@@ -16,9 +16,9 @@
 /*************************************************************************************************/
 /* Defines ------------------------------------------------------------------------------------- */
 
-/* This is to remove intellisense warnings when parsing files - Pascal 2020/07/02 */
+/* This is a fix to remove intellisense warnings when parsing files - Pascal 2020/07/02 */
 #ifndef LOG_DEBUG
-#    define LOG_DEBUG(x) (void)(x)
+#define LOG_DEBUG(x) (void)(x)
 #endif
 
 
@@ -39,16 +39,17 @@
  *
  * @param   x   : Boolean evaluation
  * @param   msg : Error message to print in case of failed assertion
+ * @param   ... : Additionnal parameters to be passed (following libfmt's formatting in the `msg`)
  *
  * @note    The macro is embedded within a `do while` loop to allow for a `;` to be inserted at the
  *          end of the macro without warnings.
  */
-#define CEP_ASSERT(x, msg)                                                                         \
+#define CEP_ASSERT(x, msg, ...)                                                                    \
     do                                                                                             \
     {                                                                                              \
         if ((x) == false)                                                                          \
         {                                                                                          \
-            LOG_DEBUG(msg);                                                                        \
+            LOG_DEBUG(msg, ##__VA_ARGS__);                                                         \
             while (true)                                                                           \
             {                                                                                      \
             }                                                                                      \
@@ -95,7 +96,7 @@
 #define CHECK_ENABLED(ret)                                                                         \
     do                                                                                             \
     {                                                                                              \
-        if (GetInstance().IsEnabled() == false)                                                    \
+        if (GetInstance()->IsEnabled() == false)                                                   \
         {                                                                                          \
             return ret;                                                                            \
         }                                                                                          \
@@ -103,7 +104,7 @@
 
 
 #ifndef UNUSED
-#define UNUSED(X) (void)X      /* To avoid warnings */
+#define UNUSED(X) (void)X /* To avoid warnings */
 #endif
 
 

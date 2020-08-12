@@ -12,7 +12,7 @@
 #pragma once
 /*************************************************************************************************/
 /* File includes ------------------------------------------------------------------------------- */
-#include "defines/_pch.hpp"
+#include "shared/defines/pch.hpp"
 
 
 namespace cep
@@ -40,29 +40,43 @@ namespace cep
 /**
  * @class   Module
  * @brief   Base class to inherit from when building modules.                                    \n
- *          For more details on how to create a module from this class, check the README file in 
+ *          For more details on how to create a module from this class, check the README file in
  *          the cep20/tornatest repository.
  */
 class Module
 {
     /*********************************************************************************************/
-    /* Private member variables ---------------------------------------------------------------- */
+    /* Private & protected member variables ---------------------------------------------------- */
 private:
-    bool        m_isEnabled = false;
-    bool        m_firstRun  = true;
+    bool m_isEnabled = false;
+    bool m_firstRun  = true;
+
+protected:
     std::string m_moduleName;
+    size_t      m_moduleIndex;
 
 
     /*********************************************************************************************/
     /* Constructors ---------------------------------------------------------------------------- */
 public:
     Module() = delete;
-    Module(const std::string& moduleName) : m_moduleName {moduleName} {}
+    Module(const std::string_view moduleName) : m_moduleName{moduleName} {}
+    ~Module() { DeInit(); }
 
 
     /*********************************************************************************************/
     /* Public member functions ----------------------------------------------------------------- */
-    virtual void Init() { Enable(); };
+    virtual void Init(size_t index)
+    {
+        SetInstance(index);
+        Enable();
+    };
+    virtual void DeInit()
+    {
+        Disable();
+        RemoveInstance(m_moduleIndex);
+    }
+
 
     ALWAYS_INLINE void Enable() { m_isEnabled = true; }
     ALWAYS_INLINE void Disable() { m_isEnabled = true; }
@@ -97,7 +111,9 @@ public:
     /*********************************************************************************************/
     /* Virtual functions ----------------------------------------------------------------------- */
 private:
-    virtual void TaskHandler() = 0;
+    virtual void   SetInstance(size_t instanceIndex)  = 0;
+    virtual size_t RemoveInstance(size_t moduleIndex) = 0;
+    virtual void   TaskHandler()                      = 0;
 };
 
 }    // namespace cep

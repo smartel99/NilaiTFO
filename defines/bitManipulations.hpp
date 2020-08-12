@@ -22,7 +22,7 @@
 #pragma once
 /*************************************************************************************************/
 /* Includes ------------------------------------------------------------------------------------ */
-#include "defines/_pch.hpp"
+#include "shared/defines/pch.hpp"
 
 
 namespace cep
@@ -99,7 +99,7 @@ constexpr T swap(T input)
 {
     static_assert(std::is_integral<T>::value,
                   "value to swap must be an integral type (uint8_t, int, size_t, ect...)");
-    
+
     constexpr std::size_t size = 8 * sizeof(T);
 
     T output = input << (size / 2);
@@ -124,7 +124,7 @@ constexpr typename cep::width2<T>::type combine(T msb, T lsb)
     static_assert(std::is_integral<T>::value,
                   "values to combine must be an integral type (uint8_t, int, size_t, ect...)");
     static_assert(sizeof(T) < sizeof(std::uint64_t), "two 64-bits values cannot be combined");
-    
+
     constexpr std::size_t size = 8 * sizeof(msb);
 
     typename cep::width2<T>::type output = static_cast<typename cep::width2<T>::type>(msb << size);

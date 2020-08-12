@@ -58,6 +58,8 @@
  * Intellisense to recognize features of the C++17 standard, such as `std::string_view`.
  * This fix is **not** to be kept if the toolchain changes from gcc to llvm, as it could have
  * catastrophic effects.
+ * Currently, since we are not compiling with clang, only using tools from llvm, this does not have
+ * effects on the code itself.
  * - Pascal 2020/07/02
  */
 #ifdef __clang__

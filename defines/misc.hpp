@@ -13,7 +13,7 @@
 #pragma once
 /*************************************************************************************************/
 /* File includes ------------------------------------------------------------------------------- */
-#include "defines/_pch.hpp"
+#include "shared/defines/pch.hpp"
 
 
 namespace cep
@@ -191,7 +191,9 @@ bool plus_minus(double value, double compare, double margin);
 
 /*************************************************************************************************/
 /* Global variables ---------------------------------------------------------------------------- */
-extern void* POINTER_TO_NULL;
+#define POINTER_TO_NULL g_NullPointer /* This defines removes the unused variable warning. */
+extern void* const g_NullPointer;
+
 
 
 /*************************************************************************************************/

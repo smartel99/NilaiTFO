@@ -13,8 +13,11 @@
 #pragma once
 /*************************************************************************************************/
 /* Includes ------------------------------------------------------------------------------------ */
+#include <array>
 #include <cstdint>
+#include <string>
 #include <type_traits>
+#include <vector>
 
 
 namespace cep
@@ -194,6 +197,21 @@ struct is_string : is_string_helper<std::remove_cv_t<T>>
  * @}
  */
 #pragma endregion
+
+
+/*************************************************************************************************/
+/* Type utilities ------------------------------------------------------------------------------ */
+
+/**
+ * @brief   Converts a strongly-typed enum class into an int (or specified underlying type).
+ * 
+ * From:    https://stackoverflow.com/a/33083231
+ */
+template<typename Enum>
+constexpr std::underlying_type_t<Enum> Underlying(Enum e) noexcept
+{
+    return static_cast<std::underlying_type_t<Enum>>(e);
+}
 
 
 /*************************************************************************************************/

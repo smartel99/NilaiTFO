@@ -12,8 +12,8 @@
 #pragma once
 /*************************************************************************************************/
 /* File includes ------------------------------------------------------------------------------- */
-#include "defines/_pch.hpp"
-#include "defines/module.hpp"
+#include "shared/defines/pch.hpp"
+#include "shared/defines/module.hpp"
 
 
 /*************************************************************************************************/
@@ -23,23 +23,48 @@ class Application
     /*********************************************************************************************/
     /* Private member variables ---------------------------------------------------------------- */
 private:
-    static Application s_instance;
-    std::vector<cep::Module*> m_modules;
-    
-    
+    static Application        s_instance;
+std::vector<cep::Module*> m_modules{};
+
+
     /*********************************************************************************************/
     /* Constructor ----------------------------------------------------------------------------- */
 public:
-    Application() = default;
+    Application()  = default;
     ~Application() = default;
 
 
     /*********************************************************************************************/
     /* Public member functions ----------------------------------------------------------------- */
-    static void Init();
-    static void Run();
-    
+    static void Init()
+    {
+        s_instance.InitializeHAL();
+        s_instance.InitializeServices();
+        s_instance.InitializeModules();
+    }
+    static void Run()
+    {
+        while (true)
+        {
+            for (cep::Module* module : s_instance.m_modules)
+            {
+                module->Run();
+            }
+        }
+    }
 
+    void AddModule(cep::Module* newModule)
+    {
+        m_modules.push_back(newModule);
+        newModule->Init(m_modules.size() - 1);
+    }
+
+    static cep::Module* GetModule(std::size_t instanceIndex)
+    {
+        return s_instance.m_modules[instanceIndex];
+    }
+
+    
     /*********************************************************************************************/
     /* Private member functions ---------------------------------------------------------------- */
 private:

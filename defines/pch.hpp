@@ -3,7 +3,7 @@
  * @{
  * @addtogroup  pch
  * @{
- * @file        _pch.hpp
+ * @file        pch.hpp
  * @author      Pascal-Emmanuel Lachance
  * @p           https://www.github.com/Raesangur
  *
@@ -28,23 +28,20 @@
 #include <string_view>
 #include <vector>
 
+
 /*------------------------------------*/
 /* STM32 HAL */
 #include "Core/Inc/main.h"
 #include "Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h"
 
-/*------------------------------------*/
-/* spdlog */
-#include "vendor/spdlog/include/spdlog/spdlog.h"
-#include "vendor/spdlog/include/spdlog/sinks/stdout_sinks.h"
-
 
 /*------------------------------------*/
 /* CEP files */
-#include "defines/compilerDefines.h"
-#include "defines/macros.hpp"
-#include "defines/typeTemplates.hpp"
-#include "services/logger.hpp"
+#include "shared/defines/compilerDefines.h"
+#include "shared/defines/macros.hpp"
+#include "shared/defines/typeTemplates.hpp"
+#include "shared/services/logger.hpp"
+#include "shared/services/ticks.hpp"
 
 
 /*************************************************************************************************/
