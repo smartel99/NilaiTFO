@@ -3,7 +3,7 @@
  * @{
  * @addtogroup  can
  * @{
- * @file        can.cpp
+ * @file        canModule.cpp
  * @author      Samuel Martel
  * @author      Pascal-Emmanuel Lachance
  * @p           https://www.github.com/Raesangur
@@ -16,6 +16,8 @@
 #include "shared/drivers/canModule.hpp"
 #include "shared/processes/application.hpp"
 
+#include "Core/Inc/can.h"
+
 
 namespace CAN
 {
@@ -23,7 +25,7 @@ namespace CAN
 
 /*************************************************************************************************/
 /* Defines ------------------------------------------------------------------------------------- */
-#define TX_TIMEOUT  500_SysTicks
+#define TX_TIMEOUT 500_SysTicks
 
 
 /*************************************************************************************************/
@@ -99,11 +101,51 @@ ALWAYS_INLINE size_t CanModule::RemoveInstance(size_t moduleIndex)
 /* Handler ------------------------------------------------------------------------------------- */
 void CanModule::TaskHandler()
 {
-    static FastTick_t timeoutTime = FASTTICK.Start() + TX_TIMEOUT;
-
-    
+    TransmissionHandler();
+    ReceptionHandler();
 }
 
+void CanModule::TransmissionHandler() noexcept
+{
+    static FastTick_t timeoutTime = FastTick_t::npos;
+
+    HAL_CAN_GetTxMailboxesFreeLevel(m_handle);
+
+    /* Clear timeout time if the transmission buffer is empty */
+    if (m_txBuffer.empty())
+    {
+        timeoutTime = FastTick_t::npos;
+        return;
+    }
+
+    /* Start the timeout if it's not already started */
+    if (timeoutTime == FastTick_t::npos)
+    {
+        timeoutTime = FASTTICK.Get() + TX_TIMEOUT;
+    }
+
+    if (HAL_CAN_GetTxMailboxesFreeLevel(m_handle) != 0)
+    {
+        SendPacket(m_txBuffer.back());
+        m_txBuffer.pop_back();
+    }
+}
+
+void CanModule::ReceptionHandler() noexcept
+{
+    /* Check if there are new received messages */
+    if (m_callbacks.empty() == true)
+    {
+        return;
+    }
+
+    /* Call the callback functions */
+    for (Callback_t& callback : m_callbacks)
+    {
+        callback(m_rxBuffer.back());
+    }
+    m_rxBuffer.pop_back();
+}
 
 /*************************************************************************************************/
 /* Public member functions definitions --------------------------------------------------------- */
@@ -253,12 +295,6 @@ void CanModule::HandleMessageReception(uint32_t fifoNumber) noexcept
     /* Push the received packet on the reception buffer stack */
     receivedPacket.Validate();
     m_rxBuffer.push_back(receivedPacket);
-
-    /* Call the callback functions */
-    for (Callback_t& callback : m_callbacks)
-    {
-        callback(receivedPacket);
-    }
 }
 
 #pragma endregion
@@ -267,6 +303,19 @@ void CanModule::HandleMessageReception(uint32_t fifoNumber) noexcept
 /*************************************************************************************************/
 /* Private member functions definitions -------------------------------------------------------- */
 #pragma region Private member function definitions
+
+void CanModule::SendPacket(TxPacket& packet) noexcept
+{
+    /* Variable that stores in which mailbox (buffer) the packet is sent from */
+    std::uint32_t buff_num = 0;
+
+    /* Add the message to the queue */
+    if (HAL_CAN_AddTxMessage(m_handle, &packet.packet, packet.data.data(), &buff_num) != HAL_OK)
+    {
+        m_status |= static_cast<Status>(m_handle->ErrorCode);
+        CALL_ERROR_HANDLER();
+    }
+}
 
 /**
  * @brief   Check if the status flag of the current module has the specified
@@ -280,9 +329,9 @@ void CanModule::HandleMessageReception(uint32_t fifoNumber) noexcept
 
 #pragma region ErrorHandler
 
-void CanModule::ErrorHandler(const std::string_view file,
-                             const std::string_view func,
-                             std::size_t            line) noexcept
+void CanModule::ErrorHandler(std::string_view file,
+                             std::string_view func,
+                             std::size_t      line) noexcept
 {
     if (CheckError(Status::ERROR_EWG))
     {
@@ -515,94 +564,99 @@ static CAN_FilterTypeDef AssertAndConvertFilterStruct(const Filter& sFilter) noe
 /* HAL Callback functions ---------------------------------------------------------------------- */
 #pragma region Callback functions
 
-/**
- * @brief   Reception of a single message in FIFO 0
- * @param   hcan: Pointer to a CAN_HandleTypeDef structure that contains the
- *          configuration information for the specified CAN.
- * @retval  None
- */
-void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef* hcan)
+/* These callbacks are declared as __weak__ by the HAL, and must have C-style linkage in order to
+ * override the HAL-provided functions. */
+extern "C"
 {
-    CanModule* module = FindModuleFromHandle(hcan);
-    CEP_ASSERT_NULL(module);
-
-    module->HandleMessageReception(CAN_RX_FIFO0);
-}
-
-/**
- * @brief   Reception of a single message in FIFO 1
- * @param   hcan: Pointer to a CAN_HandleTypeDef structure that contains the configuration
- *                information for the specified CAN.
- * @retval  None
- */
-void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef* hcan)
-{
-    CanModule* module = FindModuleFromHandle(hcan);
-    CEP_ASSERT_NULL(module);
-
-    module->HandleMessageReception(CAN_RX_FIFO1);
-}
-
-/**
- * @brief   CAN FIFO 0 Full callback, read all of the messages in that FIFO
- * @param   hcan: Pointer to a CAN_HandleTypeDef structure that contains the configuration
- *                information for the specified CAN.
- * @retval  None
- */
-void HAL_CAN_RxFifo0FullCallback(CAN_HandleTypeDef* hcan)
-{
-    CanModule* module = FindModuleFromHandle(hcan);
-    CEP_ASSERT_NULL(module);
-
-    /* Read messages until FIFO0 is empty */
-    /* Each time a message is read, the fill level (FMPi int CAN_RFiR) is decremented by one. */
-    while (HAL_CAN_GetRxFifoFillLevel(module->GetHandle(), CAN_RX_FIFO0) != 0)
+    /**
+     * @brief   Reception of a single message in FIFO 0
+     * @param   hcan: Pointer to a CAN_HandleTypeDef structure that contains the
+     *          configuration information for the specified CAN.
+     * @retval  None
+     */
+    void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef* hcan)
     {
+        CanModule* module = FindModuleFromHandle(hcan);
+        CEP_ASSERT_NULL(module);
+
         module->HandleMessageReception(CAN_RX_FIFO0);
     }
-}
 
-/**
- * @brief   CAN FIFO 1 Full callback, read all of the messages in that FIFO
- * @param   hcan: Pointer to a CAN_HandleTypeDef structure that contains the
- *          configuration information for the specified CAN.
- * @retval  None
- */
-void HAL_CAN_RxFifo1FullCallback(CAN_HandleTypeDef* hcan)
-{
-    CanModule* module = FindModuleFromHandle(hcan);
-    CEP_ASSERT_NULL(module);
-
-    /* Read messages until FIFO1 is empty */
-    /* Each time a message is read, the fill level (FMPi int CAN_RFiR) is decremented by one. */
-    while (HAL_CAN_GetRxFifoFillLevel(module->GetHandle(), CAN_RX_FIFO1) != 0)
+    /**
+     * @brief   Reception of a single message in FIFO 1
+     * @param   hcan: Pointer to a CAN_HandleTypeDef structure that contains the configuration
+     *                information for the specified CAN.
+     * @retval  None
+     */
+    void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef* hcan)
     {
+        CanModule* module = FindModuleFromHandle(hcan);
+        CEP_ASSERT_NULL(module);
+
         module->HandleMessageReception(CAN_RX_FIFO1);
     }
-}
 
-/**
- * @brief   Callback function for CAN errors.
- *          This function is a callback, it is thus called automatically.
- * @param   hcan: Pointer to the CAN peripheral
- * @retval  None
- */
-void HAL_CAN_ErrorCallback(CAN_HandleTypeDef* hcan)
-{
-    CanModule* module = FindModuleFromHandle(hcan);
-    CEP_ASSERT_NULL(module);
+    /**
+     * @brief   CAN FIFO 0 Full callback, read all of the messages in that FIFO
+     * @param   hcan: Pointer to a CAN_HandleTypeDef structure that contains the configuration
+     *                information for the specified CAN.
+     * @retval  None
+     */
+    void HAL_CAN_RxFifo0FullCallback(CAN_HandleTypeDef* hcan)
+    {
+        CanModule* module = FindModuleFromHandle(hcan);
+        CEP_ASSERT_NULL(module);
 
-    /* Get the error code */
-    module->CurrentStatus() |= static_cast<Status>(HAL_CAN_GetError(module->GetHandle()));
+        /* Read messages until FIFO0 is empty */
+        /* Each time a message is read, the fill level (FMPi int CAN_RFiR) is decremented by one. */
+        while (HAL_CAN_GetRxFifoFillLevel(module->GetHandle(), CAN_RX_FIFO0) != 0)
+        {
+            module->HandleMessageReception(CAN_RX_FIFO0);
+        }
+    }
 
-    module->CALL_ERROR_HANDLER();
-}
+    /**
+     * @brief   CAN FIFO 1 Full callback, read all of the messages in that FIFO
+     * @param   hcan: Pointer to a CAN_HandleTypeDef structure that contains the
+     *          configuration information for the specified CAN.
+     * @retval  None
+     */
+    void HAL_CAN_RxFifo1FullCallback(CAN_HandleTypeDef* hcan)
+    {
+        CanModule* module = FindModuleFromHandle(hcan);
+        CEP_ASSERT_NULL(module);
 
+        /* Read messages until FIFO1 is empty */
+        /* Each time a message is read, the fill level (FMPi int CAN_RFiR) is decremented by one. */
+        while (HAL_CAN_GetRxFifoFillLevel(module->GetHandle(), CAN_RX_FIFO1) != 0)
+        {
+            module->HandleMessageReception(CAN_RX_FIFO1);
+        }
+    }
+
+    /**
+     * @brief   Callback function for CAN errors.
+     *          This function is a callback, it is thus called automatically.
+     * @param   hcan: Pointer to the CAN peripheral
+     * @retval  None
+     */
+    void HAL_CAN_ErrorCallback(CAN_HandleTypeDef* hcan)
+    {
+        CanModule* module = FindModuleFromHandle(hcan);
+        CEP_ASSERT_NULL(module);
+
+        /* Get the error code */
+        module->CurrentStatus() |= static_cast<Status>(HAL_CAN_GetError(module->GetHandle()));
+
+        module->CALL_ERROR_HANDLER();
+    }
+
+} /* extern "C" */
 #pragma endregion
 
 
 /*************************************************************************************************/
-};    // namespace CAN
+}; /* namespace CAN */
 /**
  * @}
  * @}

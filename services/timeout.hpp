@@ -50,8 +50,8 @@ public:
     Timeout& operator=(const Timeout&) = default;
 
     Timeout(TickType               timeoutTime,
-            const std::string_view file,
-            const std::string_view func,
+            std::string_view file,
+            std::string_view func,
             std::size_t            line)
     : m_timeoutTime{timeoutTime}, m_file{file}, m_func{func}, m_line{line}
     {
@@ -59,8 +59,8 @@ public:
     }
 
     Timeout(TickType                  timeoutTime,
-            const std::string_view    file,
-            const std::string_view    func,
+            std::string_view    file,
+            std::string_view    func,
             std::size_t               line,
             std::function<void(void)> callback)
     : m_timeoutTime{timeoutTime}, m_file{file}, m_func{func}, m_line{line}, m_callback{callback}

@@ -132,6 +132,8 @@ public:
     void AddCallback(std::function<void(TickType)>& callbackFunc,
                      TickType                       value = TickType::npos) noexcept;
     void RemoveCallback(std::function<void(TickType)>& callbackFunc);
+    TickCallback_t<TickType>&
+    ChangeCallback(std::function<void(TickType)>& callbackFunc, TickType newValue = TickType::npos);
 };
 #pragma endregion
 
@@ -148,25 +150,10 @@ public:
 class FastTicker : public TickerBase<FastTick_t>
 {
 private:
-    std::size_t       s_accessCounter = 0;
     static FastTicker s_instance;
 
 public:
     ALWAYS_INLINE static FastTicker& GetInstance() { return s_instance; }
-
-    FastTick_t Start() override
-    {
-        m_enabled = true;
-        s_accessCounter++;
-        return m_currentTick;
-    }
-    void Stop() override
-    {
-        if (--s_accessCounter == 0)
-        {
-            m_enabled = false;
-        }
-    }
 };
 
 
@@ -259,6 +246,20 @@ void TickerBase<TickType>::RemoveCallback(std::function<void(TickType)>& callbac
                       m_callbacks.end());
 }
 
+/**
+ * @brief   Change the value of a specific callback function from the callback function stack.
+ */
+template<typename TickType>
+TickCallback_t<TickType>&
+TickerBase<TickType>::ChangeCallback(std::function<void(TickType)>& callbackFunc, TickType newValue)
+{
+    TickCallback_t<TickType>& callback =
+      *(m_callbacks.find(m_callbacks.begin(), m_callbacks.end(), callbackFunc));
+    
+    callback.m_value = newValue;
+    
+    return callback;
+}
 #pragma endregion
 
 

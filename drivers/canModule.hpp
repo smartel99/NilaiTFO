@@ -3,7 +3,7 @@
  * @{
  * @addtogroup  can
  * @{
- * @file        can.hpp
+ * @file        canModule.hpp
  * @author      Samuel Martel
  * @author      Pascal-Emmanuel Lachance
  * @p           https://www.github.com/Raesangur
@@ -40,7 +40,8 @@ namespace CAN
 
 #pragma region Status
 /**
- * @brief   Enum listing all the possible CAN status
+ * @addtogroup  CAN_Status
+ * @brief       Enum listing all the possible CAN status
  */
 enum class Status
 {
@@ -211,11 +212,12 @@ enum class FilterFifo
  */
 
 /**
- * @brief   CAN filter configuration structure definition
+ * @addtogroup  CAN_Filter
+ * @brief       CAN filter configuration structure definition
  */
 struct Filter
 {
-    union
+    union FilterId_t
     {
         struct
         {
@@ -233,9 +235,12 @@ struct Filter
              */
             uint16_t IdHigh;
         };
-        Id id;
+        Id       id;
+        uint32_t FullId;
+
+        FilterId_t(uint32_t id) : FullId{id} {}
     } FilterId;
-    union
+    union MaskId_t
     {
         struct
         {
@@ -257,6 +262,8 @@ struct Filter
         };
         Id       id;
         uint32_t FullMaskId;
+
+        MaskId_t(uint32_t id) : FullMaskId{id} {}
     } MaskId;
 
 
@@ -267,6 +274,23 @@ struct Filter
     FilterMode   Mode;              //!< Specifies the filter mode to be initialized.
     FilterScale  Scale;             //!< Specifies the filter scale.
     FilterEnable Activation;        //!< Enable or disable the filter.
+
+    Filter(std::uint32_t filterId,
+           std::uint32_t maskId,
+           uint8_t       bank,
+           FilterFifo    fifoAssignment,
+           FilterMode    mode       = FilterMode::IDMASK,
+           FilterScale   scale      = FilterScale::SCALE_32BIT,
+           FilterEnable  activation = FilterEnable::ENABLE)
+    : FilterId{filterId},
+      MaskId{maskId},
+      Bank{bank},
+      FifoAssignment{fifoAssignment},
+      Mode{mode},
+      Scale{scale},
+      Activation{activation} {
+
+      };
 };
 /**
  * @}
@@ -281,8 +305,9 @@ struct Filter
 
 #pragma region CAN Packets
 template<typename CAN_HeaderType>
-struct PacketBase
+class PacketBase
 {
+public:
     bool                   isValid = false;
     CAN_HeaderType         packet;
     std::array<uint8_t, 8> data{0};
@@ -290,14 +315,16 @@ struct PacketBase
     void Validate() { isValid = true; }
 };
 
-struct RxPacket : public PacketBase<CAN_RxHeaderTypeDef>
+class RxPacket : public PacketBase<CAN_RxHeaderTypeDef>
 {
+public:
     RxPacket()                = default;
     RxPacket(const RxPacket&) = default;
 };
 
 class TxPacket : public PacketBase<CAN_TxHeaderTypeDef>
 {
+public:
     template<size_t size>
     TxPacket(uint32_t id, const std::array<uint8_t, size>& packetData, bool isExtended)
     {
@@ -327,17 +354,20 @@ private:
         packet.DLC = size;
         packet.RTR = cep::Underlying((size == 0) ? RTRType::REMOTE : RTRType::DATA);
         packet.IDE = cep::Underlying(isExtended ? IdentifierType::EXT : IdentifierType::STD);
+        packet.TransmitGlobalTime = FunctionalState::DISABLE;
 
         /* Place packet in good id parameter */
         (isExtended ? packet.ExtId : packet.StdId) = id;
+        (isExtended ? packet.StdId : packet.ExtId) = 0;
     }
-};    // namespace CAN
+};
 #pragma endregion
 
 class CanModule : public cep::Module
 {
 public:
     using Callback_t = std::function<void(RxPacket)>;
+
     /*********************************************************************************************/
     /* Private member variables ---------------------------------------------------------------- */
 private:
@@ -351,11 +381,22 @@ private:
     /*********************************************************************************************/
     /* Constructor ----------------------------------------------------------------------------- */
 public:
-    CanModule(CAN_HandleTypeDef* handle, const std::string_view label)
-    : Module{label}, m_handle{handle}
+    CanModule(CAN_HandleTypeDef* handle, std::string_view label)
+    : cep::Module{label}, m_handle{handle}
     {
         HAL_CAN_Start(m_handle);
         EnableInterrupts();
+
+        Filter filter{420,
+                      0,
+                      0,
+                      FilterFifo::FIFO0,
+                      FilterMode::IDMASK,
+                      FilterScale::SCALE_32BIT,
+                      FilterEnable::ENABLE};
+
+        ConfigureFilter(filter);
+
         m_status = Status::ERROR_NONE;
     }
     ~CanModule()
@@ -379,37 +420,48 @@ public:
 
     void HandleMessageReception(uint32_t fifoNumber) noexcept;
 
-    void ErrorHandler(const std::string_view file,
-                      const std::string_view func,
-                      std::size_t            line) noexcept;
+    void ErrorHandler(std::string_view file, std::string_view func, std::size_t line) noexcept;
+
 
     /*********************************************************************************************/
     /* Handler --------------------------------------------------------------------------------- */
+public:
     void TaskHandler() override;
+
+private:
+    ALWAYS_INLINE void ReceptionHandler() noexcept;
+    ALWAYS_INLINE void TransmissionHandler() noexcept;
 
 
     /*********************************************************************************************/
     /* Accessors ------------------------------------------------------------------------------- */
+
 #pragma region Accessors
+public:
     [[nodiscard]] ALWAYS_INLINE static CanModule* GetInstance(size_t moduleIndex = 0);
     [[nodiscard]] ALWAYS_INLINE CAN_HandleTypeDef* GetHandle() const noexcept { return m_handle; }
     [[nodiscard]] ALWAYS_INLINE Status& CurrentStatus() noexcept { return m_status; }
+    [[nodiscard]] ALWAYS_INLINE std::vector<RxPacket>& GetRxBuffer() noexcept { return m_rxBuffer; }
+    [[nodiscard]] ALWAYS_INLINE std::vector<TxPacket>& GetTxBuffer() noexcept { return m_txBuffer; }
 
 private:
     ALWAYS_INLINE void   SetInstance(size_t instanceIndex) override;
     ALWAYS_INLINE size_t RemoveInstance(size_t moduleIndex) override;
 #pragma endregion
 
-    
+
     /*********************************************************************************************/
     /* Private member functions declarations --------------------------------------------------- */
+    void SendPacket(TxPacket& packet) noexcept;
+
     void                         EnableInterrupts() noexcept;
     [[nodiscard]] constexpr bool CheckError(Status errorCode) const noexcept;
 };
 
 
+
 /*************************************************************************************************/
-};    // namespace CAN
+}; /* namespace CAN */
 /**
  * @}
  * @}

@@ -24,7 +24,7 @@ class Application
     /* Private member variables ---------------------------------------------------------------- */
 private:
     static Application        s_instance;
-std::vector<cep::Module*> m_modules{};
+    std::vector<cep::Module*> m_modules{};
 
 
     /*********************************************************************************************/
@@ -64,7 +64,7 @@ public:
         return s_instance.m_modules[instanceIndex];
     }
 
-    
+
     /*********************************************************************************************/
     /* Private member functions ---------------------------------------------------------------- */
 private:

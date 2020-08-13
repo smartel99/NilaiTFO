@@ -13,8 +13,10 @@
 /*************************************************************************************************/
 /* File includes ------------------------------------------------------------------------------- */
 #include "shared/defines/pch.hpp"
+//#include "shared/processes/application.hpp"
 
 
+class Application;
 namespace cep
 {
 
@@ -37,6 +39,7 @@ namespace cep
 /*************************************************************************************************/
 /* Classes ------------------------------------------------------------------------------------- */
 
+
 /**
  * @class   Module
  * @brief   Base class to inherit from when building modules.                                    \n
@@ -45,6 +48,8 @@ namespace cep
  */
 class Module
 {
+    friend void Application::AddModule(Module* newModule);
+    friend class Application;
     /*********************************************************************************************/
     /* Private & protected member variables ---------------------------------------------------- */
 private:
@@ -53,14 +58,14 @@ private:
 
 protected:
     std::string m_moduleName;
-    size_t      m_moduleIndex;
+    size_t      m_moduleIndex = 0;
 
 
     /*********************************************************************************************/
     /* Constructors ---------------------------------------------------------------------------- */
 public:
     Module() = delete;
-    Module(const std::string_view moduleName) : m_moduleName{moduleName} {}
+    Module(std::string_view moduleName) : m_moduleName{moduleName} {}
     ~Module() { DeInit(); }
 
 
@@ -71,12 +76,12 @@ public:
         SetInstance(index);
         Enable();
     };
+
     virtual void DeInit()
     {
         Disable();
         RemoveInstance(m_moduleIndex);
     }
-
 
     ALWAYS_INLINE void Enable() { m_isEnabled = true; }
     ALWAYS_INLINE void Disable() { m_isEnabled = true; }
@@ -100,7 +105,6 @@ public:
             return false;
         }
     }
-
 
     ALWAYS_INLINE void Run()
     {
