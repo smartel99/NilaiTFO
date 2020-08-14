@@ -16,7 +16,6 @@
 //#include "shared/processes/application.hpp"
 
 
-class Application;
 namespace cep
 {
 
@@ -48,8 +47,6 @@ namespace cep
  */
 class Module
 {
-    friend void Application::AddModule(Module* newModule);
-    friend class Application;
     /*********************************************************************************************/
     /* Private & protected member variables ---------------------------------------------------- */
 private:

@@ -238,7 +238,7 @@ struct Filter
         Id       id;
         uint32_t FullId;
 
-        FilterId_t(uint32_t id) : FullId{id} {}
+        FilterId_t(uint32_t filterId) : FullId{filterId} {}
     } FilterId;
     union MaskId_t
     {
@@ -263,7 +263,7 @@ struct Filter
         Id       id;
         uint32_t FullMaskId;
 
-        MaskId_t(uint32_t id) : FullMaskId{id} {}
+        MaskId_t(uint32_t maskId) : FullMaskId{maskId} {}
     } MaskId;
 
 
@@ -277,11 +277,11 @@ struct Filter
 
     Filter(std::uint32_t filterId,
            std::uint32_t maskId,
-           uint8_t       bank,
-           FilterFifo    fifoAssignment,
-           FilterMode    mode       = FilterMode::IDMASK,
-           FilterScale   scale      = FilterScale::SCALE_32BIT,
-           FilterEnable  activation = FilterEnable::ENABLE)
+           uint8_t       bank           = 0,
+           FilterFifo    fifoAssignment = FilterFifo::FIFO0,
+           FilterMode    mode           = FilterMode::IDMASK,
+           FilterScale   scale          = FilterScale::SCALE_32BIT,
+           FilterEnable  activation     = FilterEnable::ENABLE)
     : FilterId{filterId},
       MaskId{maskId},
       Bank{bank},
@@ -309,7 +309,7 @@ class PacketBase
 {
 public:
     bool                   isValid = false;
-    CAN_HeaderType         packet;
+    CAN_HeaderType         packetInfo;
     std::array<uint8_t, 8> data{0};
 
     void Validate() { isValid = true; }
@@ -351,14 +351,14 @@ public:
 private:
     constexpr void CreatePacket(uint32_t id, size_t size, bool isExtended) noexcept
     {
-        packet.DLC = size;
-        packet.RTR = cep::Underlying((size == 0) ? RTRType::REMOTE : RTRType::DATA);
-        packet.IDE = cep::Underlying(isExtended ? IdentifierType::EXT : IdentifierType::STD);
-        packet.TransmitGlobalTime = FunctionalState::DISABLE;
+        packetInfo.DLC = size;
+        packetInfo.RTR = cep::Underlying((size == 0) ? RTRType::REMOTE : RTRType::DATA);
+        packetInfo.IDE = cep::Underlying(isExtended ? IdentifierType::EXT : IdentifierType::STD);
+        packetInfo.TransmitGlobalTime = FunctionalState::DISABLE;
 
         /* Place packet in good id parameter */
-        (isExtended ? packet.ExtId : packet.StdId) = id;
-        (isExtended ? packet.StdId : packet.ExtId) = 0;
+        (isExtended ? packetInfo.ExtId : packetInfo.StdId) = id;
+        (isExtended ? packetInfo.StdId : packetInfo.ExtId) = 0;
     }
 };
 #pragma endregion
@@ -366,7 +366,7 @@ private:
 class CanModule : public cep::Module
 {
 public:
-    using Callback_t = std::function<void(RxPacket)>;
+    using Callback_t = std::function<void(const RxPacket&)>;
 
     /*********************************************************************************************/
     /* Private member variables ---------------------------------------------------------------- */
@@ -386,16 +386,6 @@ public:
     {
         HAL_CAN_Start(m_handle);
         EnableInterrupts();
-
-        Filter filter{420,
-                      0,
-                      0,
-                      FilterFifo::FIFO0,
-                      FilterMode::IDMASK,
-                      FilterScale::SCALE_32BIT,
-                      FilterEnable::ENABLE};
-
-        ConfigureFilter(filter);
 
         m_status = Status::ERROR_NONE;
     }

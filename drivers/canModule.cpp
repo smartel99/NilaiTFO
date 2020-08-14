@@ -134,7 +134,7 @@ void CanModule::TransmissionHandler() noexcept
 void CanModule::ReceptionHandler() noexcept
 {
     /* Check if there are new received messages */
-    if (m_callbacks.empty() == true)
+    if (m_rxBuffer.empty() == true)
     {
         return;
     }
@@ -235,7 +235,7 @@ void CanModule::ClearFIFO(uint32_t fifoNumber) noexcept
 
         RxPacket          tempPacket;
         HAL_StatusTypeDef status =
-          HAL_CAN_GetRxMessage(m_handle, fifoNumber, &tempPacket.packet, tempPacket.data.data());
+          HAL_CAN_GetRxMessage(m_handle, fifoNumber, &tempPacket.packetInfo, tempPacket.data.data());
         /* If there's an error when getting the message, handle it */
         if (status != HAL_OK)
         {
@@ -279,7 +279,7 @@ void CanModule::HandleMessageReception(uint32_t fifoNumber) noexcept
     /* Get the packet */
     HAL_StatusTypeDef status = HAL_CAN_GetRxMessage(m_handle,
                                                     fifoNumber,
-                                                    &receivedPacket.packet,
+                                                    &receivedPacket.packetInfo,
                                                     receivedPacket.data.data());
 
 
@@ -310,7 +310,7 @@ void CanModule::SendPacket(TxPacket& packet) noexcept
     std::uint32_t buff_num = 0;
 
     /* Add the message to the queue */
-    if (HAL_CAN_AddTxMessage(m_handle, &packet.packet, packet.data.data(), &buff_num) != HAL_OK)
+    if (HAL_CAN_AddTxMessage(m_handle, &packet.packetInfo, packet.data.data(), &buff_num) != HAL_OK)
     {
         m_status |= static_cast<Status>(m_handle->ErrorCode);
         CALL_ERROR_HANDLER();
