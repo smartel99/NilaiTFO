@@ -103,6 +103,9 @@
     } while (false)
 
 
+#define GETTER  [[nodiscard]] ALWAYS_INLINE
+
+
 #ifndef UNUSED
 #define UNUSED(X) (void)X /* To avoid warnings */
 #endif

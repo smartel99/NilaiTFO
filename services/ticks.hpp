@@ -19,6 +19,10 @@
 #include "shared/defines/pch.hpp"
 #include "shared/services/tickUnits.hpp"
 
+#include <algorithm>
+#include <functional>
+#include <vector>
+
 
 /*************************************************************************************************/
 /* Defines ------------------------------------------------------------------------------------- */
@@ -69,6 +73,9 @@ public:
 template<typename TickType>
 class TickerBase
 {
+    static_assert((std::is_same<TickType, FastTick_t>::value ||
+                   std::is_same<TickType, SysTick_t>::value),
+                  "This tick type is not supported (must be FastTick_t or SysTick_t)");
     /*********************************************************************************************/
     /* Private & protected member variables ---------------------------------------------------- */
 private:
@@ -82,12 +89,7 @@ protected:
     /*********************************************************************************************/
     /* Constructor ----------------------------------------------------------------------------- */
 public:
-    TickerBase()
-    {
-        static_assert((std::is_same<TickType, FastTick_t>::value ||
-                       std::is_same<TickType, SysTick_t>::value),
-                      "This tick type is not supported (must be FastTick_t or SysTick_t)");
-    }
+    TickerBase() = default;
 
 
     /*********************************************************************************************/
@@ -172,7 +174,7 @@ public:
 template<typename TickType>
 [[nodiscard]] bool TickerBase<TickType>::CheckHasInc(TickType& timeToCheck) const noexcept
 {
-    static TickType oldTick = -1;
+    static TickType oldTick = TickType::npos;
 
     if (timeToCheck != -1)
     {
@@ -255,9 +257,9 @@ TickerBase<TickType>::ChangeCallback(std::function<void(TickType)>& callbackFunc
 {
     TickCallback_t<TickType>& callback =
       *(m_callbacks.find(m_callbacks.begin(), m_callbacks.end(), callbackFunc));
-    
+
     callback.m_value = newValue;
-    
+
     return callback;
 }
 #pragma endregion

@@ -16,6 +16,11 @@
 /*************************************************************************************************/
 /* Includes ------------------------------------------------------------------------------------ */
 #include "shared/defines/pch.hpp"
+#include "shared/services/ticks.hpp"
+
+#include <functional>
+#include <string_view>
+#include <utility>
 
 
 /*************************************************************************************************/
@@ -52,7 +57,7 @@ public:
     Timeout(TickType               timeoutTime,
             const std::string_view file,
             const std::string_view func,
-            std::size_t            line)
+            size_t                 line)
     : m_timeoutTime{timeoutTime}, m_file{file}, m_func{func}, m_line{line}
     {
         SubscribeToTick();
@@ -61,7 +66,7 @@ public:
     Timeout(TickType                  timeoutTime,
             const std::string_view    file,
             const std::string_view    func,
-            std::size_t               line,
+            size_t                    line,
             std::function<void(void)> callback)
     : m_timeoutTime{timeoutTime}, m_file{file}, m_func{func}, m_line{line}, m_callback{callback}
     {

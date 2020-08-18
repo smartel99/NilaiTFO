@@ -13,10 +13,13 @@
  */
 /*************************************************************************************************/
 /* Includes ------------------------------------------------------------------------------------ */
-#include "shared/drivers/canModule.hpp"
 #include "shared/processes/application.hpp"
+#include "shared/drivers/canModule.hpp"
 
-#include "Core/Inc/can.h"
+#include <algorithm>
+#include <array>
+#include <functional>
+#include <vector>
 
 
 namespace CAN
@@ -26,34 +29,6 @@ namespace CAN
 /*************************************************************************************************/
 /* Defines ------------------------------------------------------------------------------------- */
 #define TX_TIMEOUT 500_SysTicks
-
-
-/*************************************************************************************************/
-/* Macros -------------------------------------------------------------------------------------- */
-
-/**
- * @def     PRINT_ERROR
- * @brief   Prints an error from the error handler.
- *
- * @param   msg: The error message to print
- *               This parameter must be a `const char*`, or it won't automatically concatenate at
- *               compile-time with the automatically inserted string, and won't compile.
- *
- * @warning This macro should *only* be called from the `CanModule::ErrorHandler` function.
- *
- * @example:
- *  PRINT_ERROR("CAN Message Aborted");
- *
- *  Result:
- *  [Master][E] - [canModule.cpp:221 (TransmitPacket)] CAN Message Aborted in can2 module.\r\n
- */
-#define PRINT_ERROR(msg) LOG_ERROR_HELPER(msg " in {} module.", file, func, line, m_moduleName)
-
-/**
- * @def     CALL_ERROR_HANDLER
- * @brief   Call the CanModule::ErrorHandler, passing it the current program location as params.
- */
-#define CALL_ERROR_HANDLER() ErrorHandler(LOG_CURRENT_LOCATION)
 
 
 /*************************************************************************************************/
@@ -121,12 +96,6 @@ TxPacket::TxPacket(uint32_t id, const std::vector<uint8_t>& packetData, bool isE
 
 /*************************************************************************************************/
 /* Handler ------------------------------------------------------------------------------------- */
-void CanModule::TaskHandler()
-{
-    TransmissionHandler();
-    ReceptionHandler();
-}
-
 void CanModule::TransmissionHandler() noexcept
 {
     static FastTick_t timeoutTime = FastTick_t::npos;
@@ -153,21 +122,6 @@ void CanModule::TransmissionHandler() noexcept
     }
 }
 
-void CanModule::ReceptionHandler() noexcept
-{
-    /* Check if there are new received messages */
-    if (m_rxBuffer.empty() == true)
-    {
-        return;
-    }
-
-    /* Call the callback functions */
-    for (Callback_t& callback : m_callbacks)
-    {
-        callback(m_rxBuffer.back());
-    }
-    m_rxBuffer.pop_back();
-}
 
 /*************************************************************************************************/
 /* Public member functions definitions --------------------------------------------------------- */
@@ -200,36 +154,6 @@ bool CanModule::WaitForFreeTxMailbox(FastTick_t timeout) noexcept
     {
         return true;
     }
-}
-
-/**
- * @brief   Get the latest CAN packet
- * @return  The latest CAN packet received.
- *          If no CAN packets were in the reception buffer and this function was called, an empty,
- *          invalid, CAN packet struct will be returned instead.
- */
-RxPacket CanModule::ReceivePacket() noexcept
-{
-    if (m_rxBuffer.empty() == true)
-    {
-        // Return empty, invalid, CAN Packet if there are no new received messages
-        return RxPacket{};
-    }
-
-    /* Copies the last value of the reception buffer and delete the original, return the copy */
-    RxPacket temp = m_rxBuffer.back();
-    m_rxBuffer.pop_back();
-    return temp;
-}
-
-/**
- * @brief   Add a new packet to the transmit queue, to be transmitted when a new mailbox is
- *          available.
- * @param   packet: Packet to transmit
- */
-void CanModule::TransmitPacket(const TxPacket& packet)
-{
-    m_txBuffer.push_back(packet);
 }
 
 void CanModule::ConfigureFilter(const Filter& filter) noexcept
@@ -269,37 +193,11 @@ void CanModule::ClearFIFO(uint32_t fifoNumber) noexcept
         }
     }
 }
-/**
- * @brief   Add a new callback function to the callback function stack.
- *          The callback function will be called whenever there is a new CAN message being handled.
- */
-void CanModule::AddCallback(const Callback_t& callbackFunc) noexcept
-{
-    m_callbacks.push_back(callbackFunc);
-}
-
-/**
- * @brief   Remove a specific callback function from the callback function stack.
- */
-void CanModule::RemoveCallback(const Callback_t& callbackFunc)
-{
-    /* Comparing std::functions is hard (^-^;) */
-
-    /* clang-format off */
-    auto comparison = [&](const Callback_t& compare)
-                      {
-                         return callbackFunc.target<Callback_t>() == compare.target<Callback_t>();
-                      };
-    /* clang-format on */
-
-
-    m_callbacks.erase(std::remove_if(m_callbacks.begin(), m_callbacks.end(), comparison),
-                      m_callbacks.end());
-}
 
 void CanModule::HandleMessageReception(uint32_t fifoNumber) noexcept
 {
     RxPacket receivedPacket{};
+    
     /* Get the packet */
     HAL_StatusTypeDef status = HAL_CAN_GetRxMessage(m_handle,
                                                     fifoNumber,
@@ -331,7 +229,7 @@ void CanModule::HandleMessageReception(uint32_t fifoNumber) noexcept
 void CanModule::SendPacket(TxPacket& packet) noexcept
 {
     /* Variable that stores in which mailbox (buffer) the packet is sent from */
-    std::uint32_t buff_num = 0;
+    uint32_t buff_num = 0;
 
     /* Add the message to the queue */
     if (HAL_CAN_AddTxMessage(m_handle, &packet.packetInfo, packet.data.data(), &buff_num) != HAL_OK)
@@ -341,21 +239,11 @@ void CanModule::SendPacket(TxPacket& packet) noexcept
     }
 }
 
-/**
- * @brief   Check if the status flag of the current module has the specified
- *          error code masked within.
- *          Returns true if the error code is part of the status
- */
-[[nodiscard]] constexpr bool CanModule::CheckError(Status errorCode) const noexcept
-{
-    return (m_status & errorCode) == errorCode;
-}
-
 #pragma region ErrorHandler
 
 void CanModule::ErrorHandler(const std::string_view file,
                              const std::string_view func,
-                             std::size_t            line) noexcept
+                             size_t            line) noexcept
 {
     if (CheckError(Status::ERROR_EWG))
     {
@@ -530,24 +418,10 @@ inline static CanModule* FindModuleFromHandle(CAN_HandleTypeDef* hcan) noexcept
     CEP_ASSERT_NULL(hcan);
 
     /* Check if the module is can1 */
-    CanModule* module = CAN1_MODULE;
-    if (module != nullptr)
-    {
-        if (hcan->Instance == module->GetHandle()->Instance)
-        {
-            return module;
-        }
-    }
+    CHECK_HANDLE_IS_MODULE(hcan, CAN1_MODULE);
 
     /* Check if the module is can2 */
-    module = CAN2_MODULE;
-    if (module != nullptr)
-    {
-        if (hcan->Instance == module->GetHandle()->Instance)
-        {
-            return module;
-        }
-    }
+    CHECK_HANDLE_IS_MODULE(hcan, CAN2_MODULE);
 
     /* Module not found, return nullptr */
     return nullptr;

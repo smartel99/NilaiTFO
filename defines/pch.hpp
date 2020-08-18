@@ -14,19 +14,9 @@
 /*************************************************************************************************/
 /* Includes ------------------------------------------------------------------------------------ */
 
-/*------------------------------------*/
-/* Standard library files */
-#include <algorithm>
-#include <functional>
+#include <cstddef>
 #include <limits>
 #include <type_traits>
-#include <utility>
-
-#include <array>
-#include <map>
-#include <string>
-#include <string_view>
-#include <vector>
 
 
 /*------------------------------------*/
@@ -41,7 +31,6 @@
 #include "shared/defines/macros.hpp"
 #include "shared/defines/typeTemplates.hpp"
 #include "shared/services/logger.hpp"
-#include "shared/services/ticks.hpp"
 
 
 /*************************************************************************************************/

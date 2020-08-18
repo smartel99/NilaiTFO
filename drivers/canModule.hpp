@@ -16,12 +16,16 @@
 /* Includes ------------------------------------------------------------------------------------ */
 #include "shared/defines/pch.hpp"
 #include "shared/defines/misc.hpp"
-#include "shared/defines/module.hpp"
+#include "shared/defines/driverModule.hpp"
 #include "shared/services/ticks.hpp"
 
 #ifdef HAL_CAN_MODULE_ENABLED
 #include "Core/Inc/can.h"
 #endif
+
+#include <array>
+#include <functional>
+#include <vector>
 
 
 /*************************************************************************************************/
@@ -88,13 +92,11 @@ enum class Status
 /** From: https://stackoverflow.com/a/15889501 */
 [[nodiscard]] constexpr inline Status operator|(Status a, Status b) noexcept
 {
-    return static_cast<Status>(static_cast<std::underlying_type_t<Status>>(a) |
-                               static_cast<std::underlying_type_t<Status>>(b));
+    return static_cast<Status>(cep::Underlying(a) | cep::Underlying(b));
 }
 [[nodiscard]] constexpr inline Status operator&(Status a, Status b) noexcept
 {
-    return static_cast<Status>(static_cast<std::underlying_type_t<Status>>(a) &
-                               static_cast<std::underlying_type_t<Status>>(b));
+    return static_cast<Status>(cep::Underlying(a) & cep::Underlying(b));
 }
 constexpr inline Status operator|=(Status& a, const Status& b) noexcept
 {
@@ -315,8 +317,8 @@ public:
 class RxPacket : public PacketBase<CAN_RxHeaderTypeDef>
 {
 public:
-    bool isValid              = false;
-     
+    bool isValid = false;
+
     RxPacket()                = default;
     RxPacket(const RxPacket&) = default;
 
@@ -345,26 +347,18 @@ private:
 };
 #pragma endregion
 
-class CanModule : public cep::Module
+using DriverModuleType = cep::DriverModule<CAN_HandleTypeDef, Status, RxPacket, TxPacket>;
+
+class CanModule : public DriverModuleType
 {
 public:
-    using Callback_t = std::function<void(const RxPacket&)>;
-
-    /*********************************************************************************************/
-    /* Private member variables ---------------------------------------------------------------- */
-private:
-    CAN_HandleTypeDef*      m_handle = nullptr;
-    CAN::Status             m_status = Status::ERROR_NOT_INIT;
-    std::vector<RxPacket>   m_rxBuffer{};
-    std::vector<TxPacket>   m_txBuffer{};
-    std::vector<Callback_t> m_callbacks{};
+    using Callback_t = typename DriverModuleType::Callback_t;
 
 
     /*********************************************************************************************/
     /* Constructor ----------------------------------------------------------------------------- */
 public:
-    CanModule(CAN_HandleTypeDef* handle, const std::string_view label)
-    : cep::Module{label}, m_handle{handle}
+    CanModule(CAN_HandleTypeDef* handle, const std::string_view label) : DriverModule{handle, label}
     {
         HAL_CAN_Start(m_handle);
         EnableInterrupts();
@@ -380,31 +374,22 @@ public:
 
     /*********************************************************************************************/
     /* Public member functions declarations ---------------------------------------------------- */
-    bool                   WaitForFreeTxMailbox(FastTick_t timeout) noexcept;
-    [[nodiscard]] RxPacket ReceivePacket() noexcept;
-    void                   TransmitPacket(const TxPacket& packet);
-
+public:
+    bool WaitForFreeTxMailbox(FastTick_t timeout) noexcept;
     void ConfigureFilter(const Filter& filter) noexcept;
     void ClearFIFO(uint32_t fifoNumber) noexcept;
-
-    void AddCallback(const Callback_t& callbackFunc) noexcept;
-    void RemoveCallback(const Callback_t& callbackFunc);
-
     void HandleMessageReception(uint32_t fifoNumber) noexcept;
 
     void ErrorHandler(const std::string_view file,
                       const std::string_view func,
-                      std::size_t            line) noexcept;
+                      size_t            line) noexcept override;
 
 
     /*********************************************************************************************/
-    /* Handler --------------------------------------------------------------------------------- */
-public:
-    void TaskHandler() override;
-
+    /* Handlers -------------------------------------------------------------------------------- */
 private:
-    ALWAYS_INLINE void ReceptionHandler() noexcept;
-    ALWAYS_INLINE void TransmissionHandler() noexcept;
+    /* ReceptionHandler is defined in the DriverModule class */
+    ALWAYS_INLINE void TransmissionHandler() noexcept override;
 
 
     /*********************************************************************************************/
@@ -413,10 +398,6 @@ private:
 #pragma region Accessors
 public:
     [[nodiscard]] ALWAYS_INLINE static CanModule* GetInstance(size_t moduleIndex = 0);
-    [[nodiscard]] ALWAYS_INLINE CAN_HandleTypeDef* GetHandle() const noexcept { return m_handle; }
-    [[nodiscard]] ALWAYS_INLINE Status& CurrentStatus() noexcept { return m_status; }
-    [[nodiscard]] ALWAYS_INLINE std::vector<RxPacket>& GetRxBuffer() noexcept { return m_rxBuffer; }
-    [[nodiscard]] ALWAYS_INLINE std::vector<TxPacket>& GetTxBuffer() noexcept { return m_txBuffer; }
 
 private:
     ALWAYS_INLINE void   SetInstance(size_t instanceIndex) override;
@@ -428,8 +409,7 @@ private:
     /* Private member functions declarations --------------------------------------------------- */
     void SendPacket(TxPacket& packet) noexcept;
 
-    void                         EnableInterrupts() noexcept;
-    [[nodiscard]] constexpr bool CheckError(Status errorCode) const noexcept;
+    void EnableInterrupts() noexcept;
 };
 
 

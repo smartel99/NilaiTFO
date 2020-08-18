@@ -26,10 +26,10 @@
 
 /*************************************************************************************************/
 /* Defines ------------------------------------------------------------------------------------- */
-#define UART1_MODULE (UART::UARTModule::GetInstance(0))
-#define UART2_MODULE (UART::UARTModule::GetInstance(1))
-#define UART3_MODULE (UART::UARTModule::GetInstance(2))
-#define UART4_MODULE (UART::UARTModule::GetInstance(3))
+#define UART1_MODULE (UART::UartModule::GetInstance(0))
+#define UART2_MODULE (UART::UartModule::GetInstance(1))
+#define UART3_MODULE (UART::UartModule::GetInstance(2))
+#define UART4_MODULE (UART::UartModule::GetInstance(3))
 
 
 namespace UART
@@ -82,7 +82,7 @@ constexpr inline Status operator|=(Status& a, const Status& b) noexcept
 /* Classes ------------------------------------------------------------------------------------- */
 
 template<typename DataType = uint8_t>
-class Sequence
+class Sequence_t
 {
 private:
     bool                  m_useSof = false;
@@ -91,7 +91,7 @@ private:
     std::vector<DataType> m_endOfFrame{};
 
 public:
-    Sequence() = default;
+    Sequence_t() = default;
 
     ALWAYS_INLINE void SetSOF(std::initializer_list<DataType> startOfFrameSequence)
     {
@@ -108,56 +108,46 @@ public:
 template<typename DataType>
 using DriverModuleType = cep::DriverModule<UART_HandleTypeDef, Status, std::vector<DataType>>;
 
-template<typename DataType = uint8_t>
-class UartModule : public DriverModuleType<DataType>
+class UartModule : public DriverModuleType<uint8_t>
 {
+    friend class Sequence_t<uint8_t>;
 public:
-    using DriverModule = DriverModuleType<DataType>;
-    using RxPacket     = typename DriverModule::RxPacket;
-    using TxPacket     = typename DriverModule::TxPacket;
+    using DriverModule = DriverModuleType<uint8_t>;
+    using RxPacket     = typename DriverModule::RxPacket_t;
+    using TxPacket     = typename DriverModule::TxPacket_t;
     using Callback_t   = typename DriverModule::Callback_t;
 
 
+    /*********************************************************************************************/
+    /* Private member variables ---------------------------------------------------------------- */
 private:
-    friend class Sequence<DataType>;
-
-    Sequence<DataType> m_sequence;
+    Sequence_t<uint8_t> m_sequence;
 
 public:
     UartModule(UART_HandleTypeDef* handle, const std::string_view name) : DriverModule(handle, name)
     {
         /* MX_USARTx_UART_Init must be called in `application.cpp` */
 
-        this->m_status = Status::OK;
+        m_status = Status::OK;
     }
     ~UartModule()
     {
-        HAL_UART_Abort(this->m_handle);
-        HAL_UART_DeInit(this->m_handle);
+        HAL_UART_Abort(m_handle);
+        HAL_UART_DeInit(m_handle);
     }
 
 
     /*********************************************************************************************/
     /* Public member functions declarations ---------------------------------------------------- */
-    [[nodiscard]] RxPacket ReceivePacket() noexcept override;
-    void                   TransmitPacket(const TxPacket& packet) override;
-
-    void AddCallback(const Callback_t& callbackFunc) noexcept override;
-    void RemoveCallback(const Callback_t& callbackFunc) override;
-
     void ErrorHandler(const std::string_view file,
                       const std::string_view func,
-                      std::size_t            line) noexcept override;
+                      size_t            line) noexcept override;
 
 
     /*********************************************************************************************/
-    /* Handler --------------------------------------------------------------------------------- */
-public:
-    void TaskHandler() override;
-
+    /* Handlers -------------------------------------------------------------------------------- */
 private:
-    ALWAYS_INLINE void ReceptionHandler() noexcept;
-    ALWAYS_INLINE void TransmissionHandler() noexcept;
+    ALWAYS_INLINE void TransmissionHandler() noexcept override;
 
 
     /*********************************************************************************************/
@@ -166,11 +156,17 @@ private:
 #pragma region Accessors
 public:
     [[nodiscard]] ALWAYS_INLINE static UartModule* GetInstance(size_t moduleIndex = 0);
+    [[nodiscard]] ALWAYS_INLINE Sequence_t<uint8_t>& Sequence() { return m_sequence; }
 
 private:
     ALWAYS_INLINE void   SetInstance(size_t instanceIndex) override;
     ALWAYS_INLINE size_t RemoveInstance(size_t moduleIndex) override;
 #pragma endregion
+    
+    
+    /*********************************************************************************************/
+    /* Private member function declarations ---------------------------------------------------- */
+    void SendPacket(TxPacket& packet) noexcept;
 };
 
 

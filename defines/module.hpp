@@ -13,8 +13,9 @@
 /*************************************************************************************************/
 /* File includes ------------------------------------------------------------------------------- */
 #include "shared/defines/pch.hpp"
-//#include "shared/processes/application.hpp"
 
+#include <string>
+#include <string_view>
 
 namespace cep
 {

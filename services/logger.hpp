@@ -21,6 +21,10 @@
 #include "shared/vendor/spdlog/include/spdlog/spdlog.h"
 #include "shared/vendor/spdlog/include/spdlog/sinks/stdout_sinks.h"
 
+#include <memory>
+#include <string>
+#include <string_view>
+
 
 /*************************************************************************************************/
 /* Macros -------------------------------------------------------------------------------------- */

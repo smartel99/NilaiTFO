@@ -10,6 +10,8 @@
  *
  * @brief       Source for the Tick module.
  *              This module gives access to multiple event based ticks.
+ *              (The source is so tiny because the class is templated and functions definitions
+ *               must be visible from the caller's perspective, so are in the `.hpp` file).
  *
  * @version     2020/08/11 - Switch to C++17 - Pascal-Emmanuel Lachance
  */
