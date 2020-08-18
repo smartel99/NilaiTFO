@@ -59,9 +59,23 @@ public:
         newModule->Init(m_modules.size() - 1);
     }
 
-    static cep::Module* GetModule(std::size_t instanceIndex)
+    [[nodiscard]] static cep::Module* GetModule(std::size_t instanceIndex)
     {
         return s_instance.m_modules[instanceIndex];
+    }
+    [[nodiscard]] static cep::Module* GetModule(const std::string_view moduleName)
+    {
+        /* clang-format off */
+        auto namedSearch = [=](const cep::Module* currentModule)
+                           {
+                               return currentModule->GetName() == moduleName;
+                           };
+        /* clang-format on */
+
+        auto& vec      = s_instance.m_modules;
+        auto  iterator = std::find_if(vec.begin(), vec.end(), namedSearch);
+
+        return *iterator;
     }
 
 

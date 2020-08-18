@@ -62,7 +62,7 @@ protected:
     /* Constructors ---------------------------------------------------------------------------- */
 public:
     Module() = delete;
-    Module(std::string_view moduleName) : m_moduleName{moduleName} {}
+    Module(const std::string_view moduleName) : m_moduleName{moduleName} {}
     ~Module() { DeInit(); }
 
 
@@ -80,9 +80,13 @@ public:
         RemoveInstance(m_moduleIndex);
     }
 
-    ALWAYS_INLINE void Enable() { m_isEnabled = true; }
-    ALWAYS_INLINE void Disable() { m_isEnabled = true; }
-    ALWAYS_INLINE bool IsEnabled() { return m_isEnabled; }
+    ALWAYS_INLINE void                Enable() { m_isEnabled = true; }
+    ALWAYS_INLINE void                Disable() { m_isEnabled = true; }
+    [[nodiscard]] ALWAYS_INLINE bool  IsEnabled() const noexcept { return m_isEnabled; }
+    [[nodiscard]] ALWAYS_INLINE const std::string_view GetName() const noexcept
+    {
+        return m_moduleName;
+    }
 
     /**
      * @brief   Check whether it is the first time this function is called.

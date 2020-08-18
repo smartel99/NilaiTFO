@@ -308,45 +308,27 @@ template<typename CAN_HeaderType>
 class PacketBase
 {
 public:
-    bool                   isValid = false;
     CAN_HeaderType         packetInfo;
     std::array<uint8_t, 8> data{0};
-
-    void Validate() { isValid = true; }
 };
 
 class RxPacket : public PacketBase<CAN_RxHeaderTypeDef>
 {
 public:
+    bool isValid              = false;
+     
     RxPacket()                = default;
     RxPacket(const RxPacket&) = default;
+
+    void Validate() noexcept { isValid = true; }
 };
 
 class TxPacket : public PacketBase<CAN_TxHeaderTypeDef>
 {
 public:
     template<size_t size>
-    TxPacket(uint32_t id, const std::array<uint8_t, size>& packetData, bool isExtended)
-    {
-        static_assert(size <= 8, "The maximum data size is 8 bytes");
-
-        CreatePacket(id, size, isExtended);
-
-        std::copy(packetData.begin(), packetData.end(), data.begin());
-
-        isValid = true;
-    }
-
-    TxPacket(uint32_t id, const std::vector<uint8_t>& packetData, bool isExtended)
-    {
-        CEP_ASSERT(packetData.size() <= 8, "The maximum data size is 8 bytes");
-
-        CreatePacket(id, packetData.size(), isExtended);
-
-        std::copy(packetData.begin(), packetData.end(), data.begin());
-
-        isValid = true;
-    }
+    TxPacket(uint32_t id, const std::array<uint8_t, size>& packetData, bool isExtended);
+    TxPacket(uint32_t id, const std::vector<uint8_t>& packetData, bool isExtended);
 
 private:
     constexpr void CreatePacket(uint32_t id, size_t size, bool isExtended) noexcept
@@ -381,7 +363,7 @@ private:
     /*********************************************************************************************/
     /* Constructor ----------------------------------------------------------------------------- */
 public:
-    CanModule(CAN_HandleTypeDef* handle, std::string_view label)
+    CanModule(CAN_HandleTypeDef* handle, const std::string_view label)
     : cep::Module{label}, m_handle{handle}
     {
         HAL_CAN_Start(m_handle);
@@ -410,7 +392,9 @@ public:
 
     void HandleMessageReception(uint32_t fifoNumber) noexcept;
 
-    void ErrorHandler(std::string_view file, std::string_view func, std::size_t line) noexcept;
+    void ErrorHandler(const std::string_view file,
+                      const std::string_view func,
+                      std::size_t            line) noexcept;
 
 
     /*********************************************************************************************/

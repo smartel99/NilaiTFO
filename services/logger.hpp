@@ -152,8 +152,8 @@ public:
      */
     template<typename... Args>
     static void Debug(const std::string&     message,
-                      std::string_view file,
-                      std::string_view func,
+                      const std::string_view file,
+                      const std::string_view func,
                       std::uint32_t          line,
                       Args&&... args)
     {
@@ -167,8 +167,8 @@ public:
 
     template<typename... Args>
     static void Info(const std::string&     message,
-                     std::string_view file,
-                     std::string_view func,
+                     const std::string_view file,
+                     const std::string_view func,
                      std::uint32_t          line,
                      Args&&... args)
     {
@@ -182,8 +182,8 @@ public:
 
     template<typename... Args>
     static void Warning(const std::string&     message,
-                        std::string_view file,
-                        std::string_view func,
+                        const std::string_view file,
+                        const std::string_view func,
                         std::uint32_t          line,
                         Args&&... args)
     {
@@ -197,8 +197,8 @@ public:
 
     template<typename... Args>
     static void Error(const std::string&     message,
-                      std::string_view file,
-                      std::string_view func,
+                      const std::string_view file,
+                      const std::string_view func,
                       std::uint32_t          line,
                       Args&&... args)
     {
@@ -212,8 +212,8 @@ public:
 
     template<typename... Args>
     static void Critical(const std::string&     message,
-                         std::string_view file,
-                         std::string_view func,
+                         const std::string_view file,
+                         const std::string_view func,
                          std::uint32_t          line,
                          Args&&... args)
     {

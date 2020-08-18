@@ -98,6 +98,28 @@ ALWAYS_INLINE size_t CanModule::RemoveInstance(size_t moduleIndex)
 
 
 /*************************************************************************************************/
+/* Construtors --------------------------------------------------------------------------------- */
+template<std::size_t size>
+TxPacket::TxPacket(uint32_t id, const std::array<uint8_t, size>& packetData, bool isExtended)
+{
+    static_assert(size <= 8, "The maximum data size is 8 bytes");
+
+    CreatePacket(id, size, isExtended);
+
+    std::copy(packetData.begin(), packetData.end(), data.begin());
+}
+
+TxPacket::TxPacket(uint32_t id, const std::vector<uint8_t>& packetData, bool isExtended)
+{
+    CEP_ASSERT(packetData.size() <= 8, "The maximum data size is 8 bytes");
+
+    CreatePacket(id, packetData.size(), isExtended);
+
+    std::copy(packetData.begin(), packetData.end(), data.begin());
+}
+
+
+/*************************************************************************************************/
 /* Handler ------------------------------------------------------------------------------------- */
 void CanModule::TaskHandler()
 {
@@ -234,8 +256,10 @@ void CanModule::ClearFIFO(uint32_t fifoNumber) noexcept
         }
 
         RxPacket          tempPacket;
-        HAL_StatusTypeDef status =
-          HAL_CAN_GetRxMessage(m_handle, fifoNumber, &tempPacket.packetInfo, tempPacket.data.data());
+        HAL_StatusTypeDef status = HAL_CAN_GetRxMessage(m_handle,
+                                                        fifoNumber,
+                                                        &tempPacket.packetInfo,
+                                                        tempPacket.data.data());
         /* If there's an error when getting the message, handle it */
         if (status != HAL_OK)
         {
@@ -329,9 +353,9 @@ void CanModule::SendPacket(TxPacket& packet) noexcept
 
 #pragma region ErrorHandler
 
-void CanModule::ErrorHandler(std::string_view file,
-                             std::string_view func,
-                             std::size_t      line) noexcept
+void CanModule::ErrorHandler(const std::string_view file,
+                             const std::string_view func,
+                             std::size_t            line) noexcept
 {
     if (CheckError(Status::ERROR_EWG))
     {
