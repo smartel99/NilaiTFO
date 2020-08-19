@@ -115,6 +115,7 @@ public:
 public:
     [[nodiscard]] virtual RxPacket ReceivePacket() noexcept;
     virtual void                   TransmitPacket(const TxPacket& packet);
+    virtual void                   TransmitPacket(const TxPacket&& packet);
 
 
     virtual void ErrorHandler(const std::string_view file,
@@ -209,7 +210,14 @@ RxPacket DRIVER_MODULE_DEC::ReceivePacket() noexcept
 DRIVER_MODULE_TEMPLATE
 void DRIVER_MODULE_DEC::TransmitPacket(const TxPacket& packet)
 {
+    /* Copies the value at the end of the buffer */
     m_txBuffer.push_back(packet);
+}
+DRIVER_MODULE_TEMPLATE
+void DRIVER_MODULE_DEC::TransmitPacket(const TxPacket&& packet)
+{
+    /* Moves the value at the end of the buffer */
+    m_txBuffer.insert(m_txBuffer.end(), std::move(packet));
 }
 
 /**

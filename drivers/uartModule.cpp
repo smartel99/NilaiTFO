@@ -16,10 +16,11 @@
 #include "shared/drivers/uartModule.hpp"
 #include "shared/processes/application.hpp"
 
-
+#include <algorithm>
 #include <array>
 #include <functional>
 #include <vector>
+
 
 namespace UART
 {
@@ -28,6 +29,10 @@ namespace UART
 /*************************************************************************************************/
 /* Defines ------------------------------------------------------------------------------------- */
 #define TX_TIMEOUT 500_SysTicks
+
+#define IS_IRQ_SRC_DATA_READY(handler) ((handler)->Instance->SR & UART_IT_RXNE)
+#define READ_DATA_REG(handler)         ((handler)->Instance->DR & (uint8_t)0xFF)
+
 
 /*************************************************************************************************/
 /* Private function declarations --------------------------------------------------------------- */
@@ -86,6 +91,47 @@ void UartModule::TransmissionHandler() noexcept
 
 /*************************************************************************************************/
 /* Public member functions definitions --------------------------------------------------------- */
+void UartModule::HandleMessageReception()
+{
+    /* Read the received byte and flush the data register */
+    uint8_t newData = ReadSingleByte();
+
+    /* Handle Start Of Frame */
+    if (m_sequence.m_useSof == true)
+    {
+        if (HandleSOF(newData) == SectionState::NOT_COMPLETE)
+        {
+            m_currentPacket.length = 0;
+            return;
+        }
+    }
+
+    /* Handle packet length */
+    if (m_sequence.m_useLength == true)
+    {
+        if (HandleLength(newData) == SectionState::NOT_COMPLETE)
+        {
+            return;
+        }
+    }
+
+    /* Save the newly received data */
+    RxPacket& currentPacket = m_currentPacket.data;
+    currentPacket.push_back(newData);
+
+    /* Check if the packet has ended */
+    if ((currentPacket.size() >= m_currentPacket.length)    /* If packet length was received */
+        || (currentPacket.size() >= m_sequence.m_maxLength) /* If maximum length was reached */
+        || (IsEOFComplete() == true))                       /* If EOF was received */
+    {
+        /* Move the current packet at the end of the reception stack */
+        m_rxBuffer.insert(m_rxBuffer.end(), std::move(currentPacket));
+
+        /* Reset variables */
+        m_currentPacket.data.clear();
+        m_currentPacket.length = 0;
+    }
+}
 
 
 /*************************************************************************************************/
@@ -141,6 +187,134 @@ void UartModule::ErrorHandler(const std::string_view file,
     m_status = Status::OK;
 }
 
+GETTER uint8_t UartModule::ReadSingleByte()
+{
+    uint8_t newData = READ_DATA_REG(m_handle);
+    __HAL_UART_FLUSH_DRREGISTER(m_handle);
+
+    return newData;
+}
+
+
+/**
+ * @brief   Check if the current packet's start of frame has been completely received.
+ *
+ * @retval  true: If the SOF was completely received
+ *          false: If the SOF wasn't completely received
+ */
+bool UartModule::IsSOFComplete()
+{
+    auto& sof = m_sequence.m_startOfFrame;
+    return std::equal(sof.begin(), sof.end(), m_currentPacket.data.begin());
+}
+
+/**
+ * @brief   Check if the current packet's end of frame has been completely received.
+ *
+ * @retval  true: If the EOF was completely received
+ *          false: If the EOF wasn't completely received
+ */
+bool UartModule::IsEOFComplete()
+{
+    auto& eof = m_sequence.m_endOfFrame;
+    return std::equal(eof.begin(), eof.end(), m_currentPacket.data.end() - eof.size());
+}
+
+
+/**
+ * @brief   Compare the incoming data with the SOF setting, and checks if it matches.
+ *          If the data doesn't match, clear the packet and restart from zero.
+ *
+ * @param   uint8_t newData : Byte just read from the serial port
+ *
+ * @retval  COMPLETE if the SOF was completely received in the current packet
+ *          NOT_COMPLETE otherwise
+ */
+[[nodiscard]] SectionState UartModule::HandleSOF(uint8_t newData)
+{
+    /* Check if the SOF was already completely read */
+    if (!IsSOFComplete())
+    {
+        /* Check if the newly received data fits the SOF */
+        if (newData == m_sequence.m_startOfFrame.at(m_currentPacket.data.size()))
+        {
+            /* Save the SOF byte */
+            m_currentPacket.data.push_back(newData);
+            return SectionState::NOT_COMPLETE;
+        }
+        else
+        {
+            /* There was an error, clear the packet */
+            m_currentPacket.data.clear();
+            m_currentPacket.length = 0;
+            return SectionState::NOT_COMPLETE;
+        }
+    }
+
+    return SectionState::COMPLETE;
+}
+
+/**
+ * @brief   Get the incoming data and calculates the necessary packet length from it.
+ *          The length data can be spread through multiple bytes (up to 8).
+ *
+ * @param   uint8_t newData  : Byte just read from the serial port
+ *
+ * @retval  COMPLETE:     If all the length bytes were received
+ *          NOT_COMPLETE: Otherwise
+ */
+[[nodiscard]] SectionState UartModule::HandleLength(uint8_t newData)
+{
+    if (m_currentPacket.data.size() < m_sequence.m_startOfFrame.size() + m_sequence.m_lengthSize)
+    {
+        size_t n = m_currentPacket.data.size() - m_sequence.m_startOfFrame.size();
+        m_currentPacket.length |= newData << (8 * n);
+
+        m_currentPacket.data.push_back(newData);
+
+        return SectionState::NOT_COMPLETE;
+    }
+
+    return SectionState::COMPLETE;
+}
+
+
+/*************************************************************************************************/
+/* Callbacks ----------------------------------------------------------------------------------- */
+
+#pragma region Callback functions
+
+/* These callbacks are declared as __weak__ by the HAL, and must have C-style linkage in order to
+ * override the HAL-provided functions. */
+extern "C"
+{
+    /**
+     * @brief  Automatically handles interruption reception on UART modules
+     * @param  huart: Pointer to the handler to receive from
+     * @retval None
+     *
+     * @note   This function should be added in the `UARTx_IRQHandler()` functions in
+     *         `stm32f4xx_it.c` file.
+     */
+    void uart_HandleReceptionIRQ(UART_HandleTypeDef* huart)
+    {
+        UartModule* module = FindModuleFromHandle(huart);
+        CEP_ASSERT_NULL(module);
+
+        /* Verify that the interruption was caused by a reception */
+        if (IS_IRQ_SRC_DATA_READY(huart) == false)
+        {
+            /* It wasn't, let the HAL handle whatever it was, then return */
+            HAL_UART_IRQHandler(huart);
+            return;
+        }
+
+        /* Handle the incoming message */
+        module->HandleMessageReception();
+    }
+}
+#pragma endregion
+
 
 /*************************************************************************************************/
 /* Private functions definitions --------------------------------------------------------------- */
@@ -153,10 +327,10 @@ inline static UartModule* FindModuleFromHandle(UART_HandleTypeDef* huart) noexce
 
     /* Check if the module is uart2 */
     CHECK_HANDLE_IS_MODULE(huart, UART2_MODULE);
-    
+
     /* Check if the module is uart3 */
     CHECK_HANDLE_IS_MODULE(huart, UART3_MODULE);
-    
+
     /* Check if the module is uart4 */
     CHECK_HANDLE_IS_MODULE(huart, UART4_MODULE);
 

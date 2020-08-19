@@ -77,18 +77,33 @@ constexpr inline Status operator|=(Status& a, const Status& b) noexcept
  */
 #pragma endregion
 
+enum class SectionState
+{
+    NOT_COMPLETE,
+    COMPLETE,
+};
+
 
 /*************************************************************************************************/
 /* Classes ------------------------------------------------------------------------------------- */
+class UartModule;
 
-template<typename DataType = uint8_t>
 class Sequence_t
 {
+    friend class UartModule;
+    using DataType = uint8_t;
+
 private:
     bool                  m_useSof = false;
-    bool                  m_useEof = false;
     std::vector<DataType> m_startOfFrame{};
+
+    bool                  m_useEof = false;
     std::vector<DataType> m_endOfFrame{};
+
+    bool   m_useLength  = false;
+    size_t m_lengthSize = 0;
+
+    size_t m_maxLength = 127;
 
 public:
     Sequence_t() = default;
@@ -103,28 +118,39 @@ public:
         m_endOfFrame = endOfFrameSequence;
         m_useEof     = true;
     }
+
+    ALWAYS_INLINE void SetLengthSize(size_t packetLengthSize)
+    {
+        CEP_ASSERT(packetLengthSize <= 8, "Packet length must fit in a uint64_t");
+        m_lengthSize = packetLengthSize;
+        m_useLength  = true;
+    }
+
+    ALWAYS_INLINE void SetMaxLength(size_t maxLength) { m_maxLength = maxLength; }
 };
 
-template<typename DataType>
-using DriverModuleType = cep::DriverModule<UART_HandleTypeDef, Status, std::vector<DataType>>;
-
-class UartModule : public DriverModuleType<uint8_t>
+using DriverModuleType = cep::DriverModule<UART_HandleTypeDef, Status, std::vector<uint8_t>>;
+class UartModule : public DriverModuleType
 {
-    friend class Sequence_t<uint8_t>;
 public:
-    using DriverModule = DriverModuleType<uint8_t>;
-    using RxPacket     = typename DriverModule::RxPacket_t;
-    using TxPacket     = typename DriverModule::TxPacket_t;
-    using Callback_t   = typename DriverModule::Callback_t;
+    using RxPacket   = typename DriverModuleType::RxPacket_t;
+    using TxPacket   = typename DriverModuleType::TxPacket_t;
+    using Callback_t = typename DriverModuleType::Callback_t;
 
 
     /*********************************************************************************************/
     /* Private member variables ---------------------------------------------------------------- */
 private:
-    Sequence_t<uint8_t> m_sequence;
+    Sequence_t m_sequence;
 
-public:
-    UartModule(UART_HandleTypeDef* handle, const std::string_view name) : DriverModule(handle, name)
+    struct CurrentPacket_t
+    {
+        RxPacket data;
+        uint64_t length;
+    }m_currentPacket;
+
+    public : UartModule(UART_HandleTypeDef* handle, const std::string_view name)
+    : DriverModuleType{handle, name}
     {
         /* MX_USARTx_UART_Init must be called in `application.cpp` */
 
@@ -139,9 +165,7 @@ public:
 
     /*********************************************************************************************/
     /* Public member functions declarations ---------------------------------------------------- */
-    void ErrorHandler(const std::string_view file,
-                      const std::string_view func,
-                      size_t            line) noexcept override;
+    void HandleMessageReception();
 
 
     /*********************************************************************************************/
@@ -155,18 +179,28 @@ private:
 
 #pragma region Accessors
 public:
-    [[nodiscard]] ALWAYS_INLINE static UartModule* GetInstance(size_t moduleIndex = 0);
-    [[nodiscard]] ALWAYS_INLINE Sequence_t<uint8_t>& Sequence() { return m_sequence; }
+    GETTER static UartModule* GetInstance(size_t moduleIndex = 0);
+    GETTER Sequence_t& Sequence() { return m_sequence; }
 
 private:
     ALWAYS_INLINE void   SetInstance(size_t instanceIndex) override;
     ALWAYS_INLINE size_t RemoveInstance(size_t moduleIndex) override;
 #pragma endregion
-    
-    
+
+
     /*********************************************************************************************/
     /* Private member function declarations ---------------------------------------------------- */
     void SendPacket(TxPacket& packet) noexcept;
+    void ErrorHandler(const std::string_view file,
+                      const std::string_view func,
+                      size_t                 line) noexcept override;
+
+    GETTER uint8_t ReadSingleByte();
+
+    [[nodiscard]] bool         IsSOFComplete();
+    [[nodiscard]] bool         IsEOFComplete();
+    [[nodiscard]] SectionState HandleSOF(uint8_t newData);
+    [[nodiscard]] SectionState HandleLength(uint8_t newData);
 };
 
 
