@@ -53,13 +53,13 @@ void Log::CustomErrorHandler(const std::string& msg)
 {
     uint8_t* data = const_cast<uint8_t*>(reinterpret_cast<const uint8_t*>(msg.data()));
 
-    HAL_UART_Transmit(&huart1, data, msg.size(), 100);
+    HAL_UART_Transmit(&huart4, data, msg.size(), 100);
 }
 
 void Log::CustomLogHandler(const spdlog::memory_buf_t& formattedMsg)
 {
     uint8_t* data = const_cast<uint8_t*>(reinterpret_cast<const uint8_t*>(formattedMsg.data()));
-    HAL_UART_Transmit(&huart1, data, formattedMsg.size(), 100);
+    HAL_UART_Transmit(&huart4, data, formattedMsg.size(), 100);
 }
 
 
