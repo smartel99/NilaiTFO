@@ -16,27 +16,24 @@
 /* Includes
  * ------------------------------------------------------------------------------------
  */
-#include "shared/defines/pch.hpp"
-#include "shared/defines/driverModule.hpp"
+#include "shared/defines/module.hpp"
 #include "shared/defines/misc.hpp"
 #include "shared/services/ticks.hpp"
 
-#ifdef HAL_UART_MODULE_ENABLED
+#ifdef HAL_SPI_MODULE_ENABLED
 #include "Core/Inc/spi.h"
 #endif
 
-#include <array>
-#include <functional>
+#include <string>
 #include <vector>
 
 /*************************************************************************************************/
 /* Defines
  * -------------------------------------------------------------------------------------
  */
-#define SPI1_MODULE (SPI::SpiModule::GetInstance(0))
 
-namespace SPI {
-
+namespace SPI
+{
 /*************************************************************************************************/
 /* Enumerated Types
  * ----------------------------------------------------------------------------
@@ -47,193 +44,155 @@ namespace SPI {
  * @addtogroup  SPI_Status
  * @brief       SPI module status, mostly describing error states.
  */
-enum class Status {
-  SPI_ERROR_NONE = 0x00000000U,  /*!< No error                         */
-  SPI_ERROR_MODF = 0x00000001U,  /*!< MODF error                       */
-  SPI_ERROR_CRC = 0x00000002U,   /*!< CRC error                        */
-  SPI_ERROR_OVR = 0x00000004U,   /*!< OVR error                        */
-  SPI_ERROR_FRE = 0x00000008U,   /*!< FRE error                        */
-  SPI_ERROR_DMA = 0x00000010U,   /*!< DMA transfer error               */
-  SPI_ERROR_FLAG = 0x00000020U,  /*!< Error on RXNE/TXE/BSY Flag       */
-  SPI_ERROR_ABORT = 0x00000040U, /*!< Error during SPI Abort procedure */
+enum class Status
+{
+    NONE = 0x00000000U,
+    /*!< No error                         */
+    MODF = 0x00000001U,
+    /*!< MODF error                       */
+    CRC_ERROR = 0x00000002U,
+    /*!< CRC error                        */
+    OVR = 0x00000004U,
+    /*!< OVR error                        */
+    FRE = 0x00000008U,
+    /*!< FRE error                        */
+    DMA = 0x00000010U,
+    /*!< DMA transfer error               */
+    FLAG = 0x00000020U,
+    /*!< Error on RXNE/TXE/BSY Flag       */
+    ABORT = 0x00000040U,
+    /*!< Error during SPI Abort procedure */
 #if USE_HAL_SPI_REGISTER_CALLBACKS == 1
-  SPI_ERROR_INVALID_CALLBACK = 0x00000080U, /*!< Invalid Callback error  */
+      SPI_ERROR_INVALID_CALLBACK = 0x00000080U,
+    /*!< Invalid Callback error  */
 #endif                                      /* USE_HAL_SPI_REGISTER_CALLBACKS */
-  SPI_ERROR_NOT_INIT = 0x00000100U, /*!< Module is not enabled            */
-  SPI_ERROR_BAD_INIT = 0x00000200U, /*!< Bad initialization               */
-  SPI_ERROR_TIMEOUT = 0x00000400U,  /*!< Module has timed out             */
+    NOT_INIT = 0x00000100U,
+    /*!< Module is not enabled            */
+    BAD_INIT = 0x00000200U,
+    /*!< Bad initialization               */
+    TIMEOUT = 0x00000400U,
+    /*!< Module has timed out             */
 };
 
-enum class Polarity {
-  SPI_CLOCK_POLARITY_LOW = SPI_POLARITY_LOW,  /*!< Clock is low by default
-                                               *   and active high >*/
-  SPI_CLOCK_POLARITY_HIGH = SPI_POLARITY_HIGH /*!< Clock is high by default
-                                               *   and active low >*/
+enum class Polarity
+{
+    LOW = SPI_POLARITY_LOW,
+    /*!< Clock is low by default
+     *   and active high >*/
+    HIGH = SPI_POLARITY_HIGH
+    /*!< Clock is high by default
+     *   and active low >*/
 };
 
-enum class Phase {
-  SPI_CLOCK_PHASE_1EDGE = SPI_PHASE_1EDGE, /*!< Sampling is done on clock
-                                            *   rising edge >*/
-  SPI_CLOCK_PHASE_2EDGE = SPI_PHASE_2EDGE  /*!< Sampling is done on clock
-                                            *   falling edge >*/
-  };
-    /** From: https://stackoverflow.com/a/15889501 */
-    [[nodiscard]] constexpr inline Status
-    operator|(Status a, Status b) noexcept {
-  return static_cast<Status>(static_cast<std::underlying_type_t<Status>>(a) |
-                             static_cast<std::underlying_type_t<Status>>(b));
+enum class Phase
+{
+    EDGE1 = SPI_PHASE_1EDGE, 
+    /*!< Sampling is done on clock
+     *  rising edge */
+    EDGE2 = SPI_PHASE_2EDGE  
+    /*!< Sampling is done on clock
+     *   falling edge >*/
+};
+
+/** From: https://stackoverflow.com/a/15889501 */
+constexpr inline Status operator|(Status a, Status b) noexcept
+{
+    return static_cast<Status>(static_cast<std::underlying_type_t<Status>>(a) |
+                               static_cast<std::underlying_type_t<Status>>(b));
 }
-[[nodiscard]] constexpr inline Status operator&(Status a, Status b) noexcept {
-  return static_cast<Status>(static_cast<std::underlying_type_t<Status>>(a) &
-                             static_cast<std::underlying_type_t<Status>>(b));
+constexpr inline Status operator&(Status a, Status b) noexcept
+{
+    return static_cast<Status>(static_cast<std::underlying_type_t<Status>>(a) &
+                               static_cast<std::underlying_type_t<Status>>(b));
 }
-constexpr inline Status operator|=(Status &a, const Status &b) noexcept {
-  return a = a | b;
+constexpr inline Status operator|=(Status &a, const Status &b) noexcept
+{
+    return a = a | b;
 }
 /**
  * @}
  */
 #pragma endregion
 
-enum class SectionState {
-  NOT_COMPLETE,
-  COMPLETE,
+enum class SectionState
+{
+    NOT_COMPLETE,
+    COMPLETE,
 };
+/*************************************************************************************************/
+} // namespace SPI
 
 /*************************************************************************************************/
 /* Classes
  * -------------------------------------------------------------------------------------
  */
-class SpiModule;
-
-class Sequence_t {
-  friend class SpiModule;
-  using DataType = uint8_t;
-
-private:
-  bool m_useSof = false;
-  std::vector<DataType> m_startOfFrame{};
-
-  bool m_useEof = false;
-  std::vector<DataType> m_endOfFrame{};
-
-  bool m_useLength = false;
-  size_t m_lengthSize = 0;
-
-  size_t m_maxLength = 127;
-
+class SpiModule : public cep::Module
+{
 public:
-  Sequence_t() = default;
-
-  ALWAYS_INLINE void
-  SetSOF(std::initializer_list<DataType> startOfFrameSequence) {
-    m_startOfFrame = startOfFrameSequence;
-    m_useSof = true;
-  }
-  ALWAYS_INLINE void
-  SetEOF(std::initializer_list<DataType> endOfFrameSequence) {
-    m_endOfFrame = endOfFrameSequence;
-    m_useEof = true;
-  }
-
-  ALWAYS_INLINE void SetLengthSize(size_t packetLengthSize) {
-    CEP_ASSERT(packetLengthSize <= 8, "Packet length must fit in a uint64_t");
-    m_lengthSize = packetLengthSize;
-    m_useLength = true;
-  }
-
-  ALWAYS_INLINE void SetMaxLength(size_t maxLength) { m_maxLength = maxLength; }
-};
-
-using DriverModuleType =
-    cep::DriverModule<SPI_HandleTypeDef, Status, std::vector<uint8_t>>;
-class SpiModule : public DriverModuleType {
-public:
-  using RxPacket = typename DriverModuleType::RxPacket_t;
-  using TxPacket = typename DriverModuleType::TxPacket_t;
-  using Callback_t = typename DriverModuleType::Callback_t;
-
-  /*********************************************************************************************/
-  /* Private member variables
-   * ---------------------------------------------------------------- */
+    SpiModule(SPI_HandleTypeDef* handle, const std::string& label)
+        : m_label(label)
+        , m_handle(handle)
+    {
+        CEP_ASSERT(handle != nullptr, "SPI Handle is NULL!");
+    }
+    
+    virtual ~SpiModule() override;
+    
+    virtual void Run() override;
+    virtual const std::string& GetLabel() const override
+    {
+        return m_label;
+    }
+    
+    SPI::Status Transmit(const std::vector<uint8_t> pkt);
+    SPI::Status Transmit(const uint8_t* data, size_t len);
+    
+    inline SPI::Status TransmitByte(uint8_t data)
+    {
+        return Transmit(&data, 1);
+    }
+    inline SPI::Status Transmit16(uint16_t data)
+    {
+        // Send the data in little-endian mode, for backward compatibility.
+        // This method is slower than straight up reinterpret_cast, but it is 
+        // consistent accross all implementation.
+        return Transmit({ (uint8_t)(data & 0x00FF), (uint8_t)(data >> 8) });
+    }
+    
+    SPI::Status Receive(uint8_t* ouptutData, size_t len);
+    inline SPI::Status ReceiveByte(uint8_t* outputData)
+    {
+        return Receive(outputData, 1);
+    }
+    inline SPI::Status Receive16(uint16_t* outputData)
+    {
+        return Receive(reinterpret_cast<uint8_t*>(outputData), 2);
+    }
+    
+    SPI::Status Transaction(const uint8_t* txData, size_t txLen, uint8_t* rxData, size_t rxLen);
+    // #TODO Explain difference between const std::vector& and std::vector&
+    SPI::Status Transaction(const std::vector<uint8_t>& txData, std::vector<uint8_t>& rxData);
+    
+    inline SPI::Status TransactionByte(uint8_t txData, uint8_t* rxData)
+    {
+        return Transaction(&txData, 1, rxData, 1);
+    }
+    inline SPI::Status Transaction16(uint16_t txData, uint16_t* rxData)
+    {
+        return Transaction(reinterpret_cast<uint8_t*>(&txData), 2, reinterpret_cast<uint8_t*>(rxData), 2);
+    }
+    
 private:
-  Sequence_t m_sequence;
-
-  struct CurrentPacket_t {
-    RxPacket data;
-    uint64_t length;
-  } m_currentPacket;
-
-public:
-  SpiModule(SPI_HandleTypeDef *handle, const std::string_view name)
-      : DriverModuleType{handle, name} {
-    /* MX_SPIx_UART_Init must be called in `application.cpp` */
-
-    m_status = Status::SPI_ERROR_NONE;
-  }
-  ~SpiModule() {
-    HAL_SPI_Abort(m_handle);
-    HAL_SPI_DeInit(m_handle);
-  }
-
-  /*********************************************************************************************/
-  /* Public member functions declarations
-   * ---------------------------------------------------- */
-  void HandleMessageReception();
-
-  /*********************************************************************************************/
-  /* Handlers
-   * --------------------------------------------------------------------------------
-   */
+    std::string m_label;
+    SPI_HandleTypeDef* m_handle;
+    SPI::Status m_status = SPI::Status::NONE;
+    
 private:
-  ALWAYS_INLINE void TransmissionHandler() noexcept override;
+    void ErrorHandler();
+    bool WaitUntilNotBusy();
+}
+;
 
-  /*********************************************************************************************/
-  /* Accessors
-   * -------------------------------------------------------------------------------
-   */
-
-#pragma region Accessors
-public:
-  GETTER static SpiModule *GetInstance(size_t moduleIndex = 0);
-  GETTER Sequence_t &Sequence() { return m_sequence; }
-
-private:
-  ALWAYS_INLINE void SetInstance(size_t instanceIndex) override;
-  ALWAYS_INLINE size_t RemoveInstance(size_t moduleIndex) override;
-#pragma endregion
-
-  /*********************************************************************************************/
-  /* Private member function declarations
-   * ---------------------------------------------------- */
-
-  // Finish the functions! Not usable as it is!
-  void Transmit(TxPacket &packet) noexcept;
-  void TransmitByte(TxPacket &packet) noexcept;
-  void Transmit16(TxPacket &packet) noexcept;
-
-  void spi_Transaction(size_t length,
-                                  const uint8_t txData[],
-                                  uint8_t rxData[]);
-  void spi_TransactionByte(SpiModule *module,
-                                                    uint8_t txData,
-                                                    uint8_t *rxData);
-  void spi_Transaction16(SpiModule *module,
-                                                  uint16_t txData,
-                                                  uint16_t *rxData);
-  
-  void ErrorHandler(const std::string_view file, const std::string_view func,
-                    size_t line) noexcept override;
-
-  // Finish the functions!
-  GETTER uint8_t spi_Receive() noexcept;
-  GETTER uint8_t spi_ReceiveByte() noexcept;
-  GETTER uint8_t spi_Receive16() noexcept;
-  [[nodiscard]] SectionState HandleLength(uint8_t newData);
-};
-
-/*************************************************************************************************/
-}; // namespace SPI
 /**
  * @}
  * @}

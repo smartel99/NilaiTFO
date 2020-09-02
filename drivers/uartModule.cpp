@@ -1,4 +1,4 @@
-/**
+﻿/**
  * @addtogroup  drivers
  * @{
  * @addtogroup  uart
@@ -114,8 +114,8 @@ void UartModule::HandleMessageReception()
             return;
         }
     }
-    
-    
+
+
 
     /* Save the newly received data */
     RxPacket& currentPacket = m_currentPacket.data;

@@ -13,6 +13,7 @@
 #pragma once
 /*************************************************************************************************/
 /* Includes ------------------------------------------------------------------------------------ */
+#if 0
 #include "shared/defines/pch.hpp"
 #include "shared/defines/module.hpp"
 
@@ -271,3 +272,4 @@ DRIVER_MODULE_DEC::CheckError(StatusType errorCode) const noexcept
  * @}
  */
 /* ----- END OF FILE ----- */
+#endif

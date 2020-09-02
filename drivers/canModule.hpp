@@ -14,6 +14,7 @@
 #pragma once
 /*************************************************************************************************/
 /* Includes ------------------------------------------------------------------------------------ */
+#if 0
 #include "shared/defines/pch.hpp"
 #include "shared/defines/misc.hpp"
 #include "shared/defines/driverModule.hpp"
@@ -30,10 +31,6 @@
 
 /*************************************************************************************************/
 /* Defines ------------------------------------------------------------------------------------- */
-#define CAN1_MODULE (CAN::CanModule::GetInstance(0))
-#define CAN2_MODULE (CAN::CanModule::GetInstance(1))
-
-
 namespace CAN
 {
 
@@ -154,7 +151,7 @@ enum class RTRType
 enum class RxFifo
 {
     FIFO0 = CAN_RX_FIFO0,    //!< CAN Receive FIFO 0 >
-    FIFO1 = CAN_RX_FIFO1,    //!< CAN Receive FIFO 1 >
+    FIFO1 = CAN_RX_FIFO1,    //!< CAN Receive FIFO 1ï¿½>
 };
 /**
  * @}
@@ -420,4 +417,5 @@ private:
  * @}
  * @}
  */
+#endif
 /* ----- END OF FILE ----- */

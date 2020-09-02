@@ -37,40 +37,6 @@ inline static CanModule* FindModuleFromHandle(CAN_HandleTypeDef* hcan) noexcept;
 static CAN_FilterTypeDef AssertAndConvertFilterStruct(const Filter& sFilter) noexcept;
 
 
-/*************************************************************************************************/
-/* Instance creation --------------------------------------------------------------------------- */
-#pragma region Instance creation and management
-
-static std::vector<size_t> s_modules{};
-
-ALWAYS_INLINE CanModule* CanModule::GetInstance(std::size_t moduleIndex)
-{
-    CanModule* canInstance =
-      dynamic_cast<CanModule*>(Application::GetModule(s_modules[moduleIndex]));
-    if (canInstance->IsEnabled())
-    {
-        return canInstance;
-    }
-    else
-    {
-        return nullptr;
-    }
-}
-ALWAYS_INLINE void CanModule::SetInstance(size_t instanceIndex)
-{
-    s_modules.push_back(instanceIndex);
-    m_moduleIndex = s_modules.size();
-}
-ALWAYS_INLINE size_t CanModule::RemoveInstance(size_t moduleIndex)
-{
-    /* Remove module index from `s_modules` vector using the erase-remove idiom */
-    s_modules.erase(std::remove(s_modules.begin(), s_modules.end(), moduleIndex), s_modules.end());
-
-    return s_modules.size();
-}
-
-#pragma endregion
-
 
 /*************************************************************************************************/
 /* Construtors --------------------------------------------------------------------------------- */

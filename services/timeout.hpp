@@ -19,7 +19,6 @@
 #include "shared/services/ticks.hpp"
 
 #include <functional>
-#include <string_view>
 #include <utility>
 
 
@@ -40,10 +39,6 @@ private:
     bool     m_wasHit = false;
     TickType m_timeoutTime;
 
-    const std::string_view m_file;
-    const std::string_view m_func;
-    std::size_t            m_line;
-
     std::function<void(TickType)> m_timeoutCallback;
     std::function<void(void)>     m_callback;
 
@@ -54,21 +49,15 @@ public:
     Timeout(const Timeout&) = default;
     Timeout& operator=(const Timeout&) = default;
 
-    Timeout(TickType               timeoutTime,
-            const std::string_view file,
-            const std::string_view func,
-            size_t                 line)
-    : m_timeoutTime{timeoutTime}, m_file{file}, m_func{func}, m_line{line}
+    Timeout(TickType timeoutTime)
+    : m_timeoutTime{timeoutTime}
     {
         SubscribeToTick();
     }
 
     Timeout(TickType                  timeoutTime,
-            const std::string_view    file,
-            const std::string_view    func,
-            size_t                    line,
             std::function<void(void)> callback)
-    : m_timeoutTime{timeoutTime}, m_file{file}, m_func{func}, m_line{line}, m_callback{callback}
+    : m_timeoutTime{timeoutTime}, m_callback{callback}
     {
         SubscribeToTick();
     }
@@ -100,7 +89,7 @@ public:
         }
         else
         {
-            LOG_WARNING_HELPER("Timeout hit", m_file, m_func, m_line);
+            LOG_INFO("Timeout hit");
         }
     }
 
