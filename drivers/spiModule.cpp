@@ -6,7 +6,7 @@
  * @file        spiModule.cpp
  * @author      Lou-Gabriel Gaucher
  * @author      Pascal-Emmanuel Lachance
- * @p           https://www.github.com/Raesangur
+ * @author      Samuel Martel
  * @date        2020/08/13  -  09:40
  *
  * @brief       SPI communication module

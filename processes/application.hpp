@@ -13,50 +13,34 @@
 #define _APPLICATION_HPP_
 /*************************************************************************************************/
 /* File includes ------------------------------------------------------------------------------- */
-#include <string>
-#include <vector>
 
-// Explanation of static_cast: https://stackoverflow.com/a/1255015/11443498
-#define SPI1_MODULE    static_cast<SpiModule*>(Application::GetModule("spi1"))
-
-#define ADS_MODULE      static_cast<AdsModule*>(Application::GetModule("ads"))
 
 namespace cep
 {
-// Forward declaration.
-class Module;
-}
 
 /*************************************************************************************************/
 /* Classes ------------------------------------------------------------------------------------- */
 class Application
 {
 public:
-    Application() = default;
-    ~Application() = default;
+    virtual ~Application() = default;
 
-    static void Init();
-    static void Run();
-
-    void AddModule(cep::Module* newModule)
+    virtual void Init() = 0;
+    virtual void Run() = 0;
+    
+    static void AssertFailed()
     {
-        m_modules.push_back(newModule);
+        __builtin_trap();
+
+        while (true)
+        {
+            // An assertion failed, block the program.
+        }
     }
-
-    static cep::Module* GetModule(const std::string& moduleName);
-
-    
-private:
-    static Application*        s_instance;
-    std::vector<cep::Module*> m_modules;
-    
-    
-private:
-    void InitializeHAL();
-    void InitializeServices();
-    void InitializeModules();
 };
 
+
+}
 
 /*************************************************************************************************/
 /**

@@ -6,40 +6,31 @@
  * @file        uartModule.hpp
  * @author      Samuel Martel
  * @author      Pascal-Emmanuel Lachance
- * @p           https://www.github.com/Raesangur
  * @date        2020/08/13  -  09:25
  *
  * @brief       UART communication module
  */
 #pragma once
-#if 0
 /*************************************************************************************************/
 /* Includes ------------------------------------------------------------------------------------ */
-#include "shared/defines/pch.hpp"
-#include "shared/defines/driverModule.hpp"
+
+
+#include "defines/module.hpp"
 #include "shared/defines/misc.hpp"
-#include "shared/services/ticks.hpp"
 
-#ifdef HAL_UART_MODULE_ENABLED
-#include "Core/Inc/usart.h"
-#endif
-
+#include <cstdint>      // For uint8_t, size_t
+#include <functional>   // For std::function
+#include <string>       // For std::string
+#include <vector>       // For std::vector
 
 /*************************************************************************************************/
 /* Defines ------------------------------------------------------------------------------------- */
-#define UART1_MODULE (UART::UartModule::GetInstance(0))
-#define UART2_MODULE (UART::UartModule::GetInstance(1))
-#define UART3_MODULE (UART::UartModule::GetInstance(2))
-#define UART4_MODULE (UART::UartModule::GetInstance(3))
-
-
-namespace UART
-{
 
 
 /*************************************************************************************************/
 /* Enumerated Types ---------------------------------------------------------------------------- */
-
+namespace UART
+{
 #pragma region Status
 /**
  * @addtogroup  UART_Status
@@ -47,29 +38,38 @@ namespace UART
  */
 enum class Status
 {
-    OK                 = 0x0000,    //!< UART_OK.
-    NOT_ENABLED        = 0x0001,    //!< UART_NOT_ENABLED.
-    TIMEOUT            = 0x0002,    //!< UART_TIMEOUT.
-    BUSY               = 0x0004,    //!< UART_BUSY.
-    ERROR              = 0x0008,    //!< UART_ERROR.
-    DROPPED_BYTE       = 0x0010,    //!< UART_DROPPED_BYTE.
-    RX_BUFF_OVERFLOW   = 0x0020,    //!< UART_RX_BUFF_OVERFLOW.
-    NOT_DONE_RECEIVING = 0x0040,    //!< UART_NOT_DONE_RECEIVING.
-    BAD_START_OF_FRAME = 0x0080,    //!< UART_BAD_START_OF_FRAME.
+    Ok = 0x0000,
+    //!< UART_OK.
+NotEnabled = 0x0001,
+    //!< UART_NOT_ENABLED.
+Timeout = 0x0002,
+    //!< UART_TIMEOUT.
+Busy = 0x0004, 
+    //!< UART_BUSY.
+Error = 0x0008, 
+    //!< UART_ERROR.
+DroppedByte = 0x0010, 
+    //!< UART_DROPPED_BYTE.
+RxBuffOverflow = 0x0020,
+    //!< UART_RX_BUFF_OVERFLOW.
+NotDoneReceiving = 0x0040, 
+    //!< UART_NOT_DONE_RECEIVING.
+BadStartOfFrame = 0x0080,
+    //!< UART_BAD_START_OF_FRAME.
 };
 
 /** From: https://stackoverflow.com/a/15889501 */
-[[nodiscard]] constexpr inline Status operator|(Status a, Status b) noexcept
+constexpr inline Status operator|(Status a, Status b)
 {
     return static_cast<Status>(static_cast<std::underlying_type_t<Status>>(a) |
                                static_cast<std::underlying_type_t<Status>>(b));
 }
-[[nodiscard]] constexpr inline Status operator&(Status a, Status b) noexcept
+constexpr inline Status operator&(Status a, Status b)
 {
     return static_cast<Status>(static_cast<std::underlying_type_t<Status>>(a) &
                                static_cast<std::underlying_type_t<Status>>(b));
 }
-constexpr inline Status operator|=(Status& a, const Status& b) noexcept
+constexpr inline Status operator|=(Status& a, const Status& b)
 {
     return a = a | b;
 }
@@ -80,136 +80,100 @@ constexpr inline Status operator|=(Status& a, const Status& b) noexcept
 
 enum class SectionState
 {
-    NOT_COMPLETE,
-    COMPLETE,
+    NotComplete,
+    Complete,
 };
 
+struct Frame
+{
+    std::string data;
+    uint32_t timestamp = 0;
+};
+}   // namespace UART
 
 /*************************************************************************************************/
 /* Classes ------------------------------------------------------------------------------------- */
-class UartModule;
-
-class Sequence_t
-{
-    friend class UartModule;
-    using DataType = uint8_t;
-
-private:
-    bool                  m_useSof = false;
-    std::vector<DataType> m_startOfFrame{};
-
-    bool                  m_useEof = false;
-    std::vector<DataType> m_endOfFrame{};
-
-    bool   m_useLength  = false;
-    size_t m_lengthSize = 0;
-
-    size_t m_maxLength = 127;
-
-public:
-    Sequence_t() = default;
-
-    ALWAYS_INLINE void SetSOF(std::initializer_list<DataType> startOfFrameSequence)
-    {
-        m_startOfFrame = startOfFrameSequence;
-        m_useSof       = true;
-    }
-    ALWAYS_INLINE void SetEOF(std::initializer_list<DataType> endOfFrameSequence)
-    {
-        m_endOfFrame = endOfFrameSequence;
-        m_useEof     = true;
-    }
-
-    ALWAYS_INLINE void SetLengthSize(size_t packetLengthSize)
-    {
-        CEP_ASSERT(packetLengthSize <= 8, "Packet length must fit in a uint64_t");
-        m_lengthSize = packetLengthSize;
-        m_useLength  = true;
-    }
-
-    ALWAYS_INLINE void SetMaxLength(size_t maxLength) { m_maxLength = maxLength; }
-};
-
-using DriverModuleType = cep::DriverModule<UART_HandleTypeDef, Status, std::vector<uint8_t>>;
-class UartModule : public DriverModuleType
+class UartModule : public cep::Module
 {
 public:
-    using RxPacket   = typename DriverModuleType::RxPacket_t;
-    using TxPacket   = typename DriverModuleType::TxPacket_t;
-    using Callback_t = typename DriverModuleType::Callback_t;
-
-
-    /*********************************************************************************************/
-    /* Private member variables ---------------------------------------------------------------- */
-private:
-    Sequence_t m_sequence;
-
-    struct CurrentPacket_t
+    UartModule(UART_HandleTypeDef* uart, const std::string& label)
+        : m_handle(uart)
+        , m_label(label)
     {
-        RxPacket data;
-        uint64_t length;
-    }m_currentPacket;
-
-    public : UartModule(UART_HandleTypeDef* handle, const std::string_view name)
-    : DriverModuleType{handle, name}
-    {
-        /* MX_USARTx_UART_Init must be called in `application.cpp` */
-
-        m_status = Status::OK;
+        CEP_ASSERT(uart != nullptr, "UART Handle is NULL!");
+        m_txBuf.reserve(64);
+        m_rxBuf.reserve(64);
+        m_sof.reserve(2);
+        m_eof.reserve(2);
+        m_latestFrames.reserve(4);
+        
+        __HAL_UART_ENABLE_IT(m_handle, UART_IT_RXNE);
     }
-    ~UartModule()
+    virtual ~UartModule() override;
+    
+    virtual void Run() override;
+    
+    virtual const std::string& GetLabel() const override
     {
-        HAL_UART_Abort(m_handle);
-        HAL_UART_DeInit(m_handle);
+        return m_label;
     }
-
-
-    /*********************************************************************************************/
-    /* Public member functions declarations ---------------------------------------------------- */
-    void HandleMessageReception();
-
-
-    /*********************************************************************************************/
-    /* Handlers -------------------------------------------------------------------------------- */
+    
+    void Transmit(const char* msg, size_t len);
+    void Transmit(const std::string& msg);
+    void Transmit(const std::vector<uint8_t>& msg);
+    
+    size_t GetNumberOfWaitingFrames() const {return m_latestFrames.size();}
+    UART::Frame Receive();
+    
+    void SetExpectedRxLen(size_t len)
+    {
+        m_expectedLen = len;
+    }
+    void SetFrameReceiveCpltCallback(const std::function<void()>& cb);
+    void ClearFrameReceiveCpltCallback();
+    
+    void SetStartOfFrameSequence(uint8_t* sof, size_t len);
+    void SetStartOfFrameSequence(const std::string& sof);
+    void SetStartOfFrameSequence(const std::vector<uint8_t>& sof);
+    void ClearStartOfFrameSequence();
+    
+    void SetEndOfFrameSequence(uint8_t* eof, size_t len);
+    void SetEndOfFrameSequence(const std::string& eof);
+    void SetEndOfFrameSequence(const std::vector<uint8_t>& eof);
+    void ClearEndOfFrameSequence();
+    
+    void HandleReceptionIRQ();
+    
+    
 private:
-    ALWAYS_INLINE void TransmissionHandler() noexcept override;
-
-
-    /*********************************************************************************************/
-    /* Accessors ------------------------------------------------------------------------------- */
-
-#pragma region Accessors
-public:
-    GETTER static UartModule* GetInstance(size_t moduleIndex = 0);
-    GETTER Sequence_t& Sequence() { return m_sequence; }
-
+    bool WaitUntilTransmitionComplete();
+    
+    
 private:
-    ALWAYS_INLINE void   SetInstance(size_t instanceIndex) override;
-    ALWAYS_INLINE size_t RemoveInstance(size_t moduleIndex) override;
-#pragma endregion
+    UART_HandleTypeDef* m_handle = nullptr;
+    std::string m_label = "";
+    
+    UART::Status m_status = UART::Status::Ok;
+    size_t m_txBytesRemaining = -1;
+    std::vector<uint8_t> m_txBuf;
+    std::string m_rxBuf;
+    size_t m_expectedLen = 0;
+    uint32_t m_lastCharReceivedTimestamp = 0;
+    std::vector<UART::Frame> m_latestFrames;
+    
+    std::string m_sof;
+    std::string m_eof;
+    
+    std::function<void()> m_cb;
+    
+    static constexpr uint32_t TIMEOUT = 100;      // Systicks.
+    static constexpr uint32_t RX_TIMEOUT = 50;    // Systicks.
+}
+;
 
 
-    /*********************************************************************************************/
-    /* Private member function declarations ---------------------------------------------------- */
-    void SendPacket(TxPacket& packet) noexcept;
-    void ErrorHandler(const std::string_view file,
-                      const std::string_view func,
-                      size_t                 line) noexcept override;
-
-    GETTER uint8_t ReadSingleByte();
-
-    [[nodiscard]] bool         IsSOFComplete();
-    [[nodiscard]] bool         IsEOFComplete();
-    [[nodiscard]] SectionState HandleSOF(uint8_t newData);
-    [[nodiscard]] SectionState HandleLength(uint8_t newData);
-};
-
-
-/*************************************************************************************************/
-}; /* namespace UART */
 /**
  * @}
  * @}
  */
 /* ----- END OF FILE ----- */
-#endif

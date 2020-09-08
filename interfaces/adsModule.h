@@ -105,11 +105,17 @@ public:
 
     // Using timeout = 0 skips the waiting for DRDY
     const AdsPacket& RefreshValues(uint32_t timeout = 0);
+    
+    bool IsActive() const
+    {
+        return m_active;
+    }
         
     
 private:
+    bool m_active = false;
     SpiModule* m_spi;
-    std::string m_label;
+    std::string m_label = "";
     ADS::Config m_config;
     AdsPacket m_latestFrame;
     
@@ -125,6 +131,7 @@ private:
     inline uint16_t Send(uint16_t data);
     inline uint16_t ReadCommandResponse();
     inline int32_t CalculateTension(uint8_t* data);
+    inline float ConvertToVolt(int16_t val);
 };
 
 

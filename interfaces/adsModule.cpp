@@ -32,6 +32,7 @@ void AdsModule::Configure(const ADS::Config& config, bool force)
     }
     
     m_config = config;
+    m_active = false;
     
     Reset();
     
@@ -122,18 +123,25 @@ void AdsModule::Configure(const ADS::Config& config, bool force)
         return;
     }
     
+    m_active = true;
     LOG_DEBUG("ADS Configuration Completed!");
 }
 
 const AdsPacket& AdsModule::RefreshValues(uint32_t timeout)
 {
+    if (!m_active)
+    {
+        return m_latestFrame;
+    }
+    
+    
     // If a timeout was specified:
-    if (timeout > 0)
+    if(timeout > 0)
     {
         uint32_t timeoutTime = HAL_GetTick() + timeout;
      
         // Wait for DRDY to be active (LOW).
-        while (HAL_GPIO_ReadPin(m_config.pins.dataReady.port, m_config.pins.dataReady.pin) != GPIO_PIN_RESET)
+        while(HAL_GPIO_ReadPin(m_config.pins.dataReady.port, m_config.pins.dataReady.pin) != GPIO_PIN_RESET)
         {
             // If we time out:
             if(HAL_GetTick() >= timeoutTime)
@@ -159,6 +167,14 @@ const AdsPacket& AdsModule::RefreshValues(uint32_t timeout)
     int32_t ch2 = CalculateTension(&data.data()[6]);
     int32_t ch3 = CalculateTension(&data.data()[9]);
     int32_t ch4 = CalculateTension(&data.data()[12]);
+    
+    m_latestFrame.channel1 = ConvertToVolt(ch1);
+    m_latestFrame.channel2 = ConvertToVolt(ch2);
+    m_latestFrame.channel3 = ConvertToVolt(ch3);
+    m_latestFrame.channel4 = ConvertToVolt(ch4);
+    m_latestFrame.timestamp = HAL_GetTick();
+    
+    return m_latestFrame;
 }
 
 
@@ -229,7 +245,7 @@ bool AdsModule::SendConfig(uint8_t addr, uint8_t data)
     uint16_t response = ((addr | 0x20) << 8) | data;
     
     // Data is MSB in command because SPI sends LSB-first.
-    uint16_t cmd = (uint16_t)(data << 8) | (ADS::Commands::WriteRegistersMask >> 8 | addr);
+    uint16_t cmd = (ADS::Commands::WriteSingleRegisterMask | (uint16_t)addr << 8) | ((uint16_t)(data) & 0x00FF);
     
     return SendCommand(cmd, response);
 }
@@ -272,6 +288,22 @@ uint16_t AdsModule::ReadCommandResponse()
 
 int32_t AdsModule::CalculateTension(uint8_t* data)
 {
+    int32_t up = ((int32_t)data[0] << 24);
+    int32_t mid = ((int32_t)data[1] << 16);
+    int32_t bot = ((int32_t)data[2] << 8);
+    
+    // NOTE: This right-shift operation on signed data maintains the signed bit,
+    // and provides for the sign-extension from 24 to 32 bits.
+    return (((int32_t)(up | mid | bot)) >> 8);
+}
+
+float AdsModule::ConvertToVolt(int16_t val)
+{
+    // 1 LSB = (2 * Vref / Gain) / 2^24
+    // #TODO Modify this to get the value depending on the ADS's config.
+    constexpr float LSB = (2.0f *(2.442f / 1.0f)) / 16777216.0f;
+    
+    return ((float)val * LSB);
 }
 
 

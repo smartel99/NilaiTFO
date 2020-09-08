@@ -10,8 +10,10 @@
  * @date        2020/07/01 - 11:30
  */
 /*************************************************************************************************/
-#pragma once
+#ifndef _MACROS_HPP_H_
+#define _MACROS_HPP_H_
 
+#include "shared/processes/application.hpp"
 
 /*************************************************************************************************/
 /* Defines ------------------------------------------------------------------------------------- */
@@ -35,7 +37,6 @@
 /**
  * @brief   Check if a boolean condition `x` is true, if false:                                  \n
  *          - Print an error message
- *          - Calls the FreeRTOS' `configASSERT()` function
  *
  * @param   x   : Boolean evaluation
  * @param   msg : Error message to print in case of failed assertion
@@ -44,17 +45,19 @@
  * @note    The macro is embedded within a `do while` loop to allow for a `;` to be inserted at the
  *          end of the macro without warnings.
  */
+#if defined(DEBUG)
 #define CEP_ASSERT(x, msg, ...)                                                                    \
     do                                                                                             \
     {                                                                                              \
         if ((x) == false)                                                                          \
         {                                                                                          \
             LOG_DEBUG(msg, ##__VA_ARGS__);                                                         \
-            while (true)                                                                           \
-            {                                                                                      \
-            }                                                                                      \
+            cep::Application::AssertFailed();                                                      \
         }                                                                                          \
     } while (false)
+#else
+#define CEP_ASSERT(x, msg, ...)
+#endif
 
 /**
  * @brief   This macro is an alternative to the @def `CEP_ASSERT` macro, specifically for checking
@@ -69,11 +72,15 @@
  *          CEP_ASSERT_NULL(data);
  * ```
  */
+#if defined(DEBUG)
 #define CEP_ASSERT_NULL(ptr)                                                                       \
     do                                                                                             \
     {                                                                                              \
         CEP_ASSERT((ptr != nullptr), #ptr " was null");                                            \
     } while (false)
+#else
+#define CEP_ASSERT_NULL(ptr)
+#endif
 
 /**
  * @brief   Checks if the current module is enabled before entering a module's function's
@@ -116,4 +123,5 @@
  * @}
  * @}
  */
+#endif
 /* ----- END OF FILE ----- */

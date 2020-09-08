@@ -334,7 +334,7 @@ class Config
 {
 public:
     Pins pins;
-    SampleRate sampleRate = SampleRate::Hz16000;
+    SampleRate sampleRate = SampleRate::Hz1000;
     Hamming hamming = Hamming::Off;
     WordSize wordSize = WordSize::Size24; /*!< Can only be changed by hardware */
     SpiMode spiMode = SpiMode::AsynchronousSlave; /*!< Can only be changed by hardware */
@@ -588,6 +588,7 @@ public:
         referenceVoltage = (uint8_t)config.referenceVoltage;
         highResMode = (uint8_t)config.resolution;
         negativeChargePumpEnable = (uint8_t)config.negativeChargePumpEnable;
+        doNotUse = 1;
     }
     
     static const uint8_t Address = 0x0B;
@@ -624,7 +625,7 @@ public:
              */
             uint8_t referenceVoltage : 1;
         
-            uint8_t: 1;
+            uint8_t doNotUse: 1;
         
             /** @brief  High-resolution mode.
              * 
