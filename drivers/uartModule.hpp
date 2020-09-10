@@ -13,8 +13,6 @@
 #pragma once
 /*************************************************************************************************/
 /* Includes ------------------------------------------------------------------------------------ */
-
-
 #include "defines/module.hpp"
 #include "shared/defines/misc.hpp"
 
@@ -129,6 +127,11 @@ public:
     {
         m_expectedLen = len;
     }
+    void ClearExpectedRxLen()
+    {
+        m_expectedLen = -1;
+    }
+    
     void SetFrameReceiveCpltCallback(const std::function<void()>& cb);
     void ClearFrameReceiveCpltCallback();
     
@@ -166,8 +169,8 @@ private:
     
     std::function<void()> m_cb;
     
-    static constexpr uint32_t TIMEOUT = 100;      // Systicks.
-    static constexpr uint32_t RX_TIMEOUT = 50;    // Systicks.
+    static constexpr uint32_t TIMEOUT = 100;       // Systicks.
+    static constexpr uint32_t RX_TIMEOUT = 50;     // Systicks.
 }
 ;
 

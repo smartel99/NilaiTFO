@@ -33,11 +33,6 @@ UartModule::~UartModule()
     
 void UartModule::Run()
 {
-    if (GetNumberOfWaitingFrames() > 0)
-    {
-        auto pkt = Receive();
-        Transmit(pkt.data);
-    }
 }
 
     

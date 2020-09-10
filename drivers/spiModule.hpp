@@ -46,52 +46,52 @@ namespace SPI
  */
 enum class Status
 {
-    NONE = 0x00000000U,
     /*!< No error                         */
-    MODF = 0x00000001U,
+    NONE = 0x00000000U,
     /*!< MODF error                       */
-    CRC_ERROR = 0x00000002U,
+    MODF = 0x00000001U,
     /*!< CRC error                        */
-    OVR = 0x00000004U,
+    CRC_ERROR = 0x00000002U,
     /*!< OVR error                        */
-    FRE = 0x00000008U,
+    OVR = 0x00000004U,
     /*!< FRE error                        */
-    DMA = 0x00000010U,
+    FRE = 0x00000008U,
     /*!< DMA transfer error               */
-    FLAG = 0x00000020U,
+    DMA = 0x00000010U,
     /*!< Error on RXNE/TXE/BSY Flag       */
-    ABORT = 0x00000040U,
+    FLAG = 0x00000020U,
     /*!< Error during SPI Abort procedure */
+    ABORT = 0x00000040U,
 #if USE_HAL_SPI_REGISTER_CALLBACKS == 1
-      SPI_ERROR_INVALID_CALLBACK = 0x00000080U,
     /*!< Invalid Callback error  */
+      SPI_ERROR_INVALID_CALLBACK = 0x00000080U,
 #endif                                      /* USE_HAL_SPI_REGISTER_CALLBACKS */
-    NOT_INIT = 0x00000100U,
     /*!< Module is not enabled            */
-    BAD_INIT = 0x00000200U,
+    NOT_INIT = 0x00000100U,
     /*!< Bad initialization               */
-    TIMEOUT = 0x00000400U,
+    BAD_INIT = 0x00000200U,
     /*!< Module has timed out             */
+    TIMEOUT = 0x00000400U,
 };
 
 enum class Polarity
 {
-    LOW = SPI_POLARITY_LOW,
     /*!< Clock is low by default
      *   and active high >*/
-    HIGH = SPI_POLARITY_HIGH
+    LOW = SPI_POLARITY_LOW,
     /*!< Clock is high by default
      *   and active low >*/
+    HIGH = SPI_POLARITY_HIGH
 };
 
 enum class Phase
 {
-    EDGE1 = SPI_PHASE_1EDGE, 
     /*!< Sampling is done on clock
      *  rising edge */
-    EDGE2 = SPI_PHASE_2EDGE  
+    EDGE1 = SPI_PHASE_1EDGE, 
     /*!< Sampling is done on clock
      *   falling edge >*/
+    EDGE2 = SPI_PHASE_2EDGE  
 };
 
 /** From: https://stackoverflow.com/a/15889501 */
@@ -160,6 +160,10 @@ public:
     }
     
     SPI::Status Receive(uint8_t* ouptutData, size_t len);
+    SPI::Status Receive(std::vector<uint8_t>& outputData)
+    {
+        return Receive(outputData.data(), outputData.size());
+    }
     inline SPI::Status ReceiveByte(uint8_t* outputData)
     {
         return Receive(outputData, 1);

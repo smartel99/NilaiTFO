@@ -6,521 +6,563 @@
  * @file        canModule.cpp
  * @author      Samuel Martel
  * @author      Pascal-Emmanuel Lachance
- * @p           https://www.github.com/Raesangur
  * @date        2020/08/10  -  13:56
  *
  * @brief       CAN communication module
  */
 /*************************************************************************************************/
 /* Includes ------------------------------------------------------------------------------------ */
-#include "shared/processes/application.hpp"
-#include "shared/drivers/canModule.hpp"
+#include "drivers/canModule.hpp"
+#include "services/logger.hpp"
 
 #include <algorithm>
-#include <array>
-#include <functional>
-#include <vector>
 
-
-namespace CAN
+CanModule::~CanModule()
 {
-
-
-/*************************************************************************************************/
-/* Defines ------------------------------------------------------------------------------------- */
-#define TX_TIMEOUT 500_SysTicks
-
-
-/*************************************************************************************************/
-/* Private functions declarations -------------------------------------------------------------- */
-inline static CanModule* FindModuleFromHandle(CAN_HandleTypeDef* hcan) noexcept;
-static CAN_FilterTypeDef AssertAndConvertFilterStruct(const Filter& sFilter) noexcept;
-
-
-
-/*************************************************************************************************/
-/* Construtors --------------------------------------------------------------------------------- */
-template<std::size_t size>
-TxPacket::TxPacket(uint32_t id, const std::array<uint8_t, size>& packetData, bool isExtended)
-{
-    static_assert(size <= 8, "The maximum data size is 8 bytes");
-
-    CreatePacket(id, size, isExtended);
-
-    std::copy(packetData.begin(), packetData.end(), data.begin());
+    HAL_CAN_Stop(m_handle);
 }
 
-TxPacket::TxPacket(uint32_t id, const std::vector<uint8_t>& packetData, bool isExtended)
+void CanModule::Run()
 {
-    CEP_ASSERT(packetData.size() <= 8, "The maximum data size is 8 bytes");
-
-    CreatePacket(id, packetData.size(), isExtended);
-
-    std::copy(packetData.begin(), packetData.end(), data.begin());
 }
 
-
-/*************************************************************************************************/
-/* Handler ------------------------------------------------------------------------------------- */
-void CanModule::TransmissionHandler() noexcept
+void CanModule::ConfigureFilter(const CAN::FilterConfiguration& config)
 {
-    static FastTick_t timeoutTime = FastTick_t::npos;
+    uint64_t hash = ((uint64_t)config.filterId.fullId << 32) | config.maskId.fullId;
 
-    HAL_CAN_GetTxMailboxesFreeLevel(m_handle);
+    CAN_FilterTypeDef filter = AssertAndConvertFilterStruct(config);
 
-    /* Clear timeout time if the transmission buffer is empty */
-    if (m_txBuffer.empty())
+    if (HAL_CAN_ConfigFilter(m_handle, &filter) != HAL_OK)
     {
-        timeoutTime = FastTick_t::npos;
-        return;
+        CEP_ASSERT(false, "In {}::ConfigureFilter: Unable to configure filter!", m_label);
     }
-
-    /* Start the timeout if it's not already started */
-    if (timeoutTime == FastTick_t::npos)
-    {
-        timeoutTime = FASTTICK.Get() + TX_TIMEOUT;
-    }
-
-    if (HAL_CAN_GetTxMailboxesFreeLevel(m_handle) != 0)
-    {
-        SendPacket(m_txBuffer.back());
-        m_txBuffer.pop_back();
-    }
-}
-
-
-/*************************************************************************************************/
-/* Public member functions definitions --------------------------------------------------------- */
-#pragma region Public member functions definitions
-
-/**
- * @brief   Wait up to `timeout` FastTicks for a mailbox to be free
- * @param   timeout: The max number of FastTicks to wait
- * @return  True if a mailbox is free, false if not
- */
-bool CanModule::WaitForFreeTxMailbox(FastTick_t timeout) noexcept
-{
-    /* Compute timeout time */
-    FastTick_t timeoutTime = FASTTICK.Start() + timeout;
-
-    /* Wait for a mailbox to be free */
-    while (HAL_CAN_GetTxMailboxesFreeLevel(m_handle) == 0 &&
-           FASTTICK.ShouldTimeout(timeoutTime) == false)
-    {
-        /* Do nothing here, wait */
-    }
-    FASTTICK.Stop();
-
-    if (HAL_CAN_GetTxMailboxesFreeLevel(m_handle) == 0)
-    {
-        /* If no mailboxes are available */
-        return false;
-    }
-    else
-    {
-        return true;
-    }
-}
-
-void CanModule::ConfigureFilter(const Filter& filter) noexcept
-{
-    CAN_FilterTypeDef canFilter = AssertAndConvertFilterStruct(filter);
-
-    if (HAL_CAN_ConfigFilter(m_handle, &canFilter) != HAL_OK)
-    {
-        m_status |= static_cast<Status>(m_handle->ErrorCode);
-        CALL_ERROR_HANDLER();
-    }
-}
-
-void CanModule::ClearFIFO(uint32_t fifoNumber) noexcept
-{
-    SysTick_t timeout = SYSTICK.FindTimeoutTime(2);
-    while (HAL_CAN_GetRxFifoFillLevel(m_handle, fifoNumber) != 0)
-    {
-        if (SYSTICK.ShouldTimeout(timeout) == true)
-        {
-            m_status |= Status::ERROR_TIMEOUT;
-            CALL_ERROR_HANDLER();
-            break;
-        }
-
-        RxPacket          tempPacket;
-        HAL_StatusTypeDef status = HAL_CAN_GetRxMessage(m_handle,
-                                                        fifoNumber,
-                                                        &tempPacket.packetInfo,
-                                                        tempPacket.data.data());
-        /* If there's an error when getting the message, handle it */
-        if (status != HAL_OK)
-        {
-            /* Update the error code */
-            m_status |= static_cast<Status>(m_handle->ErrorCode);
-            CALL_ERROR_HANDLER();
-        }
-    }
-}
-
-void CanModule::HandleMessageReception(uint32_t fifoNumber) noexcept
-{
-    RxPacket receivedPacket{};
     
-    /* Get the packet */
-    HAL_StatusTypeDef status = HAL_CAN_GetRxMessage(m_handle,
-                                                    fifoNumber,
-                                                    &receivedPacket.packetInfo,
-                                                    receivedPacket.data.data());
-
-
-    /* If there's an error when getting the message, handle it */
-    if (status != HAL_OK)
-    {
-        /* Update the error code */
-        m_status |= static_cast<Status>(m_handle->ErrorCode);
-        CALL_ERROR_HANDLER();
-        return;
-    }
-
-    /* Push the received packet on the reception buffer stack */
-    receivedPacket.Validate();
-    m_rxBuffer.push_back(receivedPacket);
+    m_filters[hash] = config;
 }
 
-#pragma endregion
-
-
-/*************************************************************************************************/
-/* Private member functions definitions -------------------------------------------------------- */
-#pragma region Private member function definitions
-
-void CanModule::SendPacket(TxPacket& packet) noexcept
+CAN::Frame CanModule::ReceiveFrame()
 {
-    /* Variable that stores in which mailbox (buffer) the packet is sent from */
-    uint32_t buff_num = 0;
-
-    /* Add the message to the queue */
-    if (HAL_CAN_AddTxMessage(m_handle, &packet.packetInfo, packet.data.data(), &buff_num) != HAL_OK)
+    CAN::Frame frame = m_framesReceived.back();
+    m_framesReceived.pop_back();
+    return frame;
+}
+CAN::Status CanModule::TransmitFrame(uint32_t addr, const std::vector<uint8_t>& data)
+{
+    CAN_TxHeaderTypeDef head = { 0 };
+    head.StdId =  addr & 0x000007FF;
+    head.ExtId = addr & 0x1FFFFFFF;
+    // If address is higher than 0x7FF, use extended ID.
+    head.IDE = addr > 0x000007FF ? 
+        (uint32_t)CAN::IdentifierType::Extended 
+        : (uint32_t)CAN::IdentifierType::Standard;
+    // If we have data, this is a data frame. Else it's a remote frame.
+    head.RTR = data.empty() ? 
+        (uint32_t)CAN::FrameType::Remote 
+        : (uint32_t)CAN::FrameType::Data;
+    // Cap amount of data at 8 bytes.
+    head.DLC = std::min(data.size(), (size_t)8);
+    
+    if (WaitForFreeMailbox() == false)
     {
-        m_status |= static_cast<Status>(m_handle->ErrorCode);
-        CALL_ERROR_HANDLER();
+        LOG_ERROR("In {}::TransmitFrame: Timed out before a Tx mailbox is free", m_label);
+        return CAN::Status::TX_ERROR;
     }
+    
+    uint32_t buffNum = 0;
+    
+    // Add frame to the mailbox.
+    // Using const_cast here because data.data() is a const uint8_t* and not a uint8_t*.
+    if(HAL_CAN_AddTxMessage(m_handle, &head, const_cast <uint8_t*>(data.data()), &buffNum) != HAL_OK)
+    {
+        LOG_ERROR("In {}::TransmitFrame: Unable to add frame to mailbox", m_label);
+        return CAN::Status::TX_ERROR;
+    }
+    
+    return CAN::Status::ERROR_NONE;
 }
 
-#pragma region ErrorHandler
-
-void CanModule::ErrorHandler(const std::string_view file,
-                             const std::string_view func,
-                             size_t            line) noexcept
+void CanModule::SetCallback(CAN::Irq irq, const std::function<void()>& callback)
 {
-    if (CheckError(Status::ERROR_EWG))
-    {
-        PRINT_ERROR("CAN Protocol Error Warning");
-    }
-    if (CheckError(Status::ERROR_EPV))
-    {
-        PRINT_ERROR("CAN Error Passive");
-    }
-    if (CheckError(Status::ERROR_BOF))
-    {
-        PRINT_ERROR("CAN Bus-Off Error");
-    }
-    if (CheckError(Status::ERROR_STF))
-    {
-        PRINT_ERROR("CAN Stuffing Error");
-    }
-    if (CheckError(Status::ERROR_FOR))
-    {
-        PRINT_ERROR("CAN Form Error");
-    }
-    if (CheckError(Status::ERROR_ACK))
-    {
-        PRINT_ERROR("CAN Ack Error");
-    }
-    if (CheckError(Status::ERROR_BR))
-    {
-        PRINT_ERROR("CAN Recessive Bit Error");
-    }
-    if (CheckError(Status::ERROR_BD))
-    {
-        PRINT_ERROR("CAN Dominant Bit Error");
-    }
-    if (CheckError(Status::ERROR_CRC))
-    {
-        PRINT_ERROR("CAN CRC Error");
-    }
-
-    if (CheckError(Status::ERROR_RX_FOV0))
-    {
-        PRINT_ERROR("CAN FIFO0 Overrun Error");
-    }
-    if (CheckError(Status::ERROR_RX_FOV1))
-    {
-        PRINT_ERROR("CAN FIFO1 Overrun Error");
-    }
-
-    if (CheckError(Status::ERROR_TX_ALST0))
-    {
-        PRINT_ERROR("CAN Arbitration Lost Tx Failure (Mailbox 0)");
-    }
-    if (CheckError(Status::ERROR_TX_ALST1))
-    {
-        PRINT_ERROR("CAN Arbitration Lost Tx Failure (Mailbox 1)");
-    }
-    if (CheckError(Status::ERROR_TX_ALST2))
-    {
-        PRINT_ERROR("CAN Arbitration Lost Tx Failure (Mailbox 2)");
-    }
-
-    if (CheckError(Status::ERROR_TX_TERR0))
-    {
-        PRINT_ERROR("CAN Transmit Error Tx Failure (Mailbox 0)");
-    }
-    if (CheckError(Status::ERROR_TX_TERR1))
-    {
-        PRINT_ERROR("CAN Transmit Error Tx Failure (Mailbox 1)");
-    }
-    if (CheckError(Status::ERROR_TX_TERR2))
-    {
-        PRINT_ERROR("CAN Transmit Error Tx Failure (Mailbox 2)");
-    }
-
-    if (CheckError(Status::ERROR_TIMEOUT))
-    {
-        PRINT_ERROR("CAN Timeout Error");
-    }
-    if (CheckError(Status::ERROR_NOT_INIT))
-    {
-        PRINT_ERROR("CAN Module Was Not Initialized");
-    }
-    if (CheckError(Status::ERROR_NOT_READY))
-    {
-        PRINT_ERROR("CAN Peripheral Was Not Ready");
-    }
-    if (CheckError(Status::ERROR_NOT_STARTED))
-    {
-        PRINT_ERROR("CAN Peripheral Was Not Started");
-    }
-    if (CheckError(Status::ERROR_PARAM))
-    {
-        PRINT_ERROR("CAN Parameter Error");
-    }
-
-#if USE_HAL_CAN_REGISTER_CALLBACKS
-    if (CheckError(Status::ERROR_INVALID_CALLBACK))
-    {
-        PRINT_ERROR("CAN Invalid Callback Error");
-    }
-#endif /* USE_HAL_CAN_REGISTER_CALLBACKS */
-
-    if (CheckError(Status::ERROR_INTERNAL))
-    {
-        PRINT_ERROR("Internal CAN Error");
-    }
-    if (CheckError(Status::ERROR_DROPPED_PKT))
-    {
-        PRINT_ERROR("Packet received before last one was read.");
-    }
-    if (CheckError(Status::RCVD_NEW_PACKET))
-    {
-        PRINT_ERROR("CAN Packet Received (Not an Error)");
-    }
-    if (CheckError(Status::RCVD_OLD_PACKET))
-    {
-        PRINT_ERROR("CAN Packet Received (Not an Error)");
-    }
-    if (CheckError(Status::NO_PACKET_RECEIVED))
-    {
-        PRINT_ERROR("CAN No Packet Received (Not an Error)");
-    }
-    if (CheckError(Status::PKT_ABORTED))
-    {
-        PRINT_ERROR("CAN Transmission Aborted");
-    }
-    if (CheckError(Status::TX_ERROR))
-    {
-        PRINT_ERROR("CAN Transmission Error");
-    }
-
-    m_status = Status::ERROR_NONE;
+    m_callbacks[irq] = callback;
 }
-#pragma endregion
-
-
-/**
- * @brief   Enable all interrupts source for the CAN controller
- *
- * @note    `CAN_IT_ERROR` interrupt is disabled and must be enabled manually
- *          with the @ref EnableNoAckInterrupt() function.                                       \n
- *          The reason for this disabling is a bug fix, addressing the issue arising when no
- *          drive boards were present on the master board, which caused a crash through retries. \n
- *          NoAcks are now only handled in interruption after the drive board is found
- *          (although there are still retries and a timeout).
- */
-void CanModule::EnableInterrupts() noexcept
+void CanModule::ClearCallback(CAN::Irq irq)
 {
-    __HAL_CAN_ENABLE_IT(m_handle, CAN_IT_RX_FIFO0_MSG_PENDING);
-    __HAL_CAN_ENABLE_IT(m_handle, CAN_IT_RX_FIFO0_FULL);
-    __HAL_CAN_ENABLE_IT(m_handle, CAN_IT_RX_FIFO0_OVERRUN);
-
-    __HAL_CAN_ENABLE_IT(m_handle, CAN_IT_RX_FIFO1_MSG_PENDING);
-    __HAL_CAN_ENABLE_IT(m_handle, CAN_IT_RX_FIFO1_FULL);
-    __HAL_CAN_ENABLE_IT(m_handle, CAN_IT_RX_FIFO1_OVERRUN);
-
-    __HAL_CAN_ENABLE_IT(m_handle, CAN_IT_ERROR_WARNING);
-    __HAL_CAN_ENABLE_IT(m_handle, CAN_IT_ERROR_PASSIVE);
-    __HAL_CAN_ENABLE_IT(m_handle, CAN_IT_BUSOFF);
-    __HAL_CAN_ENABLE_IT(m_handle, CAN_IT_LAST_ERROR_CODE);
-    //__HAL_CAN_ENABLE_IT(m_handle, CAN_IT_ERROR);
+    m_callbacks[irq] = std::function<void()>();
 }
 
-#pragma endregion
-
-
-/*************************************************************************************************/
-/* Private functions definitions --------------------------------------------------------------- */
-#pragma region Private functions definitions
-
-inline static CanModule* FindModuleFromHandle(CAN_HandleTypeDef* hcan) noexcept
+void CanModule::EnableInterrupt(CAN::Irq irq)
 {
-    CEP_ASSERT_NULL(hcan);
-
-    /* Check if the module is can1 */
-    CHECK_HANDLE_IS_MODULE(hcan, CAN1_MODULE);
-
-    /* Check if the module is can2 */
-    CHECK_HANDLE_IS_MODULE(hcan, CAN2_MODULE);
-
-    /* Module not found, return nullptr */
-    return nullptr;
+    __HAL_CAN_ENABLE_IT(m_handle, (uint32_t)irq);
+}
+void CanModule::DisableInterrupt(CAN::Irq irq)
+{
+    __HAL_CAN_DISABLE_IT(m_handle, (uint32_t)irq);
 }
 
 
-static CAN_FilterTypeDef AssertAndConvertFilterStruct(const Filter& sFilter) noexcept
+void CanModule::HandleIrq()
 {
-    using namespace cep;
+    // CAN Interrupt Register.
+    uint32_t ier = m_handle->Instance->IER;
+    
+    HandleTxMailbox0Irq(ier);
+    HandleTxMailbox1Irq(ier);
+    HandleTxMailbox2Irq(ier);
+    HandleRxFifo0Irq(ier);
+    HandleRxFifo1Irq(ier);
+    HandleSleepIrq(ier);
+    HandleWakeupIrq(ier);
+    HandleErrorIrq(ier);
+}
 
-    CEP_ASSERT(IS_CAN_FILTER_MODE(Underlying(sFilter.Mode)), "Invalid Filter Mode");
-    CEP_ASSERT(IS_CAN_FILTER_SCALE(Underlying(sFilter.Scale)), "Invalid Filter Scale");
-    CEP_ASSERT(IS_CAN_FILTER_FIFO(Underlying(sFilter.FifoAssignment)), "Invalid Filter Fifo");
-    CEP_ASSERT(IS_CAN_FILTER_ACTIVATION(Underlying(sFilter.Activation)),
-               "Invalid Filter Activation");
-    CEP_ASSERT(IS_CAN_FILTER_BANK_SINGLE(sFilter.Bank), "Invalid Filter Bank");
+void CanModule::HandleFrameReception(CAN::RxFifo fifo)
+{
+    CAN::Frame frame = CAN::Frame();
+    HAL_CAN_GetRxMessage(m_handle, (uint32_t)fifo, &frame.frame, frame.data.data());
+    frame.timestamp = HAL_GetTick();
+    
+    m_framesReceived.push_back(frame);
+    
+    switch (fifo)
+    {
+        case CAN::RxFifo::Fifo0:
+            if (m_callbacks[CAN::Irq::Fifo0MessagePending])
+            {
+                m_callbacks[CAN::Irq::Fifo0MessagePending]();
+            }
+            break;
+        case CAN::RxFifo::Fifo1:
+            if (m_callbacks[CAN::Irq::Fifo1MessagePending])
+            {
+                m_callbacks[CAN::Irq::Fifo1MessagePending]();
+            }
+            break;
+        default:
+            CEP_ASSERT(false, "In {}::HandleFrameReception, invalid FIFO!");
+    }
+}
 
-    CAN_FilterTypeDef filter = {0};
+void CanModule::HandleTxMailbox0Irq(uint32_t ier)
+{
+    // If Tx interrupts are enabled:
+    if((ier & CAN_IT_TX_MAILBOX_EMPTY) != 0)
+    {
+        uint32_t tsrFlags = m_handle->Instance->TSR;
+        // If Interrupt is caused by mailbox 0:
+        if((tsrFlags & CAN_TSR_RQCP0) != 0)
+        {
+            // Clear the transmission complete flag (plus TXOK0, ALST0 and TERR0).
+            // (CAN_FLAG_RQCP0 encapsulates TXOK0, ALST0 and TERR0)
+            __HAL_CAN_CLEAR_FLAG(m_handle, CAN_FLAG_RQCP0);
+            
+            // Check Mailbox 0 Transmission complete.
+            if((tsrFlags & CAN_TSR_TXOK0) != 0)
+            {
+                // If a callback is set, call it.
+                if(m_callbacks[CAN::Irq::TxMailboxEmpty])
+                {
+                    m_callbacks[CAN::Irq::TxMailboxEmpty]();
+                }
+            }
+            
+            else
+            {
+                // Check Arbitration Lost flag.
+                if((tsrFlags & CAN_TSR_ALST0) != 0)
+                {
+                    m_status |= CAN::Status::ERROR_TX_ALST0;
+                }
+            
+                // Check Transmission Error flag.
+                else if((tsrFlags & CAN_TSR_TERR0) != 0)
+                {
+                    m_status |= CAN::Status::ERROR_TX_TERR0;
+                }
+                else
+                {
+                    // Transmission Mailbox 0 abort callback.
+#if USE_HAL_CAN_REGISTER_CALLBACKS == 1
+                    // Call registered callback.
+                    m_handle->TxMailbox0AbortCallback(m_handle);
+#else
+                    // Call weak (surcharged) callback.
+                    HAL_CAN_TxMailbox0AbortCallback(m_handle);
+#endif
+                }
+            }
+        }
+    }
+}
 
-    filter.FilterIdHigh         = sFilter.FilterId.IdHigh;
-    filter.FilterIdLow          = sFilter.FilterId.IdLow;
-    filter.FilterMaskIdHigh     = sFilter.MaskId.MaskIdHigh;
-    filter.FilterMaskIdLow      = sFilter.MaskId.MaskIdLow;
-    filter.FilterBank           = sFilter.Bank;
-    filter.FilterFIFOAssignment = Underlying(sFilter.FifoAssignment);
-    filter.FilterMode           = Underlying(sFilter.Mode);
-    filter.FilterScale          = Underlying(sFilter.Scale);
-    filter.FilterActivation     = Underlying(sFilter.Activation);
+void CanModule::HandleTxMailbox1Irq(uint32_t ier)
+{
+    // If Tx interrupts are enabled:
+    if((ier & CAN_IT_TX_MAILBOX_EMPTY) != 0)
+    {
+        uint32_t tsrFlags = m_handle->Instance->TSR;
+        // If Interrupt is caused by mailbox 1:
+        if((tsrFlags & CAN_TSR_RQCP1) != 0)
+        {
+            // Clear the transmission complete flag (plus TXOK1, ALST1 and TERR1).
+            // (CAN_FLAG_RQCP1 encapsulates TXOK1, ALST1 and TERR1)
+            __HAL_CAN_CLEAR_FLAG(m_handle, CAN_FLAG_RQCP1);
+            
+            // Check Mailbox 0 Transmission complete.
+            if((tsrFlags & CAN_TSR_TXOK1) != 0)
+            {
+                // If a callback is set, call it.
+                if(m_callbacks[CAN::Irq::TxMailboxEmpty])
+                {
+                    m_callbacks[CAN::Irq::TxMailboxEmpty]();
+                }
+            }
+            
+            else
+            {
+                // Check Arbitration Lost flag.
+                if((tsrFlags & CAN_TSR_ALST1) != 0)
+                {
+                    m_status |= CAN::Status::ERROR_TX_ALST1;
+                }
+            
+                // Check Transmission Error flag.
+                else if((tsrFlags & CAN_TSR_TERR1) != 0)
+                {
+                    m_status |= CAN::Status::ERROR_TX_TERR1;
+                }
+                else
+                {
+                    // Transmission Mailbox 1 abort callback.
+#if USE_HAL_CAN_REGISTER_CALLBACKS == 1
+                    // Call registered callback.
+                    m_handle->TxMailbox1AbortCallback(m_handle);
+#else
+                    // Call weak (surcharged) callback.
+                    HAL_CAN_TxMailbox1AbortCallback(m_handle);
+#endif
+                }
+            }
+        }
+    }
+}
+
+void CanModule::HandleTxMailbox2Irq(uint32_t ier)
+{
+    // If Tx interrupts are enabled:
+    if((ier & CAN_IT_TX_MAILBOX_EMPTY) != 0)
+    {
+        uint32_t tsrFlags = m_handle->Instance->TSR;
+        // If Interrupt is caused by mailbox 2:
+        if((tsrFlags & CAN_TSR_RQCP2) != 0)
+        {
+            // Clear the transmission complete flag (plus TXOK2, ALST2 and TERR2).
+            // (CAN_FLAG_RQCP2 encapsulates TXOK2, ALST2 and TERR2)
+            __HAL_CAN_CLEAR_FLAG(m_handle, CAN_FLAG_RQCP2);
+            
+            // Check Mailbox 0 Transmission complete.
+            if((tsrFlags & CAN_TSR_TXOK2) != 0)
+            {
+                // If a callback is set, call it.
+                if(m_callbacks[CAN::Irq::TxMailboxEmpty])
+                {
+                    m_callbacks[CAN::Irq::TxMailboxEmpty]();
+                }
+            }
+            else
+            {
+                // Check Arbitration Lost flag.
+                if((tsrFlags & CAN_TSR_ALST2) != 0)
+                {
+                    m_status |= CAN::Status::ERROR_TX_ALST2;
+                }
+            
+                // Check Transmission Error flag.
+                else if((tsrFlags & CAN_TSR_TERR2) != 0)
+                {
+                    m_status |= CAN::Status::ERROR_TX_TERR2;
+                }
+                else
+                {
+                    // Transmission Mailbox 2 abort callback.
+#if USE_HAL_CAN_REGISTER_CALLBACKS == 1
+                    // Call registered callback.
+                    m_handle->TxMailbox2AbortCallback(m_handle);
+#else
+                    // Call weak (surcharged) callback.
+                    HAL_CAN_TxMailbox2AbortCallback(m_handle);
+#endif
+                }
+            }
+        }
+    }
+} 
+
+void CanModule::HandleRxFifo0Irq(uint32_t ier)
+{
+    uint32_t rf0r = m_handle->Instance->RF0R;
+    // If FIFO 0 overrun interrupt is enabled:
+    if((ier & CAN_IT_RX_FIFO0_OVERRUN) != 0)
+    {
+        // If FIFO 0 overrun flag is set:
+        if((rf0r & CAN_RF0R_FOVR0) != 0)
+        {
+            // Set CAN error code.
+            m_status |= CAN::Status::ERROR_RX_FOV0;
+            
+            // Clear flag.
+            __HAL_CAN_CLEAR_FLAG(m_handle, CAN_FLAG_FOV0);
+        }
+    }
+    
+    // If FIFO 0 Full interrupt is enabled:
+    if((ier & CAN_IT_RX_FIFO0_FULL) != 0)
+    {
+        // If FIFO 0 Full flag is set:
+        if((rf0r & CAN_RF0R_FULL0) != 0)
+        {
+            // Clear FIFO 0 full flag.
+            __HAL_CAN_CLEAR_FLAG(m_handle, CAN_FLAG_FF0);
+            
+            // While there's still unread frames in the FIFO:
+            while((rf0r & CAN_RF0R_FMP0) != 0)
+            {
+                // Read them.
+                HandleFrameReception(CAN::RxFifo::Fifo0);
+            }
+        }
+    }
+    
+    // If FIFO 0 Message Pending interrupt is enabled:
+    if((ier & CAN_IT_RX_FIFO0_MSG_PENDING) != 0)
+    {
+        // Check if message is still pending.
+        if((m_handle->Instance->RF0R & CAN_RF0R_FMP0) != 0)
+        {
+            HandleFrameReception(CAN::RxFifo::Fifo0);
+        }
+    }
+}
+
+void CanModule::HandleRxFifo1Irq(uint32_t ier)
+{
+    uint32_t rf1r = m_handle->Instance->RF1R;
+    // If FIFO 1 overrun interrupt is enabled:
+    if((ier & CAN_IT_RX_FIFO1_OVERRUN) != 0)
+    {
+        // If FIFO 1 overrun flag is set:
+        if((rf1r & CAN_RF1R_FOVR1) != 0)
+        {
+            // Set CAN error code.
+            m_status |= CAN::Status::ERROR_RX_FOV1;
+            
+            // Clear flag.
+            __HAL_CAN_CLEAR_FLAG(m_handle, CAN_FLAG_FOV1);
+        }
+    }
+    
+    // If FIFO 1 Full interrupt is enabled:
+    if((ier & CAN_IT_RX_FIFO1_FULL) != 0)
+    {
+        // If FIFO 1 Full flag is set:
+        if((rf1r & CAN_RF1R_FULL1) != 0)
+        {
+            // Clear FIFO 0 full flag.
+            __HAL_CAN_CLEAR_FLAG(m_handle, CAN_FLAG_FF1);
+            
+            // While there's still unread frames in the FIFO:
+            while((rf1r & CAN_RF1R_FMP1) != 0)
+            {
+                // Read them.
+                HandleFrameReception(CAN::RxFifo::Fifo1);
+            }
+        }
+    }
+    
+    // If FIFO 1 Message Pending interrupt is enabled:
+    if((ier & CAN_IT_RX_FIFO1_MSG_PENDING) != 0)
+    {
+        // Check if message is still pending.
+        if((m_handle->Instance->RF1R & CAN_RF1R_FMP1) != 0)
+        {
+            HandleFrameReception(CAN::RxFifo::Fifo1);
+        }
+    }
+}
+
+void CanModule::HandleSleepIrq(uint32_t ier)
+{
+    // If Sleep interrupt is enabled:
+    if((ier & CAN_IT_SLEEP_ACK) != 0)
+    {
+        // If Sleep interrupt flag is set:
+        if((m_handle->Instance->MSR & CAN_MSR_SLAKI) != 0)
+        {
+            // Clear Sleep interrupt flag.
+            __HAL_CAN_CLEAR_FLAG(m_handle, CAN_FLAG_SLAKI);
+            
+            // Call the callback, if there's one.
+            if(m_callbacks[CAN::Irq::SleepAck])
+            {
+                m_callbacks[CAN::Irq::SleepAck]();
+            }
+        }
+    }
+}
+
+void CanModule::HandleWakeupIrq(uint32_t ier)
+{
+    // If Wakeup interrupt is enabled:
+    if((ier & CAN_IT_WAKEUP) != 0)
+    {
+        // If wakeup flag is set:
+        if((m_handle->Instance->MSR & CAN_MSR_WKUI) != 0)
+        {
+            // Clear the flag.
+            __HAL_CAN_CLEAR_FLAG(m_handle, CAN_FLAG_WKU);
+            
+            // If there's one, call the callback.
+            if(m_callbacks[CAN::Irq::Wakeup])
+            {
+                m_callbacks[CAN::Irq::Wakeup]();
+            }
+        }
+    }
+}
+
+void CanModule::HandleErrorIrq(uint32_t ier)
+{
+    // If error interrupt is enabled:
+    if((ier & CAN_IT_ERROR) != 0)
+    {
+        // If error flag is set:
+        if((m_handle->Instance->MSR & CAN_MSR_ERRI) != 0)
+        {
+            uint32_t esr = m_handle->Instance->ESR;
+            // Check Error Warning flag.
+            if(((ier & CAN_IT_ERROR_WARNING) != 0)
+                && ((esr&CAN_ESR_EWGF) != 0))
+            {
+                // Set status code.
+                m_status |= CAN::Status::ERROR_EWG;
+                
+                // No need to clear the flag since it is read only.
+                
+                if(m_callbacks[CAN::Irq::ErrorWarning])
+                {
+                    m_callbacks[CAN::Irq::ErrorWarning];
+                }
+            }
+            // Check error passive flag.
+            if(((ier & CAN_IT_ERROR_PASSIVE) != 0)
+                &&((esr&CAN_ESR_EPVF) != 0))
+            {
+                // Set status code.
+                m_status |= CAN::Status::ERROR_EPV;
+                
+                // No need to clear the flag since it is read only.
+                if(m_callbacks[CAN::Irq::ErrorPassive])
+                {
+                    m_callbacks[CAN::Irq::ErrorPassive];
+                }
+            }
+            // Check bus-off flag.
+            if(((ier & CAN_IT_BUSOFF) != 0)
+                && ((esr & CAN_ESR_BOFF) != 0))
+            {
+                // Set status code.
+                m_status |= CAN::Status::ERROR_BOF;
+                
+                // No need to clear the flag since it is read only.
+                if(m_callbacks[CAN::Irq::BusOffError])
+                {
+                    m_callbacks[CAN::Irq::BusOffError]();
+                }
+            }
+            // Check last error code flag.
+            if(((ier & CAN_IT_LAST_ERROR_CODE) != 0)
+                && ((esr & CAN_ESR_LEC) != 0))
+            {
+                switch (esr & CAN_ESR_LEC)
+                {
+                    case CAN_ESR_LEC_0:
+                        // Stuff Error.
+                        m_status |= CAN::Status::ERROR_STF;
+                        break;
+                    case CAN_ESR_LEC_1:
+                        // Form Error.
+                        m_status |= CAN::Status::ERROR_FOR;
+                        break;
+                    case (CAN_ESR_LEC_1 | CAN_ESR_LEC_0):
+                        // Acknowledgement error.
+                        m_status |= CAN::Status::ERROR_ACK;
+                        break;
+                    case CAN_ESR_LEC_2:
+                        // Bit Recessive Error.
+                        m_status |= CAN::Status::ERROR_BR;
+                        break;
+                    case (CAN_ESR_LEC_2 | CAN_ESR_LEC_0):
+                        // Bit Dominant Error.
+                        m_status |= CAN::Status::ERROR_BD;
+                        break;
+                    case (CAN_ESR_LEC_2 | CAN_ESR_LEC_1):
+                        // CRC Error:
+                        m_status |= CAN::Status::ERROR_CRC;
+                        break;
+                    default:
+                        break;
+                }
+                
+                // Clear Last Error code Flag.
+                CLEAR_BIT(m_handle->Instance->ESR, CAN_ESR_LEC);
+                
+                if (m_callbacks[CAN::Irq::LastErrorCode])
+                {
+                    m_callbacks[CAN::Irq::LastErrorCode]();
+                }
+            }
+        }
+        
+        // Clear ERRI Flag.
+        __HAL_CAN_CLEAR_FLAG(m_handle, CAN_FLAG_ERRI);
+    }
+}
+
+/*****************************************************************************/
+/* Private method definitions                                                */
+/*****************************************************************************/
+CAN_FilterTypeDef CanModule::AssertAndConvertFilterStruct(const CAN::FilterConfiguration& config)
+{
+    CAN_FilterTypeDef filter = { 0 };
+
+    filter.FilterIdHigh         = config.filterId.idHigh;
+    filter.FilterIdLow          = config.filterId.idLow;
+    filter.FilterMaskIdHigh     = config.maskId.maskIdHigh;
+    filter.FilterMaskIdLow      = config.maskId.maskIdLow;
+    filter.FilterFIFOAssignment = (uint32_t)config.fifo;
+    filter.FilterBank           = config.bank;
+    filter.FilterMode           = (uint32_t)config.mode;
+    filter.FilterScale          = (uint32_t)config.scale;
+    filter.FilterActivation     = (uint32_t)config.activate;
     filter.SlaveStartFilterBank = 0;
 
     return filter;
 }
 
-#pragma endregion
-
-
-/*************************************************************************************************/
-/* HAL Callback functions ---------------------------------------------------------------------- */
-#pragma region Callback functions
-
-/* These callbacks are declared as __weak__ by the HAL, and must have C-style linkage in order to
- * override the HAL-provided functions. */
-extern "C"
+bool CanModule::WaitForFreeMailbox()
 {
-    /**
-     * @brief   Reception of a single message in FIFO 0
-     * @param   hcan: Pointer to a CAN_HandleTypeDef structure that contains the
-     *          configuration information for the specified CAN.
-     * @retval  None
-     */
-    void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef* hcan)
+    uint32_t timeout = HAL_GetTick() + CanModule::TIMEOUT;
+    
+    while (HAL_GetTick() <= timeout)
     {
-        CanModule* module = FindModuleFromHandle(hcan);
-        CEP_ASSERT_NULL(module);
-
-        module->HandleMessageReception(CAN_RX_FIFO0);
-    }
-
-    /**
-     * @brief   Reception of a single message in FIFO 1
-     * @param   hcan: Pointer to a CAN_HandleTypeDef structure that contains the configuration
-     *                information for the specified CAN.
-     * @retval  None
-     */
-    void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef* hcan)
-    {
-        CanModule* module = FindModuleFromHandle(hcan);
-        CEP_ASSERT_NULL(module);
-
-        module->HandleMessageReception(CAN_RX_FIFO1);
-    }
-
-    /**
-     * @brief   CAN FIFO 0 Full callback, read all of the messages in that FIFO
-     * @param   hcan: Pointer to a CAN_HandleTypeDef structure that contains the configuration
-     *                information for the specified CAN.
-     * @retval  None
-     */
-    void HAL_CAN_RxFifo0FullCallback(CAN_HandleTypeDef* hcan)
-    {
-        CanModule* module = FindModuleFromHandle(hcan);
-        CEP_ASSERT_NULL(module);
-
-        /* Read messages until FIFO0 is empty */
-        /* Each time a message is read, the fill level (FMPi int CAN_RFiR) is decremented by one. */
-        while (HAL_CAN_GetRxFifoFillLevel(module->GetHandle(), CAN_RX_FIFO0) != 0)
+        if (HAL_CAN_GetTxMailboxesFreeLevel(m_handle) != 0)
         {
-            module->HandleMessageReception(CAN_RX_FIFO0);
+            return true;
         }
     }
+    
+    return false;
+}
 
-    /**
-     * @brief   CAN FIFO 1 Full callback, read all of the messages in that FIFO
-     * @param   hcan: Pointer to a CAN_HandleTypeDef structure that contains the
-     *          configuration information for the specified CAN.
-     * @retval  None
-     */
-    void HAL_CAN_RxFifo1FullCallback(CAN_HandleTypeDef* hcan)
-    {
-        CanModule* module = FindModuleFromHandle(hcan);
-        CEP_ASSERT_NULL(module);
-
-        /* Read messages until FIFO1 is empty */
-        /* Each time a message is read, the fill level (FMPi int CAN_RFiR) is decremented by one. */
-        while (HAL_CAN_GetRxFifoFillLevel(module->GetHandle(), CAN_RX_FIFO1) != 0)
-        {
-            module->HandleMessageReception(CAN_RX_FIFO1);
-        }
-    }
-
-    /**
-     * @brief   Callback function for CAN errors.
-     *          This function is a callback, it is thus called automatically.
-     * @param   hcan: Pointer to the CAN peripheral
-     * @retval  None
-     */
-    void HAL_CAN_ErrorCallback(CAN_HandleTypeDef* hcan)
-    {
-        CanModule* module = FindModuleFromHandle(hcan);
-        CEP_ASSERT_NULL(module);
-
-        /* Get the error code */
-        module->CurrentStatus() |= static_cast<Status>(HAL_CAN_GetError(module->GetHandle()));
-
-        module->CALL_ERROR_HANDLER();
-    }
-
-} /* extern "C" */
-#pragma endregion
-
-
-/*************************************************************************************************/
-}; /* namespace CAN */
 /**
  * @}
  * @}
