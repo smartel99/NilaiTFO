@@ -327,7 +327,7 @@ public:
     size_t GetNumberOfAvailableFrames() const { return m_framesReceived.size(); }
     CAN::Frame ReceiveFrame();
     CAN::Status TransmitFrame(uint32_t addr,
-        const std::vector<uint8_t>& data = std::vector<uint8_t>());
+        const std::vector<uint8_t>& data = std::vector<uint8_t>(), bool forceExtended = false);
 
     void SetCallback(CAN::Irq irq, const std::function<void()>& callback);
     void ClearCallback(CAN::Irq irq);

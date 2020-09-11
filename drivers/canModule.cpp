@@ -46,15 +46,21 @@ CAN::Frame CanModule::ReceiveFrame()
     m_framesReceived.pop_back();
     return frame;
 }
-CAN::Status CanModule::TransmitFrame(uint32_t addr, const std::vector<uint8_t>& data)
+CAN::Status CanModule::TransmitFrame(uint32_t addr, const std::vector<uint8_t>& data, bool forceExtended)
 {
     CAN_TxHeaderTypeDef head = { 0 };
     head.StdId =  addr & 0x000007FF;
     head.ExtId = addr & 0x1FFFFFFF;
     // If address is higher than 0x7FF, use extended ID.
-    head.IDE = addr > 0x000007FF ? 
-        (uint32_t)CAN::IdentifierType::Extended 
-        : (uint32_t)CAN::IdentifierType::Standard;
+    if((addr > 0x7FF) || forceExtended)
+    {
+        head.IDE = CAN_ID_EXT;
+    }
+    else
+    {
+        head.IDE = CAN_ID_STD;
+    }
+    
     // If we have data, this is a data frame. Else it's a remote frame.
     head.RTR = data.empty() ? 
         (uint32_t)CAN::FrameType::Remote 
