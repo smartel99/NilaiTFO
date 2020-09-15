@@ -49,7 +49,7 @@
 #define CEP_ASSERT(x, msg, ...)                                                                    \
     do                                                                                             \
     {                                                                                              \
-        if ((x) == false)                                                                          \
+        if (!(x))                                                                          \
         {                                                                                          \
             LOG_DEBUG(msg, ##__VA_ARGS__);                                                         \
             cep::Application::AssertFailed();                                                      \
