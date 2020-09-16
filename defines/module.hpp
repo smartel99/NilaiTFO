@@ -1,4 +1,4 @@
-/**
+﻿/**
  * @addtogroup  defines
  * @{
  * @addtogroup  module
@@ -6,44 +6,40 @@
  * @file        module.hpp
  * @author      Pascal-Emmanuel Lachance
  * @author      Samuel Martel
- * @p           https://www.github.com/Raesangur
  *
  * @brief       Module class definition.
  */
-#pragma once
+#ifndef MODULE_HPP_
+#    define MODULE_HPP_
 /*************************************************************************************************/
 /* File includes ------------------------------------------------------------------------------- */
-#include <string>
+#    include <string>
 
 namespace cep
 {
 /*************************************************************************************************/
 /* Macros -------------------------------------------------------------------------------------- */
 
-
 /*************************************************************************************************/
 /* Classes ------------------------------------------------------------------------------------- */
 
-
 /**
  * @class   Module
- * @brief   Base class to inherit from when building modules.                                    \n
- *          For more details on how to create a module from this class, check the README file in
- *          the cep20/tornatest repository.
+ * @brief   Base class to inherit from when building modules.
  */
 class Module
 {
 public:
-    virtual ~Module() = default;
+    virtual ~Module( ) = default;
 
-    virtual void Run() = 0;
-    virtual const std::string& GetLabel() const = 0;
+    virtual void               Run( )            = 0;
+    virtual const std::string& GetLabel( ) const = 0;
 };
 
 }    // namespace cep
 
-
 /*************************************************************************************************/
+#endif
 /**
  * @}
  * @}

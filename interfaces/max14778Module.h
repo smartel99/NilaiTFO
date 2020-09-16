@@ -27,7 +27,12 @@
 
 /*****************************************************************************/
 /* Exported types */
-namespace MAX14778 {
+namespace MAX14778
+{
+/**
+ * @struct  Config
+ * @brief
+ */
 struct Config
 {
     std::function<void(bool)> setEnAFunc = { };
