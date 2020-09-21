@@ -26,7 +26,8 @@
 /*****************************************************************************/
 /* Exported types */
 
-namespace ADS {
+namespace ADS
+{
 #    pragma region ADS Configuration Options
 
 /**
@@ -328,7 +329,7 @@ public:
     ClockDivision clockInDivision                     = ClockDivision::Div2;
     ClockDivision modulatorClockDivision              = ClockDivision::Div2;
     Oversampling  oversampling                        = (Oversampling)sampleRate;
-    Enable        enable                              = Enable::Enable;
+    Enable        enable                              = Enable::Disable;
     DigitalGain   ch1DigitalGain                      = DigitalGain::Gain1;
     DigitalGain   ch2DigitalGain                      = DigitalGain::Gain1;
     DigitalGain   ch3DigitalGain                      = DigitalGain::Gain1;
@@ -353,28 +354,29 @@ public:
     bool operator==(const Config& other) const
     {
         return (
-          (this->pins == other.pins) && (this->sampleRate == other.sampleRate) &&
-          (this->hamming == other.hamming) && (this->wordSize == other.wordSize) &&
-          (this->spiMode == other.spiMode) && (this->threshold == other.threshold) &&
-          (this->highZDelay == other.highZDelay) && (this->doneDelay == other.doneDelay) &&
-          (this->clockSource == other.clockSource) && (this->resolution == other.resolution) &&
-          (this->clockInDivision == other.clockInDivision) &&
-          (this->modulatorClockDivision == other.modulatorClockDivision) &&
-          (this->oversampling == other.oversampling) && (this->enable == other.enable) &&
-          (this->ch1DigitalGain == other.ch1DigitalGain) &&
-          (this->ch2DigitalGain == other.ch2DigitalGain) &&
-          (this->ch3DigitalGain == other.ch3DigitalGain) &&
-          (this->ch4DigitalGain == other.ch4DigitalGain) &&
-          (this->internalReferenceEnable == other.internalReferenceEnable) &&
-          (this->negativeChargePumpEnable == other.negativeChargePumpEnable) &&
-          (this->referenceVoltage == other.referenceVoltage) &&
-          (this->watchdogEnable == other.watchdogEnable) && (this->crcMode == other.crcMode) &&
-          (this->frameMode == other.frameMode) && (this->crcEnable == other.crcEnable));
+            (this->pins == other.pins) && (this->sampleRate == other.sampleRate) &&
+            (this->hamming == other.hamming) && (this->wordSize == other.wordSize) &&
+            (this->spiMode == other.spiMode) && (this->threshold == other.threshold) &&
+            (this->highZDelay == other.highZDelay) && (this->doneDelay == other.doneDelay) &&
+            (this->clockSource == other.clockSource) && (this->resolution == other.resolution) &&
+            (this->clockInDivision == other.clockInDivision) &&
+            (this->modulatorClockDivision == other.modulatorClockDivision) &&
+            (this->oversampling == other.oversampling) && (this->enable == other.enable) &&
+            (this->ch1DigitalGain == other.ch1DigitalGain) &&
+            (this->ch2DigitalGain == other.ch2DigitalGain) &&
+            (this->ch3DigitalGain == other.ch3DigitalGain) &&
+            (this->ch4DigitalGain == other.ch4DigitalGain) &&
+            (this->internalReferenceEnable == other.internalReferenceEnable) &&
+            (this->negativeChargePumpEnable == other.negativeChargePumpEnable) &&
+            (this->referenceVoltage == other.referenceVoltage) &&
+            (this->watchdogEnable == other.watchdogEnable) && (this->crcMode == other.crcMode) &&
+            (this->frameMode == other.frameMode) && (this->crcEnable == other.crcEnable));
     }
 };
 #    pragma endregion
 
-namespace Registers {
+namespace Registers
+{
 #    pragma region Register mapped structures
 
 /**
@@ -843,7 +845,8 @@ public:
  ** @enum   Acknowledges
  ** @brief  Acknowledge messages from the ADS
  ** */
-namespace Acknowledges {
+namespace Acknowledges
+{
 // Disable GCC's "unused variable" warning.
 #    pragma GCC diagnostic push
 #    pragma GCC diagnostic ignored "-Wunused"
@@ -860,7 +863,8 @@ constexpr uint16_t Wakeup = 0x0033;
  ** @enum   SysCommands
  ** @brief  System commands to the ADS
  ** */
-namespace SysCommands {
+namespace SysCommands
+{
 // Disable GCC's "unused variable" warning.
 #    pragma GCC diagnostic push
 #    pragma GCC diagnostic ignored "-Wunused"
@@ -881,7 +885,8 @@ constexpr uint16_t Unlock = 0x0655;
 #    pragma GCC diagnostic pop
 }    // namespace SysCommands
 
-namespace Commands {
+namespace Commands
+{
 // Disable GCC's "unused variable" warning.
 #    pragma GCC diagnostic push
 #    pragma GCC diagnostic ignored "-Wunused"
