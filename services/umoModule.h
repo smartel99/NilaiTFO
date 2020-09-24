@@ -58,6 +58,7 @@
  */
 struct Universe
 {
+    //! If set, indicates that the Universe was just received.
     bool                 isNew    = false;
     std::vector<uint8_t> universe = std::vector<uint8_t>(CHANNEL_COUNT);
 
