@@ -152,6 +152,7 @@ public:
     bool ReadPin(PCA9505::Ports port, PCA9505::Pins pin);
     PCA9505::PortState ReadPort(PCA9505::Ports port);
     
+	// #TODO: Optimize WritePin to Bank Write requests and WritePort once each loop
     void WritePin(PCA9505::Ports port, PCA9505::Pins pin, bool state);
     void WritePort(PCA9505::Ports port, uint8_t state);
     
