@@ -15,15 +15,11 @@
 /* File includes ------------------------------------------------------------------------------- */
 #include "shared/defines/pch.hpp"
 
-
 namespace cep
 {
-
-
 /*************************************************************************************************/
 /* Definitions --------------------------------------------------------------------------------- */
 #define NULLCHAR '\0' /* Null termination character */
-
 
 /*************************************************************************************************/
 /* Function-like macros ------------------------------------------------------------------------ */
@@ -64,7 +60,6 @@ namespace cep
         }                                                                                          \
     } while (false)
 #pragma endregion
-
 
 /*------------------------------------*/
 #pragma region Math and comparison macros
@@ -108,7 +103,6 @@ namespace cep
         }                                                                                          \
     } while (false)
 #pragma endregion
-
 
 /*------------------------------------*/
 /**
@@ -177,7 +171,6 @@ namespace cep
  */
 #define LABEL_TO_STRING(x) #x
 
-
 /*************************************************************************************************/
 /* Function declarations ----------------------------------------------------------------------- */
 void forceNullTerminationCharacter(char* string, std::size_t size);
@@ -188,13 +181,7 @@ std::uint8_t countOfOnesInBytesInator(std::uint8_t* bytes, std::uint8_t len);
 bool plus_minus(std::int32_t value, std::int32_t compare, std::int32_t margin);
 bool plus_minus(double value, double compare, double margin);
 
-
-/*************************************************************************************************/
-/* Global variables ---------------------------------------------------------------------------- */
-#define POINTER_TO_NULL g_NullPointer /* This defines removes the unused variable warning. */
-extern void* const g_NullPointer;
-
-
+size_t FindStringInVector(const std::string& str, const std::vector<uint8_t>& vec);
 
 /*************************************************************************************************/
 /* Have a wonderful day! :) */

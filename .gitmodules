@@ -1,3 +1,1 @@
-[submodule "vendor/spdlog"]
-	path = vendor/spdlog
-	url = https://www.github.com/Raesangur/spdlog
+

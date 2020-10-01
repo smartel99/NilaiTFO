@@ -80,7 +80,7 @@ enum class SectionState
 
 struct Frame
 {
-    std::vector<uint8_t> data;
+    std::vector<uint8_t> data      = std::vector<uint8_t>(515);
     uint32_t             timestamp = 0;
 };
 }    // namespace UART
@@ -114,8 +114,8 @@ public:
     size_t      GetNumberOfWaitingFrames( ) const { return m_latestFrames.size( ); }
     UART::Frame Receive( );
 
-    void SetExpectedRxLen(size_t len) { m_expectedLen = len; }
-    void ClearExpectedRxLen( ) { m_expectedLen = -1; }
+    void SetExpectedRxLen(size_t len);
+    void ClearExpectedRxLen( );
 
     void SetFrameReceiveCpltCallback(const std::function<void( )>& cb);
     void ClearFrameReceiveCpltCallback( );

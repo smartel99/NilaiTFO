@@ -1,4 +1,4 @@
-/**
+﻿/**
  * @addtogroup defines
  * @{
  * @addtogroup misc
@@ -18,15 +18,12 @@
 
 #include <cmath>
 
-
 /*************************************************************************************************/
 /* Global variables ---------------------------------------------------------------------------- */
 void* const g_NullPointer = nullptr;
 
-
 /*************************************************************************************************/
 /* Public functions definitions ---------------------------------------------------------------- */
-
 
 /**
  * @brief   Forces a null termination character at the end of a character array
@@ -46,11 +43,7 @@ void forceNullTerminationCharacter(char* string, std::size_t size)
  * @param   length: the number of bytes to clear
  * @retval  None
  */
-void clearArray(void* array, std::size_t length)
-{
-    memset(array, 0x00U, length);
-}
-
+void clearArray(void* array, std::size_t length) { memset(array, 0x00U, length); }
 
 /**
  * @brief   Count the number of 1s in the passed bytes.
@@ -68,7 +61,6 @@ std::uint8_t countOfOnesInBytesInator(std::uint8_t* bytes, std::uint8_t len)
     }
 #else
 
-
     for (std::size_t i = 0; i < len; i++)
     {
         for (std::size_t j = 0; j < 8; j++)
@@ -79,7 +71,6 @@ std::uint8_t countOfOnesInBytesInator(std::uint8_t* bytes, std::uint8_t len)
     return count;
 #endif
 }
-
 
 /**
  * @brief   Check if a value is in a reasonable margin of another value.     \n
@@ -119,7 +110,6 @@ bool plus_minus(std::int32_t value, std::int32_t compare, std::int32_t margin)
     }
 }
 
-
 /**
  * @brief   Check if a value is in a reasonable margin of another value.     \n
  *          If the value to be compared (x) is bigger than a specific value (y)
@@ -150,7 +140,6 @@ bool plus_minus(double value, double compare, double margin)
     }
 }
 
-
 /*************************************************************************************************/
 /**
  * @}
@@ -159,3 +148,25 @@ bool plus_minus(double value, double compare, double margin)
 
 /* Have a wonderful day! :) */
 /****** END OF FILE ******/
+
+size_t cep::FindStringInVector(const std::string& str, const std::vector<uint8_t>& vec)
+{
+    size_t strLen = str.size( );
+    size_t vecLen = vec.size( );
+
+    for (size_t i = 0; i <= vecLen - strLen; ++i)
+    {
+        size_t j = 0;
+        while (j < vecLen && vec[i + j] == str[j])
+        {
+            j++;
+        }
+        if (j == strLen)
+        {
+            // Match found.
+            return i;
+        }
+    }
+
+    return std::string::npos;
+}
