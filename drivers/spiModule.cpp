@@ -15,10 +15,9 @@
 /* Includes
  * ------------------------------------------------------------------------------------
  */
-#include "shared/drivers/spiModule.hpp"
-#include "shared/processes/application.hpp"
-
-#include "shared/services/timeout.hpp"
+#include "drivers/spiModule.hpp"
+#include "processes/application.hpp"
+#include "defines/macros.hpp"
 
 #include <algorithm>
 #include <array>
@@ -40,14 +39,14 @@ SpiModule::~SpiModule()
     /* Abort ongoing messages on SPI peripheral */
     if (HAL_SPI_Abort_IT(m_handle) != HAL_OK)
     {
-        m_status |= (SPI::Status)m_handle->ErrorCode;
+        m_status |= (SPI::Status) m_handle->ErrorCode;
         ErrorHandler();
     }
-        
+
     /* De-init peripheral */
     if (HAL_SPI_DeInit(m_handle) != HAL_OK)
     {
-        m_status |= (SPI::Status)m_handle->ErrorCode;            
+        m_status |= (SPI::Status) m_handle->ErrorCode;
         ErrorHandler();
     }
 }
@@ -61,77 +60,85 @@ SPI::Status SpiModule::Transmit(const std::vector<uint8_t> pkt)
     return Transmit(pkt.data(), pkt.size());
 }
 
-SPI::Status SpiModule::Transmit(const uint8_t* data, size_t len)
+SPI::Status SpiModule::Transmit(const uint8_t *data, size_t len)
 {
-    CEP_ASSERT(data != nullptr, "SPI Data pointer in null in SpiModule::Transmit");
-    CEP_ASSERT(len != 0, "SPI Transmit data length is 0 in SpiModule::Transmit");
-    
+    CEP_ASSERT(data != nullptr,
+               "SPI Data pointer in null in SpiModule::Transmit");
+    CEP_ASSERT(len != 0,
+               "SPI Transmit data length is 0 in SpiModule::Transmit");
+
     // Wait for peripheral to be free.
-    if(WaitUntilNotBusy() == false)
+    if (WaitUntilNotBusy() == false)
     {
         return SPI::Status::TIMEOUT;
     }
-    
-    if (HAL_SPI_Transmit(m_handle, const_cast<uint8_t *>(data), len, SPI_TIMEOUT) != HAL_OK)
+
+    if (HAL_SPI_Transmit(m_handle, const_cast<uint8_t*>(data), len, SPI_TIMEOUT)
+            != HAL_OK)
     {
-        m_status |= (SPI::Status)m_handle->ErrorCode;        
+        m_status |= (SPI::Status) m_handle->ErrorCode;
         ErrorHandler();
         return m_status;
     }
-    
+
     return SPI::Status::NONE;
 }
 
-SPI::Status SpiModule::Receive(uint8_t* ouptutData, size_t len)
+SPI::Status SpiModule::Receive(uint8_t *ouptutData, size_t len)
 {
     CEP_ASSERT(ouptutData != nullptr, "Pointer is NULL in SpiModule::Receive");
     CEP_ASSERT(len > 0, "Length is 0 in SpiModule::Receive");
-    
+
     // Wait for SPI peripheral to be ready.
-    if(WaitUntilNotBusy() == false)
+    if (WaitUntilNotBusy() == false)
     {
         return SPI::Status::TIMEOUT;
     }
-    
+
     if (HAL_SPI_Receive(m_handle, ouptutData, len, SPI_TIMEOUT) != HAL_OK)
     {
-        m_status |= (SPI::Status)m_handle->ErrorCode;
+        m_status |= (SPI::Status) m_handle->ErrorCode;
         ErrorHandler();
         return m_status;
     }
-    
+
     return SPI::Status::NONE;
 }
 
-SPI::Status SpiModule::Transaction(const uint8_t* txData, size_t txLen, uint8_t* rxData, size_t rxLen)
+SPI::Status SpiModule::Transaction(const uint8_t *txData, size_t txLen,
+                                   uint8_t *rxData, size_t rxLen)
 {
     CEP_ASSERT(txData != nullptr, "TxData is NULL in SpiModule::Transaction");
     CEP_ASSERT(rxData != nullptr, "RxData is NULL in SpiModule::Transaction");
     CEP_ASSERT(txLen > 0, "TxLen is 0 in SpiModule::Transaction");
-    CEP_ASSERT(txLen == rxLen, "TxLen is not equal to RxLen in SpiModule::Transaction");
-    
+    CEP_ASSERT(txLen == rxLen,
+               "TxLen is not equal to RxLen in SpiModule::Transaction");
+
     // Wait for SPI peripheral to be ready.
-    if(WaitUntilNotBusy() == false)
+    if (WaitUntilNotBusy() == false)
     {
         return SPI::Status::TIMEOUT;
     }
-    
-    if (HAL_SPI_TransmitReceive(m_handle, const_cast<uint8_t*>(txData), rxData, txLen, SPI_TIMEOUT) != HAL_OK)
+
+    if (HAL_SPI_TransmitReceive(m_handle, const_cast<uint8_t*>(txData), rxData,
+                                txLen, SPI_TIMEOUT) != HAL_OK)
     {
-        m_status |= (SPI::Status)m_handle->ErrorCode;
+        m_status |= (SPI::Status) m_handle->ErrorCode;
         ErrorHandler();
         return m_status;
-    } 
-    
+    }
+
     return SPI::Status::NONE;
 }
 
-SPI::Status SpiModule::Transaction(const std::vector<uint8_t>& txData, std::vector<uint8_t>& rxData)
+SPI::Status SpiModule::Transaction(const std::vector<uint8_t> &txData,
+                                   std::vector<uint8_t> &rxData)
 {
     // Make sure we got enough space in rxData.
     rxData.resize(txData.size());
-    
-    return Transaction(txData.data(), txData.size(), rxData.data(), rxData.size());
+
+    return Transaction(txData.data(), txData.size(), rxData.data(),
+                       rxData.size());
 }
 
 /*************************************************************************************************/
@@ -163,7 +170,7 @@ void SpiModule::ErrorHandler()
     {
         LOG_ERROR("SPI ABORT state");
     }
-    
+
     if ((m_status & SPI::Status::NOT_INIT) != SPI::Status::NONE)
     {
         LOG_ERROR("SPI module is not initialized");
@@ -172,29 +179,27 @@ void SpiModule::ErrorHandler()
     {
         LOG_ERROR("SPI timeout error");
     }
-    
+
     m_status = SPI::Status::NONE;
 }
-
 
 bool SpiModule::WaitUntilNotBusy()
 {
     // Timeout time = 200 fast ticks.
-    Timeout timeout = Timeout(200);
-    
+    uint32_t timeoutTime = HAL_GetTick() + 200;
+
     // While the SPI port is busy and the timeout wasn't hit:
-    while(timeout.WasHit() == false)
+    while (HAL_GetTick() <= timeoutTime)
     {
         // Check if the SPI port is ready.
-        if(m_handle->State == HAL_SPI_STATE_READY)
+        if (m_handle->State == HAL_SPI_STATE_READY)
         {
             return true;
         }
     }
-    
+
     return false;
 }
-
 
 /**
  * @}

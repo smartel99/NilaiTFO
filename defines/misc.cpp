@@ -17,10 +17,11 @@
 #include "shared/defines/misc.hpp"
 
 #include <cmath>
+#include <cstring>
 
 /*************************************************************************************************/
 /* Global variables ---------------------------------------------------------------------------- */
-void* const g_NullPointer = nullptr;
+void *const g_NullPointer = nullptr;
 
 /*************************************************************************************************/
 /* Public functions definitions ---------------------------------------------------------------- */
@@ -31,7 +32,7 @@ void* const g_NullPointer = nullptr;
  * @param   size: The size in characters of the char array
  * @retval  None
  */
-void forceNullTerminationCharacter(char* string, std::size_t size)
+void forceNullTerminationCharacter(char *string, std::size_t size)
 {
     /* Access last element of the array and clear it */
     string[size - 1] = NULLCHAR;
@@ -43,7 +44,10 @@ void forceNullTerminationCharacter(char* string, std::size_t size)
  * @param   length: the number of bytes to clear
  * @retval  None
  */
-void clearArray(void* array, std::size_t length) { memset(array, 0x00U, length); }
+void clearArray(void *array, std::size_t length)
+{
+    memset(array, 0x00U, length);
+}
 
 /**
  * @brief   Count the number of 1s in the passed bytes.
@@ -51,7 +55,7 @@ void clearArray(void* array, std::size_t length) { memset(array, 0x00U, length);
  * @param   len:   The number of bytes to check
  * @retval  The number of 1s
  */
-std::uint8_t countOfOnesInBytesInator(std::uint8_t* bytes, std::uint8_t len)
+std::uint8_t countOfOnesInBytesInator(std::uint8_t *bytes, std::uint8_t len)
 {
     std::uint8_t count = 0;
 #if defined(__GCC__)
@@ -93,9 +97,9 @@ std::uint8_t countOfOnesInBytesInator(std::uint8_t* bytes, std::uint8_t len)
 bool plus_minus(std::int32_t value, std::int32_t compare, std::int32_t margin)
 {
     /* Take the absolute values */
-    value   = std::abs(value);
+    value = std::abs(value);
     compare = std::abs(compare);
-    margin  = std::abs(margin);
+    margin = std::abs(margin);
 
     const std::int32_t upperRange = compare + margin;
     const std::int32_t lowerRange = (margin <= compare) ? compare - margin : 0;
@@ -149,10 +153,11 @@ bool plus_minus(double value, double compare, double margin)
 /* Have a wonderful day! :) */
 /****** END OF FILE ******/
 
-size_t cep::FindStringInVector(const std::string& str, const std::vector<uint8_t>& vec)
+size_t cep::FindStringInVector(const std::string &str,
+                               const std::vector<uint8_t> &vec)
 {
-    size_t strLen = str.size( );
-    size_t vecLen = vec.size( );
+    size_t strLen = str.size();
+    size_t vecLen = vec.size();
 
     for (size_t i = 0; i <= vecLen - strLen; ++i)
     {
