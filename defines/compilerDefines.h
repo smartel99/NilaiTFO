@@ -22,6 +22,9 @@
 #define DISABLE_WARNING_POP  _Pragma("GCC diagnostic pop")
 #define DISABLE_WARNING(warningName) DISABLE_WARNING_PUSH\
     DO_PRAGMA(GCC diagnostic ignored #warningName)
+
+#define REGION(name) if constexpr(1){
+#define END_REGION }
 #else
 #error Unsuported Compiler!
 #endif
