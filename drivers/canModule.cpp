@@ -52,7 +52,7 @@ CAN::Status CanModule::TransmitFrame(uint32_t addr,
                                      const std::vector<uint8_t> &data,
                                      bool forceExtended)
 {
-    CAN_TxHeaderTypeDef head = { 0 };
+    CAN_TxHeaderTypeDef head = { 0, 0, 0, 0, 0, (FunctionalState) 0 };
     head.StdId = addr & 0x000007FF;
     head.ExtId = addr & 0x1FFFFFFF;
     // If address is higher than 0x7FF, use extended ID.
@@ -544,7 +544,9 @@ void CanModule::HandleErrorIrq(uint32_t ier)
 CAN_FilterTypeDef CanModule::AssertAndConvertFilterStruct(
         const CAN::FilterConfiguration &config)
 {
-    CAN_FilterTypeDef filter = { 0 };
+    DISABLE_WARNING(-Wmissing-field-initializers)
+    CAN_FilterTypeDef filter = { 0, 0, 0, 0, 0, (FunctionalState) 0 };
+    DISABLE_WARNING_POP
 
     filter.FilterIdHigh = config.filterId.idHigh;
     filter.FilterIdLow = config.filterId.idLow;
