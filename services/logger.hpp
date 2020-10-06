@@ -14,7 +14,6 @@
 /*************************************************************************************************/
 /* Includes ------------------------------------------------------------------------------------ */
 
-
 /**
  * @defgroup    LOGGING     Logging Macros
  *
@@ -27,12 +26,6 @@
  *
  * @{
  */
-/** Get the current program location information */
-#define LOG_CURRENT_LOCATION
-
-#ifdef LOG_DEBUG /* Quick fix because `LOG_DEBUG` is defined as empty in `macros.hpp` to */
-#undef LOG_DEBUG /* avoid warnings. */
-#endif
 /** Prints the lowest-priority message */
 #define LOG_DEBUG(msg, ...)
 
@@ -47,3 +40,11 @@
 
 /** Prints the highest-priority message */
 #define LOG_CRITICAL(msg, ...)
+
+/*************************************************************************************************/
+/* LOG_CRITICAL("Have a wonderful day! :)"); */
+/**
+ * @}
+ * @}
+ */
+/* ----- END OF FILE ----- */

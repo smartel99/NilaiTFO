@@ -19,126 +19,127 @@
  */
 #include "defines/module.hpp"
 #include "defines/misc.hpp"
+#include "defines/macros.hpp"
+
+#include "stm32f4xx_hal.h"
 
 #include <string>
 #include <vector>
 
-
 namespace I2C
 {
-/**
- ** @enum   Status
- ** @brief  I2C status enum, indicating mostly error states
- **/
-enum class Status
-{
-    //!< No error.
-    Ok = 0x00000000,
-    /** Bus Error.
-     ** This error occures when the I2C interface detects an external Stop or 
-     ** Start condition during an address or a data transfer.
-     **/ 
-    BusError = 0x00000001,
-    /** Arbitration lost.
-     ** This error occurs when the I2C interface detects an arbitration lost 
-     ** condition.
+    /**
+     ** @enum   Status
+     ** @brief  I2C status enum, indicating mostly error states
      **/
-    ArbitrationLost = 0x00000002,
-    /** Acknowledge Failure.
-     ** This error occurs when the interface detects a nonacknowledge bit.
-     **/
-    AckFailure = 0x00000004,
-    /** Overrun/underrun error.
-     ** An overrun error can occur in slave mode when clock stretching is 
-     ** disabled and the I2C interface is receiving data. 
-     ** The interface has received a byte and the data in the data register
-     ** has not been read before the next byte is received by the interface.
-     ** 
-     ** Underrun error can occur in slave mode when clock stretching is 
-     ** disabled and the I2C interface is transmitting data. 
-     ** The interface has not updated the data register with the next byte
-     ** before the clock comes for the next byte.
-     **/
-    OverrunError = 0x00000008,
-    DmaTransferError = 0x00000010,
-    TimeoutError = 0x00000020,
-    SizeError = 0x00000040,
-    DmaParamError = 0x00000080,
-    InvalidCallback = 0x00000100,
-    WrongStart = 0x00000200,
-    NotInit = 0x00000400,
-    BadInit = 0x00000800,
-};
+    enum class Status
+    {
+        //!< No error.
+        Ok = 0x00000000,
+        /** Bus Error.
+         ** This error occures when the I2C interface detects an external Stop or
+         ** Start condition during an address or a data transfer.
+         **/
+        BusError = 0x00000001,
+        /** Arbitration lost.
+         ** This error occurs when the I2C interface detects an arbitration lost
+         ** condition.
+         **/
+        ArbitrationLost = 0x00000002,
+        /** Acknowledge Failure.
+         ** This error occurs when the interface detects a nonacknowledge bit.
+         **/
+        AckFailure = 0x00000004,
+        /** Overrun/underrun error.
+         ** An overrun error can occur in slave mode when clock stretching is
+         ** disabled and the I2C interface is receiving data.
+         ** The interface has received a byte and the data in the data register
+         ** has not been read before the next byte is received by the interface.
+         **
+         ** Underrun error can occur in slave mode when clock stretching is
+         ** disabled and the I2C interface is transmitting data.
+         ** The interface has not updated the data register with the next byte
+         ** before the clock comes for the next byte.
+         **/
+        OverrunError = 0x00000008,
+        DmaTransferError = 0x00000010,
+        TimeoutError = 0x00000020,
+        SizeError = 0x00000040,
+        DmaParamError = 0x00000080,
+        InvalidCallback = 0x00000100,
+        WrongStart = 0x00000200,
+        NotInit = 0x00000400,
+        BadInit = 0x00000800,
+    };
 
-struct Frame
-{
-    uint8_t deviceAddress = 0;
-    uint8_t registerAddress = 0;
-    std::vector<uint8_t> data = {};
-    
-    Frame() = default;
-    Frame(uint8_t devAddr, const std::vector<uint8_t>& pData = std::vector<uint8_t>())
-        : deviceAddress(devAddr)
-        , data(pData)
+    struct Frame
     {
-    }
-    Frame(uint8_t devAddr, uint8_t regAddr, const std::vector<uint8_t>& pData = std::vector<uint8_t>())
-        : deviceAddress(devAddr)
-        , registerAddress(regAddr)
-        , data(pData)
-    {
-    }
-};
+        uint8_t deviceAddress = 0;
+        uint8_t registerAddress = 0;
+        std::vector<uint8_t> data = {};
+
+        Frame() = default;
+        Frame(uint8_t devAddr,
+              const std::vector<uint8_t> &pData = std::vector<uint8_t>()) :
+                deviceAddress(devAddr), data(pData)
+        {
+        }
+        Frame(uint8_t devAddr, uint8_t regAddr,
+              const std::vector<uint8_t> &pData = std::vector<uint8_t>()) :
+                deviceAddress(devAddr), registerAddress(regAddr), data(pData)
+        {
+        }
+    };
 }
 
-class I2cModule : public cep::Module
+class I2cModule: public cep::Module
 {
 public:
-    I2cModule(I2C_HandleTypeDef* handle, const std::string& label)
-        : m_handle(handle)
-        , m_label(label)
+    I2cModule(I2C_HandleTypeDef *handle, const std::string &label) :
+            m_handle(handle), m_label(label)
     {
         CEP_ASSERT(handle != nullptr, "In I2cModule: handle is NULL!");
     }
     virtual ~I2cModule() override = default;
-    
+
     virtual void Run() override;
     virtual const std::string& GetLabel() const override
     {
         return m_label;
     }
-    
-    void TransmitFrame(uint8_t addr, const uint8_t* data, size_t len);
-    void TransmitFrame(uint8_t addr, const std::vector<uint8_t>& data)
+
+    void TransmitFrame(uint8_t addr, const uint8_t *data, size_t len);
+    void TransmitFrame(uint8_t addr, const std::vector<uint8_t> &data)
     {
         TransmitFrame(addr, data.data(), data.size());
     }
-    void TransmitFrame(const I2C::Frame& frame)
+    void TransmitFrame(const I2C::Frame &frame)
     {
-        TransmitFrame(frame.deviceAddress, frame.data.data(), frame.data.size());
+        TransmitFrame(frame.deviceAddress, frame.data.data(),
+                      frame.data.size());
     }
-    
-    void TransmitFrameToRegister(uint8_t addr, uint8_t regAddr, const uint8_t* data, size_t len);
-    void TransmitFrameToRegister(uint8_t addr, uint8_t regAddr, const std::vector<uint8_t>& data)
+
+    void TransmitFrameToRegister(uint8_t addr, uint8_t regAddr,
+                                 const uint8_t *data, size_t len);
+    void TransmitFrameToRegister(uint8_t addr, uint8_t regAddr,
+                                 const std::vector<uint8_t> &data)
     {
-        TransmitFrameToRegister(addr, regAddr , data.data(), data.size());
+        TransmitFrameToRegister(addr, regAddr, data.data(), data.size());
     }
-    void TransmitFrameToRegister(const I2C::Frame& frame)
+    void TransmitFrameToRegister(const I2C::Frame &frame)
     {
-        TransmitFrameToRegister(frame.deviceAddress, 
-            frame.registerAddress, 
-            frame.data.data(), 
-            frame.data.size());
+        TransmitFrameToRegister(frame.deviceAddress, frame.registerAddress,
+                                frame.data.data(), frame.data.size());
     }
-    
+
     I2C::Frame ReceiveFrame(uint8_t addr, size_t len);
-    I2C::Frame ReceiveFrameFromRegister(uint8_t addr, uint8_t regAddr, size_t len);
-    
-    
+    I2C::Frame ReceiveFrameFromRegister(uint8_t addr, uint8_t regAddr,
+                                        size_t len);
+
 private:
-    I2C_HandleTypeDef* m_handle = nullptr;
+    I2C_HandleTypeDef *m_handle = nullptr;
     std::string m_label = "";
-    
+
     static constexpr uint32_t TIMEOUT = 200;
 };
 /**

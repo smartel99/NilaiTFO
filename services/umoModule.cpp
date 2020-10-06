@@ -28,7 +28,7 @@ UmoModule::UmoModule(UartModule* uart, size_t universeCnt, const std::string& la
      */
     m_uart->ClearStartOfFrameSequence( );
     m_uart->ClearEndOfFrameSequence( );
-    m_uart->SetExpectedRxLen(1 + Universe::CHANNEL_COUNT + 1);
+    m_uart->SetExpectedRxLen(1 + Universe::CHANNEL_COUNT + 2);
     m_uart->ClearFrameReceiveCpltCallback( );
 }
 
