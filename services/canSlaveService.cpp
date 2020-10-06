@@ -11,7 +11,7 @@
  ******************************************************************************
  */
 #include "shared/services/canSlaveService.h"
-#include "processes/MasterApplication.h"
+#include "processes/DriveApplication.h"
 #include "shared/services/umoModule.h"
 #include "defines/macros.hpp"
 

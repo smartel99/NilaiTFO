@@ -5,7 +5,7 @@
  * @{
  *
  * @file        application.hpp
- * @author      Pascal-Emmanuel Lachance
+ * @author      Pascal-Emmanuel Lachance feat.
  * @author      Samuel Martel
  * @date        2020/07/06  -  09:02
  */
