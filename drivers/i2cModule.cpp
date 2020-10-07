@@ -16,6 +16,7 @@
  * ------------------------------------------------------------------------------------
  */
 #include "drivers/i2cModule.hpp"
+#if defined(NILAI_USE_ADC) && defined(HAL_I2C_MODULE_ENABLED)
 #include "services/logger.hpp"
 
 void I2cModule::Run()
@@ -79,7 +80,7 @@ I2C::Frame I2cModule::ReceiveFrameFromRegister(uint8_t addr, uint8_t regAddr,
 
     return frame;
 }
-
+#endif
 /**
  * @}
  * @}

@@ -13,6 +13,7 @@
 #ifndef _pca9505Module
 #define _pca9505Module
 
+#if defined(NILAI_USE_PCA9505)
 /*****************************************************************************/
 /* Includes */
 #include "defines/module.hpp"
@@ -171,6 +172,7 @@ private:
 
 /* Have a wonderful day :) */
 #endif /* _pca9505Module */
+#endif
 /**
  * @}
  */

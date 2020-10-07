@@ -12,7 +12,7 @@
  */
 #ifndef _adsModule
 #    define _adsModule
-
+#if defined(NILAI_USE_ADS) && defined(NILAI_USE_SPI)
 /*****************************************************************************/
 /* Includes */
 #    include "shared/interfaces/adsModuleConfig.h"
@@ -110,6 +110,7 @@ private:
 
 /* Have a wonderful day :) */
 #endif /* _adsModule */
+#endif
 /**
  * @}
  */

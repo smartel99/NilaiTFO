@@ -5,7 +5,6 @@
  * @{
  * @file    bitManipulations.hpp
  * @author  Pascal-Emmanuel Lachance
- * @p       https://www.github.com/Raesangur
  * @date    2019/11/24  -  20:14
  *
  * @brief   Header file for small miscelleanous bit manipulation functions and
@@ -24,6 +23,10 @@
 /* Includes ------------------------------------------------------------------------------------ */
 #include "defines/macros.hpp"
 
+#include <cstdint>
+#include <cstddef>
+#include <type_traits>
+
 namespace cep
 {
 
@@ -32,18 +35,15 @@ namespace cep
     template<typename T>
     constexpr T swap(T input);
 
-    std::uint64_t combine(std::uint8_t *array, std::uint8_t length);
+    uint64_t combine(uint8_t *array, uint8_t length);
 
-    constexpr void arraynificator(void *src, std::size_t len, void *dest);
-    constexpr void uint16_arraynificator(std::uint16_t val,
-                                         std::uint8_t output[2]);
-    constexpr void uint24_arraynificator(std::uint32_t val,
-                                         std::uint8_t output[3]);
-    constexpr void uint32_arraynificator(std::uint32_t val,
-                                         std::uint8_t output[4]);
+    constexpr void arraynificator(void *src, size_t len, void *dest);
+    constexpr void uint16_arraynificator(uint16_t val, uint8_t output[2]);
+    constexpr void uint24_arraynificator(uint32_t val, uint8_t output[3]);
+    constexpr void uint32_arraynificator(uint32_t val, uint8_t output[4]);
 
-    void float_arraynificator(float val, std::uint8_t output[4]);
-    void double_arraynificator(double val, std::uint8_t output[8]);
+    void float_arraynificator(float val, uint8_t output[4]);
+    void double_arraynificator(double val, uint8_t output[8]);
     float floatinificator(uint8_t input[4]);
 
     /*************************************************************************************************/
@@ -97,7 +97,7 @@ namespace cep
         static_assert(std::is_integral<T>::value,
                 "value to swap must be an integral type (uint8_t, int, size_t, ect...)");
 
-        constexpr std::size_t size = 8 * sizeof(T);
+        constexpr size_t size = 8 * sizeof(T);
 
         T output = input << (size / 2);
         output |= input >> (size / 2);
@@ -114,14 +114,14 @@ namespace cep
      *
      * @retval  uint64_t: combined value
      */
-    std::uint64_t combine(std::uint8_t *array, std::uint8_t length)
+    uint64_t combine(uint8_t *array, uint8_t length)
     {
         CEP_ASSERT(array != nullptr, "pointer was null");
         CEP_ASSERT(length <= sizeof(uint64_t), "Invalid array length");
 
-        std::uint64_t output = 0;
-        std::uint8_t *outputPtr = reinterpret_cast<std::uint8_t*>(&output);
-        for (std::uint8_t i = 0; i < length; i++)
+        uint64_t output = 0;
+        uint8_t *outputPtr = reinterpret_cast<uint8_t*>(&output);
+        for (uint8_t i = 0; i < length; i++)
         {
             outputPtr[length - (i + 1)] = array[i];
         }
@@ -138,11 +138,11 @@ namespace cep
      * @param   dest: Destination array to copy the values into
      * @retval  None
      */
-    constexpr void arraynificator(void *src, std::size_t len, void *dest)
+    constexpr void arraynificator(void *src, size_t len, void *dest)
     {
-        for (std::size_t i = 0; i < len; i++)
+        for (size_t i = 0; i < len; i++)
         {
-            ((std::uint8_t*) dest)[i] = ((std::uint8_t*) src)[i];
+            ((uint8_t*) dest)[i] = ((uint8_t*) src)[i];
         }
     }
 
@@ -157,11 +157,10 @@ namespace cep
      * @param   output : The desired output destination
      * @retval  None
      */
-    constexpr void uint16_arraynificator(std::uint16_t val,
-                                         std::uint8_t output[2])
+    constexpr void uint16_arraynificator(uint16_t val, uint8_t output[2])
     {
         output[0] = val >> 8;
-        output[1] = (std::uint8_t) val;
+        output[1] = (uint8_t) val;
     }
 
     /**
@@ -175,12 +174,11 @@ namespace cep
      * @param   output : The desired output destination
      * @retval  None
      */
-    constexpr void uint24_arraynificator(std::uint32_t val,
-                                         std::uint8_t output[3])
+    constexpr void uint24_arraynificator(uint32_t val, uint8_t output[3])
     {
-        output[0] = (std::uint8_t)(val >> 16);
-        output[1] = (std::uint8_t)(val >> 8);
-        output[2] = (std::uint8_t)(val);
+        output[0] = (uint8_t) (val >> 16);
+        output[1] = (uint8_t) (val >> 8);
+        output[2] = (uint8_t) (val);
     }
 
     /**
@@ -194,12 +192,12 @@ namespace cep
      * @param   output : The desired output destination
      * @retval  None
      */
-    constexpr void uint32_arraynificator(std::uint32_t val, uint8_t output[4])
+    constexpr void uint32_arraynificator(uint32_t val, uint8_t output[4])
     {
-        output[0] = (std::uint8_t)(val >> 24);
-        output[1] = (std::uint8_t)(val >> 16);
-        output[2] = (std::uint8_t)(val >> 8);
-        output[3] = (std::uint8_t)(val);
+        output[0] = (uint8_t) (val >> 24);
+        output[1] = (uint8_t) (val >> 16);
+        output[2] = (uint8_t) (val >> 8);
+        output[3] = (uint8_t) (val);
     }
 
     /**
@@ -211,13 +209,13 @@ namespace cep
      *
      * @note    This function swaps the endianness of the float
      */
-    void float_arraynificator(float val, std::uint8_t output[4])
+    void float_arraynificator(float val, uint8_t output[4])
     {
-        std::uint32_t value = *reinterpret_cast<std::uint32_t*>(&val);
-        output[3] = (std::uint8_t)(value >> 24);
-        output[2] = (std::uint8_t)(value >> 16);
-        output[1] = (std::uint8_t)(value >> 8);
-        output[0] = (std::uint8_t)(value);
+        uint32_t value = *reinterpret_cast<uint32_t*>(&val);
+        output[3] = (uint8_t) (value >> 24);
+        output[2] = (uint8_t) (value >> 16);
+        output[1] = (uint8_t) (value >> 8);
+        output[0] = (uint8_t) (value);
     }
 
     /**
@@ -227,18 +225,18 @@ namespace cep
      * @param   output: The desired output destination
      * @retval  None
      */
-    void double_arraynificator(double val, std::uint8_t output[8])
+    void double_arraynificator(double val, uint8_t output[8])
     {
-        std::uint64_t temp = reinterpret_cast<std::uint64_t>(&val);
+        uint64_t temp = reinterpret_cast<uint64_t>(&val);
 
-        output[0] = (std::uint8_t)(temp >> 56);
-        output[1] = (std::uint8_t)(temp >> 48);
-        output[2] = (std::uint8_t)(temp >> 40);
-        output[3] = (std::uint8_t)(temp >> 32);
-        output[4] = (std::uint8_t)(temp >> 24);
-        output[5] = (std::uint8_t)(temp >> 16);
-        output[6] = (std::uint8_t)(temp >> 8);
-        output[7] = (std::uint8_t)(temp);
+        output[0] = (uint8_t) (temp >> 56);
+        output[1] = (uint8_t) (temp >> 48);
+        output[2] = (uint8_t) (temp >> 40);
+        output[3] = (uint8_t) (temp >> 32);
+        output[4] = (uint8_t) (temp >> 24);
+        output[5] = (uint8_t) (temp >> 16);
+        output[6] = (uint8_t) (temp >> 8);
+        output[7] = (uint8_t) (temp);
     }
 
     /**
@@ -249,10 +247,10 @@ namespace cep
      *
      * @note    This function swaps the endianness of the float
      */
-    float floatinificator(std::uint8_t input[4])
+    float floatinificator(uint8_t input[4])
     {
         float val = 0.0f;
-        std::uint8_t *ptr = reinterpret_cast<std::uint8_t*>(&val);
+        uint8_t *ptr = reinterpret_cast<uint8_t*>(&val);
 
         ptr[0] = input[3];
         ptr[1] = input[2];

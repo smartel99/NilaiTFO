@@ -13,7 +13,7 @@
 
 #ifndef _max14763Module
 #    define _max14763Module
-
+#if defined(NILAI_USE_MAX14763)
 /*****************************************************************************/
 /* Includes */
 #    include "defines/module.hpp"
@@ -66,6 +66,7 @@ private:
 
 /* Have a wonderful day :) */
 #endif /* _max14763Module */
+#endif
 /**
  * @}
  */

@@ -13,6 +13,7 @@
 #ifndef _adsModuleConfig
 #    define _adsModuleConfig
 
+#if defined(NILAI_USE_ADS)
 /*****************************************************************************/
 /* Includes */
 #    include "defines/pin.h"
@@ -953,6 +954,7 @@ namespace ADS
 
 /* Have a wonderful day :) */
 #endif /* _adsModuleConfig */
+#endif
 /**
  * @}
  */

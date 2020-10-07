@@ -11,7 +11,7 @@
  ******************************************************************************
  */
 #include "max14778Module.h"
-
+#if defined(NILAI_USE_MAX14778)
 #include "stm32f4xx_hal.h"
 
 #include <algorithm>
@@ -214,3 +214,4 @@ bool Max14778Module::GetBCom( )
         return false;
     }
 }
+#endif

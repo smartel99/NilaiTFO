@@ -14,11 +14,12 @@
 #define UART_MODULE_HPP_
 /*************************************************************************************************/
 /* Includes ------------------------------------------------------------------------------------ */
+#if defined(NILAI_USE_UART)
+#include "stm32f4xx_hal.h"
+#if defined(HAL_UART_MODULE_ENABLED)
 #include "defines/module.hpp"
 #include "defines/misc.hpp"
 #include "defines/macros.hpp"
-
-#include "stm32f4xx_hal.h"
 
 #include <cstdint>       // For uint8_t, size_t
 #include <functional>    // For std::function
@@ -167,6 +168,12 @@ private:
     static constexpr uint32_t TIMEOUT = 100;    // Systicks.
     static constexpr uint32_t RX_TIMEOUT = 50;     // Systicks.
 };
+#else
+#if WARN_MISSING_STM_DRIVERS
+#warning NilaiTFO UART module enabled, but HAL_UART_MODULE_ENABLE is not defined!
+#endif
+#endif
+#endif
 #endif
 
 /**

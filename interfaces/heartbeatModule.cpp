@@ -12,6 +12,7 @@
  */
 #include "heartbeatModule.h"
 
+#if defined(NILAI_USE_HEARTBEAT)
 HeartbeatModule::HeartbeatModule(const Pin& pin, const std::string& label)
     : m_label(label), m_led(pin)
 {
@@ -40,3 +41,4 @@ void HeartbeatModule::Run( )
         }
     }
 }
+#endif

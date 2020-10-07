@@ -16,11 +16,12 @@
 /* Includes
  * ------------------------------------------------------------------------------------
  */
+#if defined(NILAI_USE_CAN)
+#include "stm32f4xx_hal.h"
+#if defined(HAL_CAN_MODULE_ENABLED)
 #include "defines/module.hpp"
 #include "defines/misc.hpp"
 #include "defines/macros.hpp"
-
-#include "stm32f4xx_hal.h"
 
 #include <array>
 #include <functional>
@@ -383,6 +384,12 @@ private:
 
 }
 ;
+#else
+#if WARN_MISSING_STM_DRIVERS
+#warning NilaiTFO CAN module enabled, but HAL_CAN_MODULE_ENABLED is not defined!
+#endif
+#endif
+#endif
 #endif
 /**
  * @}

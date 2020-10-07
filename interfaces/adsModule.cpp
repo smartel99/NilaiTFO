@@ -11,7 +11,7 @@
  ******************************************************************************
  */
 #include "adsModule.h"
-
+#if defined(NILAI_USE_ADS) && defined(NILAI_USE_SPI)
 #include "defines/macros.hpp"
 #include "defines/bitManipulations.hpp"
 #include "defines/globaldef.h"
@@ -361,7 +361,7 @@ float AdsModule::ConvertToVolt(int16_t val)
 
     return ((float) val * LSB);
 }
-
+#endif
 /* Have a wonderful day :) */
 /**
  * @}

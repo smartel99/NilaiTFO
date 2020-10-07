@@ -17,11 +17,13 @@
 /* Includes
  * ------------------------------------------------------------------------------------
  */
+#if defined(NILAI_USE_SPI)
+#include "stm32f4xx_hal.h"
+#if defined(HAL_CAN_MODULE_ENABLED)
 #include "defines/module.hpp"
 #include "defines/misc.hpp"
 #include "defines/macros.hpp"
 
-#include "stm32f4xx_hal.h"
 
 #include <string>
 #include <vector>
@@ -195,7 +197,12 @@ private:
     bool WaitUntilNotBusy();
 }
 ;
-
+#else
+#if WARN_MISSING_STM_DRIVERS
+#warning NilaiTFO SPI module enabled, but HAL_SPI_USE_MODULE is not defined!
+#endif
+#endif
+#endif
 #endif
 /**
  * @}

@@ -11,81 +11,82 @@
  ******************************************************************************
  */
 #include "relayModule.h"
-
+#if defined(NILAI_USE_RELAY)
 #include "stm32f4xx_hal.h"
 
 #include <algorithm>
 
 RelayModule::RelayModule(const RELAY::Config& config, const std::string& label)
-	: m_config(config)
-	, m_label(label)
+    : m_config(config)
+    , m_label(label)
 {
 }
 
 // what to put in "RUN"
 void RelayModule::Run()
 {
-	SetEN(true);
+    SetEN(true);
 
-	HAL_Delay(100);
+    HAL_Delay(100);
 }
 
 void RelayModule::SetEN(bool state)
 {
-	if (m_config.setENFunc)
-	{
-		m_config.setENFunc(state);
-	}
+    if (m_config.setENFunc)
+    {
+        m_config.setENFunc(state);
+    }
 }
 
 bool RelayModule::GetEN()
 {
-	if (m_config.getENFunc)
-	{
-		return m_config.getENFunc();
-	}
-	else
-	{
-		return false;
-	}
+    if (m_config.getENFunc)
+    {
+        return m_config.getENFunc();
+    }
+    else
+    {
+        return false;
+    }
 }
 
 void RelayModule::SetContactor1(bool state)
 {
-	if (m_config.setENFunc)
-	{
-		m_config.setENFunc(state);
-	}
+    if (m_config.setENFunc)
+    {
+        m_config.setENFunc(state);
+    }
 }
 
 bool RelayModule::GetContactor1()
 {
-	if (m_config.getENFunc)
-	{
-		return m_config.getENFunc();
-	}
-	else
-	{
-		return false;
-	}
+    if (m_config.getENFunc)
+    {
+        return m_config.getENFunc();
+    }
+    else
+    {
+        return false;
+    }
 }
 
 void RelayModule::SetContactor2(bool state)
 {
-	if (m_config.setENFunc)
-	{
-		m_config.setENFunc(state);
-	}
+    if (m_config.setENFunc)
+    {
+        m_config.setENFunc(state);
+    }
 }
 
 bool RelayModule::GetContactor2()
 {
-	if (m_config.getENFunc)
-	{
-		return m_config.getENFunc();
-	}
-	else
-	{
-		return false;
-	}
+    if (m_config.getENFunc)
+    {
+        return m_config.getENFunc();
+    }
+    else
+    {
+        return false;
+    }
 }
+#endif

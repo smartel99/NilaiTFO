@@ -14,6 +14,7 @@
 #ifndef _relayModule
 #    define _relayModule
 
+#if defined(NILAI_USE_RELAY)
 /*****************************************************************************/
 /* Includes */
 #    include "defines/module.hpp"
@@ -35,7 +36,7 @@ namespace RELAY
      */
     struct Config
     {
-        std::function<void(bool)> setENFunc = {};
+        std::function<void(bool)> setENFunc = { };
         std::function<bool()> getENFunc = {};
 
         std::function<void(bool)> setContactor1Func = {};
@@ -77,6 +78,7 @@ private:
 
 /* Have a wonderful day :) */
 #endif /* _relayModule */
+#endif
 /**
  * @}
  */

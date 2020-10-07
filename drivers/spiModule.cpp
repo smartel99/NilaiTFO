@@ -16,6 +16,7 @@
  * ------------------------------------------------------------------------------------
  */
 #include "drivers/spiModule.hpp"
+#if defined(NILAI_USE_SPI) && defined(HAL_CAN_MODULE_ENABLED)
 #include "processes/application.hpp"
 #include "defines/macros.hpp"
 
@@ -63,9 +64,9 @@ SPI::Status SpiModule::Transmit(const std::vector<uint8_t> pkt)
 SPI::Status SpiModule::Transmit(const uint8_t *data, size_t len)
 {
     CEP_ASSERT(data != nullptr,
-               "SPI Data pointer in null in SpiModule::Transmit");
+            "SPI Data pointer in null in SpiModule::Transmit");
     CEP_ASSERT(len != 0,
-               "SPI Transmit data length is 0 in SpiModule::Transmit");
+            "SPI Transmit data length is 0 in SpiModule::Transmit");
 
     // Wait for peripheral to be free.
     if (WaitUntilNotBusy() == false)
@@ -106,13 +107,13 @@ SPI::Status SpiModule::Receive(uint8_t *ouptutData, size_t len)
 }
 
 SPI::Status SpiModule::Transaction(const uint8_t *txData, size_t txLen,
-                                   uint8_t *rxData, size_t rxLen)
+        uint8_t *rxData, size_t rxLen)
 {
     CEP_ASSERT(txData != nullptr, "TxData is NULL in SpiModule::Transaction");
     CEP_ASSERT(rxData != nullptr, "RxData is NULL in SpiModule::Transaction");
     CEP_ASSERT(txLen > 0, "TxLen is 0 in SpiModule::Transaction");
     CEP_ASSERT(txLen == rxLen,
-               "TxLen is not equal to RxLen in SpiModule::Transaction");
+            "TxLen is not equal to RxLen in SpiModule::Transaction");
 
     // Wait for SPI peripheral to be ready.
     if (WaitUntilNotBusy() == false)
@@ -121,7 +122,7 @@ SPI::Status SpiModule::Transaction(const uint8_t *txData, size_t txLen,
     }
 
     if (HAL_SPI_TransmitReceive(m_handle, const_cast<uint8_t*>(txData), rxData,
-                                txLen, SPI_TIMEOUT) != HAL_OK)
+                    txLen, SPI_TIMEOUT) != HAL_OK)
     {
         m_status |= (SPI::Status) m_handle->ErrorCode;
         ErrorHandler();
@@ -132,13 +133,13 @@ SPI::Status SpiModule::Transaction(const uint8_t *txData, size_t txLen,
 }
 
 SPI::Status SpiModule::Transaction(const std::vector<uint8_t> &txData,
-                                   std::vector<uint8_t> &rxData)
+        std::vector<uint8_t> &rxData)
 {
     // Make sure we got enough space in rxData.
     rxData.resize(txData.size());
 
     return Transaction(txData.data(), txData.size(), rxData.data(),
-                       rxData.size());
+            rxData.size());
 }
 
 /*************************************************************************************************/
@@ -200,7 +201,7 @@ bool SpiModule::WaitUntilNotBusy()
 
     return false;
 }
-
+#endif
 /**
  * @}
  * @}

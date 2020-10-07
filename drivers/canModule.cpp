@@ -13,6 +13,8 @@
 /*************************************************************************************************/
 /* Includes ------------------------------------------------------------------------------------ */
 #include "drivers/canModule.hpp"
+
+#if defined(NILAI_USE_CAN) && defined(HAL_CAN_MODULE_ENABLED)
 #include "services/logger.hpp"
 
 #include <algorithm>
@@ -576,7 +578,7 @@ bool CanModule::WaitForFreeMailbox()
 
     return false;
 }
-
+#endif
 /**
  * @}
  * @}

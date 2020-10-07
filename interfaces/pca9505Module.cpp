@@ -11,7 +11,7 @@
  ******************************************************************************
  */
 #include "pca9505Module.h"
-
+#if defined(NILAI_USE_PCA9505)
 Pca9505Module::Pca9505Module(const PCA9505::Config& config, const std::string& label)
     : m_i2c(config.i2c), m_address(config.address), m_label(label),
       m_outputEnable(config.outputEnable), m_interrupt(config.interrupt), m_reset(config.reset)
@@ -201,3 +201,4 @@ void Pca9505Module::WritePort(PCA9505::Ports port, uint8_t state)
 
     m_i2c->TransmitFrameToRegister(m_address, 0x08 + (uint8_t)port, {m_ports[(uint8_t)port].port});
 }
+#endif

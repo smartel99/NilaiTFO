@@ -13,6 +13,7 @@
 /*************************************************************************************************/
 /* Includes ------------------------------------------------------------------------------------ */
 #include "drivers/uartModule.hpp"
+#if defined(NILAI_USE_UART) && defined(HAL_UART_MODULE_ENABLED)
 #include "defines/macros.hpp"
 #include "main.h"
 
@@ -253,7 +254,7 @@ bool UartModule::WaitUntilTransmitionComplete()
 
 /*************************************************************************************************/
 /* Private functions definitions --------------------------------------------------------------- */
-
+#endif
 /**
  * @}
  * @}

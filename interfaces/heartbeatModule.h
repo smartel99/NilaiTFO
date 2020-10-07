@@ -13,6 +13,7 @@
 #ifndef _heartbeatModule
 #    define _heartbeatModule
 
+#if defined(NILAI_USE_HEARTBEAT)
 /*****************************************************************************/
 /* Includes */
 #    include "defines/ledPattern.h"
@@ -51,6 +52,7 @@ private:
 
 /* Have a wonderful day :) */
 #endif /* _heartbeatModule */
+#endif
 /**
  * @}
  */
