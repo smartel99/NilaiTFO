@@ -37,10 +37,14 @@
 /* Includes */
 #    include "defines/module.hpp"
 #    include "drivers/uartModule.hpp"
+#    if defined(NILAI_USE_UMO)
+#        if !defined(NILAI_USE_UART)
+#            error Cannot use the UMO module without the UART module!
+#        else
 
-#    include <array>
-#    include <string>
-#    include <vector>
+#            include <array>
+#            include <string>
+#            include <vector>
 
 /*****************************************************************************/
 /* Exported defines */
@@ -78,7 +82,8 @@ public:
 
     bool IsUniverseReady(size_t universe) const;
 
-    const std::vector<uint8_t> GetChannels(size_t universe, size_t channel, size_t size);
+    std::vector<uint8_t> GetChannels(size_t universe, size_t channel, size_t size);
+    void GetChannels(size_t universe, size_t channel, uint8_t* outData, size_t size);
 
     void SetChannels(size_t universe, size_t channel, const std::vector<uint8_t>& data);
     void SetChannels(size_t universe, size_t channel, uint8_t* data, size_t len);
@@ -92,7 +97,8 @@ private:
 
 /*****************************************************************************/
 /* Exported functions */
-
+#        endif
+#    endif
 /* Have a wonderful day :) */
 #endif /* _umoModule */
 /**

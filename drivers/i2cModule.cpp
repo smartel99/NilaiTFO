@@ -16,7 +16,7 @@
  * ------------------------------------------------------------------------------------
  */
 #include "drivers/i2cModule.hpp"
-#if defined(NILAI_USE_ADC) && defined(HAL_I2C_MODULE_ENABLED)
+#if defined(NILAI_USE_I2C) && defined(HAL_I2C_MODULE_ENABLED)
 #include "services/logger.hpp"
 
 void I2cModule::Run()

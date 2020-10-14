@@ -48,13 +48,13 @@ Pca9505Module::Pca9505Module(const PCA9505::Config& config, const std::string& l
 
 void Pca9505Module::Run( )
 {
-    static uint32_t lastRead = 0;
-
-    if (HAL_GetTick( ) > lastRead + 1)
-    {
-        lastRead = HAL_GetTick( );
-        ReadPort(PCA9505::Ports::p0);
-    }
+    //    static uint32_t lastRead = 0;
+    //
+    //    if (HAL_GetTick( ) > lastRead + 10)
+    //    {
+    //        lastRead = HAL_GetTick( );
+    //        ReadPort(PCA9505::Ports::p0);
+    //    }
 }
 
 void Pca9505Module::EnableOutput( )
@@ -164,8 +164,9 @@ bool Pca9505Module::ReadPin(PCA9505::Ports port, PCA9505::Pins pin)
     // Just return the cached value.
     uint8_t mask = 0xFF ^ (0x01 << (uint8_t)pin);
 
-    return (bool)(m_ports[(uint8_t)port].port & mask);
+    return (bool)(ReadPort(port).port & mask);
 }
+
 PCA9505::PortState Pca9505Module::ReadPort(PCA9505::Ports port)
 {
     auto frame = m_i2c->ReceiveFrameFromRegister(m_address, 0x80, 5);

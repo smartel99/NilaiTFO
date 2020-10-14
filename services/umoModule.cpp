@@ -11,8 +11,8 @@
  ******************************************************************************
  */
 #include "umoModule.h"
-
-#include "defines/macros.hpp"
+#if defined(NILAI_USE_UMO) && defined(NILAI_USE_UART)
+#    include "defines/macros.hpp"
 
 UmoModule::UmoModule(UartModule* uart, size_t universeCnt, const std::string& label)
     : m_uart(uart), m_label(label), m_universes(universeCnt)
@@ -30,6 +30,8 @@ UmoModule::UmoModule(UartModule* uart, size_t universeCnt, const std::string& la
     m_uart->ClearEndOfFrameSequence( );
     m_uart->SetExpectedRxLen(1 + Universe::CHANNEL_COUNT + 2);
     m_uart->ClearFrameReceiveCpltCallback( );
+
+    LOG_INFO("[UMO] Module Initialized!");
 }
 
 void UmoModule::Run( )
@@ -45,6 +47,7 @@ void UmoModule::Run( )
             uint16_t crc = 0;
             // It's time to answer to the PC.
             universe.isNew = false;
+            LOG_INFO("[UMO] Sending Universe %i", u);
             m_uart->Transmit(std::vector<uint8_t>{(uint8_t)u});
             m_uart->Transmit(universe.universe);
             m_uart->Transmit(std::vector<uint8_t>{(uint8_t)(crc >> 8), (uint8_t)(crc & 0x00FF)});
@@ -67,6 +70,7 @@ void UmoModule::Run( )
                 m_universes[frame.data[0]].universe[i] = frame.data[1 + i];
             }
             m_universes[frame.data[0]].isNew = true;
+            LOG_INFO("[UMO] Received new Universe with ID %i", frame.data[0]);
         }
     }
 }
@@ -92,8 +96,9 @@ bool UmoModule::IsUniverseReady(size_t universe) const
     return m_universes[universe].isNew;
 }
 
-const std::vector<uint8_t> UmoModule::GetChannels(size_t universe, size_t channel, size_t size)
+std::vector<uint8_t> UmoModule::GetChannels(size_t universe, size_t channel, size_t size)
 {
+    [[maybe_unused]] volatile size_t c = channel;
     // Make sure that all params are good.
     CEP_ASSERT(
         universe < m_universes.size( ),
@@ -118,13 +123,44 @@ const std::vector<uint8_t> UmoModule::GetChannels(size_t universe, size_t channe
     // Init a vector for the output data.
     std::vector<uint8_t> data = std::vector<uint8_t>(size);
 
-    // Copy requested data the vector.
-    for (size_t i = 0; i < size; i++)
+    // Copy requested data into the vector.
+    for (size_t i = channel; i < (channel + size); i++)
     {
         data[i] = m_universes[universe].universe[i];
     }
 
     return data;
+}
+
+void UmoModule::GetChannels(size_t universe, size_t channel, uint8_t* outData, size_t size)
+{
+    // Make sure that all params are good.
+    CEP_ASSERT(
+        universe < m_universes.size( ),
+        "In {}.GetChannels, invalid universe requested (universe is {}, must be inferior to {}).",
+        m_label,
+        universe,
+        m_universes.size( ));
+    CEP_ASSERT(
+        channel < Universe::CHANNEL_COUNT,
+        "In {}.GetChannels, invalid channel requested (channel is {}, must be inferior to {}).",
+        m_label,
+        channel,
+        Universe::CHANNEL_COUNT);
+    CEP_ASSERT((channel + size) < Universe::CHANNEL_COUNT,
+               "In {}.GetChannels, requested number of channels would exceed the range of the "
+               "Universe! (channel is {}, size is {}, sum must be inferior to {})",
+               m_label,
+               channel,
+               size,
+               Universe::CHANNEL_COUNT);
+    CEP_ASSERT(outData != nullptr, "In {}.GetChannels, outData is NULL", m_label);
+
+    // Copy requested data the buffer.
+    for (size_t i = 0; i < size; i++)
+    {
+        outData[i] = m_universes[universe].universe[channel + i];
+    }
 }
 
 void UmoModule::SetChannels(size_t universe, size_t channel, const std::vector<uint8_t>& data)
@@ -160,3 +196,4 @@ void UmoModule::SetChannels(size_t universe, size_t channel, uint8_t* data, size
         m_universes[universe].universe[channel + i] = data[i];
     }
 }
+#endif

@@ -12,9 +12,9 @@
  */
 #include "max14778Module.h"
 #if defined(NILAI_USE_MAX14778)
-#include "stm32f4xx_hal.h"
+#    include "stm32f4xx_hal.h"
 
-#include <algorithm>
+#    include <algorithm>
 
 Max14778Module::Max14778Module(const MAX14778::Config& config, const std::string& label)
     : m_config(config), m_label(label)
@@ -53,6 +53,8 @@ void Max14778Module::Run( )
             break;
         case 7:
             SelectB3( );
+            break;
+        default:
             break;
     }
 

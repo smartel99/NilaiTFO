@@ -37,6 +37,10 @@
 //#define NILAI_USE_PCA9505
 //#define NILAI_USE_RELAY
 
+// Services
+//#define NILAI_USE_UMO
+//#define NILAI_USE_SYSTEM
+
 
 /******************************************************************************/
 /* [SECTION]: Configuration                                                   */

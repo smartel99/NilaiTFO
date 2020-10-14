@@ -1,5 +1,5 @@
 ﻿#include "adcModule.hpp"
-
+#if defined(NILAI_USE_ADC) && defined(HAL_ADC_MODULE_ENABLED)
 
 #include "adc.h"
 #include "main.h"
@@ -23,7 +23,7 @@ uint16_t adcModule::analogRead(ADC_HandleTypeDef* adcHandle, uint32_t channel)
 {
   static uint32_t adcVal;
 
-	
+
 HAL_ADC_Start(&hadc1);
 
 
@@ -40,3 +40,4 @@ HAL_ADC_Start(&hadc1);
 void adcModule::Run()
 {
 }
+#endif
