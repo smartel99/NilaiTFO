@@ -30,7 +30,7 @@
 #        define LOG_HELPER(msg, ...)                                                               \
             do                                                                                     \
             {                                                                                      \
-                Logger::Get( ) != nullptr ? Logger::Get( )->Log("[%02i:%02i:%02i:%03i]" msg,       \
+                Logger::Get( ) != nullptr ? Logger::Get( )->Log("[%02i:%02i:%02i.%03i]" msg,       \
                                                                 GET_CUR_H( ),                      \
                                                                 GET_CUR_MIN( ) % 60,               \
                                                                 GET_CUR_SEC( ) % 60,               \
