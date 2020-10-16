@@ -22,8 +22,8 @@
 
 #        include "shared/drivers/spiModule.hpp"
 
-#        include <deque>
 #        include <string>
+#        include <vector>
 
 /*****************************************************************************/
 /* Exported defines */
@@ -36,10 +36,21 @@
 struct AdsPacket
 {
     uint32_t timestamp = 0;
-    int32_t  channel1  = 0;
-    int32_t  channel2  = 0;
-    int32_t  channel3  = 0;
-    int32_t  channel4  = 0;
+
+    int32_t avgChannel1 = 0;
+    int32_t avgChannel2 = 0;
+    int32_t avgChannel3 = 0;
+    int32_t avgChannel4 = 0;
+
+    int32_t minChannel1 = 0;
+    int32_t minChannel2 = 0;
+    int32_t minChannel3 = 0;
+    int32_t minChannel4 = 0;
+
+    int32_t maxChannel1 = 0;
+    int32_t maxChannel2 = 0;
+    int32_t maxChannel3 = 0;
+    int32_t maxChannel4 = 0;
 };
 
 class SystemModule;
@@ -67,10 +78,20 @@ public:
 
     const AdsPacket& GetLatestPacket( ) const { return m_latestFrame; }
 
-    int32_t GetChannel1( ) const { return m_latestFrame.channel1; }
-    int32_t GetChannel2( ) const { return m_latestFrame.channel2; }
-    int32_t GetChannel3( ) const { return m_latestFrame.channel3; }
-    int32_t GetChannel4( ) const { return m_latestFrame.channel4; }
+    int32_t GetAverageChannel1( ) const { return m_latestFrame.avgChannel1; }
+    int32_t GetAverageChannel2( ) const { return m_latestFrame.avgChannel2; }
+    int32_t GetAverageChannel3( ) const { return m_latestFrame.avgChannel3; }
+    int32_t GetAverageChannel4( ) const { return m_latestFrame.avgChannel4; }
+
+    int32_t GetMinChannel1( ) const { return m_latestFrame.minChannel1; }
+    int32_t GetMinChannel2( ) const { return m_latestFrame.minChannel2; }
+    int32_t GetMinChannel3( ) const { return m_latestFrame.minChannel3; }
+    int32_t GetMinChannel4( ) const { return m_latestFrame.minChannel4; }
+
+    int32_t GetMaxChannel1( ) const { return m_latestFrame.maxChannel1; }
+    int32_t GetMaxChannel2( ) const { return m_latestFrame.maxChannel2; }
+    int32_t GetMaxChannel3( ) const { return m_latestFrame.maxChannel3; }
+    int32_t GetMaxChannel4( ) const { return m_latestFrame.maxChannel4; }
 
     // Use force = true if you want the config to be applied no matter what.
     void Configure(const ADS::Config& config = ADS::Config( ), bool force = false);
@@ -103,13 +124,13 @@ private:
     uint8_t m_samplesToTake = 1;
     struct
     {
-        std::deque<int32_t> channel1;
-        std::deque<int32_t> channel2;
-        std::deque<int32_t> channel3;
-        std::deque<int32_t> channel4;
+        std::vector<float> channel1;
+        std::vector<float> channel2;
+        std::vector<float> channel3;
+        std::vector<float> channel4;
 
         /* These methods do not respect CEP's naming convention because
-         * they are intended as an interface with std::deque.
+         * they are intended as an interface with std::vector.
          */
         void clear( )
         {
@@ -137,8 +158,10 @@ private:
     inline bool     SendConfig(uint8_t addr, uint8_t data);
     inline uint16_t Send(uint16_t data);
     inline uint16_t ReadCommandResponse( );
-    inline int32_t  CalculateTension(uint8_t* data);
-    inline float    ConvertToVolt(int16_t val);
+    inline float    CalculateTension(uint8_t* data);
+    inline float    ConvertToVolt(int32_t val);
+    inline uint32_t ConvertToHex(float val);
+    void            UpdateLatestFrame( );
 };
 
 /*****************************************************************************/

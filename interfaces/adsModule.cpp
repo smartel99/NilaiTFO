@@ -30,6 +30,8 @@
 #        define ADS_ERROR(msg, ...) LOG_ERROR("[ADS Module] " msg, ##__VA_ARGS__)
 #    endif
 
+#    include <limits>
+
 AdsModule::AdsModule(SpiModule* spi, const std::string& label)
     : m_spi(spi), m_label(label), m_config(ADS::Config( )), m_sysModule(SYS_MODULE)
 {
@@ -52,12 +54,14 @@ void AdsModule::Configure(const ADS::Config& config, bool force)
 
     Reset( );
 
+    // CMD -> 0x0011    Resp -> 0xFF04
     if (SendCommand(ADS::SysCommands::Reset, ADS::Acknowledges::Ready) == false)
     {
         ADS_ERROR("Unable to reset.");
         return;
     }
 
+    // CMD -> 0x0655    Resp -> 0x0655
     if (SendCommand(ADS::SysCommands::Unlock, ADS::Acknowledges::Unlock) == false)
     {
         ADS_ERROR("Unable to unlock.");
@@ -160,7 +164,6 @@ void AdsModule::Disable( )
 
 const AdsPacket& AdsModule::RefreshValues(uint32_t timeout)
 {
-    HAL_GPIO_WritePin(LED_HEARTBEAT_GPIO_Port, LED_HEARTBEAT_Pin, GPIO_PIN_SET);
     if (!m_active)
     {
         return m_latestFrame;
@@ -194,48 +197,22 @@ const AdsPacket& AdsModule::RefreshValues(uint32_t timeout)
 
     // First 3 bytes are for the status.
     // Each consecutive trios of bytes represent the data of a channel.
-    int32_t ch1 = CalculateTension(&data[3]);
-    int32_t ch2 = CalculateTension(&data[6]);
-    int32_t ch3 = CalculateTension(&data[9]);
-    int32_t ch4 = CalculateTension(&data[12]);
+    float ch1 = CalculateTension(&data[3]);
+    float ch2 = CalculateTension(&data[6]);
+    float ch3 = CalculateTension(&data[9]);
+    float ch4 = CalculateTension(&data[12]);
 
     m_channels.channel1.push_back(ch1);
     m_channels.channel2.push_back(ch2);
     m_channels.channel3.push_back(ch3);
     m_channels.channel4.push_back(ch4);
 
-    int32_t tot1 = 0, tot2 = 0, tot3 = 0, tot4 = 0;
-
-    for (size_t i = 0; i < m_channels.size( ); i++)
-    {
-        tot1 += m_channels.channel1[i];
-        tot2 += m_channels.channel2[i];
-        tot3 += m_channels.channel3[i];
-        tot4 += m_channels.channel4[i];
-    }
-
     // If we're at the end of our buffers:
     if (m_channels.size( ) >= m_samplesToTake)
     {
-        m_latestFrame.channel1  = tot1 / m_channels.size( );
-        m_latestFrame.channel2  = tot2 / m_channels.size( );
-        m_latestFrame.channel3  = tot3 / m_channels.size( );
-        m_latestFrame.channel4  = tot4 / m_channels.size( );
-        m_latestFrame.timestamp = HAL_GetTick( );
-
-        // Clear all of the buffers for the next run.
-        m_channels.channel1.clear( );
-        m_channels.channel2.clear( );
-        m_channels.channel3.clear( );
-        m_channels.channel4.clear( );
-        LOG_DEBUG("[ADS] CH1: %i\tCH2: %i\tCH3: %i\tCH4: %i",
-                  m_latestFrame.channel1,
-                  m_latestFrame.channel2,
-                  m_latestFrame.channel3,
-                  m_latestFrame.channel4);
+        UpdateLatestFrame( );
     }
 
-    HAL_GPIO_WritePin(LED_HEARTBEAT_GPIO_Port, LED_HEARTBEAT_Pin, GPIO_PIN_RESET);
     return m_latestFrame;
 }
 
@@ -357,7 +334,7 @@ uint16_t AdsModule::ReadCommandResponse( )
     return (cep::swap((uint16_t)response));
 }
 
-int32_t AdsModule::CalculateTension(uint8_t* data)
+float AdsModule::CalculateTension(uint8_t* data)
 {
     int32_t up  = ((int32_t)data[0] << 24);
     int32_t mid = ((int32_t)data[1] << 16);
@@ -365,16 +342,104 @@ int32_t AdsModule::CalculateTension(uint8_t* data)
 
     // NOTE: This right-shift operation on signed data maintains the signed bit,
     // and provides for the sign-extension from 24 to 32 bits.
-    return (((int32_t)(up | mid | bot)) >> 8);
+    return ConvertToVolt(((int32_t)(up | mid | bot)) >> 8);
 }
 
-float AdsModule::ConvertToVolt(int16_t val)
+float AdsModule::ConvertToVolt(int32_t val)
 {
     // 1 LSB = (2 * Vref / Gain) / 2^24
     // #TODO Modify this to get the value depending on the ADS's config.
     constexpr float LSB = (2.0f * (2.442f / 1.0f)) / 16777216.0f;
 
     return ((float)val * LSB);
+}
+
+uint32_t AdsModule::ConvertToHex(float val)
+{
+    // 1 LSB = (2 * Vref / Gain) / 2^24
+    // #TODO Modify this to get the value depending on the ADS's config.
+    constexpr float LSB = (2.0f * (2.442f / 1.0f)) / 16777216.0f;
+
+    uint32_t h = 0;
+    if (val < 0.0f)
+    {
+        val *= -1;
+        h = (uint32_t)(val / LSB) & 0x007FFFFFF;
+        h |= 0x00800000;
+    }
+    else
+    {
+        h = (uint32_t)(val / LSB) & 0x007FFFFFF;
+    }
+    return h;
+}
+
+void AdsModule::UpdateLatestFrame( )
+{
+    float tot1 = 0, tot2 = 0, tot3 = 0, tot4 = 0;
+    float min1 = std::numeric_limits<float>::max( ), min2 = min1, min3 = min1, min4 = min1;
+    float max1 = std::numeric_limits<float>::lowest( ), max2 = max1, max3 = max1, max4 = max1;
+    for (size_t i = 0; i < m_channels.size( ); i++)
+    {
+        min1 = std::min(min1, m_channels.channel1[i]);
+        min2 = std::min(min2, m_channels.channel2[i]);
+        min3 = std::min(min3, m_channels.channel3[i]);
+        min4 = std::min(min4, m_channels.channel4[i]);
+        max1 = std::max(max1, m_channels.channel1[i]);
+        max2 = std::max(max2, m_channels.channel2[i]);
+        max3 = std::max(max3, m_channels.channel3[i]);
+        max4 = std::max(max4, m_channels.channel4[i]);
+        tot1 += m_channels.channel1[i];
+        tot2 += m_channels.channel2[i];
+        tot3 += m_channels.channel3[i];
+        tot4 += m_channels.channel4[i];
+    }
+    tot1 /= m_channels.size( );
+    tot2 /= m_channels.size( );
+    tot3 /= m_channels.size( );
+    tot4 /= m_channels.size( );
+    m_latestFrame.avgChannel1 = ConvertToHex(tot1);
+    m_latestFrame.avgChannel2 = ConvertToHex(tot2);
+    m_latestFrame.avgChannel3 = ConvertToHex(tot3);
+    m_latestFrame.avgChannel4 = ConvertToHex(tot4);
+    m_latestFrame.minChannel1 = ConvertToHex(min1);
+    m_latestFrame.minChannel2 = ConvertToHex(min2);
+    m_latestFrame.minChannel3 = ConvertToHex(min3);
+    m_latestFrame.minChannel4 = ConvertToHex(min4);
+    m_latestFrame.maxChannel1 = ConvertToHex(max1);
+    m_latestFrame.maxChannel2 = ConvertToHex(max2);
+    m_latestFrame.maxChannel3 = ConvertToHex(max3);
+    m_latestFrame.maxChannel4 = ConvertToHex(max4);
+    m_latestFrame.timestamp   = HAL_GetTick( );
+    // Clear all of the buffers for the next run.
+    m_channels.channel1.clear( );
+    m_channels.channel2.clear( );
+    m_channels.channel3.clear( );
+    m_channels.channel4.clear( );
+
+    // Debug stuff.
+#    if 0
+    LOG_DEBUG("[ADS] \n\r\tCH1: 0x%06X (%0.3f) min: %0.3f\tmax: %0.3f"
+              "\n\r\tCH2: 0x%06X (%0.3f) min: %0.3f\tmax: %0.3f"
+              "\n\r\tCH3: 0x%06X (%0.3f) min: %0.3f\tmax: %0.3f"
+              "\n\r\tCH4: 0x%06X (%0.3f) min: %0.3f\tmax: %0.3f",
+              m_latestFrame.avgChannel1,
+              tot1,
+              min1,
+              max1,
+              m_latestFrame.avgChannel2,
+              tot2,
+              min2,
+              max2,
+              m_latestFrame.avgChannel3,
+              tot3,
+              min3,
+              max3,
+              m_latestFrame.avgChannel4,
+              tot4,
+              min4,
+              max4);
+#    endif
 }
 #endif
 /* Have a wonderful day :) */
