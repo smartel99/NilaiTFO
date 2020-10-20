@@ -124,9 +124,9 @@ std::vector<uint8_t> UmoModule::GetChannels(size_t universe, size_t channel, siz
     std::vector<uint8_t> data = std::vector<uint8_t>(size);
 
     // Copy requested data into the vector.
-    for (size_t i = channel; i < (channel + size); i++)
+    for (size_t i = 0; i < size; i++)
     {
-        data[i] = m_universes[universe].universe[i];
+        data[i] = m_universes[universe].universe[channel + i];
     }
 
     return data;

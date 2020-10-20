@@ -14,11 +14,10 @@
 #ifndef _relayModule
 #    define _relayModule
 
-#if defined(NILAI_USE_RELAY)
+#    if defined(NILAI_USE_RELAY)
 /*****************************************************************************/
 /* Includes */
-#    include "defines/module.hpp"
-#    include <functional>
+#        include <functional>
 
 /*****************************************************************************/
 /* Exported defines */
@@ -28,56 +27,47 @@
 
 /*****************************************************************************/
 /* Exported types */
-namespace RELAY
+namespace cep
 {
-    /**
-     * @struct  Config
-     * @brief
-     */
-    struct Config
-    {
-        std::function<void(bool)> setENFunc = { };
-        std::function<bool()> getENFunc = {};
-
-        std::function<void(bool)> setContactor1Func = {};
-        std::function<void(bool)> setContactor2Func = {};
-        std::function<bool()> getContactor1Func = {};
-        std::function<bool()> getContactor2Func = {};
-    };
-}    // namespace RELAY
-
-class RelayModule: public cep::Module
+class Relay
 {
 public:
-    RelayModule() = delete;
-    RelayModule(const RELAY::Config &config, const std::string &label);
-    virtual ~RelayModule() override = default;
-
-    virtual void Run() override;
-    virtual const std::string& GetLabel() const override
+    Relay( ) = default;
+    Relay(const std::function<void(bool)>& set, const std::function<bool( )>& get)
+        : m_set(set), m_get(get)
     {
-        return m_label;
     }
 
-    void SetEN(bool state);
-    bool GetEN();
+    void SetSetFunc(const std::function<void(bool)>& func) { m_set = func; }
+    void SetGetFunc(const std::function<bool( )>& func) { m_get = func; }
 
-    void SetContactor1(bool state);
-    void SetContactor2(bool state);
-    bool GetContactor1();
-    bool GetContactor2();
+    void Set(bool state)
+    {
+        if (m_set)
+        {
+            m_set(state);
+        }
+    }
+
+    bool Get( )
+    {
+        if (m_get)
+        {
+            return m_get( );
+        }
+    }
 
 private:
-    RELAY::Config m_config;
-    std::string m_label;
-}
-;
+    std::function<void(bool)> m_set = {};
+    std::function<bool( )>    m_get = {};
+};
+}    // namespace cep
 
 /*****************************************************************************/
 /* Exported functions */
 
 /* Have a wonderful day :) */
-#endif /* _relayModule */
+#    endif /* _relayModule */
 #endif
 /**
  * @}

@@ -12,7 +12,6 @@
 #ifndef NILAITFOCONFIG_H_
 #define NILAITFOCONFIG_H_
 
-
 // Path of the main application header file
 #define APPLICATION_HEADER "application.hpp"
 
@@ -34,13 +33,13 @@
 //#define NILAI_USE_HEARTBEAT
 //#define NILAI_USE_MAX14763
 //#define NILAI_USE_MAX14778
+//#define NILAI_USE_MAX323
 //#define NILAI_USE_PCA9505
 //#define NILAI_USE_RELAY
 
 // Services
 //#define NILAI_USE_UMO
 //#define NILAI_USE_SYSTEM
-
 
 /******************************************************************************/
 /* [SECTION]: Configuration                                                   */

@@ -51,7 +51,8 @@
 /** Prints an error message */
 #        define LOG_ERROR(msg, ...)    LOG_HELPER("[ERROR   ]: " msg "\n\r\0", ##__VA_ARGS__)
 
-/** Prints a critical error message */
+/** Prints a critical error message
+ */
 #        define LOG_CRITICAL(msg, ...) LOG_HELPER("[CRITICAL]: " msg "\n\r\0", ##__VA_ARGS__)
 
 class UartModule;
@@ -65,6 +66,7 @@ public:
     void Log(const char* fmt, ...);
     void VLog(const char* fmt, va_list args);
 
+    UartModule*    GetUart( ) { return m_uart; }
     static Logger* Get( ) { return s_instance; }
 
 private:
