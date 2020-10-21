@@ -12,12 +12,11 @@
  */
 #ifndef _max14778Module
 #    define _max14778Module
-#if defined(NILAI_USE_MAX14778)
+#    if defined(NILAI_USE_MAX14778)
 /*****************************************************************************/
 /* Includes */
-#    include "defines/module.hpp"
 
-#    include <functional>
+#        include <functional>
 
 /*****************************************************************************/
 /* Exported defines */
@@ -35,62 +34,57 @@ namespace MAX14778
  */
 struct Config
 {
-    std::function<void(bool)> setEnAFunc = { };
-    std::function<void(bool)> setEnBFunc = { };
+    std::function<void(bool)> setEnAFunc = {};
+    std::function<void(bool)> setEnBFunc = {};
 
-    std::function<void(bool)> setSA0Func = { };
-    std::function<void(bool)> setSA1Func = { };
+    std::function<void(bool)> setSA0Func = {};
+    std::function<void(bool)> setSA1Func = {};
 
-    std::function<void(bool)> setSB0Func = { };
-    std::function<void(bool)> setSB1Func = { };
+    std::function<void(bool)> setSB0Func = {};
+    std::function<void(bool)> setSB1Func = {};
 
-    std::function<void(bool)> setAComFunc = { };
-    std::function<void(bool)> setBComFunc = { };
+    std::function<void(bool)> setAComFunc = {};
+    std::function<void(bool)> setBComFunc = {};
 
-    std::function<bool( )> getAComFunc = { };
-    std::function<bool( )> getBComFunc = { };
+    std::function<bool( )> getAComFunc = {};
+    std::function<bool( )> getBComFunc = {};
 };
 }    // namespace MAX14778
 
-class Max14778Module : public cep::Module
+class Max14778Module
 {
 public:
-    Max14778Module( ) = delete;
-    Max14778Module(const MAX14778::Config& config, const std::string& label);
-    virtual ~Max14778Module( ) override = default;
+    Max14778Module( ) = default;
+    Max14778Module(const MAX14778::Config& config);
 
-    virtual void               Run( ) override;
-    virtual const std::string& GetLabel( ) const override { return m_label; }
+    void SetEnA(bool state) const;
+    void SetEnB(bool state) const;
 
-    void SetEnA(bool state);
-    void SetEnB(bool state);
+    void SelectA0( ) const;
+    void SelectA1( ) const;
+    void SelectA2( ) const;
+    void SelectA3( ) const;
 
-    void SelectA0( );
-    void SelectA1( );
-    void SelectA2( );
-    void SelectA3( );
+    void SelectB0( ) const;
+    void SelectB1( ) const;
+    void SelectB2( ) const;
+    void SelectB3( ) const;
 
-    void SelectB0( );
-    void SelectB1( );
-    void SelectB2( );
-    void SelectB3( );
+    void SetACom(bool state) const;
+    void SetBCom(bool state) const;
 
-    void SetACom(bool state);
-    void SetBCom(bool state);
-
-    bool GetACom( );
-    bool GetBCom( );
+    bool GetACom( ) const;
+    bool GetBCom( ) const;
 
 private:
     MAX14778::Config m_config;
-    std::string      m_label;
 };
 
 /*****************************************************************************/
 /* Exported functions */
 
 /* Have a wonderful day :) */
-#endif /* _max14778Module */
+#    endif /* _max14778Module */
 #endif
 /**
  * @}

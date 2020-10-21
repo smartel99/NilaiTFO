@@ -16,204 +16,73 @@
 
 #    include <algorithm>
 
-Max14778Module::Max14778Module(const MAX14778::Config& config, const std::string& label)
-    : m_config(config), m_label(label)
+#    define CALL_SET_FN(fn, state)                                                                 \
+        do                                                                                         \
+        {                                                                                          \
+            if (m_config.fn)                                                                       \
+                m_config.fn(state);                                                                \
+        } while (0)
+#    define CALL_GET_FN(fn) (m_config.fn ? m_config.fn( ) : 0)
+
+Max14778Module::Max14778Module(const MAX14778::Config& config) : m_config(config) {}
+
+void Max14778Module::SetEnA(bool state) const { CALL_SET_FN(setEnAFunc, state); }
+
+void Max14778Module::SetEnB(bool state) const { CALL_SET_FN(setEnBFunc, state); }
+
+void Max14778Module::SelectA0( ) const
 {
+    CALL_SET_FN(setSA0Func, false);
+    CALL_SET_FN(setSA1Func, false);
 }
 
-void Max14778Module::Run( )
+void Max14778Module::SelectA1( ) const
 {
-    static uint8_t cnt = 0;
-    switch (cnt)
-    {
-        case 0:
-            SetEnA(true);
-            SetEnB(false);
-            SelectA0( );
-            break;
-        case 1:
-            SelectA1( );
-            break;
-        case 2:
-            SelectA2( );
-            break;
-        case 3:
-            SelectA3( );
-            break;
-        case 4:
-            SetEnA(false);
-            SetEnB(true);
-            SelectB0( );
-            break;
-        case 5:
-            SelectB1( );
-            break;
-        case 6:
-            SelectB2( );
-            break;
-        case 7:
-            SelectB3( );
-            break;
-        default:
-            break;
-    }
-
-    if (++cnt > 7)
-    {
-        cnt = 0;
-    }
-    HAL_Delay(100);
+    CALL_SET_FN(setSA0Func, true);
+    CALL_SET_FN(setSA1Func, false);
 }
 
-void Max14778Module::SetEnA(bool state)
+void Max14778Module::SelectA2( ) const
 {
-    if (m_config.setEnAFunc)
-    {
-        m_config.setEnAFunc(state);
-    }
+    CALL_SET_FN(setSA0Func, false);
+    CALL_SET_FN(setSA1Func, true);
 }
 
-void Max14778Module::SetEnB(bool state)
+void Max14778Module::SelectA3( ) const
 {
-    if (m_config.setEnBFunc)
-    {
-        m_config.setEnBFunc(state);
-    }
+    CALL_SET_FN(setSA0Func, true);
+    CALL_SET_FN(setSA1Func, true);
 }
 
-void Max14778Module::SelectA0( )
+void Max14778Module::SelectB0( ) const
 {
-    if (m_config.setSA0Func)
-    {
-        m_config.setSA0Func(false);
-    }
-    if (m_config.setSA1Func)
-    {
-        m_config.setSA1Func(false);
-    }
+    CALL_SET_FN(setSB0Func, false);
+    CALL_SET_FN(setSB1Func, false);
 }
 
-void Max14778Module::SelectA1( )
+void Max14778Module::SelectB1( ) const
 {
-    if (m_config.setSA0Func)
-    {
-        m_config.setSA0Func(true);
-    }
-    if (m_config.setSA1Func)
-    {
-        m_config.setSA1Func(false);
-    }
+    CALL_SET_FN(setSB0Func, true);
+    CALL_SET_FN(setSB1Func, false);
 }
 
-void Max14778Module::SelectA2( )
+void Max14778Module::SelectB2( ) const
 {
-    if (m_config.setSA0Func)
-    {
-        m_config.setSA0Func(false);
-    }
-    if (m_config.setSA1Func)
-    {
-        m_config.setSA1Func(true);
-    }
+    CALL_SET_FN(setSB0Func, false);
+    CALL_SET_FN(setSB1Func, true);
 }
 
-void Max14778Module::SelectA3( )
+void Max14778Module::SelectB3( ) const
 {
-    if (m_config.setSA0Func)
-    {
-        m_config.setSA0Func(true);
-    }
-    if (m_config.setSA1Func)
-    {
-        m_config.setSA1Func(true);
-    }
+    CALL_SET_FN(setSB0Func, true);
+    CALL_SET_FN(setSB1Func, true);
 }
 
-void Max14778Module::SelectB0( )
-{
-    if (m_config.setSB0Func)
-    {
-        m_config.setSB0Func(false);
-    }
-    if (m_config.setSB1Func)
-    {
-        m_config.setSB1Func(false);
-    }
-}
+void Max14778Module::SetACom(bool state) const { CALL_SET_FN(setAComFunc, state); }
 
-void Max14778Module::SelectB1( )
-{
-    if (m_config.setSB0Func)
-    {
-        m_config.setSB0Func(true);
-    }
-    if (m_config.setSB1Func)
-    {
-        m_config.setSB1Func(false);
-    }
-}
+void Max14778Module::SetBCom(bool state) const { CALL_SET_FN(setBComFunc, state); }
 
-void Max14778Module::SelectB2( )
-{
-    if (m_config.setSB0Func)
-    {
-        m_config.setSB0Func(false);
-    }
-    if (m_config.setSB1Func)
-    {
-        m_config.setSB1Func(true);
-    }
-}
+bool Max14778Module::GetACom( ) const { return CALL_GET_FN(getAComFunc); }
 
-void Max14778Module::SelectB3( )
-{
-    if (m_config.setSB0Func)
-    {
-        m_config.setSB0Func(true);
-    }
-    if (m_config.setSB1Func)
-    {
-        m_config.setSB1Func(true);
-    }
-}
-
-void Max14778Module::SetACom(bool state)
-{
-    if (m_config.setAComFunc)
-    {
-        m_config.setAComFunc(state);
-    }
-}
-
-void Max14778Module::SetBCom(bool state)
-{
-    if (m_config.setBComFunc)
-    {
-        m_config.setBComFunc(state);
-    }
-}
-
-bool Max14778Module::GetACom( )
-{
-    if (m_config.getAComFunc)
-    {
-        return m_config.getAComFunc( );
-    }
-    else
-    {
-        return false;
-    }
-}
-
-bool Max14778Module::GetBCom( )
-{
-    if (m_config.getBComFunc)
-    {
-        return m_config.getBComFunc( );
-    }
-    else
-    {
-        return false;
-    }
-}
+bool Max14778Module::GetBCom( ) const { return CALL_GET_FN(getBComFunc); }
 #endif

@@ -36,6 +36,7 @@
 //#define NILAI_USE_MAX323
 //#define NILAI_USE_PCA9505
 //#define NILAI_USE_RELAY
+//#define NILAI_USE_TLP3545
 
 // Services
 //#define NILAI_USE_UMO

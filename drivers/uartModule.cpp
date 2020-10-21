@@ -128,7 +128,6 @@ void UartModule::ClearEndOfFrameSequence( ) { m_eof = ""; }
 
 void UartModule::HandleReceptionIRQ( )
 {
-    HAL_GPIO_WritePin(LED_STATUS_GPIO_Port, LED_STATUS_Pin, GPIO_PIN_SET);
     if (m_handle->Instance->SR & UART_IT_RXNE)
     {
         // Read data register not empty.
@@ -208,7 +207,6 @@ void UartModule::HandleReceptionIRQ( )
     {
         HAL_UART_IRQHandler(m_handle);
     }
-    HAL_GPIO_WritePin(LED_STATUS_GPIO_Port, LED_STATUS_Pin, GPIO_PIN_RESET);
 }
 
 /*************************************************************************************************/
