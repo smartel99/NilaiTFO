@@ -13,11 +13,10 @@
 
 #ifndef _max14763Module
 #    define _max14763Module
-#if defined(NILAI_USE_MAX14763)
+#    if defined(NILAI_USE_MAX14763)
 /*****************************************************************************/
 /* Includes */
-#    include "defines/module.hpp"
-#    include <functional>
+#        include <functional>
 
 /*****************************************************************************/
 /* Exported defines */
@@ -27,45 +26,40 @@
 
 /*****************************************************************************/
 /* Exported types */
-namespace MAX14763
-{
-/**
- * @struct  Config
- * @brief
- */
-struct Config
-{
 
-    std::function<void(bool)> setSELFunc = { };
-
-    std::function<bool( )> getSELFunc = { };
-};
-}    // namespace MAX14763
-
-class Max14763Module : public cep::Module
+class Max14763Module
 {
 public:
-    Max14763Module( ) = delete;
-    Max14763Module(const MAX14763::Config& config, const std::string& label);
-    virtual ~Max14763Module( ) override = default;
+    Max14763Module( ) = default;
+    Max14763Module(const std::function<void(bool)>& setFunc) : m_setFunc(setFunc) {}
 
-    virtual void               Run( ) override;
-    virtual const std::string& GetLabel( ) const override { return m_label; }
+    void SetFunc(const std::function<void(bool)>& func) { m_setFunc = func; }
 
-    void SetSEL(bool state);
+    void Set( )
+    {
+        if (m_setFunc)
+        {
+            m_setFunc(true);
+        }
+    }
 
-    bool GetSEL( );
+    void Reset( )
+    {
+        if (m_setFunc)
+        {
+            m_setFunc(false);
+        }
+    }
 
 private:
-    MAX14763::Config m_config;
-    std::string      m_label;
+    std::function<void(bool)> m_setFunc;
 };
 
 /*****************************************************************************/
 /* Exported functions */
 
 /* Have a wonderful day :) */
-#endif /* _max14763Module */
+#    endif /* _max14763Module */
 #endif
 /**
  * @}

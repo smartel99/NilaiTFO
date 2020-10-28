@@ -27,6 +27,12 @@
 void SystemModule::Run( )
 {
     static auto* umo = UMO_MODULE;
+
+    // Check if lid is open or closed.
+    // COVER_IN == high -> lid open
+    m_status = (HAL_GPIO_ReadPin(COVER_IN_GPIO_Port, COVER_IN_Pin)) ? m_status | 0x8000
+                                                                    : m_status & 0x7FFF;
+
     // If we've received a reset request during the last frame:
     if (m_rstRq == 0x01)
     {
@@ -34,7 +40,6 @@ void SystemModule::Run( )
         //        HAL_NVIC_SystemReset( );
     }
 
-    // #TODO Find a more performance friendly way of getting UMO_MODULE.
     if (umo->IsUniverseReady(m_universeId))
     {
         // Check if we should reset.

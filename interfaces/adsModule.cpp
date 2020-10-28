@@ -142,8 +142,6 @@ void AdsModule::Configure(const ADS::Config& config, bool force)
         ADS_ERROR("Unable to lock ADS.");
         return;
     }
-
-    LOG_DEBUG("ADS Configuration Completed!");
 }
 
 void AdsModule::Enable( )
@@ -379,7 +377,9 @@ void AdsModule::UpdateLatestFrame( )
     float tot1 = 0, tot2 = 0, tot3 = 0, tot4 = 0;
     float min1 = std::numeric_limits<float>::max( ), min2 = min1, min3 = min1, min4 = min1;
     float max1 = std::numeric_limits<float>::lowest( ), max2 = max1, max3 = max1, max4 = max1;
-    for (size_t i = 0; i < m_channels.size( ); i++)
+    // Ignore the first half of the samples taken.
+    int cnt = 0;
+    for (size_t i = (m_channels.size( ) / 2); i < m_channels.size( ); i++)
     {
         min1 = std::min(min1, m_channels.channel1[i]);
         min2 = std::min(min2, m_channels.channel2[i]);
@@ -393,11 +393,12 @@ void AdsModule::UpdateLatestFrame( )
         tot2 += m_channels.channel2[i];
         tot3 += m_channels.channel3[i];
         tot4 += m_channels.channel4[i];
+        cnt++;
     }
-    tot1 /= m_channels.size( );
-    tot2 /= m_channels.size( );
-    tot3 /= m_channels.size( );
-    tot4 /= m_channels.size( );
+    tot1 /= cnt;
+    tot2 /= cnt;
+    tot3 /= cnt;
+    tot4 /= cnt;
     m_latestFrame.avgChannel1 = ConvertToHex(tot1);
     m_latestFrame.avgChannel2 = ConvertToHex(tot2);
     m_latestFrame.avgChannel3 = ConvertToHex(tot3);
@@ -418,7 +419,7 @@ void AdsModule::UpdateLatestFrame( )
     m_channels.channel4.clear( );
 
     // Debug stuff.
-#    if 0
+#    if 1
     LOG_DEBUG("[ADS] \n\r\tCH1: 0x%06X (%0.3f) min: %0.3f\tmax: %0.3f"
               "\n\r\tCH2: 0x%06X (%0.3f) min: %0.3f\tmax: %0.3f"
               "\n\r\tCH3: 0x%06X (%0.3f) min: %0.3f\tmax: %0.3f"

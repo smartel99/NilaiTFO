@@ -31,7 +31,7 @@ UmoModule::UmoModule(UartModule* uart, size_t universeCnt, const std::string& la
     m_uart->SetExpectedRxLen(1 + Universe::CHANNEL_COUNT + 2);
     m_uart->ClearFrameReceiveCpltCallback( );
 
-    LOG_INFO("[UMO] Module Initialized!");
+    LOG_INFO("[UMO]: Initialized");
 }
 
 void UmoModule::Run( )

@@ -46,6 +46,9 @@ enum SystemStatus
     // Status type:
     Standby = 0x0100,
     Busy    = 0x0200,
+
+    // Physical Status:
+    LidOpen = 0x8000,
 };
 }
 

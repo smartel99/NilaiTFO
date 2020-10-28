@@ -44,6 +44,8 @@ Pca9505Module::Pca9505Module(const PCA9505::Config& config, const std::string& l
     m_i2c->TransmitFrameToRegister(m_address, 0x90, m_polarities.data( ), m_polarities.size( ));
     m_i2c->TransmitFrameToRegister(m_address, 0x98, m_directions.data( ), m_directions.size( ));
     m_i2c->TransmitFrameToRegister(m_address, 0xA0, m_interrupts.data( ), m_interrupts.size( ));
+
+    LOG_INFO("[%s]: Initialized", m_label.c_str( ));
 }
 
 void Pca9505Module::Run( )
