@@ -61,7 +61,7 @@ void UmoModule::Run( )
         UART::Frame frame = m_uart->Receive( );
         // Make sure the Universe is valid. (Valid ID + CRC)
         if (frame.data[0] < m_universes.size( ) &&
-            frame.data.size( ) == (1 + Universe::CHANNEL_COUNT + 2))
+            sizeof_array(frame.data) == (1 + Universe::CHANNEL_COUNT + 2))
         {
             // #TODO Check CRC.
             // Copy Universe into module if it is valid.

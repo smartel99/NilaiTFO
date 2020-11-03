@@ -66,9 +66,11 @@ void UartModule::Transmit(const std::vector<uint8_t>& msg)
 
 UART::Frame UartModule::Receive( )
 {
-    UART::Frame frame = m_latestFrames.back( );
-    m_latestFrames.pop_back( );
-    return frame;
+    //    UART::Frame frame = m_latestFrames.back( );
+    //    m_latestFrames.pop_back( );
+    //    return frame;
+    m_framePending = false;
+    return m_latestFrames;
 }
 
 void UartModule::SetExpectedRxLen(size_t len)
@@ -194,7 +196,9 @@ void UartModule::HandleReceptionIRQ( )
 
         if (rxComplete == true)
         {
-            m_latestFrames.emplace_back(UART::Frame{m_rxBuf, HAL_GetTick( )});
+            //            m_latestFrames.push_back(UART::Frame(m_rxBuf, HAL_GetTick( )));
+            m_latestFrames = UART::Frame(m_rxBuf, HAL_GetTick( ));
+            m_framePending = true;
             // Clear reception buffer and call the callback
             m_rxBuf.clear( );
             if (m_cb)

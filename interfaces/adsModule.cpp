@@ -349,7 +349,8 @@ float AdsModule::ConvertToVolt(int32_t val)
     // #TODO Modify this to get the value depending on the ADS's config.
     constexpr float LSB = (2.0f * (2.442f / 1.0f)) / 16777216.0f;
 
-    return ((float)val * LSB);
+    // The 0.02656 value is a negative offset added by the ADS131, which we don't want.
+    return (((float)val * LSB) + 0.02656f);
 }
 
 uint32_t AdsModule::ConvertToHex(float val)

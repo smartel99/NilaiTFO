@@ -83,8 +83,21 @@ enum class SectionState
 
 struct Frame
 {
-    std::vector<uint8_t> data      = std::vector<uint8_t>(515);
-    uint32_t             timestamp = 0;
+    // std::vector<uint8_t> data;
+    uint8_t  data[515] = {0};
+    uint32_t timestamp = 0;
+
+    Frame( ) = default;
+    Frame(const std::vector<uint8_t>& d, uint32_t t) : timestamp(t)
+    {
+        //        volatile size_t s = d.size( );
+        //        data.reserve(s);
+        for (size_t i = 0; i < d.size( ); i++)
+        {
+            data[i] = d[i];
+            //            data.push_back(v);
+        }
+    }
 };
 }    // namespace UART
 
@@ -100,10 +113,10 @@ public:
         m_rxBuf.reserve(512);
         m_sof.reserve(2);
         m_eof.reserve(2);
-        m_latestFrames.reserve(4);
+        //        m_latestFrames.reserve(8);
 
         __HAL_UART_ENABLE_IT(m_handle, UART_IT_RXNE);
-        LOG_INFO("[UART] %s Initialized!", label);
+        LOG_INFO("[UART] %s Initialized!", label.c_str( ));
     }
     virtual ~UartModule( ) override;
 
@@ -115,7 +128,11 @@ public:
     void Transmit(const std::string& msg);
     void Transmit(const std::vector<uint8_t>& msg);
 
-    size_t      GetNumberOfWaitingFrames( ) const { return m_latestFrames.size( ); }
+    size_t GetNumberOfWaitingFrames( ) const
+    {
+        return (m_framePending ? 1 : 0);
+        // return m_latestFrames.size( );
+    }
     UART::Frame Receive( );
 
     void SetExpectedRxLen(size_t len);
@@ -143,13 +160,15 @@ private:
     UART_HandleTypeDef* m_handle = nullptr;
     std::string         m_label  = "";
 
-    UART::Status             m_status           = UART::Status::Ok;
-    size_t                   m_txBytesRemaining = -1;
-    std::vector<uint8_t>     m_txBuf;
-    std::vector<uint8_t>     m_rxBuf;
-    size_t                   m_expectedLen               = 0;
-    uint32_t                 m_lastCharReceivedTimestamp = 0;
-    std::vector<UART::Frame> m_latestFrames;
+    UART::Status         m_status           = UART::Status::Ok;
+    size_t               m_txBytesRemaining = -1;
+    std::vector<uint8_t> m_txBuf;
+    std::vector<uint8_t> m_rxBuf;
+    size_t               m_expectedLen               = 0;
+    uint32_t             m_lastCharReceivedTimestamp = 0;
+    //    std::vector<UART::Frame> m_latestFrames;
+    UART::Frame m_latestFrames;
+    bool        m_framePending = false;
 
     std::string m_sof;
     std::string m_eof;

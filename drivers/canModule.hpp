@@ -284,6 +284,30 @@ struct Frame
     CAN_RxHeaderTypeDef    frame;
     std::array<uint8_t, 8> data;
     uint32_t               timestamp = 0;
+
+    bool operator==(const Frame& other)
+    {
+        // If both have the same extended ID:
+        if (frame.ExtId == other.frame.ExtId)
+        {
+            // For each byte of data:
+            for (size_t i = 0; i < data.size( ); i++)
+            {
+                // If the two bytes are not the same:
+                if (data[i] != other.data[i])
+                {
+                    // Frames are different.
+                    return false;
+                }
+            }
+            // Everything is identical, true.
+            return true;
+        }
+        // ID don't match
+        return false;
+    }
+
+    bool operator!=(const Frame& other) { return !(*this == other); }
 };
 }    // Namespace CAN
 
@@ -327,6 +351,10 @@ public:
     CAN::Status TransmitFrame(uint32_t                    addr,
                               const std::vector<uint8_t>& data          = std::vector<uint8_t>( ),
                               bool                        forceExtended = false);
+    CAN::Status TransmitFrame(uint32_t addr,
+                              uint8_t* data          = nullptr,
+                              size_t   len           = 0,
+                              bool     forceExtended = false);
 
     void SetCallback(CAN::Irq irq, const std::function<void( )>& callback);
     void ClearCallback(CAN::Irq irq);

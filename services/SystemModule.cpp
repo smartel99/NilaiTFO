@@ -24,6 +24,27 @@
 #    define CLEAR_BIT(REG, BIT) ((REG) &= ~(BIT))
 #    define READ_BIT(REG, BIT)  ((REG) & (BIT))
 
+SystemModule::SystemModule(const std::string& label,
+                           uint8_t            universe,
+                           uint8_t            rstChannel,
+                           uint8_t            statusStartChannel,
+                           uint8_t            snStartChannel,
+                           uint8_t            versionChannel)
+    : m_label(label), m_universeId(universe), m_rstChannel(rstChannel),
+      m_snStartChannel(snStartChannel), m_statusStartChannel(statusStartChannel),
+      m_versionChannel(versionChannel)
+{
+    HAL_GPIO_ReadPin(fixtureID1_GPIO_Port, fixtureID1_Pin) == GPIO_PIN_SET
+        ? SET_BIT(m_fixtureId, System::IdBit1)
+        : CLEAR_BIT(m_fixtureId, System::IdBit1);
+    HAL_GPIO_ReadPin(fixtureID2_GPIO_Port, fixtureID2_Pin) == GPIO_PIN_SET
+        ? SET_BIT(m_fixtureId, System::IdBit2)
+        : CLEAR_BIT(m_fixtureId, System::IdBit2);
+    HAL_GPIO_ReadPin(fixtureID3_GPIO_Port, fixtureID3_Pin) == GPIO_PIN_SET
+        ? SET_BIT(m_fixtureId, System::IdBit3)
+        : CLEAR_BIT(m_fixtureId, System::IdBit3);
+}
+
 void SystemModule::Run( )
 {
     static auto* umo = UMO_MODULE;
@@ -95,4 +116,5 @@ void SystemModule::SetStatus(System::SystemStatus status)
 
     SET_BIT(m_status, status);
 }
+
 #endif
