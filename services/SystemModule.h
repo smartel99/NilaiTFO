@@ -84,6 +84,7 @@ private:
     std::string m_label       = "";
     uint16_t    m_status      = 0x0001;
     uint16_t    m_fixtureId   = 0x0000;
+    uint16_t    m_unused      = 0x0000;    // Unused, but don't removed, it is used for alignment.
     uint16_t    m_sn          = 0x0000;
     uint8_t     m_versions[6] = {NILAI_VERSION_MAJOR,
                              NILAI_VERSION_MINOR,
@@ -92,8 +93,9 @@ private:
                              FW_VERSION_MINOR,
                              FW_VERSION_BUILD};
 
-    uint8_t m_rstRq              = 0x00;
-    uint8_t m_universeId         = 0x00;
+    uint8_t m_rstRq      = 0x00;
+    uint8_t m_universeId = 0x00;
+
     uint8_t m_rstChannel         = 0x00;
     uint8_t m_snStartChannel     = 0x01;
     uint8_t m_statusStartChannel = 0x02;

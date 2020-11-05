@@ -34,21 +34,24 @@ SystemModule::SystemModule(const std::string& label,
       m_snStartChannel(snStartChannel), m_statusStartChannel(statusStartChannel),
       m_versionChannel(versionChannel)
 {
-    HAL_GPIO_ReadPin(fixtureID1_GPIO_Port, fixtureID1_Pin) == GPIO_PIN_SET
+    HAL_GPIO_ReadPin(fixtureID1_GPIO_Port, fixtureID1_Pin) == GPIO_PIN_RESET
         ? SET_BIT(m_fixtureId, System::IdBit1)
         : CLEAR_BIT(m_fixtureId, System::IdBit1);
-    HAL_GPIO_ReadPin(fixtureID2_GPIO_Port, fixtureID2_Pin) == GPIO_PIN_SET
+    HAL_GPIO_ReadPin(fixtureID2_GPIO_Port, fixtureID2_Pin) == GPIO_PIN_RESET
         ? SET_BIT(m_fixtureId, System::IdBit2)
         : CLEAR_BIT(m_fixtureId, System::IdBit2);
-    HAL_GPIO_ReadPin(fixtureID3_GPIO_Port, fixtureID3_Pin) == GPIO_PIN_SET
+    HAL_GPIO_ReadPin(fixtureID3_GPIO_Port, fixtureID3_Pin) == GPIO_PIN_RESET
         ? SET_BIT(m_fixtureId, System::IdBit3)
         : CLEAR_BIT(m_fixtureId, System::IdBit3);
+
+    m_status |= m_fixtureId;
 }
 
 void SystemModule::Run( )
 {
     static auto* umo = UMO_MODULE;
 
+    m_status |= m_fixtureId;
     // Check if lid is open or closed.
     // COVER_IN == high -> lid open
     m_status = (HAL_GPIO_ReadPin(COVER_IN_GPIO_Port, COVER_IN_Pin)) ? m_status | 0x8000
@@ -63,23 +66,23 @@ void SystemModule::Run( )
 
     if (umo->IsUniverseReady(m_universeId))
     {
-        // Check if we should reset.
+        // Check if we should reset. 97
         if (umo->GetChannels(m_universeId, m_rstChannel, 1)[0] == 1)
         {
             m_rstRq = 0x01;
         }
 
-        // Update status in universe.
+        // Update status in universe. 100
         umo->SetChannels(m_universeId,
                          m_statusStartChannel,
                          {(uint8_t)(m_status >> 8), (uint8_t)(m_status & 0x00FF)});
 
-        // Update serial number in universe.
+        // Update serial number in universe. 102
         umo->SetChannels(m_universeId,
                          m_snStartChannel,
                          {(uint8_t)(m_sn >> 8), (uint8_t)(m_sn & 0x00FF)});
 
-        // Update version in universe.
+        // Update version in universe. 130
         umo->SetChannels(m_universeId, m_versionChannel, m_versions, sizeof(m_versions));
     }
 }

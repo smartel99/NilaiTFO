@@ -97,7 +97,7 @@ CAN::Status CanModule::TransmitFrame(uint32_t addr, uint8_t* data, size_t len, b
         }
     }
 
-    TransmitFrame(addr, dataV, forceExtended);
+    return TransmitFrame(addr, dataV, forceExtended);
 }
 
 void CanModule::SetCallback(CAN::Irq irq, const std::function<void( )>& callback)
@@ -537,7 +537,9 @@ void CanModule::HandleErrorIrq(uint32_t ier)
 /*****************************************************************************/
 CAN_FilterTypeDef CanModule::AssertAndConvertFilterStruct(const CAN::FilterConfiguration& config)
 {
-    DISABLE_WARNING(-Wmissing - field - initializers)
+    // clang-format off
+    DISABLE_WARNING(-Wmissing-field-initializers)
+    // clang-format on
     CAN_FilterTypeDef filter = {0, 0, 0, 0, 0, (FunctionalState)0};
     DISABLE_WARNING_POP
 
