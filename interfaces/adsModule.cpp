@@ -11,6 +11,7 @@
  ******************************************************************************
  */
 #include "adsModule.h"
+#include <cmath>
 #if defined(NILAI_USE_ADS) && defined(NILAI_USE_SPI)
 #    include "defines/bitManipulations.hpp"
 #    include "defines/globaldef.h"
@@ -194,7 +195,8 @@ const AdsPacket& AdsModule::RefreshValues(uint32_t timeout)
     HAL_GPIO_WritePin(m_config.pins.chipSelect.port, m_config.pins.chipSelect.pin, GPIO_PIN_SET);
 
     // First 3 bytes are for the status.
-    // Each consecutive trios of bytes represent the data of a channel.
+    // TODO: Maybe check status?
+    // Each consecutive trio of bytes represent the data of a channel.
     float ch1 = CalculateTension(&data[3]);
     float ch2 = CalculateTension(&data[6]);
     float ch3 = CalculateTension(&data[9]);
@@ -349,7 +351,7 @@ float AdsModule::ConvertToVolt(int32_t val)
     // #TODO Modify this to get the value depending on the ADS's config.
     constexpr float LSB = (2.0f * (2.442f / 1.0f)) / 16777216.0f;
 
-    // The 0.02656 value is a negative offset added by the ADS131, which we don't want.
+    //    // The 0.02656 value is a negative offset added by the ADS131, which we don't want.
     return (((float)val * LSB) + 0.02656f);
 }
 
@@ -376,38 +378,64 @@ uint32_t AdsModule::ConvertToHex(float val)
 void AdsModule::UpdateLatestFrame( )
 {
     float tot1 = 0, tot2 = 0, tot3 = 0, tot4 = 0;
+    float rmsTot1 = 0, rmsTot2 = 0, rmsTot3 = 0, rmsTot4 = 0;
     float min1 = std::numeric_limits<float>::max( ), min2 = min1, min3 = min1, min4 = min1;
     float max1 = std::numeric_limits<float>::lowest( ), max2 = max1, max3 = max1, max4 = max1;
     // Ignore the first half of the samples taken.
     int cnt = 0;
-    for (size_t i = (m_channels.size( ) / 2); i < m_channels.size( ); i++)
+    for (size_t i = 0 /*(m_channels.size( ) / 2)*/; i < m_channels.size( ); i++)
     {
         min1 = std::min(min1, m_channels.channel1[i]);
         min2 = std::min(min2, m_channels.channel2[i]);
         min3 = std::min(min3, m_channels.channel3[i]);
         min4 = std::min(min4, m_channels.channel4[i]);
+
         max1 = std::max(max1, m_channels.channel1[i]);
         max2 = std::max(max2, m_channels.channel2[i]);
         max3 = std::max(max3, m_channels.channel3[i]);
         max4 = std::max(max4, m_channels.channel4[i]);
+
         tot1 += m_channels.channel1[i];
         tot2 += m_channels.channel2[i];
         tot3 += m_channels.channel3[i];
         tot4 += m_channels.channel4[i];
+
+        rmsTot1 += m_channels.channel1[i] * m_channels.channel1[i];
+        rmsTot2 += m_channels.channel2[i] * m_channels.channel2[i];
+        rmsTot3 += m_channels.channel3[i] * m_channels.channel3[i];
+        rmsTot4 += m_channels.channel4[i] * m_channels.channel4[i];
         cnt++;
     }
     tot1 /= cnt;
     tot2 /= cnt;
     tot3 /= cnt;
     tot4 /= cnt;
+
+    rmsTot1 /= cnt;
+    rmsTot2 /= cnt;
+    rmsTot3 /= cnt;
+    rmsTot4 /= cnt;
+
+    rmsTot1 = sqrt(rmsTot1);
+    rmsTot2 = sqrt(rmsTot2);
+    rmsTot3 = sqrt(rmsTot3);
+    rmsTot4 = sqrt(rmsTot4);
+
     m_latestFrame.avgChannel1 = ConvertToHex(tot1);
     m_latestFrame.avgChannel2 = ConvertToHex(tot2);
     m_latestFrame.avgChannel3 = ConvertToHex(tot3);
     m_latestFrame.avgChannel4 = ConvertToHex(tot4);
+
+    m_latestFrame.rmsChannel1 = ConvertToHex(rmsTot1);
+    m_latestFrame.rmsChannel2 = ConvertToHex(rmsTot2);
+    m_latestFrame.rmsChannel3 = ConvertToHex(rmsTot3);
+    m_latestFrame.rmsChannel4 = ConvertToHex(rmsTot4);
+
     m_latestFrame.minChannel1 = ConvertToHex(min1);
     m_latestFrame.minChannel2 = ConvertToHex(min2);
     m_latestFrame.minChannel3 = ConvertToHex(min3);
     m_latestFrame.minChannel4 = ConvertToHex(min4);
+
     m_latestFrame.maxChannel1 = ConvertToHex(max1);
     m_latestFrame.maxChannel2 = ConvertToHex(max2);
     m_latestFrame.maxChannel3 = ConvertToHex(max3);
@@ -419,7 +447,7 @@ void AdsModule::UpdateLatestFrame( )
     m_channels.channel3.clear( );
     m_channels.channel4.clear( );
 
-    // Debug stuff.
+// Debug stuff.
 #    if 1
     LOG_DEBUG("[ADS] \n\r\tCH1: 0x%06X (%0.3f) min: %0.3f\tmax: %0.3f"
               "\n\r\tCH2: 0x%06X (%0.3f) min: %0.3f\tmax: %0.3f"

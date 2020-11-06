@@ -51,6 +51,11 @@ struct AdsPacket
     int32_t maxChannel2 = 0;
     int32_t maxChannel3 = 0;
     int32_t maxChannel4 = 0;
+
+    int32_t rmsChannel1 = 0;
+    int32_t rmsChannel2 = 0;
+    int32_t rmsChannel3 = 0;
+    int32_t rmsChannel4 = 0;
 };
 
 class SystemModule;
@@ -93,6 +98,11 @@ public:
     int32_t GetMaxChannel3( ) const { return m_latestFrame.maxChannel3; }
     int32_t GetMaxChannel4( ) const { return m_latestFrame.maxChannel4; }
 
+    int32_t GetRmsChannel1( ) const { return m_latestFrame.rmsChannel1; }
+    int32_t GetRmsChannel2( ) const { return m_latestFrame.rmsChannel2; }
+    int32_t GetRmsChannel3( ) const { return m_latestFrame.rmsChannel3; }
+    int32_t GetRmsChannel4( ) const { return m_latestFrame.rmsChannel4; }
+
     // Use force = true if you want the config to be applied no matter what.
     void Configure(const ADS::Config& config = ADS::Config( ), bool force = false);
     void Enable( );
@@ -100,6 +110,7 @@ public:
 
     // Using timeout = 0 skips the waiting for DRDY
     const AdsPacket& RefreshValues(uint32_t timeout = 0);
+    inline float     CalculateTension(uint8_t* data);
 
     bool IsActive( ) const { return m_active; }
 
@@ -158,7 +169,6 @@ private:
     inline bool     SendConfig(uint8_t addr, uint8_t data);
     inline uint16_t Send(uint16_t data);
     inline uint16_t ReadCommandResponse( );
-    inline float    CalculateTension(uint8_t* data);
     inline float    ConvertToVolt(int32_t val);
     inline uint32_t ConvertToHex(float val);
     void            UpdateLatestFrame( );
