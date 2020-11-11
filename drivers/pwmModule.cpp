@@ -103,9 +103,10 @@ void PwmModule::SetFrequency(uint64_t hz)
 
 void PwmModule::SetDutyCycle(uint32_t percent)
 {
+    // TODO: Fix this function so that we can set the duty cycle.
     // Clip percent to 100, we can't have more than a 100% duty cycle.
-    percent           = (percent < 100) ? percent : 100;
-    float requestedDC = (float)percent / 100.0f;
+    //    percent           = (percent < 100) ? percent : 100;
+    //    float requestedDC = (float)percent / 100.0f;
 
     // If the PWM is currently active, disable it.
     if (m_isActive)
