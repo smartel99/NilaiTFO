@@ -55,7 +55,7 @@ void UartModule::Transmit(const char* msg, size_t len)
     m_txBytesRemaining = m_txBuf.size();
 
     // Send the message.
-    if (HAL_UART_Transmit_IT(m_handle, m_txBuf.data(), m_txBuf.size()) != HAL_OK)
+    if (HAL_UART_Transmit_IT(m_handle, m_txBuf.data(), (uint16_t)m_txBuf.size()) != HAL_OK)
     {
         LOG_ERROR("In {}::Transmit: Unable to transmit message", m_label);
         return;
