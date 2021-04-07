@@ -13,8 +13,8 @@
 #ifndef _MACROS_HPP_H_
 #    define _MACROS_HPP_H_
 
-#    include "processes/application.hpp"
-#    include "services/logger.hpp"
+#    include "shared/processes/application.hpp"
+#    include "shared/services/logger.hpp"
 
 /*************************************************************************************************/
 /* Defines ------------------------------------------------------------------------------------- */
