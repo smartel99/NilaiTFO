@@ -118,7 +118,6 @@ public:
         m_eof.reserve(2);
         //        m_latestFrames.reserve(8);
 
-        __HAL_UART_ENABLE_IT(m_handle, UART_IT_RXNE);
         LOG_INFO("[UART] %s Initialized!", label.c_str());
     }
     virtual ~UartModule() override;
@@ -126,6 +125,9 @@ public:
     virtual void Run() override;
 
     virtual const std::string& GetLabel() const override { return m_label; }
+
+    inline void EnableRxInterrupt() { __HAL_UART_ENABLE_IT(m_handle, UART_IT_RXNE); }
+    inline void DisableRxInterrupt() { __HAL_UART_DISABLE_IT(m_handle, UART_IT_RXNE); }
 
     void Transmit(const char* msg, size_t len);
     void Transmit(const std::string& msg);
