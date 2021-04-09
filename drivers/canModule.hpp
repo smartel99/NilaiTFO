@@ -11,23 +11,24 @@
  * @brief       CAN communication module
  */
 #ifndef CAN_MODULE_HPP_
-#    define CAN_MODULE_HPP_
+#define CAN_MODULE_HPP_
 /*************************************************************************************************/
 /* Includes
  * ------------------------------------------------------------------------------------
  */
-#    if defined(NILAI_USE_CAN)
-#        include "stm32f4xx_hal.h"
-#        if defined(HAL_CAN_MODULE_ENABLED)
-#            include "defines/macros.hpp"
-#            include "defines/misc.hpp"
-#            include "defines/module.hpp"
+#if defined(NILAI_USE_CAN)
+#include "defines/internalConfig.h"
+#include NILAI_HAL_HEADER
+#if defined(HAL_CAN_MODULE_ENABLED)
+#include "defines/macros.hpp"
+#include "defines/misc.hpp"
+#include "defines/module.hpp"
 
-#            include <array>
-#            include <cstdint>
-#            include <functional>
-#            include <map>
-#            include <vector>
+#include <array>
+#include <cstdint>
+#include <functional>
+#include <map>
+#include <vector>
 
 /*************************************************************************************************/
 /* Defines
@@ -39,7 +40,7 @@
  * ----------------------------------------------------------------------------
  */
 
-namespace CAN
+namespace CEP_CAN
 {
 /**
  * @addtogroup  CAN_Status
@@ -98,10 +99,10 @@ enum class Status
     //!< Parameter error.
     ERROR_PARAM = 0x00200000U,
 
-#            if USE_HAL_CAN_REGISTER_CALLBACKS == 1
+#if USE_HAL_CAN_REGISTER_CALLBACKS == 1
     //!< Invalid Callback error */
     ERROR_INVALID_CALLBACK = 0x00400000U,
-#            endif
+#endif
 
     //!< Internal error.
     ERROR_INTERNAL = 0x00800000U,
@@ -130,7 +131,10 @@ constexpr inline Status operator&(Status a, Status b)
     return static_cast<Status>(static_cast<std::underlying_type_t<Status>>(a) &
                                static_cast<std::underlying_type_t<Status>>(b));
 }
-constexpr inline Status operator|=(Status& a, const Status& b) { return a = a | b; }
+constexpr inline Status operator|=(Status& a, const Status& b)
+{
+    return a = a | b;
+}
 /**
  * @}
  */
@@ -291,7 +295,7 @@ struct Frame
         if (frame.ExtId == other.frame.ExtId)
         {
             // For each byte of data:
-            for (size_t i = 0; i < data.size( ); i++)
+            for (size_t i = 0; i < data.size(); i++)
             {
                 // If the two bytes are not the same:
                 if (data[i] != other.data[i])
@@ -309,66 +313,66 @@ struct Frame
 
     bool operator!=(const Frame& other) { return !(*this == other); }
 };
-}    // Namespace CAN
+}    // Namespace CEP_CAN
 
 class CanModule : public cep::Module
 {
 public:
     CanModule(CAN_HandleTypeDef* handle, const std::string& label)
-        : m_handle(handle), m_label(label)
+    : m_handle(handle), m_label(label)
     {
         CEP_ASSERT(handle != nullptr, "CAN Handle is NULL!");
         m_framesReceived.reserve(5);
         m_callbacks =
-            std::map<CAN::Irq, std::function<void( )>>({{CAN::Irq::TxMailboxEmpty, {}},
-                                                        {CAN::Irq::Fifo0MessagePending, {}},
-                                                        {CAN::Irq::Fifo0Full, {}},
-                                                        {CAN::Irq::Fifo0Overrun, {}},
-                                                        {CAN::Irq::Fifo1MessagePending, {}},
-                                                        {CAN::Irq::Fifo1Full, {}},
-                                                        {CAN::Irq::Fifo1Overrun, {}},
-                                                        {CAN::Irq::Wakeup, {}},
-                                                        {CAN::Irq::SleepAck, {}},
-                                                        {CAN::Irq::ErrorWarning, {}},
-                                                        {CAN::Irq::ErrorPassive, {}},
-                                                        {CAN::Irq::BusOffError, {}},
-                                                        {CAN::Irq::LastErrorCode, {}},
-                                                        {CAN::Irq::ErrorStatus, {}}});
+          std::map<CEP_CAN::Irq, std::function<void()>>({{CEP_CAN::Irq::TxMailboxEmpty, {}},
+                                                     {CEP_CAN::Irq::Fifo0MessagePending, {}},
+                                                     {CEP_CAN::Irq::Fifo0Full, {}},
+                                                     {CEP_CAN::Irq::Fifo0Overrun, {}},
+                                                     {CEP_CAN::Irq::Fifo1MessagePending, {}},
+                                                     {CEP_CAN::Irq::Fifo1Full, {}},
+                                                     {CEP_CAN::Irq::Fifo1Overrun, {}},
+                                                     {CEP_CAN::Irq::Wakeup, {}},
+                                                     {CEP_CAN::Irq::SleepAck, {}},
+                                                     {CEP_CAN::Irq::ErrorWarning, {}},
+                                                     {CEP_CAN::Irq::ErrorPassive, {}},
+                                                     {CEP_CAN::Irq::BusOffError, {}},
+                                                     {CEP_CAN::Irq::LastErrorCode, {}},
+                                                     {CEP_CAN::Irq::ErrorStatus, {}}});
 
         HAL_CAN_Start(m_handle);
 
-        LOG_INFO("[%s]: Initialized", m_label.c_str( ));
+        LOG_INFO("[%s]: Initialized", m_label.c_str());
     }
-    virtual ~CanModule( ) override;
+    virtual ~CanModule() override;
 
-    virtual void               Run( ) override;
-    virtual const std::string& GetLabel( ) const override { return m_label; }
+    virtual void               Run() override;
+    virtual const std::string& GetLabel() const override { return m_label; }
 
-    void ConfigureFilter(const CAN::FilterConfiguration& config);
+    void ConfigureFilter(const CEP_CAN::FilterConfiguration& config);
 
-    size_t      GetNumberOfAvailableFrames( ) const { return m_framesReceived.size( ); }
-    CAN::Frame  ReceiveFrame( );
-    CAN::Status TransmitFrame(uint32_t                    addr,
-                              const std::vector<uint8_t>& data          = std::vector<uint8_t>( ),
+    size_t      GetNumberOfAvailableFrames() const { return m_framesReceived.size(); }
+    CEP_CAN::Frame  ReceiveFrame();
+    CEP_CAN::Status TransmitFrame(uint32_t                    addr,
+                              const std::vector<uint8_t>& data          = std::vector<uint8_t>(),
                               bool                        forceExtended = false);
-    CAN::Status TransmitFrame(uint32_t addr,
+    CEP_CAN::Status TransmitFrame(uint32_t addr,
                               uint8_t* data          = nullptr,
                               size_t   len           = 0,
                               bool     forceExtended = false);
 
-    void SetCallback(CAN::Irq irq, const std::function<void( )>& callback);
-    void ClearCallback(CAN::Irq irq);
+    void SetCallback(CEP_CAN::Irq irq, const std::function<void()>& callback);
+    void ClearCallback(CEP_CAN::Irq irq);
 
-    void EnableInterrupt(CAN::Irq irq);
-    void EnableInterrupts(const std::vector<CAN::Irq>& irqs)
+    void EnableInterrupt(CEP_CAN::Irq irq);
+    void EnableInterrupts(const std::vector<CEP_CAN::Irq>& irqs)
     {
         for (const auto& irq : irqs)
         {
             EnableInterrupt(irq);
         }
     }
-    void DisableInterrupt(CAN::Irq irq);
-    void DisableInterrupts(const std::vector<CAN::Irq>& irqs)
+    void DisableInterrupt(CEP_CAN::Irq irq);
+    void DisableInterrupts(const std::vector<CEP_CAN::Irq>& irqs)
     {
         for (const auto& irq : irqs)
         {
@@ -376,12 +380,12 @@ public:
         }
     }
 
-    void HandleIrq( );
+    void HandleIrq();
 
 private:
-    CAN_FilterTypeDef AssertAndConvertFilterStruct(const CAN::FilterConfiguration& config);
-    bool              WaitForFreeMailbox( );
-    void              HandleFrameReception(CAN::RxFifo fifo);
+    CAN_FilterTypeDef AssertAndConvertFilterStruct(const CEP_CAN::FilterConfiguration& config);
+    bool              WaitForFreeMailbox();
+    void              HandleFrameReception(CEP_CAN::RxFifo fifo);
     void              HandleTxMailbox0Irq(uint32_t ier);
     void              HandleTxMailbox1Irq(uint32_t ier);
     void              HandleTxMailbox2Irq(uint32_t ier);
@@ -394,20 +398,20 @@ private:
 private:
     CAN_HandleTypeDef* m_handle = nullptr;
     std::string        m_label  = "";
-    CAN::Status        m_status = CAN::Status::ERROR_NONE;
+    CEP_CAN::Status        m_status = CEP_CAN::Status::ERROR_NONE;
 
-    std::vector<CAN::Frame>                      m_framesReceived;
-    std::map<CAN::Irq, std::function<void( )>>   m_callbacks;
-    std::map<uint64_t, CAN::FilterConfiguration> m_filters;
+    std::vector<CEP_CAN::Frame>                      m_framesReceived;
+    std::map<CEP_CAN::Irq, std::function<void()>>    m_callbacks;
+    std::map<uint64_t, CEP_CAN::FilterConfiguration> m_filters;
 
     static constexpr uint32_t TIMEOUT = 15;
 };
-#        else
-#            if WARN_MISSING_STM_DRIVERS
-#                warning NilaiTFO CAN module enabled, but HAL_CAN_MODULE_ENABLED is not defined!
-#            endif
-#        endif
-#    endif
+#else
+#if WARN_MISSING_STM_DRIVERS
+#warning NilaiTFO CAN module enabled, but HAL_CAN_MODULE_ENABLED is not defined!
+#endif
+#endif
+#endif
 #endif
 /**
  * @}

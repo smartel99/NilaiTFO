@@ -5,8 +5,7 @@
  * @{
  *
  * @file        Logger.hpp
- * @author      Pascal-Emmanuel Lachance
- * @p           https://www.github.com/Raesangur
+ * @author      Samuel Martel
  * @date        2020/06/29 - 11:30
  */
 #pragma once

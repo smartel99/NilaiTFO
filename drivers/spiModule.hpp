@@ -12,20 +12,21 @@
  * @brief       SPI communication module
  */
 #ifndef SPI_MODULE_HPP_
-#    define SPI_MODULE_HPP_
+#define SPI_MODULE_HPP_
 /*************************************************************************************************/
 /* Includes
  * ------------------------------------------------------------------------------------
  */
-#    if defined(NILAI_USE_SPI)
-#        include "stm32f4xx_hal.h"
-#        if defined(HAL_CAN_MODULE_ENABLED)
-#            include "defines/macros.hpp"
-#            include "defines/misc.hpp"
-#            include "defines/module.hpp"
+#if defined(NILAI_USE_SPI)
+#include "defines/internalConfig.h"
+#include NILAI_HAL_HEADER
+#if defined(HAL_CAN_MODULE_ENABLED)
+#include "defines/macros.hpp"
+#include "defines/misc.hpp"
+#include "defines/module.hpp"
 
-#            include <string>
-#            include <vector>
+#include <string>
+#include <vector>
 
 /*************************************************************************************************/
 /* Defines
@@ -61,10 +62,10 @@ enum class Status
     FLAG = 0x00000020U,
     /*!< Error during SPI Abort procedure */
     ABORT = 0x00000040U,
-#            if USE_HAL_SPI_REGISTER_CALLBACKS == 1
+#if USE_HAL_SPI_REGISTER_CALLBACKS == 1
     /*!< Invalid Callback error  */
     SPI_ERROR_INVALID_CALLBACK = 0x00000080U,
-#            endif /* USE_HAL_SPI_REGISTER_CALLBACKS */
+#endif /* USE_HAL_SPI_REGISTER_CALLBACKS */
     /*!< Module is not enabled            */
     NOT_INIT = 0x00000100U,
     /*!< Bad initialization               */
@@ -104,7 +105,10 @@ constexpr inline Status operator&(Status a, Status b) noexcept
     return static_cast<Status>(static_cast<std::underlying_type_t<Status>>(a) &
                                static_cast<std::underlying_type_t<Status>>(b));
 }
-constexpr inline Status operator|=(Status& a, const Status& b) noexcept { return a = a | b; }
+constexpr inline Status operator|=(Status& a, const Status& b) noexcept
+{
+    return a = a | b;
+}
 /**
  * @}
  */
@@ -125,16 +129,16 @@ class SpiModule : public cep::Module
 {
 public:
     SpiModule(SPI_HandleTypeDef* handle, const std::string& label)
-        : m_label(label), m_handle(handle)
+    : m_label(label), m_handle(handle)
     {
         CEP_ASSERT(handle != nullptr, "SPI Handle is NULL!");
-        LOG_INFO("[%s]: Initialized", m_label.c_str( ));
+        LOG_INFO("[%s]: Initialized", m_label.c_str());
     }
 
-    virtual ~SpiModule( ) override;
+    virtual ~SpiModule() override;
 
-    virtual void               Run( ) override;
-    virtual const std::string& GetLabel( ) const override { return m_label; }
+    virtual void               Run() override;
+    virtual const std::string& GetLabel() const override { return m_label; }
 
     SPI::Status Transmit(const std::vector<uint8_t> pkt);
     SPI::Status Transmit(const uint8_t* data, size_t len);
@@ -151,7 +155,7 @@ public:
     SPI::Status Receive(uint8_t* ouptutData, size_t len);
     SPI::Status Receive(std::vector<uint8_t>& outputData)
     {
-        return Receive(outputData.data( ), outputData.size( ));
+        return Receive(outputData.data(), outputData.size());
     }
     inline SPI::Status ReceiveByte(uint8_t* outputData) { return Receive(outputData, 1); }
     inline SPI::Status Receive16(uint16_t* outputData)
@@ -181,15 +185,15 @@ private:
     SPI::Status        m_status = SPI::Status::NONE;
 
 private:
-    void ErrorHandler( );
-    bool WaitUntilNotBusy( );
+    void ErrorHandler();
+    bool WaitUntilNotBusy();
 };
-#        else
-#            if WARN_MISSING_STM_DRIVERS
-#                warning NilaiTFO SPI module enabled, but HAL_SPI_USE_MODULE is not defined!
-#            endif
-#        endif
-#    endif
+#else
+#if WARN_MISSING_STM_DRIVERS
+#warning NilaiTFO SPI module enabled, but HAL_SPI_USE_MODULE is not defined!
+#endif
+#endif
+#endif
 #endif
 /**
  * @}

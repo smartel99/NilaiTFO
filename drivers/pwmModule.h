@@ -15,14 +15,15 @@
 /***********************************************/
 /* Includes */
 #if defined(NILAI_USE_PWM)
-#    include "stm32f4xx_hal.h"
-#    if defined(HAL_TIM_MODULE_ENABLED)
-#        include "defines/macros.hpp"
-#        include "defines/misc.hpp"
-#        include "defines/module.hpp"
+#include "defines/internalConfig.h"
+#include NILAI_HAL_HEADER
+#if defined(HAL_TIM_MODULE_ENABLED)
+#include "defines/macros.hpp"
+#include "defines/misc.hpp"
+#include "defines/module.hpp"
 
-#        include <string>
-#        include <vector>
+#include <string>
+#include <vector>
 
 namespace PWM
 {
@@ -40,18 +41,18 @@ class PwmModule : public cep::Module
 public:
     PwmModule(TIM_HandleTypeDef* timer, PWM::Channels channel, const std::string& label);
 
-    virtual void               Run( ) override;
-    virtual const std::string& GetLabel( ) const override { return m_label; }
+    virtual void               Run() override;
+    virtual const std::string& GetLabel() const override { return m_label; }
 
-    void Enable( );
-    void Disable( );
-    bool IsEnabled( ) const { return m_isActive; }
+    void Enable();
+    void Disable();
+    bool IsEnabled() const { return m_isActive; }
 
     void     SetFrequency(uint64_t hz);
-    uint64_t GetFrequency( ) const { return m_activeFreq; }
+    uint64_t GetFrequency() const { return m_activeFreq; }
 
     void     SetDutyCycle(uint32_t percent);
-    uint32_t GetDutyCycle( ) const { return m_activeDutyCycle; }
+    uint32_t GetDutyCycle() const { return m_activeDutyCycle; }
 
 private:
     TIM_HandleTypeDef* m_timer   = nullptr;
@@ -63,11 +64,11 @@ private:
     bool     m_isActive        = false;
 };
 
-#    else
-#        if WARN_MISSING_STM_DRIVERS
-#            warning NilaiTFO PWM Module enabled, but HAL_TIM_MODULE_ENABLED is not defined!
-#        endif
-#    endif
+#else
+#if WARN_MISSING_STM_DRIVERS
+#warning NilaiTFO PWM Module enabled, but HAL_TIM_MODULE_ENABLED is not defined!
+#endif
+#endif
 #endif
 
 /***********************************************/

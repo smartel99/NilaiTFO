@@ -11,20 +11,21 @@
  * @brief       UART communication module
  */
 #ifndef UART_MODULE_HPP_
-#    define UART_MODULE_HPP_
+#define UART_MODULE_HPP_
 /*************************************************************************************************/
 /* Includes ------------------------------------------------------------------------------------ */
-#    if defined(NILAI_USE_UART)
-#        include "stm32f4xx_hal.h"
-#        if defined(HAL_UART_MODULE_ENABLED)
-#            include "defines/macros.hpp"
-#            include "defines/misc.hpp"
-#            include "defines/module.hpp"
+#if defined(NILAI_USE_UART)
+#include "defines/internalConfig.h"
+#include NILAI_HAL_HEADER
+#if defined(HAL_UART_MODULE_ENABLED)
+#include "defines/macros.hpp"
+#include "defines/misc.hpp"
+#include "defines/module.hpp"
 
-#            include <cstdint>       // For uint8_t, size_t
-#            include <functional>    // For std::function
-#            include <string>        // For std::string
-#            include <vector>        // For std::vector
+#include <cstdint>       // For uint8_t, size_t
+#include <functional>    // For std::function
+#include <string>        // For std::string
+#include <vector>        // For std::vector
 
 /*************************************************************************************************/
 /* Defines ------------------------------------------------------------------------------------- */
@@ -70,7 +71,10 @@ constexpr inline Status operator&(Status a, Status b)
     return static_cast<Status>(static_cast<std::underlying_type_t<Status>>(a) &
                                static_cast<std::underlying_type_t<Status>>(b));
 }
-constexpr inline Status operator|=(Status& a, const Status& b) { return a = a | b; }
+constexpr inline Status operator|=(Status& a, const Status& b)
+{
+    return a = a | b;
+}
 /**
  * @}
  */
@@ -87,12 +91,12 @@ struct Frame
     uint8_t  data[515] = {0};
     uint32_t timestamp = 0;
 
-    Frame( ) = default;
+    Frame() = default;
     Frame(const std::vector<uint8_t>& d, uint32_t t) : timestamp(t)
     {
         //        volatile size_t s = d.size( );
         //        data.reserve(s);
-        for (size_t i = 0; i < d.size( ); i++)
+        for (size_t i = 0; i < d.size(); i++)
         {
             data[i] = d[i];
             //            data.push_back(v);
@@ -116,45 +120,45 @@ public:
         //        m_latestFrames.reserve(8);
 
         __HAL_UART_ENABLE_IT(m_handle, UART_IT_RXNE);
-        LOG_INFO("[UART] %s Initialized!", label.c_str( ));
+        LOG_INFO("[UART] %s Initialized!", label.c_str());
     }
-    virtual ~UartModule( ) override;
+    virtual ~UartModule() override;
 
-    virtual void Run( ) override;
+    virtual void Run() override;
 
-    virtual const std::string& GetLabel( ) const override { return m_label; }
+    virtual const std::string& GetLabel() const override { return m_label; }
 
     void Transmit(const char* msg, size_t len);
     void Transmit(const std::string& msg);
     void Transmit(const std::vector<uint8_t>& msg);
 
-    size_t GetNumberOfWaitingFrames( ) const
+    size_t GetNumberOfWaitingFrames() const
     {
         return (m_framePending ? 1 : 0);
         // return m_latestFrames.size( );
     }
-    UART::Frame Receive( );
+    UART::Frame Receive();
 
     void SetExpectedRxLen(size_t len);
-    void ClearExpectedRxLen( );
+    void ClearExpectedRxLen();
 
-    void SetFrameReceiveCpltCallback(const std::function<void( )>& cb);
-    void ClearFrameReceiveCpltCallback( );
+    void SetFrameReceiveCpltCallback(const std::function<void()>& cb);
+    void ClearFrameReceiveCpltCallback();
 
     void SetStartOfFrameSequence(uint8_t* sof, size_t len);
     void SetStartOfFrameSequence(const std::string& sof);
     void SetStartOfFrameSequence(const std::vector<uint8_t>& sof);
-    void ClearStartOfFrameSequence( );
+    void ClearStartOfFrameSequence();
 
     void SetEndOfFrameSequence(uint8_t* eof, size_t len);
     void SetEndOfFrameSequence(const std::string& eof);
     void SetEndOfFrameSequence(const std::vector<uint8_t>& eof);
-    void ClearEndOfFrameSequence( );
+    void ClearEndOfFrameSequence();
 
-    void HandleReceptionIRQ( );
+    void HandleReceptionIRQ();
 
 private:
-    bool WaitUntilTransmitionComplete( );
+    bool WaitUntilTransmitionComplete();
 
 private:
     UART_HandleTypeDef* m_handle = nullptr;
@@ -173,17 +177,17 @@ private:
     std::string m_sof;
     std::string m_eof;
 
-    std::function<void( )> m_cb;
+    std::function<void()> m_cb;
 
     static constexpr uint32_t TIMEOUT    = 100;    // Systicks.
     static constexpr uint32_t RX_TIMEOUT = 50;     // Systicks.
 };
-#        else
-#            if WARN_MISSING_STM_DRIVERS
-#                warning NilaiTFO UART module enabled, but HAL_UART_MODULE_ENABLE is not defined!
-#            endif
-#        endif
-#    endif
+#else
+#if WARN_MISSING_STM_DRIVERS
+#warning NilaiTFO UART module enabled, but HAL_UART_MODULE_ENABLE is not defined!
+#endif
+#endif
+#endif
 #endif
 
 /**
