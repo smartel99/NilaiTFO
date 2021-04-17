@@ -11,10 +11,10 @@
  */
 /*************************************************************************************************/
 #ifndef _MACROS_HPP_H_
-#    define _MACROS_HPP_H_
+#define _MACROS_HPP_H_
 
-#    include "shared/processes/application.hpp"
-#    include "shared/services/logger.hpp"
+#include "processes/application.hpp"
+#include "services/logger.hpp"
 
 /*************************************************************************************************/
 /* Defines ------------------------------------------------------------------------------------- */
@@ -27,7 +27,7 @@
  *
  * @param   x : The array to calculate the size
  */
-#    define sizeof_array(x) (size_t)(sizeof(x) / sizeof((x)[0]))
+#define sizeof_array(x) (size_t)(sizeof(x) / sizeof((x)[0]))
 
 /**
  * @brief   Check if a boolean condition `x` is true, if false:                                  \n
@@ -40,19 +40,19 @@
  * @note    The macro is embedded within a `do while` loop to allow for a `;` to be inserted at the
  *          end of the macro without warnings.
  */
-#    if defined(DEBUG)
-#        define CEP_ASSERT(x, msg, ...)                                                            \
-            do                                                                                     \
-            {                                                                                      \
-                if (!(x))                                                                          \
-                {                                                                                  \
-                    LOG_DEBUG(msg, ##__VA_ARGS__);                                                 \
-                    cep::Application::AssertFailed( );                                             \
-                }                                                                                  \
-            } while (false)
-#    else
-#        define CEP_ASSERT(x, msg, ...)
-#    endif
+#if defined(DEBUG)
+#define CEP_ASSERT(x, msg, ...)                                                                    \
+    do                                                                                             \
+    {                                                                                              \
+        if (!(x))                                                                                  \
+        {                                                                                          \
+            LOG_DEBUG(msg, ##__VA_ARGS__);                                                         \
+            cep::Application::AssertFailed();                                                      \
+        }                                                                                          \
+    } while (false)
+#else
+#define CEP_ASSERT(x, msg, ...)
+#endif
 
 /*************************************************************************************************/
 /**
