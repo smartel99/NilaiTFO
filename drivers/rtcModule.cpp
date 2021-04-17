@@ -11,7 +11,8 @@
 
 #include "rtcModule.h"
 
-
+#if defined(NILAI_USE_RTC) && defined(HAL_RTC_MODULE_ENABLED)
 void RtcModule::Run()
 {
 }
+#endif
