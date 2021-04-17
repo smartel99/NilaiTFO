@@ -40,11 +40,11 @@
                                                       ##__VA_ARGS__)                               \
                                  : (void)0;                                                        \
     } while (0)
+#define INT_NILAI_LOG_IMPL_OK
 #elif !defined(NILAI_USE_RTC)
-#error The RTC module must be enabled!
+#error NILAI_LOGGER_USE_RTC was defined, the RTC module must also be enabled!
 #else
-// TODO Find a way to let the user define the path of Nilai.
-#include "shared/drivers/rtcModule.h"
+#include "drivers/rtcModule.h"
 #define LOG_HELPER(msg, ...)                                                                       \
     do                                                                                             \
     {                                                                                              \
@@ -54,23 +54,39 @@
                                                       ##__VA_ARGS__)                               \
                                  : (void)0;                                                        \
     } while (0)
+#define INT_NILAI_LOG_IMPL_OK
 #endif
 
-/** Prints a debug message */
-#define LOG_DEBUG(msg, ...)    LOG_HELPER("[DEBUG   ]: " msg "\n\r\0", ##__VA_ARGS__)
+#if defined(NILAI_LOG_ENABLE_DEBUG) && defined(INT_NILAI_LOG_IMPL_OK)
+#define LOG_DEBUG(msg, ...) LOG_HELPER("[DEBUG   ]: " msg "\n\r\0", ##__VA_ARGS__)
+#else
+#define LOG_DEBUG(msg, ...)
+#endif
 
-/** Prints a information message */
-#define LOG_INFO(msg, ...)     LOG_HELPER("[INFO    ]: " msg "\n\r\0", ##__VA_ARGS__)
+#if defined(NILAI_LOG_ENABLE_INFO) && defined(INT_NILAI_LOG_IMPL_OK)
+#define LOG_INFO(msg, ...) LOG_HELPER("[INFO    ]: " msg "\n\r\0", ##__VA_ARGS__)
+#else
+#define LOG_INFO(msg, ...)
+#endif
 
-/** Prints a warning message */
-#define LOG_WARNING(msg, ...)  LOG_HELPER("[WARN    ]: " msg "\n\r\0", ##__VA_ARGS__)
+#if defined(NILAI_LOG_ENABLE_WARNING) && defined(INT_NILAI_LOG_IMPL_OK)
+#define LOG_WARNING(msg, ...) LOG_HELPER("[WARN    ]: " msg "\n\r\0", ##__VA_ARGS__)
+#else
+#define LOG_WARNING(msg, ...)
+#endif
 
-/** Prints an error message */
-#define LOG_ERROR(msg, ...)    LOG_HELPER("[ERROR   ]: " msg "\n\r\0", ##__VA_ARGS__)
+#if defined(NILAI_LOG_ENABLE_ERROR) && defined(INT_NILAI_LOG_IMPL_OK)
+#define LOG_ERROR(msg, ...) LOG_HELPER("[ERROR   ]: " msg "\n\r\0", ##__VA_ARGS__)
+#else
+#define LOG_ERROR(msg, ...)
+#endif
 
-/** Prints a critical error message
- */
+#if defined(NILAI_LOG_ENABLE_CRITICAL) && defined(INT_NILAI_LOG_IMPL_OK)
 #define LOG_CRITICAL(msg, ...) LOG_HELPER("[CRITICAL]: " msg "\n\r\0", ##__VA_ARGS__)
+#else
+#define LOG_CRITICAL(msg, ...)
+#endif
+
 
 class UartModule;
 class Logger
