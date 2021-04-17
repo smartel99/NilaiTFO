@@ -31,20 +31,20 @@
  *  - Ignore Universe
  */
 #ifndef _umoModule
-#    define _umoModule
+#define _umoModule
 
 /*****************************************************************************/
 /* Includes */
-#    include "defines/module.hpp"
-#    include "drivers/uartModule.hpp"
-#    if defined(NILAI_USE_UMO)
-#        if !defined(NILAI_USE_UART)
-#            error Cannot use the UMO module without the UART module!
-#        else
+#include "defines/module.hpp"
+#include "drivers/uartModule.hpp"
+#if defined(NILAI_USE_UMO)
+#if !defined(NILAI_USE_UART)
+#error Cannot use the UMO module without the UART module!
+#else
 
-#            include <array>
-#            include <string>
-#            include <vector>
+#include <array>
+#include <string>
+#include <vector>
 
 /*****************************************************************************/
 /* Exported defines */
@@ -73,10 +73,11 @@ class UmoModule : public cep::Module
 {
 public:
     UmoModule(UartModule* uart, size_t universeCnt, const std::string& label);
-    virtual ~UmoModule( ) override = default;
+    virtual ~UmoModule() override = default;
 
-    virtual void               Run( ) override;
-    virtual const std::string& GetLabel( ) const override { return m_label; }
+    virtual bool               DoPost() override;
+    virtual void               Run() override;
+    virtual const std::string& GetLabel() const override { return m_label; }
 
     const std::vector<uint8_t>& GetUniverse(size_t universe) const;
 
@@ -97,8 +98,8 @@ private:
 
 /*****************************************************************************/
 /* Exported functions */
-#        endif
-#    endif
+#endif
+#endif
 /* Have a wonderful day :) */
 #endif /* _umoModule */
 /**

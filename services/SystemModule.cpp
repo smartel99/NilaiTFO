@@ -13,15 +13,15 @@
 #include "SystemModule.h"
 #if defined(NILAI_USE_SYSTEM) && defined(NILAI_USE_UMO)
 
-#    include "stm32f4xx_hal.h"
+#include NILAI_HAL_HEADER
 
-#    include "services/umoModule.h"
+#include "services/umoModule.h"
 
-#    include APPLICATION_HEADER
+#include APPLICATION_HEADER
 
-#    define SET_BIT(REG, BIT)   ((REG) |= (BIT))
-#    define CLEAR_BIT(REG, BIT) ((REG) &= ~(BIT))
-#    define READ_BIT(REG, BIT)  ((REG) & (BIT))
+#define SET_BIT(REG, BIT)   ((REG) |= (BIT))
+#define CLEAR_BIT(REG, BIT) ((REG) &= ~(BIT))
+#define READ_BIT(REG, BIT)  ((REG) & (BIT))
 
 SystemModule::SystemModule(const std::string& label,
                            uint8_t            universe,
@@ -29,32 +29,41 @@ SystemModule::SystemModule(const std::string& label,
                            uint8_t            statusStartChannel,
                            uint8_t            snStartChannel,
                            uint8_t            versionChannel)
-    : m_label(label), m_universeId(universe), m_rstChannel(rstChannel),
-      m_snStartChannel(snStartChannel), m_statusStartChannel(statusStartChannel),
-      m_versionChannel(versionChannel)
+: m_label(label),
+  m_universeId(universe),
+  m_rstChannel(rstChannel),
+  m_snStartChannel(snStartChannel),
+  m_statusStartChannel(statusStartChannel),
+  m_versionChannel(versionChannel)
 {
     HAL_GPIO_ReadPin(fixtureID1_GPIO_Port, fixtureID1_Pin) == GPIO_PIN_RESET
-        ? SET_BIT(m_fixtureId, System::IdBit1)
-        : CLEAR_BIT(m_fixtureId, System::IdBit1);
+      ? SET_BIT(m_fixtureId, System::IdBit1)
+      : CLEAR_BIT(m_fixtureId, System::IdBit1);
     HAL_GPIO_ReadPin(fixtureID2_GPIO_Port, fixtureID2_Pin) == GPIO_PIN_RESET
-        ? SET_BIT(m_fixtureId, System::IdBit2)
-        : CLEAR_BIT(m_fixtureId, System::IdBit2);
+      ? SET_BIT(m_fixtureId, System::IdBit2)
+      : CLEAR_BIT(m_fixtureId, System::IdBit2);
     HAL_GPIO_ReadPin(fixtureID3_GPIO_Port, fixtureID3_Pin) == GPIO_PIN_RESET
-        ? SET_BIT(m_fixtureId, System::IdBit3)
-        : CLEAR_BIT(m_fixtureId, System::IdBit3);
+      ? SET_BIT(m_fixtureId, System::IdBit3)
+      : CLEAR_BIT(m_fixtureId, System::IdBit3);
 
     m_status |= m_fixtureId;
 }
 
-void SystemModule::Run( )
+bool SystemModule::DoPost()
+{
+#warning No POSTs have been written for this module!
+    return false;
+}
+
+void SystemModule::Run()
 {
     static auto* umo = UMO_MODULE;
 
     m_status |= m_fixtureId;
     // Check if lid is open or closed.
     // COVER_IN == high -> lid open
-    m_status = (HAL_GPIO_ReadPin(COVER_IN_GPIO_Port, COVER_IN_Pin)) ? m_status | 0x8000
-                                                                    : m_status & 0x7FFF;
+    m_status =
+      (HAL_GPIO_ReadPin(COVER_IN_GPIO_Port, COVER_IN_Pin)) ? m_status | 0x8000 : m_status & 0x7FFF;
 
     // If we've received a reset request during the last frame:
     if (m_rstRq == 0x01)
@@ -100,9 +109,9 @@ void SystemModule::SetStatus(System::SystemStatus status)
         // Clear the error bits.
         CLEAR_BIT(m_status,
                   System::SystemStatus::HalError | System::SystemStatus::DriverError |
-                      System::SystemStatus::InterfaceError | System::SystemStatus::ServiceError |
-                      System::SystemStatus::ProcessError | System::SystemStatus::PostError |
-                      System::SystemStatus::OtherError);
+                    System::SystemStatus::InterfaceError | System::SystemStatus::ServiceError |
+                    System::SystemStatus::ProcessError | System::SystemStatus::PostError |
+                    System::SystemStatus::OtherError);
     }
     // If status is Standby:
     else if (status == System::SystemStatus::Standby)

@@ -16,6 +16,9 @@
 // Path of the main application header file.
 #define APPLICATION_HEADER "processes/MasterApplication.h"
 
+// Path of NilaiTFO
+#define NILAI_PATH "NilaiTFO/"
+
 /******************************************************************************/
 /* [SECTION]: Configuration                                                   */
 /******************************************************************************/
@@ -33,6 +36,13 @@
  */
 //#define NILAI_USES_STM32F4xx
 //#define NILAI_USES_STM32L4xx
+
+/**
+ * Select if the logger should use the system time or the RTC time.
+ * To use the RTC, the RTC module must be enabled.
+ * Uncomment to use the RTC, comment to use the system clock.
+ */
+#define NILAI_LOGGER_USE_RTC
 
 /******************************************************************************/
 /* [SECTION]: Module Activation                                               */

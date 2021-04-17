@@ -41,6 +41,7 @@ class PwmModule : public cep::Module
 public:
     PwmModule(TIM_HandleTypeDef* timer, PWM::Channels channel, const std::string& label);
 
+    virtual bool               DoPost() override;
     virtual void               Run() override;
     virtual const std::string& GetLabel() const override { return m_label; }
 

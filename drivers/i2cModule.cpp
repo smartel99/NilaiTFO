@@ -19,63 +19,93 @@
 #if defined(NILAI_USE_I2C) && defined(HAL_I2C_MODULE_ENABLED)
 #include "services/logger.hpp"
 
+I2cModule::I2cModule(I2C_HandleTypeDef* handle, const std::string& label)
+: m_handle(handle), m_label(label)
+{
+    CEP_ASSERT(handle != nullptr, "In I2cModule: handle is NULL!");
+    LOG_INFO("[%s]: Initialized", m_label.c_str());
+}
+
+/**
+ * If the initialization passed, the POST passes.
+ * @return
+ */
+bool I2cModule::DoPost()
+{
+    LOG_INFO("[%s]: POST OK", m_label.c_str());
+    return true;
+}
+
 void I2cModule::Run()
 {
 }
 
-void I2cModule::TransmitFrame(uint8_t addr, const uint8_t *data, size_t len)
+void I2cModule::TransmitFrame(uint8_t addr, const uint8_t* data, size_t len)
 {
-    if (HAL_I2C_Master_Transmit(m_handle, addr, const_cast<uint8_t*>(data), len,
+    if (HAL_I2C_Master_Transmit(m_handle,
+                                addr,
+                                const_cast<uint8_t*>(data),
+                                (uint16_t)len,
                                 I2cModule::TIMEOUT) != HAL_OK)
     {
-        LOG_ERROR("In {}::TransmitFrame, unable to transmit frame", m_label);
+        LOG_ERROR("[%s]: In TransmitFrame, unable to transmit frame", m_label.c_str());
     }
 }
 
-void I2cModule::TransmitFrameToRegister(uint8_t addr, uint8_t regAddr,
-                                        const uint8_t *data, size_t len)
+void I2cModule::TransmitFrameToRegister(uint8_t        addr,
+                                        uint8_t        regAddr,
+                                        const uint8_t* data,
+                                        size_t         len)
 {
-    if (HAL_I2C_Mem_Write(m_handle, addr, regAddr, sizeof(regAddr),
-                          const_cast<uint8_t*>(data), len, I2cModule::TIMEOUT)
-            != HAL_OK)
+    if (HAL_I2C_Mem_Write(m_handle,
+                          addr,
+                          regAddr,
+                          sizeof(regAddr),
+                          const_cast<uint8_t*>(data),
+                          (uint16_t)len,
+                          I2cModule::TIMEOUT) != HAL_OK)
     {
-        // #TODO Fix the fucking logging module
-        // LOG_ERROR("In {}::TransmitFrameToRegister, unable to transmit frame", m_label);
+        LOG_ERROR("[%s]: In TransmitFrameToRegister, unable to transmit frame", m_label.c_str());
     }
 }
 
-I2C::Frame I2cModule::ReceiveFrame(uint8_t addr, size_t len)
+CEP_I2C::Frame I2cModule::ReceiveFrame(uint8_t addr, size_t len)
 {
-    I2C::Frame frame;
+    CEP_I2C::Frame frame;
 
     frame.deviceAddress = addr;
     // Allocate memory for the data.
     frame.data.resize(len);
 
-    if (HAL_I2C_Master_Receive(m_handle, addr, frame.data.data(),
-                               frame.data.size(), I2cModule::TIMEOUT) != HAL_OK)
+    if (HAL_I2C_Master_Receive(m_handle,
+                               addr,
+                               frame.data.data(),
+                               (uint16_t)frame.data.size(),
+                               I2cModule::TIMEOUT) != HAL_OK)
     {
-        LOG_ERROR("In {}::ReceiveFrame, unable to receive frame", m_label);
+        LOG_ERROR("[%s]: In ReceiveFrame, unable to receive frame", m_label.c_str());
     }
 
     return frame;
 }
 
-I2C::Frame I2cModule::ReceiveFrameFromRegister(uint8_t addr, uint8_t regAddr,
-                                               size_t len)
+CEP_I2C::Frame I2cModule::ReceiveFrameFromRegister(uint8_t addr, uint8_t regAddr, size_t len)
 {
-    I2C::Frame frame;
+    CEP_I2C::Frame frame;
 
-    frame.deviceAddress = addr;
+    frame.deviceAddress   = addr;
     frame.registerAddress = regAddr;
     frame.data.resize(len);
 
-    if (HAL_I2C_Mem_Read(m_handle, frame.deviceAddress, frame.registerAddress,
-                         sizeof(frame.registerAddress), frame.data.data(),
-                         frame.data.size(), I2cModule::TIMEOUT) != HAL_OK)
+    if (HAL_I2C_Mem_Read(m_handle,
+                         frame.deviceAddress,
+                         frame.registerAddress,
+                         sizeof(frame.registerAddress),
+                         frame.data.data(),
+                         (uint16_t)frame.data.size(),
+                         I2cModule::TIMEOUT) != HAL_OK)
     {
-        // #TODO Fucking logging module doesn't work *AND* causes a crash
-        // LOG_ERROR("In {}::ReceiveFrameFromRegister, unable to receive frame", m_label);
+        LOG_ERROR("[%s]: In ReceiveFrameFromRegister, unable to receive frame", m_label.c_str());
     }
 
     return frame;

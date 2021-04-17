@@ -13,6 +13,7 @@ public:
     AdcModule(ADC_HandleTypeDef* adc, const std::string& label);
     virtual ~AdcModule() override;
 
+    virtual bool               DoPost() override;
     virtual void               Run() override {}
     virtual const std::string& GetLabel() const override { return m_label; }
 

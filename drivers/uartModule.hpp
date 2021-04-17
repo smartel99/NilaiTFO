@@ -32,7 +32,7 @@
 
 /*************************************************************************************************/
 /* Enumerated Types ---------------------------------------------------------------------------- */
-namespace UART
+namespace CEP_UART
 {
 /**
  * @addtogroup  UART_Status
@@ -103,27 +103,17 @@ struct Frame
         }
     }
 };
-}    // namespace UART
+}    // namespace CEP_UART
 
 /*************************************************************************************************/
 /* Classes ------------------------------------------------------------------------------------- */
 class UartModule : public cep::Module
 {
 public:
-    UartModule(UART_HandleTypeDef* uart, const std::string& label) : m_handle(uart), m_label(label)
-    {
-        CEP_ASSERT(uart != nullptr, "UART Handle is NULL!");
-        m_txBuf.reserve(64);
-        m_rxBuf.reserve(512);
-        m_sof.reserve(2);
-        m_eof.reserve(2);
-        //        m_latestFrames.reserve(8);
-
-        __HAL_UART_ENABLE_IT(m_handle, UART_IT_RXNE);
-        LOG_INFO("[UART] %s Initialized!", label.c_str());
-    }
+    UartModule(UART_HandleTypeDef* uart, const std::string& label);
     virtual ~UartModule() override;
 
+    virtual bool DoPost() override;
     virtual void Run() override;
 
     virtual const std::string& GetLabel() const override { return m_label; }
@@ -137,7 +127,7 @@ public:
         return (m_framePending ? 1 : 0);
         // return m_latestFrames.size( );
     }
-    UART::Frame Receive();
+    CEP_UART::Frame Receive();
 
     void SetExpectedRxLen(size_t len);
     void ClearExpectedRxLen();
@@ -164,15 +154,15 @@ private:
     UART_HandleTypeDef* m_handle = nullptr;
     std::string         m_label  = "";
 
-    UART::Status         m_status           = UART::Status::Ok;
+    CEP_UART::Status     m_status           = CEP_UART::Status::Ok;
     size_t               m_txBytesRemaining = -1;
     std::vector<uint8_t> m_txBuf;
     std::vector<uint8_t> m_rxBuf;
     size_t               m_expectedLen               = 0;
     uint32_t             m_lastCharReceivedTimestamp = 0;
     //    std::vector<UART::Frame> m_latestFrames;
-    UART::Frame m_latestFrames;
-    bool        m_framePending = false;
+    CEP_UART::Frame m_latestFrames;
+    bool            m_framePending = false;
 
     std::string m_sof;
     std::string m_eof;

@@ -11,27 +11,42 @@
 
 #include "pwmModule.h"
 #if defined(NILAI_USE_PWM) && defined(HAL_TIM_MODULE_ENABLED)
-#    include "services/logger.hpp"
+#include "services/logger.hpp"
 
 PwmModule::PwmModule(TIM_HandleTypeDef* timer, PWM::Channels channel, const std::string& label)
-    : m_timer(timer), m_channel((uint32_t)channel), m_label(label), m_activeFreq(0),
-      m_activeDutyCycle(0), m_isActive(false)
+: m_timer(timer),
+  m_channel((uint32_t)channel),
+  m_label(label),
+  m_activeFreq(0),
+  m_activeDutyCycle(0),
+  m_isActive(false)
 {
     CEP_ASSERT(timer != nullptr, "[PWM]: TIM Handle is NULL!");
 
     LOG_INFO("[PWM]: Initialized");
 }
 
-void PwmModule::Run( ) {}
+/**
+ * If the initialization passed, the POST passes.
+ */
+bool PwmModule::DoPost()
+{
+    LOG_INFO("[%s]: POST OK", m_label.c_str());
+    return true;
+}
 
-void PwmModule::Enable( )
+void PwmModule::Run()
+{
+}
+
+void PwmModule::Enable()
 {
     LOG_DEBUG("[PWM]: Starting PWM generation");
     HAL_TIM_PWM_Start(m_timer, m_channel);
     m_isActive = true;
 }
 
-void PwmModule::Disable( )
+void PwmModule::Disable()
 {
     LOG_DEBUG("[PWM]: Stopping PWM generation");
     HAL_TIM_PWM_Stop(m_timer, m_channel);
@@ -42,11 +57,11 @@ void PwmModule::SetFrequency(uint64_t hz)
 {
     if (hz == 0)
     {
-        Disable( );
+        Disable();
         return;
     }
 
-    uint32_t clk = HAL_RCC_GetPCLK1Freq( );
+    uint32_t clk = HAL_RCC_GetPCLK1Freq();
 
     // If the PWM is currently active:
     if (m_isActive)
@@ -116,7 +131,7 @@ void PwmModule::SetDutyCycle(uint32_t percent)
 
     m_activeDutyCycle = percent;
     m_timer->Instance->CCR1 =
-        m_timer->Instance->ARR / 2;    //(uint32_t)((float)m_activeFreq * requestedDC);
+      m_timer->Instance->ARR / 2;    //(uint32_t)((float)m_activeFreq * requestedDC);
 
     LOG_DEBUG("[PWM]: Setting duty cycle to %d%% (CCR1: 0x%08X)", percent, m_timer->Instance->CCR1);
     // If the PWM was active, re-enable it.

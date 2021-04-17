@@ -11,16 +11,16 @@
  ******************************************************************************
  */
 #ifndef _SystemModule
-#    define _SystemModule
+#define _SystemModule
 
 /*****************************************************************************/
 /* Includes */
-#    if defined(NILAI_USE_SYSTEM)
-#        if !defined(NILAI_USE_UMO)
-#            error Cannot use System module without UMO!
-#        else
-#            include "defines/module.hpp"
-#            include "version.h"
+#if defined(NILAI_USE_SYSTEM)
+#if !defined(NILAI_USE_UMO)
+#error Cannot use System module without UMO!
+#else
+#include "defines/module.hpp"
+#include "version.h"
 
 /*****************************************************************************/
 /* Exported defines */
@@ -67,16 +67,17 @@ public:
                  uint8_t            statusStartChannel = 1,
                  uint8_t            snStartChannel     = 2,
                  uint8_t            versionChannel     = 3);
-    virtual ~SystemModule( ) = default;
+    virtual ~SystemModule() = default;
 
-    virtual void               Run( ) override;
-    virtual const std::string& GetLabel( ) const { return m_label; }
+    virtual bool               DoPost() override;
+    virtual void               Run() override;
+    virtual const std::string& GetLabel() const { return m_label; }
 
     void SetStatus(System::SystemStatus status);
 
-    System::SystemStatus GetStatus( ) const { return (System::SystemStatus)m_status; }
+    System::SystemStatus GetStatus() const { return (System::SystemStatus)m_status; }
 
-    uint16_t GetSn( ) const { return m_sn; }
+    uint16_t GetSn() const { return m_sn; }
 
     void SetSn(uint16_t sn = 0x0000) { m_sn = sn; }
 
@@ -104,8 +105,8 @@ private:
 
 /*****************************************************************************/
 /* Exported functions */
-#        endif
-#    endif
+#endif
+#endif
 /* Have a wonderful day :) */
 #endif /* _SystemModule */
 /**

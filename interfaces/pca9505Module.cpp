@@ -13,8 +13,12 @@
 #include "pca9505Module.h"
 #if defined(NILAI_USE_PCA9505)
 Pca9505Module::Pca9505Module(const PCA9505::Config& config, const std::string& label)
-    : m_i2c(config.i2c), m_address(config.address), m_label(label),
-      m_outputEnable(config.outputEnable), m_interrupt(config.interrupt), m_reset(config.reset)
+: m_i2c(config.i2c),
+  m_address(config.address),
+  m_label(label),
+  m_outputEnable(config.outputEnable),
+  m_interrupt(config.interrupt),
+  m_reset(config.reset)
 {
     CEP_ASSERT(m_i2c != nullptr, "I2C module is NULL in PCA9505Module ctor!");
 
@@ -41,14 +45,20 @@ Pca9505Module::Pca9505Module(const PCA9505::Config& config, const std::string& l
 
     // Send the configuration to the chip.
     m_i2c->TransmitFrameToRegister(m_address, 0x88, states);
-    m_i2c->TransmitFrameToRegister(m_address, 0x90, m_polarities.data( ), m_polarities.size( ));
-    m_i2c->TransmitFrameToRegister(m_address, 0x98, m_directions.data( ), m_directions.size( ));
-    m_i2c->TransmitFrameToRegister(m_address, 0xA0, m_interrupts.data( ), m_interrupts.size( ));
+    m_i2c->TransmitFrameToRegister(m_address, 0x90, m_polarities.data(), m_polarities.size());
+    m_i2c->TransmitFrameToRegister(m_address, 0x98, m_directions.data(), m_directions.size());
+    m_i2c->TransmitFrameToRegister(m_address, 0xA0, m_interrupts.data(), m_interrupts.size());
 
-    LOG_INFO("[%s]: Initialized", m_label.c_str( ));
+    LOG_INFO("[%s]: Initialized", m_label.c_str());
 }
 
-void Pca9505Module::Run( )
+bool Pca9505Module::DoPost()
+{
+#warning No POSTs have been written for this module!
+    return false;
+}
+
+void Pca9505Module::Run()
 {
     //    static uint32_t lastRead = 0;
     //
@@ -59,19 +69,19 @@ void Pca9505Module::Run( )
     //    }
 }
 
-void Pca9505Module::EnableOutput( )
+void Pca9505Module::EnableOutput()
 {
     // OE is active LOW.
     HAL_GPIO_WritePin(m_outputEnable.port, m_outputEnable.pin, GPIO_PIN_RESET);
 }
 
-void Pca9505Module::DisableOutput( )
+void Pca9505Module::DisableOutput()
 {
     // OE is active LOW.
     HAL_GPIO_WritePin(m_outputEnable.port, m_outputEnable.pin, GPIO_PIN_SET);
 }
 
-void Pca9505Module::Reset( )
+void Pca9505Module::Reset()
 {
     // RESET is active LOW.
     HAL_GPIO_WritePin(m_reset.port, m_reset.pin, GPIO_PIN_RESET);
@@ -79,13 +89,13 @@ void Pca9505Module::Reset( )
     HAL_GPIO_WritePin(m_reset.port, m_reset.pin, GPIO_PIN_SET);
 }
 
-void Pca9505Module::HoldReset( )
+void Pca9505Module::HoldReset()
 {
     // RESET is active LOW.
     HAL_GPIO_WritePin(m_reset.port, m_reset.pin, GPIO_PIN_RESET);
 }
 
-void Pca9505Module::ReleaseReset( )
+void Pca9505Module::ReleaseReset()
 {
     // RESET is active LOW.
     HAL_GPIO_WritePin(m_reset.port, m_reset.pin, GPIO_PIN_SET);
@@ -142,11 +152,8 @@ void Pca9505Module::ConfigurePin(const PCA9505::PinConfig& config)
     m_i2c->TransmitFrameToRegister(m_address, 0x20 + offset, {m_interrupts[offset]});
 }
 
-void Pca9505Module::ConfigurePort(PCA9505::Ports port,
-                                  uint8_t        directions,
-                                  uint8_t        polarities,
-                                  uint8_t        interrupts,
-                                  uint8_t        states)
+void Pca9505Module::ConfigurePort(
+  PCA9505::Ports port, uint8_t directions, uint8_t polarities, uint8_t interrupts, uint8_t states)
 {
     uint8_t portId = (uint8_t)port;
 
@@ -173,7 +180,7 @@ PCA9505::PortState Pca9505Module::ReadPort(PCA9505::Ports port)
 {
     auto frame = m_i2c->ReceiveFrameFromRegister(m_address, 0x80, 5);
 
-    auto frameData = frame.data.begin( );
+    auto frameData = frame.data.begin();
     for (auto& p : m_ports)
     {
         p.port = *frameData++;

@@ -13,30 +13,38 @@
 #include "heartbeatModule.h"
 
 #if defined(NILAI_USE_HEARTBEAT)
+#include "services/logger.hpp"
+
 HeartbeatModule::HeartbeatModule(const Pin& pin, const std::string& label)
-    : m_label(label), m_led(pin)
+: m_label(label), m_led(pin)
 {
 }
 
-void HeartbeatModule::Run( )
+bool HeartbeatModule::DoPost()
+{
+    LOG_INFO("[%s]: POST OK", m_label.c_str());
+    return true;
+}
+
+void HeartbeatModule::Run()
 {
     static uint32_t nextChange   = 0;
     static bool     currentState = false;
 
-    if (HAL_GetTick( ) >= nextChange)
+    if (HAL_GetTick() >= nextChange)
     {
         if (currentState)
         {
             // Turn the LED off.
             HAL_GPIO_WritePin(m_led.port, m_led.pin, GPIO_PIN_RESET);
-            nextChange   = HAL_GetTick( ) + m_defaultPattern.timeOff;
+            nextChange   = HAL_GetTick() + m_defaultPattern.timeOff;
             currentState = false;
         }
         else
         {
             // Turn the LED on.
             HAL_GPIO_WritePin(m_led.port, m_led.pin, GPIO_PIN_SET);
-            nextChange   = HAL_GetTick( ) + m_defaultPattern.timeOn;
+            nextChange   = HAL_GetTick() + m_defaultPattern.timeOn;
             currentState = true;
         }
     }

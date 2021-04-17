@@ -28,6 +28,31 @@ AdcModule::~AdcModule()
     m_channelBuff = nullptr;
 }
 
+/**
+ * For the POST to pass, we must read a non-null value on every channels.
+ * This assumes that enough time has elapsed since the initialization for conversions to have been
+ * done on every channels.
+ * @return
+ */
+bool AdcModule::DoPost()
+{
+    bool isAllChannelsOk = true;
+    for (size_t i = 0; i < m_channelCount; i++)
+    {
+        if (m_channelBuff[i] == 0)
+        {
+            LOG_ERROR("[%s]: Error in POST: Channel %i reading 0!", m_label.c_str(), i);
+            isAllChannelsOk = false;
+        }
+    }
+
+    if (isAllChannelsOk == true)
+    {
+        LOG_INFO("[%s]: POST OK", m_label.c_str());
+    }
+    return isAllChannelsOk;
+}
+
 float AdcModule::GetChannelReading(size_t channel) const
 {
     CEP_ASSERT(channel < m_channelCount,

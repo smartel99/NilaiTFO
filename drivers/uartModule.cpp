@@ -28,10 +28,33 @@
 /*************************************************************************************************/
 /* Public method definitions                                                                     */
 /*************************************************************************************************/
+UartModule::UartModule(UART_HandleTypeDef* uart, const std::string& label)
+: m_handle(uart), m_label(label)
+{
+    CEP_ASSERT(uart != nullptr, "UART Handle is NULL!");
+    m_txBuf.reserve(64);
+    m_rxBuf.reserve(512);
+    m_sof.reserve(2);
+    m_eof.reserve(2);
+    //        m_latestFrames.reserve(8);
+
+    __HAL_UART_ENABLE_IT(m_handle, UART_IT_RXNE);
+    LOG_INFO("[%s]: Initialized", label.c_str());
+}
 
 UartModule::~UartModule()
 {
     HAL_UART_DeInit(m_handle);
+}
+
+/**
+ * If the initialization passed, the POST passes.
+ * @return
+ */
+bool UartModule::DoPost()
+{
+    LOG_INFO("[%s]: POST OK", m_label.c_str());
+    return true;
 }
 
 void UartModule::Run()
@@ -55,9 +78,9 @@ void UartModule::Transmit(const char* msg, size_t len)
     m_txBytesRemaining = m_txBuf.size();
 
     // Send the message.
-    if (HAL_UART_Transmit_IT(m_handle, m_txBuf.data(), m_txBuf.size()) != HAL_OK)
+    if (HAL_UART_Transmit_IT(m_handle, m_txBuf.data(), (uint16_t)m_txBuf.size()) != HAL_OK)
     {
-        LOG_ERROR("In {}::Transmit: Unable to transmit message", m_label);
+        LOG_ERROR("[%s]: In Transmit: Unable to transmit message", m_label.c_str());
         return;
     }
 }
@@ -72,7 +95,7 @@ void UartModule::Transmit(const std::vector<uint8_t>& msg)
     Transmit((const char*)msg.data(), msg.size());
 }
 
-UART::Frame UartModule::Receive()
+CEP_UART::Frame UartModule::Receive()
 {
     //    UART::Frame frame = m_latestFrames.back( );
     //    m_latestFrames.pop_back( );
@@ -96,8 +119,8 @@ void UartModule::ClearExpectedRxLen()
 void UartModule::SetFrameReceiveCpltCallback(const std::function<void()>& cb)
 {
     CEP_ASSERT(cb != nullptr,
-               "In {}::SetFrameReceiveCpltCallback, invalid callback function",
-               m_label);
+               "[%s]: In SetFrameReceiveCpltCallback, invalid callback function",
+               m_label.c_str());
 
     m_cb = cb;
 }
@@ -109,8 +132,8 @@ void UartModule::ClearFrameReceiveCpltCallback()
 
 void UartModule::SetStartOfFrameSequence(uint8_t* sof, size_t len)
 {
-    CEP_ASSERT(sof != nullptr, "In {}::SetStartOfFrameSequence, sof is NULL", m_label);
-    CEP_ASSERT(len > 0, "In {}::SetStartOfFrameSequence, len is 0", m_label);
+    CEP_ASSERT(sof != nullptr, "[%s]: In SetStartOfFrameSequence, sof is NULL", m_label.c_str());
+    CEP_ASSERT(len > 0, "[%s]: In SetStartOfFrameSequence, len is 0", m_label.c_str());
     SetStartOfFrameSequence(std::string(sof, sof + len));
 }
 
@@ -131,8 +154,8 @@ void UartModule::ClearStartOfFrameSequence()
 
 void UartModule::SetEndOfFrameSequence(uint8_t* eof, size_t len)
 {
-    CEP_ASSERT(eof != nullptr, "In {}::SetEndOfFrameSequence, sof is NULL", m_label);
-    CEP_ASSERT(len > 0, "In {}::SetStartOfFrameSequence, len is 0", m_label);
+    CEP_ASSERT(eof != nullptr, "[%s]: In SetEndOfFrameSequence, sof is NULL", m_label.c_str());
+    CEP_ASSERT(len > 0, "[%s]: In SetStartOfFrameSequence, len is 0", m_label.c_str());
     SetEndOfFrameSequence(std::string(eof, eof + len));
 }
 
@@ -220,7 +243,7 @@ void UartModule::HandleReceptionIRQ()
         if (rxComplete == true)
         {
             //            m_latestFrames.push_back(UART::Frame(m_rxBuf, HAL_GetTick( )));
-            m_latestFrames = UART::Frame(m_rxBuf, HAL_GetTick());
+            m_latestFrames = CEP_UART::Frame(m_rxBuf, HAL_GetTick());
             m_framePending = true;
             // Clear reception buffer and call the callback
             m_rxBuf.clear();

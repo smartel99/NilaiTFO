@@ -12,10 +12,10 @@
  */
 #include "umoModule.h"
 #if defined(NILAI_USE_UMO) && defined(NILAI_USE_UART)
-#    include "defines/macros.hpp"
+#include "defines/macros.hpp"
 
 UmoModule::UmoModule(UartModule* uart, size_t universeCnt, const std::string& label)
-    : m_uart(uart), m_label(label), m_universes(universeCnt)
+: m_uart(uart), m_label(label), m_universes(universeCnt)
 {
     // Ensure that the pointer is valid.
     CEP_ASSERT(uart != nullptr, "In UmoModule: uart is NULL!");
@@ -26,15 +26,21 @@ UmoModule::UmoModule(UartModule* uart, size_t universeCnt, const std::string& la
      * - 515 bytes (universeID + 512 channels + CRC)
      * - No end of frame received callback
      */
-    m_uart->ClearStartOfFrameSequence( );
-    m_uart->ClearEndOfFrameSequence( );
+    m_uart->ClearStartOfFrameSequence();
+    m_uart->ClearEndOfFrameSequence();
     m_uart->SetExpectedRxLen(1 + Universe::CHANNEL_COUNT + 2);
-    m_uart->ClearFrameReceiveCpltCallback( );
+    m_uart->ClearFrameReceiveCpltCallback();
 
     LOG_INFO("[UMO]: Initialized");
 }
 
-void UmoModule::Run( )
+bool UmoModule::DoPost()
+{
+#warning No POSTs have been written for this module!
+    return false;
+}
+
+void UmoModule::Run()
 {
     // Check if we should be sending an Universe to the PC.
     int u = 0;
@@ -56,11 +62,11 @@ void UmoModule::Run( )
     }
 
     // Check if we have received an Universe.
-    if (m_uart->GetNumberOfWaitingFrames( ) > 0)
+    if (m_uart->GetNumberOfWaitingFrames() > 0)
     {
-        UART::Frame frame = m_uart->Receive( );
+        UART::Frame frame = m_uart->Receive();
         // Make sure the Universe is valid. (Valid ID + CRC)
-        if (frame.data[0] < m_universes.size( ) &&
+        if (frame.data[0] < m_universes.size() &&
             sizeof_array(frame.data) == (1 + Universe::CHANNEL_COUNT + 2))
         {
             // #TODO Check CRC.
@@ -77,21 +83,21 @@ void UmoModule::Run( )
 
 const std::vector<uint8_t>& UmoModule::GetUniverse(size_t universe) const
 {
-    CEP_ASSERT(universe < m_universes.size( ),
+    CEP_ASSERT(universe < m_universes.size(),
                "In {}.GetUniverse, invalid universe! (Was {}, should be inferior to {})",
                m_label,
                universe,
-               m_universes.size( ));
+               m_universes.size());
     return m_universes[universe].universe;
 }
 
 bool UmoModule::IsUniverseReady(size_t universe) const
 {
-    CEP_ASSERT(universe < m_universes.size( ),
+    CEP_ASSERT(universe < m_universes.size(),
                "In {}.IsUniverseReady, universe is out of range. (is {}, should be under {}",
                m_label,
                universe,
-               m_universes.size( ));
+               m_universes.size());
 
     return m_universes[universe].isNew;
 }
@@ -100,18 +106,18 @@ std::vector<uint8_t> UmoModule::GetChannels(size_t universe, size_t channel, siz
 {
     [[maybe_unused]] volatile size_t c = channel;
     // Make sure that all params are good.
-    CEP_ASSERT(
-        universe < m_universes.size( ),
-        "In {}.GetChannels, invalid universe requested (universe is {}, must be inferior to {}).",
-        m_label,
-        universe,
-        m_universes.size( ));
-    CEP_ASSERT(
-        channel < Universe::CHANNEL_COUNT,
-        "In {}.GetChannels, invalid channel requested (channel is {}, must be inferior to {}).",
-        m_label,
-        channel,
-        Universe::CHANNEL_COUNT);
+    CEP_ASSERT(universe < m_universes.size(),
+               "In {}.GetChannels, invalid universe requested (universe is {}, must be inferior to "
+               "{}).",
+               m_label,
+               universe,
+               m_universes.size());
+    CEP_ASSERT(channel < Universe::CHANNEL_COUNT,
+               "In {}.GetChannels, invalid channel requested (channel is {}, must be inferior to "
+               "{}).",
+               m_label,
+               channel,
+               Universe::CHANNEL_COUNT);
     CEP_ASSERT((channel + size) < Universe::CHANNEL_COUNT,
                "In {}.GetChannels, requested number of channels would exceed the range of the "
                "Universe! (channel is {}, size is {}, sum must be inferior to {})",
@@ -135,18 +141,18 @@ std::vector<uint8_t> UmoModule::GetChannels(size_t universe, size_t channel, siz
 void UmoModule::GetChannels(size_t universe, size_t channel, uint8_t* outData, size_t size)
 {
     // Make sure that all params are good.
-    CEP_ASSERT(
-        universe < m_universes.size( ),
-        "In {}.GetChannels, invalid universe requested (universe is {}, must be inferior to {}).",
-        m_label,
-        universe,
-        m_universes.size( ));
-    CEP_ASSERT(
-        channel < Universe::CHANNEL_COUNT,
-        "In {}.GetChannels, invalid channel requested (channel is {}, must be inferior to {}).",
-        m_label,
-        channel,
-        Universe::CHANNEL_COUNT);
+    CEP_ASSERT(universe < m_universes.size(),
+               "In {}.GetChannels, invalid universe requested (universe is {}, must be inferior to "
+               "{}).",
+               m_label,
+               universe,
+               m_universes.size());
+    CEP_ASSERT(channel < Universe::CHANNEL_COUNT,
+               "In {}.GetChannels, invalid channel requested (channel is {}, must be inferior to "
+               "{}).",
+               m_label,
+               channel,
+               Universe::CHANNEL_COUNT);
     CEP_ASSERT((channel + size) < Universe::CHANNEL_COUNT,
                "In {}.GetChannels, requested number of channels would exceed the range of the "
                "Universe! (channel is {}, size is {}, sum must be inferior to {})",
@@ -166,17 +172,17 @@ void UmoModule::GetChannels(size_t universe, size_t channel, uint8_t* outData, s
 void UmoModule::SetChannels(size_t universe, size_t channel, const std::vector<uint8_t>& data)
 {
     // data.data() is a const uint8_t*, we must remove the const from it.
-    SetChannels(universe, channel, const_cast<uint8_t*>(data.data( )), data.size( ));
+    SetChannels(universe, channel, const_cast<uint8_t*>(data.data()), data.size());
 }
 
 void UmoModule::SetChannels(size_t universe, size_t channel, uint8_t* data, size_t len)
 {
     // Make sure that all parameters are valid.
-    CEP_ASSERT(universe < m_universes.size( ),
+    CEP_ASSERT(universe < m_universes.size(),
                "In {}.SetChannels, universe is out of range (is {}, must be under {}).",
                m_label,
                universe,
-               m_universes.size( ));
+               m_universes.size());
     CEP_ASSERT(channel < Universe::CHANNEL_COUNT,
                "In {}.SetChannels, channel is out of range (is {}, must be under {}).",
                m_label,

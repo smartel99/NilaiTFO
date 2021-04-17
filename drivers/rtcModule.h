@@ -9,8 +9,8 @@
  *
  * @brief       Real-Time Clock Module
  */
-#ifndef SPI_MODULE_HPP_
-#define SPI_MODULE_HPP_
+#ifndef RTC_MODULE_HPP_
+#define RTC_MODULE_HPP_
 /*************************************************************************************************/
 /* Includes
  * ------------------------------------------------------------------------------------
@@ -30,20 +30,54 @@
 /* Defines
  * -------------------------------------------------------------------------------------
  */
-namespace CEP_RTC{
+namespace CEP_RTC
+{
+enum class DayLightSaving
+{
+    None   = 0,
+    AddOne = 1,
+    SubOne = 2
+};
+
+/**
+ * @brief   Contains the time information.
+ *
+ * Format options:
+ *  - `%h`: Hours
+ *  - `%m`: Minutes
+ *  - `%s`: Seconds
+ */
 struct Time
 {
-    uint8_t seconds = 0;
+    uint8_t hours   = 0;
     uint8_t minutes = 0;
-    uint8_t hours = 0;
+    uint8_t seconds = 0;
 
-    uint8_t day = 0;
-    uint8_t dotw = 0; // Day of the week, 0 is Sunday, 6 is Saturday
-    uint8_t month = 0; // 0 is January, 11 is December
-    uint16_t year = 0;
-}
+    DayLightSaving dayLightSaving = DayLightSaving::None;
 
-}
+    Time(const RTC_TimeTypeDef& time);
+
+    RTC_TimeTypeDef ToHal() const;
+    std::string     ToStr() const;
+};
+
+struct Date
+{
+    uint16_t year  = 0;
+    uint8_t  month = 0;    // Month is coded in BCD. 0x01 is January, 0x12 is December
+    uint8_t  day   = 0;    // Day of the month, starts at 1.
+    uint8_t  dotw  = 0;    // Day of the week, 1 is Monday, 7 is Sunday
+
+    Date(const RTC_DateTypeDef& date);
+
+    std::string DotWtoStr() const;
+    std::string MonthtoStr() const;
+
+    RTC_DateTypeDef ToHal() const;
+    std::string     ToStr() const;
+};
+
+}    // namespace CEP_RTC
 
 /*************************************************************************************************/
 /* Classes
@@ -52,25 +86,33 @@ struct Time
 class RtcModule : public cep::Module
 {
 public:
-    RtcModule(RTC_HandleTypeDef* handle, const std::string& label)
-    : m_label(label), m_handle(handle)
-    {
-        CEP_ASSERT(handle != nullptr, "RTC Handle is NULL!");
-        LOG_INFO("[%s]: Initialized", m_label.c_str());
-    }
+    RtcModule(RTC_HandleTypeDef* handle, const std::string& label);
 
     virtual ~RtcModule() override = default;
 
+    virtual bool               DoPost() override;
     virtual void               Run() override;
     virtual const std::string& GetLabel() const override { return m_label; }
 
+    void          SetTime(const CEP_RTC::Time& time);
+    CEP_RTC::Time GetTime();
+
+    void          SetDate(const CEP_RTC::Date& date);
+    CEP_RTC::Date GetDate();
+
+    size_t GetEpoch();
+
+    static RtcModule* Get() { return s_instance; }
+
+private:
+    static RtcModule* s_instance;
 
 private:
     std::string        m_label;
     RTC_HandleTypeDef* m_handle;
-
-private:
 };
+
+
 #else
 #if WARN_MISSING_STM_DRIVERS
 #warning NilaiTFO RTC module enabled, but HAL_RTC_USE_MODULE is not defined!

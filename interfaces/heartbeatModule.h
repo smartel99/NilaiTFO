@@ -11,16 +11,16 @@
  ******************************************************************************
  */
 #ifndef _heartbeatModule
-#    define _heartbeatModule
+#define _heartbeatModule
 
 #if defined(NILAI_USE_HEARTBEAT)
 /*****************************************************************************/
 /* Includes */
-#    include "defines/ledPattern.h"
-#    include "defines/module.hpp"
-#    include "defines/pin.h"
+#include "defines/ledPattern.h"
+#include "defines/module.hpp"
+#include "defines/pin.h"
 
-#    include <string>
+#include <string>
 
 /*****************************************************************************/
 /* Exported defines */
@@ -35,10 +35,11 @@ class HeartbeatModule : public cep::Module
 {
 public:
     HeartbeatModule(const Pin& pin, const std::string& label);
-    virtual ~HeartbeatModule( ) = default;
+    virtual ~HeartbeatModule() = default;
 
-    virtual void               Run( ) override;
-    virtual const std::string& GetLabel( ) const override { return m_label; }
+    virtual bool               DoPost() override;
+    virtual void               Run() override;
+    virtual const std::string& GetLabel() const override { return m_label; }
 
 private:
     std::string m_label = "";

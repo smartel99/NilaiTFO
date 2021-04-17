@@ -318,47 +318,24 @@ struct Frame
 class CanModule : public cep::Module
 {
 public:
-    CanModule(CAN_HandleTypeDef* handle, const std::string& label)
-    : m_handle(handle), m_label(label)
-    {
-        CEP_ASSERT(handle != nullptr, "CAN Handle is NULL!");
-        m_framesReceived.reserve(5);
-        m_callbacks =
-          std::map<CEP_CAN::Irq, std::function<void()>>({{CEP_CAN::Irq::TxMailboxEmpty, {}},
-                                                     {CEP_CAN::Irq::Fifo0MessagePending, {}},
-                                                     {CEP_CAN::Irq::Fifo0Full, {}},
-                                                     {CEP_CAN::Irq::Fifo0Overrun, {}},
-                                                     {CEP_CAN::Irq::Fifo1MessagePending, {}},
-                                                     {CEP_CAN::Irq::Fifo1Full, {}},
-                                                     {CEP_CAN::Irq::Fifo1Overrun, {}},
-                                                     {CEP_CAN::Irq::Wakeup, {}},
-                                                     {CEP_CAN::Irq::SleepAck, {}},
-                                                     {CEP_CAN::Irq::ErrorWarning, {}},
-                                                     {CEP_CAN::Irq::ErrorPassive, {}},
-                                                     {CEP_CAN::Irq::BusOffError, {}},
-                                                     {CEP_CAN::Irq::LastErrorCode, {}},
-                                                     {CEP_CAN::Irq::ErrorStatus, {}}});
-
-        HAL_CAN_Start(m_handle);
-
-        LOG_INFO("[%s]: Initialized", m_label.c_str());
-    }
+    CanModule(CAN_HandleTypeDef* handle, const std::string& label);
     virtual ~CanModule() override;
 
+    virtual bool               DoPost() override;
     virtual void               Run() override;
     virtual const std::string& GetLabel() const override { return m_label; }
 
     void ConfigureFilter(const CEP_CAN::FilterConfiguration& config);
 
-    size_t      GetNumberOfAvailableFrames() const { return m_framesReceived.size(); }
+    size_t          GetNumberOfAvailableFrames() const { return m_framesReceived.size(); }
     CEP_CAN::Frame  ReceiveFrame();
     CEP_CAN::Status TransmitFrame(uint32_t                    addr,
-                              const std::vector<uint8_t>& data          = std::vector<uint8_t>(),
-                              bool                        forceExtended = false);
+                                  const std::vector<uint8_t>& data = std::vector<uint8_t>(),
+                                  bool                        forceExtended = false);
     CEP_CAN::Status TransmitFrame(uint32_t addr,
-                              uint8_t* data          = nullptr,
-                              size_t   len           = 0,
-                              bool     forceExtended = false);
+                                  uint8_t* data          = nullptr,
+                                  size_t   len           = 0,
+                                  bool     forceExtended = false);
 
     void SetCallback(CEP_CAN::Irq irq, const std::function<void()>& callback);
     void ClearCallback(CEP_CAN::Irq irq);
@@ -398,7 +375,7 @@ private:
 private:
     CAN_HandleTypeDef* m_handle = nullptr;
     std::string        m_label  = "";
-    CEP_CAN::Status        m_status = CEP_CAN::Status::ERROR_NONE;
+    CEP_CAN::Status    m_status = CEP_CAN::Status::ERROR_NONE;
 
     std::vector<CEP_CAN::Frame>                      m_framesReceived;
     std::map<CEP_CAN::Irq, std::function<void()>>    m_callbacks;

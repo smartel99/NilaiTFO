@@ -28,7 +28,7 @@
 #include <string>
 #include <vector>
 
-namespace I2C
+namespace CEP_I2C
 {
 /**
  ** @enum   Status
@@ -92,19 +92,15 @@ struct Frame
     {
     }
 };
-}    // namespace I2C
+}    // namespace CEP_I2C
 
 class I2cModule : public cep::Module
 {
 public:
-    I2cModule(I2C_HandleTypeDef* handle, const std::string& label)
-    : m_handle(handle), m_label(label)
-    {
-        CEP_ASSERT(handle != nullptr, "In I2cModule: handle is NULL!");
-        LOG_INFO("[%s]: Initialized", m_label.c_str());
-    }
+    I2cModule(I2C_HandleTypeDef* handle, const std::string& label);
     virtual ~I2cModule() override = default;
 
+    virtual bool               DoPost() override;
     virtual void               Run() override;
     virtual const std::string& GetLabel() const override { return m_label; }
 
@@ -113,7 +109,7 @@ public:
     {
         TransmitFrame(addr, data.data(), data.size());
     }
-    void TransmitFrame(const I2C::Frame& frame)
+    void TransmitFrame(const CEP_I2C::Frame& frame)
     {
         TransmitFrame(frame.deviceAddress, frame.data.data(), frame.data.size());
     }
@@ -123,7 +119,7 @@ public:
     {
         TransmitFrameToRegister(addr, regAddr, data.data(), data.size());
     }
-    void TransmitFrameToRegister(const I2C::Frame& frame)
+    void TransmitFrameToRegister(const CEP_I2C::Frame& frame)
     {
         TransmitFrameToRegister(frame.deviceAddress,
                                 frame.registerAddress,
@@ -131,14 +127,14 @@ public:
                                 frame.data.size());
     }
 
-    I2C::Frame ReceiveFrame(uint8_t addr, size_t len);
-    I2C::Frame ReceiveFrameFromRegister(uint8_t addr, uint8_t regAddr, size_t len);
+    CEP_I2C::Frame ReceiveFrame(uint8_t addr, size_t len);
+    CEP_I2C::Frame ReceiveFrameFromRegister(uint8_t addr, uint8_t regAddr, size_t len);
 
 private:
     I2C_HandleTypeDef* m_handle = nullptr;
     std::string        m_label  = "";
 
-    static constexpr uint32_t TIMEOUT = 200;
+    static constexpr uint16_t TIMEOUT = 200;
 };
 #else
 #if WARN_MISSING_STM_DRIVERS

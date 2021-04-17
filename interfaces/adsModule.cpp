@@ -13,32 +13,40 @@
 #include "adsModule.h"
 #include <cmath>
 #if defined(NILAI_USE_ADS) && defined(NILAI_USE_SPI)
-#    include "defines/bitManipulations.hpp"
-#    include "defines/globaldef.h"
-#    include "defines/macros.hpp"
-#    include "services/logger.hpp"
-#    include APPLICATION_HEADER
+#include "defines/bitManipulations.hpp"
+#include "defines/globaldef.h"
+#include "defines/macros.hpp"
+#include "services/logger.hpp"
+#include APPLICATION_HEADER
 
-#    if defined(NILAI_USE_SYSTEM)
-#        include "services/SystemModule.h"
-#        define ADS_ERROR(msg, ...)                                                                \
-            do                                                                                     \
-            {                                                                                      \
-                m_sysModule->SetStatus(System::SystemStatus::InterfaceError);                      \
-                LOG_ERROR("[ADS Module] " msg, ##__VA_ARGS__);                                     \
-            } while (0)
-#    else
-#        define ADS_ERROR(msg, ...) LOG_ERROR("[ADS Module] " msg, ##__VA_ARGS__)
-#    endif
+#if defined(NILAI_USE_SYSTEM)
+#include "services/SystemModule.h"
+#define ADS_ERROR(msg, ...)                                                                        \
+    do                                                                                             \
+    {                                                                                              \
+        m_sysModule->SetStatus(System::SystemStatus::InterfaceError);                              \
+        LOG_ERROR("[ADS Module] " msg, ##__VA_ARGS__);                                             \
+    } while (0)
+#else
+#define ADS_ERROR(msg, ...) LOG_ERROR("[ADS Module] " msg, ##__VA_ARGS__)
+#endif
 
-#    include <limits>
+#include <limits>
 
 AdsModule::AdsModule(SpiModule* spi, const std::string& label)
-    : m_spi(spi), m_label(label), m_config(ADS::Config( )), m_sysModule(SYS_MODULE)
+: m_spi(spi), m_label(label), m_config(ADS::Config()), m_sysModule(SYS_MODULE)
 {
 }
 
-void AdsModule::Run( ) {}
+bool AdsModule::DoPost()
+{
+#warning No POST has been written for this module!
+    return false;
+}
+
+void AdsModule::Run()
+{
+}
 
 void AdsModule::Configure(const ADS::Config& config, bool force)
 {
@@ -53,7 +61,7 @@ void AdsModule::Configure(const ADS::Config& config, bool force)
     m_config = config;
     m_active = false;
 
-    Reset( );
+    Reset();
 
     // CMD -> 0x0011    Resp -> 0xFF04
     if (SendCommand(ADS::SysCommands::Reset, ADS::Acknowledges::Ready) == false)
@@ -145,7 +153,7 @@ void AdsModule::Configure(const ADS::Config& config, bool force)
     }
 }
 
-void AdsModule::Enable( )
+void AdsModule::Enable()
 {
     m_config.enable = ADS::Enable::Enable;
     Configure(m_config, true);
@@ -153,7 +161,7 @@ void AdsModule::Enable( )
     m_active = true;
 }
 
-void AdsModule::Disable( )
+void AdsModule::Disable()
 {
     m_config.enable = ADS::Enable::Disable;
     Configure(m_config, true);
@@ -171,14 +179,14 @@ const AdsPacket& AdsModule::RefreshValues(uint32_t timeout)
     // If a timeout was specified:
     if (timeout > 0)
     {
-        uint32_t timeoutTime = HAL_GetTick( ) + timeout;
+        uint32_t timeoutTime = HAL_GetTick() + timeout;
 
         // Wait for DRDY to be active (LOW).
         while (HAL_GPIO_ReadPin(m_config.pins.dataReady.port, m_config.pins.dataReady.pin) !=
                GPIO_PIN_RESET)
         {
             // If we time out:
-            if (HAL_GetTick( ) >= timeoutTime)
+            if (HAL_GetTick() >= timeoutTime)
             {
                 // Don't update the cached values and bail out.
                 return m_latestFrame;
@@ -208,9 +216,9 @@ const AdsPacket& AdsModule::RefreshValues(uint32_t timeout)
     m_channels.channel4.push_back(ch4);
 
     // If we're at the end of our buffers:
-    if (m_channels.size( ) >= m_samplesToTake)
+    if (m_channels.size() >= m_samplesToTake)
     {
-        UpdateLatestFrame( );
+        UpdateLatestFrame();
     }
 
     return m_latestFrame;
@@ -220,7 +228,7 @@ const AdsPacket& AdsModule::RefreshValues(uint32_t timeout)
 /* Private method definitions                                                */
 /*****************************************************************************/
 
-void AdsModule::Reset( )
+void AdsModule::Reset()
 {
     CEP_ASSERT(m_config.pins.chipSelect.port != nullptr, "ADS's Chip Select GPIO Port is NULL!");
     CEP_ASSERT(m_config.pins.dataReady.port != nullptr, "ADS's Data Ready GPIO Port is NULL!");
@@ -250,7 +258,7 @@ bool AdsModule::SendCommand(uint16_t cmd, uint16_t expectedResponse)
         attempts++;
 
         Send(cep::swap(cmd));
-        resp = ReadCommandResponse( );
+        resp = ReadCommandResponse();
         if (resp == expectedResponse)
         {
             break;
@@ -293,7 +301,7 @@ bool AdsModule::SendConfig(uint8_t addr, uint8_t data)
 
     // Data is MSB in command because SPI sends LSB-first.
     uint16_t cmd =
-        (ADS::Commands::WriteSingleRegisterMask | (uint16_t)addr << 8) | ((uint16_t)(data)&0x00FF);
+      (ADS::Commands::WriteSingleRegisterMask | (uint16_t)addr << 8) | ((uint16_t)(data)&0x00FF);
 
     return SendCommand(cmd, response);
 }
@@ -319,7 +327,7 @@ uint16_t AdsModule::Send(uint16_t data)
     return (cep::combine(&resp[0], 2));
 }
 
-uint16_t AdsModule::ReadCommandResponse( )
+uint16_t AdsModule::ReadCommandResponse()
 {
     uint32_t response = 0;
 
@@ -375,15 +383,15 @@ uint32_t AdsModule::ConvertToHex(float val)
     return h;
 }
 
-void AdsModule::UpdateLatestFrame( )
+void AdsModule::UpdateLatestFrame()
 {
     float tot1 = 0, tot2 = 0, tot3 = 0, tot4 = 0;
     float rmsTot1 = 0, rmsTot2 = 0, rmsTot3 = 0, rmsTot4 = 0;
-    float min1 = std::numeric_limits<float>::max( ), min2 = min1, min3 = min1, min4 = min1;
-    float max1 = std::numeric_limits<float>::lowest( ), max2 = max1, max3 = max1, max4 = max1;
+    float min1 = std::numeric_limits<float>::max(), min2 = min1, min3 = min1, min4 = min1;
+    float max1 = std::numeric_limits<float>::lowest(), max2 = max1, max3 = max1, max4 = max1;
     // Ignore the first half of the samples taken.
     int cnt = 0;
-    for (size_t i = 0 /*(m_channels.size( ) / 2)*/; i < m_channels.size( ); i++)
+    for (size_t i = 0 /*(m_channels.size( ) / 2)*/; i < m_channels.size(); i++)
     {
         min1 = std::min(min1, m_channels.channel1[i]);
         min2 = std::min(min2, m_channels.channel2[i]);
@@ -440,36 +448,37 @@ void AdsModule::UpdateLatestFrame( )
     m_latestFrame.maxChannel2 = ConvertToHex(max2);
     m_latestFrame.maxChannel3 = ConvertToHex(max3);
     m_latestFrame.maxChannel4 = ConvertToHex(max4);
-    m_latestFrame.timestamp   = HAL_GetTick( );
+    m_latestFrame.timestamp   = HAL_GetTick();
     // Clear all of the buffers for the next run.
-    m_channels.channel1.clear( );
-    m_channels.channel2.clear( );
-    m_channels.channel3.clear( );
-    m_channels.channel4.clear( );
+    m_channels.channel1.clear();
+    m_channels.channel2.clear();
+    m_channels.channel3.clear();
+    m_channels.channel4.clear();
 
 // Debug stuff.
-#    if 1
-    LOG_DEBUG("[ADS] \n\r\tCH1: 0x%06X (%0.3f) min: %0.3f\tmax: %0.3f"
-              "\n\r\tCH2: 0x%06X (%0.3f) min: %0.3f\tmax: %0.3f"
-              "\n\r\tCH3: 0x%06X (%0.3f) min: %0.3f\tmax: %0.3f"
-              "\n\r\tCH4: 0x%06X (%0.3f) min: %0.3f\tmax: %0.3f",
-              m_latestFrame.avgChannel1,
-              tot1,
-              min1,
-              max1,
-              m_latestFrame.avgChannel2,
-              tot2,
-              min2,
-              max2,
-              m_latestFrame.avgChannel3,
-              tot3,
-              min3,
-              max3,
-              m_latestFrame.avgChannel4,
-              tot4,
-              min4,
-              max4);
-#    endif
+#if 1
+    LOG_DEBUG(
+      "[ADS] \n\r\tCH1: 0x%06X (%0.3f) min: %0.3f\tmax: %0.3f"
+      "\n\r\tCH2: 0x%06X (%0.3f) min: %0.3f\tmax: %0.3f"
+      "\n\r\tCH3: 0x%06X (%0.3f) min: %0.3f\tmax: %0.3f"
+      "\n\r\tCH4: 0x%06X (%0.3f) min: %0.3f\tmax: %0.3f",
+      m_latestFrame.avgChannel1,
+      tot1,
+      min1,
+      max1,
+      m_latestFrame.avgChannel2,
+      tot2,
+      min2,
+      max2,
+      m_latestFrame.avgChannel3,
+      tot3,
+      min3,
+      max3,
+      m_latestFrame.avgChannel4,
+      tot4,
+      min4,
+      max4);
+#endif
 }
 #endif
 /* Have a wonderful day :) */

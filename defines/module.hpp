@@ -10,10 +10,10 @@
  * @brief       Module class definition.
  */
 #ifndef MODULE_HPP_
-#    define MODULE_HPP_
+#define MODULE_HPP_
 /*************************************************************************************************/
 /* File includes ------------------------------------------------------------------------------- */
-#    include <string>
+#include <string>
 
 namespace cep
 {
@@ -30,10 +30,11 @@ namespace cep
 class Module
 {
 public:
-    virtual ~Module( ) = default;
+    virtual ~Module() = default;
 
-    virtual void               Run( )            = 0;
-    virtual const std::string& GetLabel( ) const = 0;
+    virtual bool               DoPost()         = 0;
+    virtual void               Run()            = 0;
+    virtual const std::string& GetLabel() const = 0;
 };
 
 }    // namespace cep

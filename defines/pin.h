@@ -32,10 +32,16 @@
 struct Pin
 {
     GPIO_TypeDef* port = nullptr;
-    uint16_t pin = 0;
+    uint16_t      pin  = 0;
+
+    void Set(bool state) { HAL_GPIO_WritePin(port, pin, (state ? GPIO_PIN_SET : GPIO_PIN_RESET)); }
+
+    bool Get() const { return HAL_GPIO_ReadPin(port, pin); }
+
+
     bool operator==(const Pin& other) const
     {
-        return ((this->port == other.port)&&(this->pin == other.pin));
+        return ((this->port == other.port) && (this->pin == other.pin));
     }
 };
 

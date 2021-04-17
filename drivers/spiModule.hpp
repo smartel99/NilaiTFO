@@ -33,7 +33,7 @@
  * -------------------------------------------------------------------------------------
  */
 
-namespace SPI
+namespace CEP_SPI
 {
 /*************************************************************************************************/
 /* Enumerated Types
@@ -119,7 +119,7 @@ enum class SectionState
     COMPLETE,
 };
 /*************************************************************************************************/
-}    // namespace SPI
+}    // namespace CEP_SPI
 
 /*************************************************************************************************/
 /* Classes
@@ -128,50 +128,45 @@ enum class SectionState
 class SpiModule : public cep::Module
 {
 public:
-    SpiModule(SPI_HandleTypeDef* handle, const std::string& label)
-    : m_label(label), m_handle(handle)
-    {
-        CEP_ASSERT(handle != nullptr, "SPI Handle is NULL!");
-        LOG_INFO("[%s]: Initialized", m_label.c_str());
-    }
-
+    SpiModule(SPI_HandleTypeDef* handle, const std::string& label);
     virtual ~SpiModule() override;
 
+    virtual bool               DoPost() override;
     virtual void               Run() override;
     virtual const std::string& GetLabel() const override { return m_label; }
 
-    SPI::Status Transmit(const std::vector<uint8_t> pkt);
-    SPI::Status Transmit(const uint8_t* data, size_t len);
+    CEP_SPI::Status Transmit(const std::vector<uint8_t> pkt);
+    CEP_SPI::Status Transmit(const uint8_t* data, size_t len);
 
-    inline SPI::Status TransmitByte(uint8_t data) { return Transmit(&data, 1); }
-    inline SPI::Status Transmit16(uint16_t data)
+    inline CEP_SPI::Status TransmitByte(uint8_t data) { return Transmit(&data, 1); }
+    inline CEP_SPI::Status Transmit16(uint16_t data)
     {
         // Send the data in little-endian mode, for backward compatibility.
         // This method is slower than straight up reinterpret_cast, but it is
-        // consistent accross all implementation.
+        // consistent across all implementation.
         return Transmit({(uint8_t)(data & 0x00FF), (uint8_t)(data >> 8)});
     }
 
-    SPI::Status Receive(uint8_t* ouptutData, size_t len);
-    SPI::Status Receive(std::vector<uint8_t>& outputData)
+    CEP_SPI::Status Receive(uint8_t* ouptutData, size_t len);
+    CEP_SPI::Status Receive(std::vector<uint8_t>& outputData)
     {
         return Receive(outputData.data(), outputData.size());
     }
-    inline SPI::Status ReceiveByte(uint8_t* outputData) { return Receive(outputData, 1); }
-    inline SPI::Status Receive16(uint16_t* outputData)
+    inline CEP_SPI::Status ReceiveByte(uint8_t* outputData) { return Receive(outputData, 1); }
+    inline CEP_SPI::Status Receive16(uint16_t* outputData)
     {
         return Receive(reinterpret_cast<uint8_t*>(outputData), 2);
     }
 
-    SPI::Status Transaction(const uint8_t* txData, size_t txLen, uint8_t* rxData, size_t rxLen);
+    CEP_SPI::Status Transaction(const uint8_t* txData, size_t txLen, uint8_t* rxData, size_t rxLen);
     // #TODO Explain difference between const std::vector& and std::vector&
-    SPI::Status Transaction(const std::vector<uint8_t>& txData, std::vector<uint8_t>& rxData);
+    CEP_SPI::Status Transaction(const std::vector<uint8_t>& txData, std::vector<uint8_t>& rxData);
 
-    inline SPI::Status TransactionByte(uint8_t txData, uint8_t* rxData)
+    inline CEP_SPI::Status TransactionByte(uint8_t txData, uint8_t* rxData)
     {
         return Transaction(&txData, 1, rxData, 1);
     }
-    inline SPI::Status Transaction16(uint16_t txData, uint16_t* rxData)
+    inline CEP_SPI::Status Transaction16(uint16_t txData, uint16_t* rxData)
     {
         return Transaction(reinterpret_cast<uint8_t*>(&txData),
                            2,
@@ -182,7 +177,9 @@ public:
 private:
     std::string        m_label;
     SPI_HandleTypeDef* m_handle;
-    SPI::Status        m_status = SPI::Status::NONE;
+    CEP_SPI::Status    m_status = CEP_SPI::Status::NONE;
+
+    constexpr static uint16_t TIMEOUT = 200;
 
 private:
     void ErrorHandler();
