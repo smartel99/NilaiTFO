@@ -10,22 +10,36 @@
  */
 
 #if defined(NILAI_USE_LOGGER)
-#    include "logger.hpp"
-#    include "defines/macros.hpp"
-#    include "drivers/uartModule.hpp"
+#include "logger.hpp"
+#include "defines/macros.hpp"
+#if defined(NILAI_USE_UART)
+#include "drivers/uartModule.hpp"
+#endif
 
-#    include <cstdio>
+#include <cstdarg>
+#include <cstdio>
 
 Logger* Logger::s_instance = nullptr;
 
-Logger::Logger(UartModule* uart)
+#if defined(NILAI_USE_UART)
+Logger::Logger(UartModule* uart, const std::function<void(const char*, size_t)> logFunc)
 {
     CEP_ASSERT(s_instance == nullptr, "Can only have one instance of Logger!");
     s_instance = this;
     m_uart     = uart;
+    m_logFunc  = logFunc;
 }
+#else
 
-Logger::~Logger( ) = default;
+Logger::Logger(const std::function<void(const char*, size_t)> logFunc)
+{
+    CEP_ASSERT(s_instance == nullptr, "Can only have one instance of Logger!");
+    s_instance = this;
+    m_logFunc  = logFunc;
+}
+#endif
+
+Logger::~Logger() = default;
 
 void Logger::Log(const char* fmt, ...)
 {
@@ -44,7 +58,16 @@ void Logger::VLog(const char* fmt, va_list args)
     size_t s = vsnprintf(buff, sizeof_array(buff), fmt, args);
 
     CEP_ASSERT(s < sizeof_array(buff), "vsnprintf error!");
-    m_uart->Transmit(buff, s);
+#if defined(NILAI_USE_UART)
+    if (m_uart != nullptr)
+    {
+        m_uart->Transmit(buff, s);
+    }
+#endif
+    if (m_logFunc)
+    {
+        m_logFunc(buff, s);
+    }
 }
 
 #endif

@@ -11,17 +11,12 @@
 #pragma once
 
 #if defined(NILAI_USE_LOGGER)
-#if !defined(NILAI_USE_UART)
-#error UART Module must be enabled to use the Logging module!
-#else
 
 /*************************************************************************************************/
 /* Includes ------------------------------------------------------------------------------------ */
 #include "defines/internalConfig.h"
 
-#include <cstdarg>
-#include <cstddef>
-#include <cstdint>
+#include <functional>
 
 #if !defined(NILAI_LOGGER_USE_RTC)
 #define GET_CUR_MS()  (HAL_GetTick())
@@ -87,13 +82,17 @@
 #define LOG_CRITICAL(msg, ...)
 #endif
 
-
+#if defined(NILAI_USE_UART)
 class UartModule;
+#endif
 class Logger
 {
 public:
-    Logger(UartModule* uart);
-
+#if defined(NILAI_USE_UART)
+    Logger(UartModule* uart = nullptr, const std::function<void(const char*, size_t)> logFunc = {});
+#else
+    Logger(const std::function<void(const char*, size_t)> logFunc);
+#endif
     ~Logger();
 
     void Log(const char* fmt, ...);
@@ -105,9 +104,11 @@ public:
 private:
     static Logger* s_instance;
 
+#if defined(NILAI_USE_UART)
     UartModule* m_uart = nullptr;
-};
 #endif
+    std::function<void(const char*, size_t)> m_logFunc = {};
+};
 #endif
 /*************************************************************************************************/
 /* LOG_CRITICAL("Have a wonderful day! :)"); */
