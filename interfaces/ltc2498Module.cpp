@@ -39,11 +39,9 @@ std::array<uint8_t, 4> ConversionSettings::ToRegValues() const
 }
 }    // namespace LTC2498
 
-Ltc2498Module::Ltc2498Module(const std::string& label,
-                             SpiModule*         spi,
-                             const Pin&         inPin,
-                             const Pin&         csPin)
-: m_label(label), m_spi(spi), m_misoPin(inPin), m_csPin(csPin)
+Ltc2498Module::Ltc2498Module(
+  const std::string& label, SpiModule* spi, const Pin& inPin, const Pin& csPin, float vcom)
+: m_label(label), m_spi(spi), m_misoPin(inPin), m_csPin(csPin), m_vcom(vcom)
 {
     // Enable the LTC2498 chip select signal to monitor its status.
     m_csPin.Set(false);
@@ -63,7 +61,7 @@ bool Ltc2498Module::DoPost()
 {
     LTC2498::ConversionSettings config;
     config.channel   = LTC2498::Channels::CH0;
-    config.type      = LTC2498::AcquisitionTypes::SingleEnded;
+    config.type      = LTC2498::AcquisitionTypes::Differential;
     config.polarity  = LTC2498::Polarities::Positive;
     config.inputType = LTC2498::InputTypes::TempSensor;
     config.filters   = LTC2498::Filters::All;
@@ -87,18 +85,27 @@ bool Ltc2498Module::DoPost()
         }
     }
 
-    const LTC2498::Reading& reading = GetLastReading();
-    // Calculate the temperature (in kelvins) from the reading.
-    float temp = (float)(reading.raw) / 314.0f;
+    // MISO pin == 0 -> Conversion is complete!
+    SetMisoAsMiso();
 
-    if ((temp >= 243.15f) && (temp <= 333.15f))
+    std::array<uint8_t, 4> resp = SetNextConvAndReadResults({});
+
+    ParseConversionResult(resp, config);
+
+    SetMisoAsGpio();
+
+    const LTC2498::Reading& reading = GetLastReading();
+    // Calculate the temperature from the reading.
+    float temp = ((float)(reading.raw) / 314.0f) - 273.15f;
+
+    if ((temp >= -30.0f) && (temp <= 60.0f))
     {
-        LTC_INFO("POST OK");
+        LTC_INFO("Temp = %0.2fC - POST OK", temp);
         return true;
     }
     else
     {
-        LTC_ERROR("Error in POST: Invalid temperature read: %0.3f", temp);
+        LTC_ERROR("Error in POST: Invalid temperature read: %0.2fC", temp);
         return false;
     }
 }
@@ -116,20 +123,27 @@ void Ltc2498Module::Run()
         // MISO pin == 0 -> Conversion is complete!
         SetMisoAsMiso();
 
+        auto                        callback = m_lastReading.config.callback;
+        LTC2498::ConversionSettings lastConf = m_lastReading.config;
+
         std::array<uint8_t, 4> nextConversion = {0};
         // Check if we have a conversion queued up.
-        int pos = GetNextConversion();
-        if (pos != -1)
+        auto next = GetNextConversion();
+        if (next != m_conversions.end())
         {
-            nextConversion = m_conversions[pos].ToRegValues();
+            nextConversion = next->ToRegValues();
 
             // Pre-saves the conversion settings.
-            m_lastReading.config = m_conversions[pos];
+            m_lastReading.config = *next;
         }
 
         std::array<uint8_t, 4> resp = SetNextConvAndReadResults(nextConversion);
 
-        ParseConversionResult(resp);
+        ParseConversionResult(resp, lastConf);
+        if (callback)
+        {
+            callback(m_lastReading.reading, lastConf);
+        }
         SetMisoAsGpio();
     }
 }
@@ -140,16 +154,19 @@ bool Ltc2498Module::QueueConversions(const std::vector<LTC2498::ConversionSettin
     m_conversions = conversions;
     m_repeat      = repeat;
 
-    m_currentConversion = 0;
+    // We changed the vector, the iterators are now invalid.
+    m_isIteratorValid = false;
 
     // If there are no conversions in the vector:
     if (conversions.empty() == true)
     {
         // Don't start a conversion.
+        m_currentConversion = m_conversions.end();
         return false;
     }
     else
     {
+        m_currentConversion = m_conversions.begin();
         SetNextConvAndReadResults(conversions[0].ToRegValues());
         return true;
     }
@@ -172,6 +189,9 @@ bool Ltc2498Module::StartConversion(const LTC2498::ConversionSettings& config)
 
 void Ltc2498Module::SetMisoAsGpio()
 {
+    // We don't really need to blip the chip select like that, but doing so allows the SPI
+    // transaction to be debugged with a logic analyzer.
+    m_csPin.Set(true);
     HAL_GPIO_DeInit(m_misoPin.port, m_misoPin.pin);
 
     GPIO_InitTypeDef GPIO_InitStruct = {};
@@ -180,10 +200,14 @@ void Ltc2498Module::SetMisoAsGpio()
     GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     HAL_GPIO_Init(m_misoPin.port, &GPIO_InitStruct);
+    m_csPin.Set(false);
 }
 
 void Ltc2498Module::SetMisoAsMiso()
 {
+    // We don't really need to blip the chip select like that, but doing so allows the SPI
+    // transaction to be debugged with a logic analyzer.
+    m_csPin.Set(true);
     HAL_GPIO_DeInit(m_misoPin.port, m_misoPin.pin);
 
     GPIO_InitTypeDef GPIO_InitStruct = {};
@@ -195,32 +219,32 @@ void Ltc2498Module::SetMisoAsMiso()
     // TODO Change GPIO_AF5_SPI1 for something generic that works with other SPI peripherals.
     GPIO_InitStruct.Alternate = GPIO_AF5_SPI1;
     HAL_GPIO_Init(m_misoPin.port, &GPIO_InitStruct);
+    m_csPin.Set(false);
 }
 
 /**
  *
  * @return -1 if there's no queued conversion.
  */
-int Ltc2498Module::GetNextConversion()
+LTC2498::CurrentConversion Ltc2498Module::GetNextConversion()
 {
     if (m_conversions.empty())
     {
         // Conversion queue is empty.
-        return -1;
+        return m_conversions.end();
     }
     else
     {
-        if (m_currentConversion < m_conversions.size())
+        if ((m_currentConversion + 1) < m_conversions.end())
         {
             // Not at the end of the queue.
-            int pos = (int)m_currentConversion;
             m_currentConversion++;
-            return pos;
+            return m_currentConversion;
         }
         else if (m_repeat == true)
         {
             // At the end of the queue but we need to repeat it.
-            m_currentConversion = 0;
+            m_currentConversion = m_conversions.begin();
             return m_currentConversion;
         }
         else
@@ -228,7 +252,8 @@ int Ltc2498Module::GetNextConversion()
             // At the end of the queue, no repeat.
             // Clear the queue.
             m_conversions.clear();
-            return -1;
+            m_currentConversion = m_conversions.end();
+            return m_currentConversion;
         }
     }
 }
@@ -258,39 +283,84 @@ Ltc2498Module::SetNextConvAndReadResults(const std::array<uint8_t, 4>& config)
     return resp;
 }
 
-void Ltc2498Module::ParseConversionResult(const std::array<uint8_t, 4>& resp)
+void Ltc2498Module::ParseConversionResult(const std::array<uint8_t, 4>&      resp,
+                                          const LTC2498::ConversionSettings& config)
 {
     // Convert into a single uint32_t for QoL.
     uint32_t raw = ((uint32_t)resp[0] << 24) | ((uint32_t)resp[1] << 16) |
                    ((uint32_t)resp[2] << 8) | ((uint32_t)resp[3]);
 
     // Bit 31 is End of Conversion flag, should obviously be set to 0.
-    if ((raw & 0x8000) == 1)
+    if ((raw & 0x80000000) == 1)
     {
         LTC_ERROR("End of conversion flag is not 0!\t0x%08X", raw);
         return;
     }
 
     // Bit 30 is a dummy bit, should always be 0.
-    if ((raw & 0x4000) == 1)
+    if ((raw & 0x40000000) == 1)
     {
         LTC_ERROR("Dummy bit is not 0!\t0x%08X", raw);
         return;
     }
 
     // Bit 29 is the sign of the result.
-    int sign = ((raw & 0x2000) ? 1 : -1);
+    int sign = ((raw & 0x20000000) ? 1 : -1);
+
+    // Combining bit 29 and bit 28 gives us the status of the conversion.
+    // If both bits are the same, we are over the acceptable range of the ADC.
+    if ((raw & 0x30000000) == 0x30000000)
+    {
+        LTC_ERROR("Over range detected! (0x%08X)", raw);
+        m_lastReading.raw     = 0x30000000 >> 5;    // Code for over range.
+        m_lastReading.reading = 2.5f;
+        return;
+    }
+    else if ((raw & 0x30000000) == 0x00000000)
+    {
+        LTC_ERROR("Under range detected! (0x%08X)", raw);
+        m_lastReading.raw     = 0x0FFFFFFF;    // Code for under range.
+        m_lastReading.reading = -2.5f;
+        return;
+    }
 
     // Bit 28 to 5 is the conversion result.
     raw = (raw & 0x1FFFFFE0) >> 5;
 
     // Apply the sign.
-    raw *= sign;
+    int32_t hex = (int32_t)raw * sign;
 
-    m_lastReading.raw = raw;
+    m_lastReading.raw = hex;
 
     // Convert the raw reading into volts.
-    m_lastReading.reading = (float)raw * (5.0f / 16777216.0f);
+    // Full scale of the chip is 0.5Vref, Vref being 5V.
+    float value = (float)hex * (5.0f / 16777216.0f);
+
+    // In the case of a single-ended conversion, it was observed that if the input voltage is
+    // inferior to the common voltage, the measured voltage is equal to `-Vcom - Vin` instead of
+    // the `Vin - Vcom` that is expected. We thus need to compensate for this.
+    if (config.type == LTC2498::AcquisitionTypes::SingleEnded)
+    {
+        if (value < 0.0f)
+        {
+            value = (value * -1.0f) - m_vcom;
+        }
+        else
+        {
+            value = (value + m_vcom);
+        }
+    }
+    else
+    {
+        // In the case of a differential conversion, it was observed that if V+'s voltage is under
+        // V-'s, the measured voltage is equal to `-5.0 + abs(V+ - V-)`.
+        if (value < 0.0f)
+        {
+            value = -5.0f - value;
+        }
+    }
+
+    m_lastReading.reading = value;
 }
 
 #endif

@@ -44,6 +44,16 @@
  */
 #define NILAI_LOGGER_USE_RTC
 
+/**
+ * Toggle each level of logging.
+ * To enable a level of logging, uncomment the definition, otherwise comment it.
+ */
+#define NILAI_LOG_ENABLE_DEBUG
+#define NILAI_LOG_ENABLE_INFO
+#define NILAI_LOG_ENABLE_WARNING
+#define NILAI_LOG_ENABLE_ERROR
+#define NILAI_LOG_ENABLE_CRITICAL
+
 /******************************************************************************/
 /* [SECTION]: Module Activation                                               */
 /******************************************************************************/
@@ -71,7 +81,6 @@
 //#define NILAI_USE_PCA9505
 //#define NILAI_USE_RELAY
 //#define NILAI_USE_RN2903
-//#define NILAI_USE_SD
 //#define NILAI_USE_TLP3545
 
 // Services
@@ -79,6 +88,7 @@
 //#define NILAI_USE_SYSTEM
 //#define NILAI_USE_LOGGER
 //#define NILAI_USE_FILE_LOGGER
+//#define NILAI_USE_FILESYSTEM
 
 /**
  * @}

@@ -11,101 +11,129 @@
 
 #include "esp32Module.h"
 
-#if defined(NILAI_USE_ESP32) && 0
+#if defined(NILAI_USE_ESP32)
 #if !defined(NILAI_USE_UART)
 #error The UART module must be enabled in order to use the ESP32 Module
 #endif
 #include "defines/internalConfig.h"
 #include NILAI_HAL_HEADER
 
+#define ESP_DEBUG(msg, ...) LOG_DEBUG("[%s]: " msg, m_label.c_str(), ##__VA_ARGS__)
 #define ESP_INFO(msg, ...)  LOG_INFO("[%s]: " msg, m_label.c_str(), ##__VA_ARGS__)
+#define ESP_WARN(msg, ...)  LOG_WARNING("[%s]: " msg, m_label.c_str(), ##__VA_ARGS__)
 #define ESP_ERROR(msg, ...) LOG_ERROR("[%s]: " msg, m_label.c_str(), ##__VA_ARGS__)
 
-#define CHECK_STATUS_AND_CALLBACK(bit)                                                             \
-    do                                                                                             \
-    {                                                                                              \
-        if (m_status.state & (bit))                                                                \
-        {                                                                                          \
-            ESP_INFO("%s event received", GetStateString((bit)));                                  \
-            if (m_callbacks[(bit)])                                                                \
-            {                                                                                      \
-                m_callbacks[(bit)]();                                                              \
-            }                                                                                      \
-        }                                                                                          \
-    } while (0)
-
-static const char* GetStateString(CEP_ESP32::State state);
-static std::string GetCommandString(CEP_ESP32::Command cmd);
-
-EspModule::EspModule(const std::string& label, UartModule* uart, const CEP_ESP32::Pins& pins)
+EspModule::EspModule(const std::string&     label,
+                     UartModule*            uart,
+                     const std::string&     deviceName,
+                     const CEP_ESP32::Pins& pins)
 : m_label(label), m_uart(uart), m_pins(pins)
 {
     CEP_ASSERT(uart != nullptr, "UART handle is NULL!");
 
+    // Set TPIN to high to allow the ESP to boot.
+    m_pins.tpin.Set(true);
+
+    // Enable the ESP32 in normal boot mode.
     m_pins.enable.Set(false);
     m_pins.boot.Set(true);
-    m_pins.enable(true);
+    m_pins.enable.Set(true);
 
-    InitializeCallbacks();
+    if (deviceName.empty() == false)
+    {
+        m_deviceName = deviceName;
+    }
 
-    m_uart->SetStartOfFrameSequence("\x55\xAA");
-    m_uart->SetEndOfFrameSequence("\x00");
+    m_uart->SetExpectedRxLen(512);
+
+    m_uart->SetStartOfFrameSequence("\xAA\x55");
+    m_uart->SetEndOfFrameSequence("\x55\xAA");
+
+    // Wait for ESP32 to be done booting, which takes around 400ms...
+    HAL_Delay(450);
 
     ESP_INFO("Initialized.");
 }
 
 /**
  * To pass the POST, the following things must all succeed:
- *  - The `tpin` must be HIGH
- *  - The `GetStatus` command indicates that there are no errors on the ESP32.
+ *  - The `tpout` must be HIGH
+ *  - The ESP must respond with "OK".
  * @return True if the POST passes, false otherwise.
  */
 bool EspModule::DoPost()
 {
+    // Make sure that TPOUT is high.
     if (m_pins.tpout.Get() == false)
     {
         ESP_ERROR("Error in POST: TPOUT is LOW!");
         return false;
     }
 
-    const CEP_ESP32::Status& status = RefreshStatus();
-    if (status.state != CEP_ESP32::State::NoErrors)
+    // Send the device name to the ESP, with null terminator.
+    m_uart->Transmit(m_deviceName.c_str(), m_deviceName.size() + 1);
+
+    // Wait for its response.
+    size_t start = HAL_GetTick();
+    while (m_uart->GetNumberOfWaitingFrames() == 0)
     {
-        ESP_ERROR("Error in POST: Status is %s", GetStateString(status.state));
+        if (HAL_GetTick() >= start + EspModule::TIMEOUT)
+        {
+            // Timed out.
+            ESP_ERROR("Error in POST: No response from ESP!");
+            return false;
+        }
+    }
+
+    // We got the response, check it.
+    CEP_UART::Frame resp = m_uart->Receive();
+
+    if (resp != "OK")
+    {
+        ESP_ERROR("Error in POST: Invalid response from ESP! ('%s')", resp.data);
         return false;
     }
+
+    // POST OK!
+    ESP_INFO("POST OK");
 
     return true;
 }
 
 void EspModule::Run()
 {
-    // If the ESP32 has something to tell us, it will set the TPOUT pin to LOW.
+    // If TPOUT is LOW, there's a problem, reset the ESP.
     if (m_pins.tpout.Get() == false)
     {
-        // Go read that status.
-        RefreshStatus();
+        ESP_WARN("TPOUT is LOW, resetting!");
+        m_pins.enable.Set(false);
+        HAL_Delay(1);
+        m_pins.enable.Set(true);
 
-        CheckStatusAndCallCallback();
+        // We must re-send the device name.
+        m_uart->Transmit(m_deviceName);
+
+        // Wait for its response.
+        size_t start = HAL_GetTick();
+        while (m_uart->GetNumberOfWaitingFrames() == 0)
+        {
+            if (HAL_GetTick() >= start + EspModule::TIMEOUT)
+            {
+                // Timed out.
+                ESP_ERROR("No response from ESP!");
+                return;
+            }
+        }
+
+        // We got the response, check it.
+        CEP_UART::Frame resp = m_uart->Receive();
+
+        if (resp != "OK")
+        {
+            ESP_ERROR("Invalid response from ESP! ('%s')", resp.data);
+            return;
+        }
     }
-}
-
-const CEP_ESP32::Status& EspModule::RefreshStatus()
-{
-}
-
-void EspModule::SetEventCallback(CEP_ESP32::State event, const std::function<void()>& cb)
-{
-    CEP_ASSERT(m_callbacks.find(event) != m_callbacks.end(), "Invalid event!");
-
-    m_callbacks[event] = cb;
-}
-
-void EspModule::ClearEventCallback(CEP_ESP32::State event)
-{
-    CEP_ASSERT(m_callbacks.find(event) != m_callbacks.end(), "Invalid event!");
-
-    m_callbacks[event] = {};
 }
 
 void EspModule::Enable()
@@ -138,138 +166,100 @@ void EspModule::SetBootMode(CEP_ESP32::BootMode mode)
 
 bool EspModule::ProgramEsp(const std::string& filepath)
 {
-#if !defined(NILAI_USE_SD)
+#if !defined(NILAI_USE_FILESYSTEM)
+    UNUSED(filepath);
     CEP_ASSERT(false, "The SD module must be enabled to use this function");
-#endif
+    return false;
+#else
+    UNUSED(filepath);
 #warning Implement EspModule::ProgramEsp!
+    return false;
+#endif
 }
 
-const CEP_ESP32::Status& EspModule::RefreshStatus()
+void EspModule::Transmit(const char* msg, size_t len)
 {
-    m_uart->Transmit(GetCommandString(CEP_ESP32::Command::GetStatus));
+    m_uart->Transmit(msg, len);
 }
 
-void EspModule::InitializeCallbacks()
+void EspModule::Transmit(const std::string& msg)
 {
-    using namespace CEP_ESP32;
-    m_callbacks = {{State::Transmitting, {}},
-                   {State::TxComplete, {}},
-                   {State::Receiving, {}},
-                   {State::DataAwaiting, {}},
-                   {State::Scanning, {}},
-                   {State::ScanComplete, {}},
-                   {State::FoundDevices, {}},
-                   {State::Broadcasting, {}},
-                   {State::BroadcastComplete, {}},
-                   {State::ConnReqReceived, {}},
-                   {State::Connecting, {}},
-                   {State::Connected, {}},
-                   {State::TxError, {}},
-                   {State::RxError, {}},
-                   {State::ScanError, {}},
-                   {State::BroadcastError, {}},
-                   {State::ConnError, {}},
-                   {State::MiscError, {}}};
+    m_uart->Transmit(msg);
 }
 
-void EspModule::CheckStatusAndCallCallback()
+void EspModule::Transmit(const std::vector<uint8_t>& msg)
 {
-    using namespace CEP_ESP32;
-    CHECK_STATUS_AND_CALLBACK(State::Transmitting);
-    CHECK_STATUS_AND_CALLBACK(State::TxComplete);
-    CHECK_STATUS_AND_CALLBACK(State::Receiving);
-    CHECK_STATUS_AND_CALLBACK(State::DataAwaiting);
-    CHECK_STATUS_AND_CALLBACK(State::Scanning);
-    CHECK_STATUS_AND_CALLBACK(State::ScanComplete);
-    CHECK_STATUS_AND_CALLBACK(State::FoundDevices);
-    CHECK_STATUS_AND_CALLBACK(State::Broadcasting);
-    CHECK_STATUS_AND_CALLBACK(State::BroadcastComplete);
-    CHECK_STATUS_AND_CALLBACK(State::ConnReqReceived);
-    CHECK_STATUS_AND_CALLBACK(State::Connecting);
-    CHECK_STATUS_AND_CALLBACK(State::Connected);
-    CHECK_STATUS_AND_CALLBACK(State::TxError);
-    CHECK_STATUS_AND_CALLBACK(State::RxError);
-    CHECK_STATUS_AND_CALLBACK(State::ScanError);
-    CHECK_STATUS_AND_CALLBACK(State::BroadcastError);
-    CHECK_STATUS_AND_CALLBACK(State::ConnError);
-    CHECK_STATUS_AND_CALLBACK(State::MiscError);
+    m_uart->Transmit(msg);
 }
 
-const char* GetStateString(CEP_ESP32::State state)
+size_t EspModule::GetNumberOfWaitingFrames() const
 {
-    switch (state)
-    {
-        case CEP_ESP32::State::RxError:
-            return "RxError";
-        case CEP_ESP32::State::Scanning:
-            return "Scanning";
-        case CEP_ESP32::State::NoErrors:
-            return "NoErrors";
-        case CEP_ESP32::State::TxError:
-            return "TxError";
-        case CEP_ESP32::State::Connected:
-            return "Connected";
-        case CEP_ESP32::State::Standby:
-            return "Standby";
-        case CEP_ESP32::State::Connecting:
-            return "Connecting";
-        case CEP_ESP32::State::Broadcasting:
-            return "Broadcasting";
-        case CEP_ESP32::State::Transmitting:
-            return "Transmitting";
-        case CEP_ESP32::State::MiscError:
-            return "MiscError";
-        case CEP_ESP32::State::ConnError:
-            return "ConnError";
-        case CEP_ESP32::State::BroadcastError:
-            return "BroadcastError";
-        case CEP_ESP32::State::ScanError:
-            return "ScanError";
-        case CEP_ESP32::State::Receiving:
-            return "Receiving";
-        default:
-            return "Unknown Error";
-    }
+    return m_uart->GetNumberOfWaitingFrames();
 }
 
-std::string GetCommandString(CEP_ESP32::Command cmd)
+CEP_UART::Frame EspModule::Receive()
 {
-    switch (cmd)
-    {
-        case CEP_ESP32::Command::GetStatus:
-            return std::string{"\x01"};
-        case CEP_ESP32::Command::StartScanning:
-            return std::string{"\x02"};
-        case CEP_ESP32::Command::StopScanning:
-            return std::string{"\x03"};
-        case CEP_ESP32::Command::StartBroadcasting:
-            return std::string{"\x04"};
-        case CEP_ESP32::Command::StopBroadcasting:
-            return std::string{"\x05"};
-        case CEP_ESP32::Command::RequestConnection:
-            return std::string{"\x06"};
-        case CEP_ESP32::Command::ListDevices:
-            return std::string{"\x07"};
-        case CEP_ESP32::Command::Connect:
-            return std::string{"\x08"};
-        case CEP_ESP32::Command::Disconnect:
-            return std::string{"\x09"};
-        case CEP_ESP32::Command::SendPacket:
-            return std::string{"\x0A"};
-        case CEP_ESP32::Command::ReceivePacket:
-            return std::string{"\x0B"};
-        case CEP_ESP32::Command::Reset:
-            return std::string{"\x0C"};
-        case CEP_ESP32::Command::GetDeviceAddress:
-            return std::string("\x0D");
-        case CEP_ESP32::Command::GetErrorMessages:
-            return std::string{"\xFE"};
-        case CEP_ESP32::Command::Error:
-            return std::string{"\xFF"};
-        default:
-            CEP_ASSERT(false, "Invalid command");
-            break;
-    }
+    return m_uart->Receive();
+}
+
+void EspModule::SetExpectedRxLen(size_t len)
+{
+    m_uart->SetExpectedRxLen(len);
+}
+
+void EspModule::ClearExpectedRxLen()
+{
+    m_uart->ClearExpectedRxLen();
+}
+
+void EspModule::SetFrameReceiveCpltCallback(const std::function<void()>& cb)
+{
+    m_uart->SetFrameReceiveCpltCallback(cb);
+}
+
+void EspModule::ClearFrameReceiveCpltCallback()
+{
+    m_uart->ClearFrameReceiveCpltCallback();
+}
+
+void EspModule::SetStartOfFrameSequence(const char* sof, size_t len)
+{
+    m_uart->SetStartOfFrameSequence(const_cast<uint8_t*>((const uint8_t*)sof), len);
+}
+
+void EspModule::SetStartOfFrameSequence(const std::string& sof)
+{
+    m_uart->SetStartOfFrameSequence(sof);
+}
+
+void EspModule::SetStartOfFrameSequence(const std::vector<uint8_t>& sof)
+{
+    m_uart->SetStartOfFrameSequence(sof);
+}
+
+void EspModule::ClearStartOfFrameSequence()
+{
+    m_uart->ClearStartOfFrameSequence();
+}
+
+void EspModule::SetEndOfFrameSequence(const char* eof, size_t len)
+{
+    m_uart->SetEndOfFrameSequence(const_cast<uint8_t*>((const uint8_t*)eof), len);
+}
+
+void EspModule::SetEndOfFrameSequence(const std::string& eof)
+{
+    m_uart->SetEndOfFrameSequence(eof);
+}
+
+void EspModule::SetEndOfFrameSequence(const std::vector<uint8_t>& eof)
+{
+    m_uart->SetEndOfFrameSequence(eof);
+}
+
+void EspModule::ClearEndOfFrameSequence()
+{
+    m_uart->ClearEndOfFrameSequence();
 }
 
 #endif

@@ -55,6 +55,7 @@ struct Time
 
     DayLightSaving dayLightSaving = DayLightSaving::None;
 
+    Time() = default;
     Time(const RTC_TimeTypeDef& time);
 
     RTC_TimeTypeDef ToHal() const;
@@ -68,6 +69,8 @@ struct Date
     uint8_t  day   = 0;    // Day of the month, starts at 1.
     uint8_t  dotw  = 0;    // Day of the week, 1 is Monday, 7 is Sunday
 
+    Date() = default;
+    Date(uint16_t y, uint8_t m, uint8_t d, uint8_t wd = 1) : year(y), month(m), day(d), dotw(wd) {}
     Date(const RTC_DateTypeDef& date);
 
     std::string DotWtoStr() const;
@@ -75,6 +78,18 @@ struct Date
 
     RTC_DateTypeDef ToHal() const;
     std::string     ToStr() const;
+};
+
+struct Timestamp
+{
+    Date date;
+    Time time;
+
+    Timestamp() = default;
+    Timestamp(const Date& d, const Time& t) : date(d), time(t) {}
+    Timestamp(size_t epoch);
+
+    size_t ToEpoch() const;
 };
 
 }    // namespace CEP_RTC
@@ -100,7 +115,10 @@ public:
     void          SetDate(const CEP_RTC::Date& date);
     CEP_RTC::Date GetDate();
 
-    size_t GetEpoch();
+    CEP_RTC::Timestamp GetTimestamp();
+
+    size_t        GetEpoch();
+    static size_t GetEpoch(const CEP_RTC::Date& date, const CEP_RTC::Time& time);
 
     static RtcModule* Get() { return s_instance; }
 

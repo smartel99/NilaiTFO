@@ -18,6 +18,7 @@
 
 #include <cmath>
 #include <cstring>
+#include <algorithm>
 
 /*************************************************************************************************/
 /* Global variables ---------------------------------------------------------------------------- */
@@ -144,20 +145,28 @@ bool plus_minus(double value, double compare, double margin)
     }
 }
 
-/*************************************************************************************************/
-/**
- * @}
- * @}
- */
-
-/* Have a wonderful day! :) */
-/****** END OF FILE ******/
 
 size_t cep::FindStringInVector(const std::string& str, const std::vector<uint8_t>& vec)
 {
+#if __cplusplus >= 201703L
+    auto it = std::search(vec.begin(), vec.end(), str.begin(), str.end());
+    if (it == vec.end())
+    {
+        return std::string::npos;
+    }
+    else
+    {
+        return (it - vec.begin());
+    }
+#else
     size_t strLen = str.size();
     size_t vecLen = vec.size();
 
+    // If the string is bigger than the vector, we won't find the string in the vector ;)
+    if (strLen > vecLen)
+    {
+        return std::string::npos;
+    }
     for (size_t i = 0; i <= vecLen - strLen; ++i)
     {
         size_t j = 0;
@@ -173,4 +182,14 @@ size_t cep::FindStringInVector(const std::string& str, const std::vector<uint8_t
     }
 
     return std::string::npos;
+#endif
 }
+
+/*************************************************************************************************/
+/**
+ * @}
+ * @}
+ */
+
+/* Have a wonderful day! :) */
+/****** END OF FILE ******/

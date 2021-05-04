@@ -146,9 +146,9 @@ RTC_DateTypeDef Date::ToHal() const
 
 std::string Date::ToStr() const
 {
-    char d[11] = {0};
+    char d[9] = {0};
 
-    sprintf(d, "%04i/%02i/%02i", year, month, day);
+    sprintf(d, "%02i-%02i-%02i", year - 2000, month, day);
 
     return std::string{d};
 }
@@ -252,11 +252,48 @@ CEP_RTC::Date RtcModule::GetDate()
     return CEP_RTC::Date(halDate);
 }
 
+CEP_RTC::Timestamp RtcModule::GetTimestamp()
+{
+    return CEP_RTC::Timestamp(GetDate(), GetTime());
+}
+
 size_t RtcModule::GetEpoch()
 {
-    CEP_RTC::Date date = GetDate();
-    CEP_RTC::Time time = GetTime();
+    return GetEpoch(GetDate(), GetTime());
+}
 
+size_t RtcModule::GetEpoch(const CEP_RTC::Date& date, const CEP_RTC::Time& time)
+{
+    time_t    epoch = {0};
+    struct tm tim   = {};
+
+    tim.tm_year = (date.year - 1900);
+    tim.tm_mon  = date.month - 1;
+    tim.tm_mday = date.day;
+    tim.tm_hour = time.hours;
+    tim.tm_min  = time.minutes;
+    tim.tm_sec  = time.seconds;
+
+    epoch = mktime(&tim);
+    return (size_t)epoch;
+}
+
+CEP_RTC::Timestamp::Timestamp(size_t epoch)
+{
+    time_t     e = epoch;
+    struct tm* tim;
+
+    tim          = gmtime(&e);
+    date.year    = (uint16_t)(tim->tm_year + 1900);
+    date.month   = (uint8_t)(tim->tm_mon + 1);
+    date.day     = (uint8_t)(tim->tm_mday);
+    time.hours   = (uint8_t)(tim->tm_hour);
+    time.minutes = (uint8_t)(tim->tm_min);
+    time.seconds = (uint8_t)(tim->tm_sec);
+}
+
+size_t CEP_RTC::Timestamp::ToEpoch() const
+{
     time_t    epoch = {0};
     struct tm tim   = {};
 

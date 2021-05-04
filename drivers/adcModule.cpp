@@ -8,6 +8,7 @@ static constexpr float ConvertToVolt(uint32_t val)
     return (((float)val / 4095.0f) * 3.3f);
 }
 
+
 AdcModule::AdcModule(ADC_HandleTypeDef* adc, const std::string& label) : m_adc(adc), m_label(label)
 {
     CEP_ASSERT(adc != nullptr, "[%s]: ADC handle is null!", m_label.c_str());
@@ -43,6 +44,13 @@ bool AdcModule::DoPost()
         {
             LOG_ERROR("[%s]: Error in POST: Channel %i reading 0!", m_label.c_str(), i);
             isAllChannelsOk = false;
+        }
+        else
+        {
+            LOG_INFO("[%s]: Channel %i reading %0.3fV",
+                     m_label.c_str(),
+                     i,
+                     ConvertToVolt(m_channelBuff[i]));
         }
     }
 

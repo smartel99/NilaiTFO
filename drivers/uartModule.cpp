@@ -18,6 +18,8 @@
 #include "main.h"
 
 #include <cstring>
+#include <cstdarg>    // For va_list.
+#include <cstdio>
 
 /*************************************************************************************************/
 /* Defines ------------------------------------------------------------------------------------- */
@@ -93,6 +95,18 @@ void UartModule::Transmit(const std::string& msg)
 void UartModule::Transmit(const std::vector<uint8_t>& msg)
 {
     Transmit((const char*)msg.data(), msg.size());
+}
+
+void UartModule::VTransmit(const char* fmt, ...)
+{
+    static char buff[256];
+
+    va_list args;
+    va_start(args, fmt);
+    size_t len = vsnprintf(buff, sizeof(buff), fmt, args);
+    va_end(args);
+
+    Transmit(buff, len);
 }
 
 CEP_UART::Frame UartModule::Receive()
@@ -192,7 +206,7 @@ void UartModule::HandleReceptionIRQ()
         m_rxBuf.emplace_back(newChar);
 
         // If we want a sof:
-        if (m_sof.empty() == false)
+        if ((m_sof.empty() == false) && (m_hasReceivedSof == false))
         {
             // Check if it is contained in the buffer.
             // #TODO Ideally we'd just want to do that when we don't know if we've received it yet.
@@ -216,7 +230,8 @@ void UartModule::HandleReceptionIRQ()
             else
             {
                 // SoF is start of packet, just keep starting from there.
-                m_rxBuf.erase(m_rxBuf.begin(), m_rxBuf.begin() + pos);
+                m_rxBuf.erase(m_rxBuf.begin(), m_rxBuf.begin() + pos + m_sof.size());
+                m_hasReceivedSof = true;
             }
         }
 
@@ -243,9 +258,10 @@ void UartModule::HandleReceptionIRQ()
         if (rxComplete == true)
         {
             //            m_latestFrames.push_back(UART::Frame(m_rxBuf, HAL_GetTick( )));
-            m_latestFrames = CEP_UART::Frame(m_rxBuf, HAL_GetTick());
-            m_framePending = true;
-            // Clear reception buffer and call the callback
+            m_latestFrames   = CEP_UART::Frame(m_rxBuf, HAL_GetTick());
+            m_framePending   = true;
+            m_hasReceivedSof = false;
+            // Clear reception buffer and call the callback.
             m_rxBuf.clear();
             if (m_cb)
             {

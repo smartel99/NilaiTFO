@@ -111,13 +111,13 @@ enum class Speeds
  */
 struct ConversionSettings
 {
-    Channels                   channel   = Channels::CH0;
-    AcquisitionTypes           type      = AcquisitionTypes::Differential;
-    Polarities                 polarity  = Polarities::Positive;
-    InputTypes                 inputType = InputTypes::External;
-    Filters                    filters   = Filters::All;
-    Speeds                     speed     = Speeds::x1;
-    std::function<void(float)> callback;
+    Channels                                              channel  = Channels::CH0;
+    AcquisitionTypes                                      type     = AcquisitionTypes::Differential;
+    Polarities                                            polarity = Polarities::Positive;
+    InputTypes                                            inputType = InputTypes::External;
+    Filters                                               filters   = Filters::All;
+    Speeds                                                speed     = Speeds::x1;
+    std::function<void(float, const ConversionSettings&)> callback;
 
     std::array<uint8_t, 4> ToRegValues() const;
 };
@@ -131,13 +131,19 @@ struct Reading
     float              reading = 0.0f;    //!< The value read by the conversion, in volts.
     int32_t            raw     = 0;       //!< The raw value read by the conversion, in LSBs.
 };
+
+using CurrentConversion = std::vector<ConversionSettings>::iterator;
 }    // namespace LTC2498
 
 
 class Ltc2498Module : public cep::Module
 {
 public:
-    Ltc2498Module(const std::string& label, SpiModule* spi, const Pin& inPin, const Pin& csPin);
+    Ltc2498Module(const std::string& label,
+                  SpiModule*         spi,
+                  const Pin&         inPin,
+                  const Pin&         csPin,
+                  float              vcom = 0.00f);
     virtual ~Ltc2498Module() override = default;
 
     virtual bool               DoPost() override;
@@ -158,20 +164,23 @@ private:
     SpiModule*  m_spi     = nullptr;
     Pin         m_misoPin = {};
     Pin         m_csPin   = {};
+    float       m_vcom    = 0.00f;
 
     std::vector<LTC2498::ConversionSettings> m_conversions       = {};
-    size_t                                   m_currentConversion = 0;
+    LTC2498::CurrentConversion               m_currentConversion = m_conversions.end();
+    bool                                     m_isIteratorValid   = true;
     bool                                     m_isConverting      = false;
     bool                                     m_repeat            = false;
 
     LTC2498::Reading m_lastReading = {};
 
 private:
-    void                   SetMisoAsGpio();
-    void                   SetMisoAsMiso();
-    int                    GetNextConversion();
-    std::array<uint8_t, 4> SetNextConvAndReadResults(const std::array<uint8_t, 4>& config);
-    void                   ParseConversionResult(const std::array<uint8_t, 4>& resp);
+    void                       SetMisoAsGpio();
+    void                       SetMisoAsMiso();
+    LTC2498::CurrentConversion GetNextConversion();
+    std::array<uint8_t, 4>     SetNextConvAndReadResults(const std::array<uint8_t, 4>& config);
+    void                       ParseConversionResult(const std::array<uint8_t, 4>&      resp,
+                                                     const LTC2498::ConversionSettings& config);
 };
 
 /***********************************************/

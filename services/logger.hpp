@@ -16,6 +16,7 @@
 /* Includes ------------------------------------------------------------------------------------ */
 #include "defines/internalConfig.h"
 
+#include <cstdarg>    // For va_list
 #include <functional>
 
 #if !defined(NILAI_LOGGER_USE_RTC)
@@ -43,9 +44,10 @@
 #define LOG_HELPER(msg, ...)                                                                       \
     do                                                                                             \
     {                                                                                              \
-        Logger::Get() != nullptr ? Logger::Get()->Log("[%s %s] " msg,                              \
+        Logger::Get() != nullptr ? Logger::Get()->Log("[%s %s.%03i] " msg,                         \
                                                       RtcModule::Get()->GetDate().ToStr().c_str(), \
                                                       RtcModule::Get()->GetTime().ToStr().c_str(), \
+                                                      HAL_GetTick() % 1000,                        \
                                                       ##__VA_ARGS__)                               \
                                  : (void)0;                                                        \
     } while (0)
@@ -85,13 +87,16 @@
 #if defined(NILAI_USE_UART)
 class UartModule;
 #endif
+
+using LogFunc = std::function<void(const char*, size_t)>;
+
 class Logger
 {
 public:
 #if defined(NILAI_USE_UART)
-    Logger(UartModule* uart = nullptr, const std::function<void(const char*, size_t)> logFunc = {});
+    Logger(UartModule* uart = nullptr, const LogFunc& logFunc = {});
 #else
-    Logger(const std::function<void(const char*, size_t)> logFunc);
+    Logger(const LogFunc& logFunc);
 #endif
     ~Logger();
 
@@ -101,13 +106,15 @@ public:
     UartModule*    GetUart() { return m_uart; }
     static Logger* Get() { return s_instance; }
 
+    void SetLogFunc(const LogFunc& logFunc) { m_logFunc = logFunc; }
+
 private:
     static Logger* s_instance;
 
 #if defined(NILAI_USE_UART)
     UartModule* m_uart = nullptr;
 #endif
-    std::function<void(const char*, size_t)> m_logFunc = {};
+    LogFunc m_logFunc = {};
 };
 #endif
 /*************************************************************************************************/

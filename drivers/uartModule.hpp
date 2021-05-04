@@ -87,21 +87,31 @@ enum class SectionState
 
 struct Frame
 {
-    // std::vector<uint8_t> data;
-    uint8_t  data[515] = {0};
+    uint8_t* data      = nullptr;
+    size_t   len       = 0;
     uint32_t timestamp = 0;
 
     Frame() = default;
     Frame(const std::vector<uint8_t>& d, uint32_t t) : timestamp(t)
     {
-        //        volatile size_t s = d.size( );
-        //        data.reserve(s);
+        data = new uint8_t[d.size()];
+        CEP_ASSERT(data != nullptr, "Unable to allocate memory for data!");
+        len = d.size();
         for (size_t i = 0; i < d.size(); i++)
         {
             data[i] = d[i];
-            //            data.push_back(v);
         }
     }
+    ~Frame()
+    {
+        delete[] data;
+        data = nullptr;
+        len  = 0;
+    }
+
+    std::string ToStr() const { return std::string{(char*)data}; }
+    bool        operator==(const std::string& s) const { return (std::string{(char*)data} == s); }
+    bool        operator!=(const std::string& s) const { return std::string{(char*)data} != s; }
 };
 }    // namespace CEP_UART
 
@@ -121,6 +131,7 @@ public:
     void Transmit(const char* msg, size_t len);
     void Transmit(const std::string& msg);
     void Transmit(const std::vector<uint8_t>& msg);
+    void VTransmit(const char* fmt, ...);
 
     size_t GetNumberOfWaitingFrames() const
     {
@@ -165,6 +176,7 @@ private:
     bool            m_framePending = false;
 
     std::string m_sof;
+    bool        m_hasReceivedSof = false;
     std::string m_eof;
 
     std::function<void()> m_cb;
