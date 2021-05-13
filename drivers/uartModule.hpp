@@ -87,11 +87,16 @@ enum class SectionState
 
 struct Frame
 {
+#if 0
     uint8_t* data      = nullptr;
     size_t   len       = 0;
-    uint32_t timestamp = 0;
+#endif
+    std::vector<uint8_t> data;
+    size_t               len       = 0;
+    uint32_t             timestamp = 0;
 
     Frame() = default;
+#if 0
     Frame(const std::vector<uint8_t>& d, uint32_t t) : timestamp(t)
     {
         data = new uint8_t[d.size()];
@@ -108,10 +113,22 @@ struct Frame
         data = nullptr;
         len  = 0;
     }
+#endif
+    Frame(const std::vector<uint8_t>& d, uint32_t t) : timestamp(t)
+    {
+        data = d;
+        len  = data.size();
+    }
 
-    std::string ToStr() const { return std::string{(char*)data}; }
-    bool        operator==(const std::string& s) const { return (std::string{(char*)data} == s); }
-    bool        operator!=(const std::string& s) const { return std::string{(char*)data} != s; }
+    std::string ToStr() const { return std::string{(char*)data.data()}; }
+    bool        operator==(const std::string& s) const
+    {
+        return (std::string((char*)data.data(), len) == s);
+    }
+    bool operator!=(const std::string& s) const
+    {
+        return (std::string((char*)data.data(), len) != s);
+    }
 };
 }    // namespace CEP_UART
 
@@ -180,6 +197,8 @@ private:
     std::string m_eof;
 
     std::function<void()> m_cb;
+
+    bool m_hasNewData = false;
 
     static constexpr uint32_t TIMEOUT    = 100;    // Systicks.
     static constexpr uint32_t RX_TIMEOUT = 50;     // Systicks.

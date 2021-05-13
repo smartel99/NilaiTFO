@@ -95,7 +95,7 @@ Result ReadDir(dir_t* dir, fileInfo_t* outInfo);
 Result FindFirst(dir_t*             outDir,
                  fileInfo_t*        outInfo,
                  const std::string& dirPath,
-                 const std::string& pattern);
+                 const std::string& pattern = "");
 Result FindNext(dir_t* dir, fileInfo_t* outInfo);
 
 Result GetStat(const std::string& path, fileInfo_t* outInfo);

@@ -46,7 +46,7 @@
     {                                                                                              \
         if (!(x))                                                                                  \
         {                                                                                          \
-            LOG_DEBUG(msg, ##__VA_ARGS__);                                                         \
+            LOG_DEBUG("Assert Failed %i %s: " msg, __LINE__, __FILE__, ##__VA_ARGS__);             \
             cep::Application::AssertFailed();                                                      \
         }                                                                                          \
     } while (false)

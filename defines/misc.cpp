@@ -148,7 +148,7 @@ bool plus_minus(double value, double compare, double margin)
 
 size_t cep::FindStringInVector(const std::string& str, const std::vector<uint8_t>& vec)
 {
-#if __cplusplus >= 201703L
+#if __cplusplus >= 201703L && 0
     auto it = std::search(vec.begin(), vec.end(), str.begin(), str.end());
     if (it == vec.end())
     {
@@ -185,6 +185,16 @@ size_t cep::FindStringInVector(const std::string& str, const std::vector<uint8_t
 #endif
 }
 
+uint64_t cep::Hash(const std::string& str)
+{
+    const char* string = str.c_str();
+    size_t      result = 0;
+    while (*string != 0)
+    {
+        result = result * 31 + *string++;
+    }
+    return result;
+}
 /*************************************************************************************************/
 /**
  * @}

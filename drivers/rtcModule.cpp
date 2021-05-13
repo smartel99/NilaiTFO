@@ -64,7 +64,7 @@ RTC_TimeTypeDef Time::ToHal() const
 
 std::string Time::ToStr() const
 {
-    char t[9] = {0};
+    char t[12] = {0};
 
     sprintf(t, "%02i:%02i:%02i", hours, minutes, seconds);
 
@@ -146,7 +146,7 @@ RTC_DateTypeDef Date::ToHal() const
 
 std::string Date::ToStr() const
 {
-    char d[9] = {0};
+    char d[14] = {0};
 
     sprintf(d, "%02i-%02i-%02i", year - 2000, month, day);
 

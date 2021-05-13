@@ -54,8 +54,8 @@ enum class FileModes : uint8_t
     OpenAppend = FA_OPEN_APPEND,
 
     DEFAULT       = Read | OpenExisting,
-    DEFAULT_WRITE = Write | CreateAlways,
-    WRITE_APPEND  = Write | OpenAppend,
+    DEFAULT_WRITE = Read | Write | OpenAlways,
+    WRITE_APPEND  = Read | Write | OpenAppend,
 };
 
 constexpr inline FileModes operator|(FileModes a, FileModes b)

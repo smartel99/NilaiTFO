@@ -22,7 +22,7 @@
 Logger* Logger::s_instance = nullptr;
 
 #if defined(NILAI_USE_UART)
-Logger::Logger(UartModule* uart, const std::function<void(const char*, size_t)> logFunc)
+Logger::Logger(UartModule* uart, const LogFunc& logFunc)
 {
     CEP_ASSERT(s_instance == nullptr, "Can only have one instance of Logger!");
     s_instance = this;
@@ -31,7 +31,7 @@ Logger::Logger(UartModule* uart, const std::function<void(const char*, size_t)> 
 }
 #else
 
-Logger::Logger(const std::function<void(const char*, size_t)> logFunc)
+Logger::Logger(const LogFunc& logFunc)
 {
     CEP_ASSERT(s_instance == nullptr, "Can only have one instance of Logger!");
     s_instance = this;

@@ -117,9 +117,21 @@ struct ConversionSettings
     InputTypes                                            inputType = InputTypes::External;
     Filters                                               filters   = Filters::All;
     Speeds                                                speed     = Speeds::x1;
-    std::function<void(float, const ConversionSettings&)> callback;
+    std::function<void(float, const ConversionSettings&)> callback  = {};
 
     std::array<uint8_t, 4> ToRegValues() const;
+
+    ConversionSettings() = default;
+    ConversionSettings(Channels                                                     ch,
+                       AcquisitionTypes                                             ty,
+                       Polarities                                                   pol,
+                       InputTypes                                                   in,
+                       Filters                                                      fil,
+                       Speeds                                                       s,
+                       const std::function<void(float, const ConversionSettings&)>& cb)
+    : channel(ch), type(ty), polarity(pol), inputType(in), filters(fil), speed(s), callback(cb)
+    {
+    }
 };
 
 /**

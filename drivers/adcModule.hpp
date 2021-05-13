@@ -17,6 +17,9 @@ public:
     virtual void               Run() override {}
     virtual const std::string& GetLabel() const override { return m_label; }
 
+    void Start();
+    void Stop();
+
     float GetChannelReading(size_t channel) const;
 
 private:

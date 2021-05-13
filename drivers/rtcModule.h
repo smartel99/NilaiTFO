@@ -67,7 +67,7 @@ struct Date
     uint16_t year  = 0;
     uint8_t  month = 0;    // Month is coded in BCD. 0x01 is January, 0x12 is December
     uint8_t  day   = 0;    // Day of the month, starts at 1.
-    uint8_t  dotw  = 0;    // Day of the week, 1 is Monday, 7 is Sunday
+    uint8_t  dotw  = 1;    // Day of the week, 1 is Monday, 7 is Sunday
 
     Date() = default;
     Date(uint16_t y, uint8_t m, uint8_t d, uint8_t wd = 1) : year(y), month(m), day(d), dotw(wd) {}

@@ -18,7 +18,6 @@ AdcModule::AdcModule(ADC_HandleTypeDef* adc, const std::string& label) : m_adc(a
     CEP_ASSERT(m_channelBuff != nullptr,
                "[%s]: Unable to allocate memory for channel data buffer!",
                m_label.c_str());
-    HAL_ADC_Start_DMA(&hadc1, &m_channelBuff[0], m_channelCount);
 
     LOG_INFO("[%s]: Initialized", m_label.c_str());
 }
@@ -37,6 +36,8 @@ AdcModule::~AdcModule()
  */
 bool AdcModule::DoPost()
 {
+    Start();
+    HAL_Delay(5);    // To give time to take samples.
     bool isAllChannelsOk = true;
     for (size_t i = 0; i < m_channelCount; i++)
     {
@@ -53,6 +54,7 @@ bool AdcModule::DoPost()
                      ConvertToVolt(m_channelBuff[i]));
         }
     }
+    Stop();
 
     if (isAllChannelsOk == true)
     {
@@ -69,6 +71,16 @@ float AdcModule::GetChannelReading(size_t channel) const
                channel);
 
     return ConvertToVolt(m_channelBuff[channel]);
+}
+
+void AdcModule::Start()
+{
+    HAL_ADC_Start_DMA(&hadc1, &m_channelBuff[0], m_channelCount);
+}
+
+void AdcModule::Stop()
+{
+    HAL_ADC_Stop_DMA(&hadc1);
 }
 
 #endif

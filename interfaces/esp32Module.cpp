@@ -46,8 +46,8 @@ EspModule::EspModule(const std::string&     label,
 
     m_uart->SetExpectedRxLen(512);
 
-    m_uart->SetStartOfFrameSequence("\xAA\x55");
-    m_uart->SetEndOfFrameSequence("\x55\xAA");
+    m_uart->SetStartOfFrameSequence("\x01\x02");
+    m_uart->SetEndOfFrameSequence("\x03\x04");
 
     // Wait for ESP32 to be done booting, which takes around 400ms...
     HAL_Delay(450);
@@ -77,6 +77,8 @@ bool EspModule::DoPost()
     size_t start = HAL_GetTick();
     while (m_uart->GetNumberOfWaitingFrames() == 0)
     {
+        // Data is only processed in the Run function.
+        m_uart->Run();
         if (HAL_GetTick() >= start + EspModule::TIMEOUT)
         {
             // Timed out.
@@ -90,7 +92,7 @@ bool EspModule::DoPost()
 
     if (resp != "OK")
     {
-        ESP_ERROR("Error in POST: Invalid response from ESP! ('%s')", resp.data);
+        ESP_ERROR("Error in POST: Invalid response from ESP! ('%s')", resp.ToStr().c_str());
         return false;
     }
 

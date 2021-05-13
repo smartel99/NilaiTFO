@@ -313,14 +313,14 @@ void Ltc2498Module::ParseConversionResult(const std::array<uint8_t, 4>&      res
     {
         LTC_ERROR("Over range detected! (0x%08X)", raw);
         m_lastReading.raw     = 0x30000000 >> 5;    // Code for over range.
-        m_lastReading.reading = 2.5f;
+        m_lastReading.reading = 0.0f;
         return;
     }
     else if ((raw & 0x30000000) == 0x00000000)
     {
         LTC_ERROR("Under range detected! (0x%08X)", raw);
         m_lastReading.raw     = 0x0FFFFFFF;    // Code for under range.
-        m_lastReading.reading = -2.5f;
+        m_lastReading.reading = 0.0f;
         return;
     }
 

@@ -16,6 +16,7 @@
 
 #include "defines/module.hpp"
 
+#include <exception>
 #include <vector>
 
 namespace cep
@@ -25,6 +26,7 @@ namespace cep
 class Application
 {
 public:
+    Application() { std::set_terminate(&Application::AssertFailed); }
     virtual ~Application() = default;
 
     virtual void Init()   = 0;
@@ -72,6 +74,7 @@ private:
 };
 
 }    // namespace cep
+
 
 /*************************************************************************************************/
 /**
