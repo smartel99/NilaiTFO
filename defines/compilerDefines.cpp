@@ -10,17 +10,24 @@
  */
 
 #include "../processes/application.hpp"
+
+#include "defines/macros.hpp"
+
 #include <new>
 #include <malloc.h>
 
 void* operator new(std::size_t size)
 {
-    return malloc(size);
+    void* ptr = malloc(size);
+    CEP_ASSERT(ptr != nullptr, "Failed to allocate memory!");
+    return ptr;
 }
 
 void* operator new[](std::size_t size)
 {
-    return malloc(size);
+    void* ptr = malloc(size);
+    CEP_ASSERT(ptr != nullptr, "Failed to allocate memory!");
+    return ptr;
 }
 
 void operator delete(void* ptr)
@@ -44,6 +51,12 @@ void operator delete[](void* ptr, size_t)
 }
 
 
+/**
+ * @brief   This function is called whenever a pure virtual function
+ *          is somehow managed to be called through extremely heretical
+ *          practices.
+ * 
+ */
 extern "C" void __cxa_pure_virtual()
 {
     cep::Application::AssertFailed();

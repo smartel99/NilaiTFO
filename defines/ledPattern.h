@@ -10,12 +10,12 @@
  *
  ******************************************************************************
  */
-#ifndef _ledPattern
-#    define _ledPattern
+#ifndef LED_PATTERN_H
+#define LED_PATTERN_H
 
 /*****************************************************************************/
 /* Includes */
-#    include <vector>
+#include <vector>
 
 namespace cep
 {
@@ -38,8 +38,8 @@ using LedSequence = std::vector<LedPattern>;
 
 namespace StatusPatterns
 {
-constexpr LedPattern NoErrors{500, 500, -1};
-constexpr LedPattern Error{100, 900, -1};
+constexpr LedPattern NoErrors {500, 500, -1};
+constexpr LedPattern Error {100, 900, -1};
 }    // namespace StatusPatterns
 
 /*****************************************************************************/
@@ -47,7 +47,7 @@ constexpr LedPattern Error{100, 900, -1};
 
 }    // namespace cep
 /* Have a wonderful day :) */
-#endif /* _ledPattern */
+#endif /* LED_PATTERN_H */
 /**
  * @}
  */

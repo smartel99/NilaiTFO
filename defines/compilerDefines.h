@@ -6,12 +6,13 @@
  *
  * @file    compilerDefines.h
  * @author  Pascal-Emmanuel Lachance
- * @p       https://github.com/Raesangur/
+ * @author  Samuel Martel
  * @date    2019/08/06  -  16:39
  *
  * @brief   Collection of defines to allow cross-compiler compatilibity.
  */
-#pragma once
+#ifndef COMPILER_DEFINES_H
+#define COMPILER_DEFINES_H
 
 /*****************************************************************************/
 /* Defines ----------------------------------------------------------------- */
@@ -32,14 +33,6 @@
 #error Unsuported Compiler!
 #endif
 
-#if defined(__XC16__)
-#define _PACKED_      __attribute__((__packed__))
-#define _INTERRUPT_   __attribute__((interrupt, no_auto_psv))
-#define _NOINLINE_    __attribute__((noinline))
-#define ALWAYS_INLINE __attribute__((always_inline))
-#define _xmemory_     space(xmemory)
-#define _EDS_         __eds__
-#define _ASM_         __asm__ volatile
 #elif defined(__GNUC__) || defined(__clang__)
 #define _PACKED_      __attribute__((packed))
 #define _INTERRUPT_   __attribute__((interrupt))
@@ -48,15 +41,6 @@
 #define _xmemory_
 #define _EDS_
 #define _ASM_ __asm__ volatile
-#elif defined(__MSVC__)
-#define _PACKED_
-#define _INTERRUPT_
-#define _NOINLINE_    declspec(noinline)
-#define ALWAYS_INLINE __forceinline
-#define _xmemory_
-#define _EDS_
-#define _ASM_
-#define ALLOW_ASM 0 /* Disable inline assembly */
 #else
 #error Unsuported Compiler!
 #endif
@@ -85,7 +69,8 @@
 
 /*************************************************************************************************/
 /**
- * @}
+ * @}  
  * @}
  */
+#endif
 /* ----- END OF FILE ----- */

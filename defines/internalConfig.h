@@ -30,7 +30,7 @@
 #define NILAI_UART_IRQ_STATUS_REG ISR
 #else
 #define NILAI_HAL_HEADER ""
-#error No STM32 were defined in NilaiTFOConfig!
+#error No STM32 were defined in NilaiTFOConfig, or the configuration file cannot be foundS!
 #endif
 
 
