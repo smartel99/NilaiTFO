@@ -16,17 +16,19 @@
 
 #include "defines/module.hpp"
 
-#include <exception>
+#include <csignal>
 #include <vector>
 
 namespace cep
 {
 /*************************************************************************************************/
 /* Classes ------------------------------------------------------------------------------------- */
+[[noreturn]] void AbortionHandler(int signal);
+
 class Application
 {
 public:
-    Application() { std::set_terminate(&Application::AssertFailed); }
+    Application() { std::signal(SIGABRT, &AbortionHandler); }
     virtual ~Application() = default;
 
     virtual void Init()   = 0;

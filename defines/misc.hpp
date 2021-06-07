@@ -3,16 +3,18 @@
  * @{
  * @file    misc.hpp
  * @author  Pascal-Emmanuel Lachance
- * @p       https://www.github.com/Raesangur
+ * @author  Samuel Martel
  * @date    2019/08/27, 14:22
  *
- * @brief   Header file for small miscelleanous functions and features.
+ * @brief   Header file for small miscellaneous functions and features.
  *
  * @version 2020/08/10 - Switch to C++17
  */
 #pragma once
 /*************************************************************************************************/
 /* File includes ------------------------------------------------------------------------------- */
+
+#include "macros.hpp"
 
 #include <string>
 #include <sstream>
@@ -183,7 +185,15 @@ bool plus_minus(double value, double compare, double margin);
 
 size_t FindStringInVector(const std::string& str, const std::vector<uint8_t>& vec);
 
-uint64_t Hash(const std::string& str);
+constexpr uint64_t Hash(const char* str)
+{
+    uint64_t result = 0;
+    while (*str != 0)
+    {
+        result = result * 31 + *str++;
+    }
+    return result;
+}
 
 template<typename T>
 std::string IntToHex(T i)
@@ -192,6 +202,44 @@ std::string IntToHex(T i)
     stream << std::setfill('0') << std::setw(sizeof(T)) << std::hex << i;
     return stream.str();
 }
+
+template<typename T>
+std::vector<uint8_t> ValToVector(const T& val)
+{
+    std::vector<uint8_t> v;
+    v.reserve(sizeof(T));
+
+    const uint8_t* ptr = reinterpret_cast<const uint8_t*>(&val);
+    for (size_t i = 0; i < sizeof(T); i++)
+    {
+        v.push_back(*ptr);
+        ptr++;
+    }
+
+    return v;
+}
+
+template<typename T>
+T VectorToVal(const std::vector<uint8_t>& vec)
+{
+    return (*reinterpret_cast<const T*>(vec.data()));
+}
+
+template<typename T, size_t N>
+T VectorToVal(const std::array<uint8_t, N>& arr)
+{
+    return (*reinterpret_cast<const T*>(arr.data()));
+}
+
+template<size_t N>
+std::string VectorToVal(const std::array<uint8_t, N>& arr)
+{
+    return std::string((const char*)arr.data(), arr.size());
+}
+
+
+std::vector<uint8_t> StrToVec(const std::string& str);
+std::vector<uint8_t> StrToVec(const std::string& str, size_t maxSize);
 
 /*************************************************************************************************/
 /* Have a wonderful day! :) */

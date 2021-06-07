@@ -185,15 +185,35 @@ size_t cep::FindStringInVector(const std::string& str, const std::vector<uint8_t
 #endif
 }
 
-uint64_t cep::Hash(const std::string& str)
+
+std::vector<uint8_t> StrToVec(const std::string& str)
 {
-    const char* string = str.c_str();
-    size_t      result = 0;
-    while (*string != 0)
+    std::vector<uint8_t> v;
+    v.reserve(str.size());
+
+    for (const auto& c : str)
     {
-        result = result * 31 + *string++;
+        v.push_back(c);
     }
-    return result;
+
+    return v;
+}
+
+std::vector<uint8_t> cep::StrToVec(const std::string& str, size_t maxSize)
+{
+    std::vector<uint8_t> v;
+    v.reserve(maxSize);
+
+    for (const auto& c : str)
+    {
+        v.push_back(c);
+        if (v.size() >= maxSize)
+        {
+            break;
+        }
+    }
+
+    return v;
 }
 /*************************************************************************************************/
 /**
