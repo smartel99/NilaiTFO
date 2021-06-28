@@ -199,6 +199,15 @@ std::vector<uint8_t> StrToVec(const std::string& str)
     return v;
 }
 
+std::string cep::IntToHex(size_t i)
+{
+    char msg[9] = {0};
+
+    sprintf(msg, "%08X", i);
+
+    return std::string(msg);
+}
+
 std::vector<uint8_t> cep::StrToVec(const std::string& str, size_t maxSize)
 {
     std::vector<uint8_t> v;

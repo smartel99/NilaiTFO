@@ -195,13 +195,7 @@ constexpr uint64_t Hash(const char* str)
     return result;
 }
 
-template<typename T>
-std::string IntToHex(T i)
-{
-    std::stringstream stream;
-    stream << std::setfill('0') << std::setw(sizeof(T)) << std::hex << i;
-    return stream.str();
-}
+std::string IntToHex(size_t i);
 
 template<typename T>
 std::vector<uint8_t> ValToVector(const T& val)

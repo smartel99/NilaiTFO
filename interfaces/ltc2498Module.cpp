@@ -68,20 +68,25 @@ bool Ltc2498Module::DoPost()
     config.speed     = LTC2498::Speeds::x1;
     config.callback  = {};
 
-    if (StartConversion(config) == false)
+    // Take two samples, to make sure to clear the power-up reading that is automatically done by
+    // the LTC2498.
+    for (size_t i = 0; i < 2; i++)
     {
-        LTC_ERROR("Error in POST: Unable to start conversion!");
-        return false;
-    }
-
-    size_t start = HAL_GetTick();
-    while (IsConversionInProgress() == true)
-    {
-        if (HAL_GetTick() >= start + 250)
+        if (StartConversion(config) == false)
         {
-            // Give the ADC the time of 2 samples (~266.67ms) to complete the conversion.
-            LTC_ERROR("Error in POST: Timed out while waiting for ADC!");
+            LTC_ERROR("Error in POST: Unable to start conversion!");
             return false;
+        }
+
+        size_t start = HAL_GetTick();
+        while (IsConversionInProgress() == true)
+        {
+            if (HAL_GetTick() >= start + 250)
+            {
+                // Give the ADC the time of 2 samples (~266.67ms) to complete the conversion.
+                LTC_ERROR("Error in POST: Timed out while waiting for ADC!");
+                return false;
+            }
         }
     }
 
@@ -105,7 +110,9 @@ bool Ltc2498Module::DoPost()
     }
     else
     {
-        LTC_ERROR("Error in POST: Invalid temperature read: %0.2fC", temp);
+        LTC_ERROR("Error in POST: Invalid temperature read: %0.2fC (%0.3fV)",
+                  temp,
+                  reading.reading);
         return false;
     }
 }

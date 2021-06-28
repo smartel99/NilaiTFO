@@ -72,7 +72,7 @@ void CanModule::ConfigureFilter(const CEP_CAN::FilterConfiguration& config)
 
     if (HAL_CAN_ConfigFilter(m_handle, &filter) != HAL_OK)
     {
-        CEP_ASSERT(false, "In {}::ConfigureFilter: Unable to configure filter!", m_label);
+        CEP_ASSERT(false, "In %s::ConfigureFilter: Unable to configure filter!", m_label.c_str());
     }
 
     m_filters[hash] = config;
@@ -108,7 +108,7 @@ CanModule::TransmitFrame(uint32_t addr, const std::vector<uint8_t>& data, bool f
 
     if (WaitForFreeMailbox() == false)
     {
-        LOG_ERROR("In {}::TransmitFrame: Timed out before a Tx mailbox is free", m_label);
+        LOG_ERROR("In %s::TransmitFrame: Timed out before a Tx mailbox is free", m_label.c_str());
         return CEP_CAN::Status::TX_ERROR;
     }
 
@@ -119,7 +119,7 @@ CanModule::TransmitFrame(uint32_t addr, const std::vector<uint8_t>& data, bool f
     if (HAL_CAN_AddTxMessage(m_handle, &head, const_cast<uint8_t*>(data.data()), &buffNum) !=
         HAL_OK)
     {
-        LOG_ERROR("In {}::TransmitFrame: Unable to add frame to mailbox", m_label);
+        LOG_ERROR("In %s::TransmitFrame: Unable to add frame to mailbox", m_label.c_str());
         return CEP_CAN::Status::TX_ERROR;
     }
 
@@ -199,7 +199,7 @@ void CanModule::HandleFrameReception(CEP_CAN::RxFifo fifo)
             }
             break;
         default:
-            CEP_ASSERT(false, "In {}::HandleFrameReception, invalid FIFO!");
+            CEP_ASSERT(false, "In %s::HandleFrameReception, invalid FIFO!", m_label.c_str());
     }
 }
 
