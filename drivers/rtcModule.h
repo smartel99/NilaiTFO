@@ -90,6 +90,8 @@ struct Timestamp
     Timestamp(size_t epoch);
 
     size_t ToEpoch() const;
+
+    bool operator>(const Timestamp& other) { return (ToEpoch() > other.ToEpoch()); }
 };
 
 }    // namespace CEP_RTC
