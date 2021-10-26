@@ -54,6 +54,14 @@
 #define NILAI_LOG_ENABLE_ERROR
 #define NILAI_LOG_ENABLE_CRITICAL
 
+/**
+ * Defines the hardware layer used by Umo.
+ * Selects if the hardware layer should be UART or CAN.
+ * Can only have one at a time!
+ */
+//#define NILAI_UMO_USE_CAN
+#define NILAI_UMO_USE_UART
+
 /******************************************************************************/
 /* [SECTION]: Module Activation                                               */
 /******************************************************************************/

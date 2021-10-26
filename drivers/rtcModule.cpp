@@ -204,13 +204,6 @@ void RtcModule::SetTime(const CEP_RTC::Time& time)
 {
     RTC_TimeTypeDef newTime = time.ToHal();
 
-    if (IS_RTC_HOUR24(newTime.Hours) == false || IS_RTC_MINUTES(newTime.Minutes) == false ||
-        IS_RTC_SECONDS(newTime.Seconds) == false)
-    {
-        LOG_ERROR("[%s]: Invalid time! %s", m_label.c_str(), time.ToStr().c_str());
-        return;
-    }
-
     if (HAL_RTC_SetTime(m_handle, &newTime, RTC_FORMAT_BIN) != HAL_OK)
     {
         LOG_ERROR("[%s]: Unable to set the time!", m_label.c_str());
@@ -236,12 +229,7 @@ CEP_RTC::Time RtcModule::GetTime()
 void RtcModule::SetDate(const CEP_RTC::Date& date)
 {
     RTC_DateTypeDef newDate = date.ToHal();
-    if (IS_RTC_YEAR(newDate.Year) == false || IS_RTC_MONTH(newDate.Month) == false ||
-        IS_RTC_DATE(newDate.Date) == false)
-    {
-        LOG_ERROR("[%s]: Invalid date! %s", m_label.c_str(), date.ToStr().c_str());
-        return;
-    }
+
     if (HAL_RTC_SetDate(m_handle, &newDate, RTC_FORMAT_BIN) != HAL_OK)
     {
         LOG_ERROR("[%s]: Unable to set the date!", m_label.c_str());

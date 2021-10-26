@@ -3,7 +3,7 @@
  * @addtogroup adsModuleConfig
  * @{
  * @file    adsModuleConfig
- * @author  Client Microdata
+ * @author  Samuel Martel
  * @brief   Header for the adsModuleConfig module.
  *
  * @date 9/2/2020 9:50:53 AM

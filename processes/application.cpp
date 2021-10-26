@@ -14,7 +14,7 @@
 {
     (void)signal;
     // This function will in most cases be called by the STL, in place of the standard _exit().
-    Application::AssertFailed();
+    AssertFailed((const uint8_t*)__FILE__, __LINE__, 1);
     while (1)
     {
     }

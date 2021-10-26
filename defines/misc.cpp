@@ -5,7 +5,6 @@
  * @{
  * @file    misc.cpp
  * @author  Pascal-Emmanuel Lachance
- * @p       https://www.github.com/Raesangur
  * @date    2019/08/27, 14:22
  *
  * @brief   Miscelleanous functions including :
@@ -16,13 +15,12 @@
 /* File includes ------------------------------------------------------------------------------- */
 #include "shared/defines/misc.hpp"
 
+#include <algorithm>
 #include <cmath>
 #include <cstring>
-#include <algorithm>
 
 /*************************************************************************************************/
 /* Global variables ---------------------------------------------------------------------------- */
-void* const g_NullPointer = nullptr;
 
 /*************************************************************************************************/
 /* Public functions definitions ---------------------------------------------------------------- */
@@ -33,10 +31,10 @@ void* const g_NullPointer = nullptr;
  * @param   size: The size in characters of the char array
  * @retval  None
  */
-void forceNullTerminationCharacter(char* string, std::size_t size)
+void cep::forceNullTerminationCharacter(char* string, size_t size)
 {
     /* Access last element of the array and clear it */
-    string[size - 1] = NULLCHAR;
+    string[size - 1] = '\0';
 }
 
 /**
@@ -45,10 +43,7 @@ void forceNullTerminationCharacter(char* string, std::size_t size)
  * @param   length: the number of bytes to clear
  * @retval  None
  */
-void clearArray(void* array, std::size_t length)
-{
-    memset(array, 0x00U, length);
-}
+void cep::clearArray(void* array, size_t length) { memset(array, 0x00U, length); }
 
 /**
  * @brief   Count the number of 1s in the passed bytes.
@@ -56,7 +51,7 @@ void clearArray(void* array, std::size_t length)
  * @param   len:   The number of bytes to check
  * @retval  The number of 1s
  */
-size_t countOfOnesInBytesInator(uint8_t* bytes, uint8_t len)
+size_t cep::countOfOnesInBytesInator(uint8_t* bytes, uint8_t len)
 {
     size_t count = 0;
 #if defined(__GCC__)
@@ -73,8 +68,8 @@ size_t countOfOnesInBytesInator(uint8_t* bytes, uint8_t len)
             count += (uint8_t)((bytes[i] >> j) & 0x01);
         }
     }
-    return count;
 #endif
+    return count;
 }
 
 /**
@@ -95,15 +90,15 @@ size_t countOfOnesInBytesInator(uint8_t* bytes, uint8_t len)
  *                second value.
  *          false: If the two values are too far apart from each other
  */
-bool plus_minus(std::int32_t value, std::int32_t compare, std::int32_t margin)
+bool cep::plus_minus(int32_t value, int32_t compare, int32_t margin)
 {
     /* Take the absolute values */
     value   = std::abs(value);
     compare = std::abs(compare);
     margin  = std::abs(margin);
 
-    const std::int32_t upperRange = compare + margin;
-    const std::int32_t lowerRange = (margin <= compare) ? compare - margin : 0;
+    const int32_t upperRange = compare + margin;
+    const int32_t lowerRange = (margin <= compare) ? compare - margin : 0;
 
     if (value < upperRange && value > lowerRange)
     {
@@ -133,7 +128,7 @@ bool plus_minus(std::int32_t value, std::int32_t compare, std::int32_t margin)
  *                second value.
  *          false: If the two values are too far apart from each other
  */
-bool plus_minus(double value, double compare, double margin)
+bool cep::plus_minus(double value, double compare, double margin)
 {
     if ((value <= (compare + margin)) && (value > (compare - margin)))
     {
@@ -145,22 +140,21 @@ bool plus_minus(double value, double compare, double margin)
     }
 }
 
-
 size_t cep::FindStringInVector(const std::string& str, const std::vector<uint8_t>& vec)
 {
-#if __cplusplus >= 201703L && 0
-    auto it = std::search(vec.begin(), vec.end(), str.begin(), str.end());
-    if (it == vec.end())
+#if __cplusplus >= 201703L
+    auto it = std::search(vec.begin( ), vec.end( ), str.begin( ), str.end( ));
+    if (it == vec.end( ))
     {
         return std::string::npos;
     }
     else
     {
-        return (it - vec.begin());
+        return (it - vec.begin( ));
     }
 #else
-    size_t strLen = str.size();
-    size_t vecLen = vec.size();
+    size_t strLen = str.size( );
+    size_t vecLen = vec.size( );
 
     // If the string is bigger than the vector, we won't find the string in the vector ;)
     if (strLen > vecLen)
@@ -185,11 +179,10 @@ size_t cep::FindStringInVector(const std::string& str, const std::vector<uint8_t
 #endif
 }
 
-
-std::vector<uint8_t> StrToVec(const std::string& str)
+std::vector<uint8_t> cep::StrToVec(const std::string& str)
 {
     std::vector<uint8_t> v;
-    v.reserve(str.size());
+    v.reserve(str.size( ));
 
     for (const auto& c : str)
     {
@@ -216,7 +209,7 @@ std::vector<uint8_t> cep::StrToVec(const std::string& str, size_t maxSize)
     for (const auto& c : str)
     {
         v.push_back(c);
-        if (v.size() >= maxSize)
+        if (v.size( ) >= maxSize)
         {
             break;
         }

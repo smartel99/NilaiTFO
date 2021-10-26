@@ -15,54 +15,49 @@
 #include "drivers/canModule.hpp"
 
 #if defined(NILAI_USE_CAN) && defined(HAL_CAN_MODULE_ENABLED)
-#include "services/logger.hpp"
+#    include "services/logger.hpp"
 
-#include <algorithm>
+#    include <algorithm>
 
 CanModule::CanModule(CAN_HandleTypeDef* handle, const std::string& label)
-: m_handle(handle), m_label(label)
+    : m_handle(handle), m_label(label)
 {
     CEP_ASSERT(handle != nullptr, "CAN Handle is NULL!");
     m_framesReceived.reserve(5);
     m_callbacks =
-      std::map<CEP_CAN::Irq, std::function<void()>>({{CEP_CAN::Irq::TxMailboxEmpty, {}},
-                                                     {CEP_CAN::Irq::Fifo0MessagePending, {}},
-                                                     {CEP_CAN::Irq::Fifo0Full, {}},
-                                                     {CEP_CAN::Irq::Fifo0Overrun, {}},
-                                                     {CEP_CAN::Irq::Fifo1MessagePending, {}},
-                                                     {CEP_CAN::Irq::Fifo1Full, {}},
-                                                     {CEP_CAN::Irq::Fifo1Overrun, {}},
-                                                     {CEP_CAN::Irq::Wakeup, {}},
-                                                     {CEP_CAN::Irq::SleepAck, {}},
-                                                     {CEP_CAN::Irq::ErrorWarning, {}},
-                                                     {CEP_CAN::Irq::ErrorPassive, {}},
-                                                     {CEP_CAN::Irq::BusOffError, {}},
-                                                     {CEP_CAN::Irq::LastErrorCode, {}},
-                                                     {CEP_CAN::Irq::ErrorStatus, {}}});
+        std::map<CEP_CAN::Irq, std::function<void( )>>({{CEP_CAN::Irq::TxMailboxEmpty, {}},
+                                                        {CEP_CAN::Irq::Fifo0MessagePending, {}},
+                                                        {CEP_CAN::Irq::Fifo0Full, {}},
+                                                        {CEP_CAN::Irq::Fifo0Overrun, {}},
+                                                        {CEP_CAN::Irq::Fifo1MessagePending, {}},
+                                                        {CEP_CAN::Irq::Fifo1Full, {}},
+                                                        {CEP_CAN::Irq::Fifo1Overrun, {}},
+                                                        {CEP_CAN::Irq::Wakeup, {}},
+                                                        {CEP_CAN::Irq::SleepAck, {}},
+                                                        {CEP_CAN::Irq::ErrorWarning, {}},
+                                                        {CEP_CAN::Irq::ErrorPassive, {}},
+                                                        {CEP_CAN::Irq::BusOffError, {}},
+                                                        {CEP_CAN::Irq::LastErrorCode, {}},
+                                                        {CEP_CAN::Irq::ErrorStatus, {}}});
 
     HAL_CAN_Start(m_handle);
 
-    LOG_INFO("[%s]: Initialized", m_label.c_str());
+    LOG_INFO("[%s]: Initialized", m_label.c_str( ));
 }
 
-CanModule::~CanModule()
-{
-    HAL_CAN_Stop(m_handle);
-}
+CanModule::~CanModule( ) { HAL_CAN_Stop(m_handle); }
 
 /**
  * If it passes initialization, it passes the POST.
  * @return
  */
-bool CanModule::DoPost()
+bool CanModule::DoPost( )
 {
-    LOG_INFO("[%s]: POST OK", m_label.c_str());
+    LOG_INFO("[%s]: POST OK", m_label.c_str( ));
     return true;
 }
 
-void CanModule::Run()
-{
-}
+void CanModule::Run( ) {}
 
 void CanModule::ConfigureFilter(const CEP_CAN::FilterConfiguration& config)
 {
@@ -72,20 +67,20 @@ void CanModule::ConfigureFilter(const CEP_CAN::FilterConfiguration& config)
 
     if (HAL_CAN_ConfigFilter(m_handle, &filter) != HAL_OK)
     {
-        CEP_ASSERT(false, "In %s::ConfigureFilter: Unable to configure filter!", m_label.c_str());
+        CEP_ASSERT(false, "In %s::ConfigureFilter: Unable to configure filter!", m_label.c_str( ));
     }
 
     m_filters[hash] = config;
 }
 
-CEP_CAN::Frame CanModule::ReceiveFrame()
+CEP_CAN::Frame CanModule::ReceiveFrame( )
 {
-    CEP_CAN::Frame frame = m_framesReceived.back();
-    m_framesReceived.pop_back();
+    CEP_CAN::Frame frame = m_framesReceived.back( );
+    m_framesReceived.pop_back( );
     return frame;
 }
 CEP_CAN::Status
-CanModule::TransmitFrame(uint32_t addr, const std::vector<uint8_t>& data, bool forceExtended)
+    CanModule::TransmitFrame(uint32_t addr, const std::vector<uint8_t>& data, bool forceExtended)
 {
     CAN_TxHeaderTypeDef head = {0, 0, 0, 0, 0, (FunctionalState)0};
     head.StdId               = addr & 0x000007FF;
@@ -102,13 +97,13 @@ CanModule::TransmitFrame(uint32_t addr, const std::vector<uint8_t>& data, bool f
 
     // If we have data, this is a data frame. Else it's a remote frame.
     head.RTR =
-      data.empty() ? (uint32_t)CEP_CAN::FrameType::Remote : (uint32_t)CEP_CAN::FrameType::Data;
+        data.empty( ) ? (uint32_t)CEP_CAN::FrameType::Remote : (uint32_t)CEP_CAN::FrameType::Data;
     // Cap amount of data at 8 bytes.
-    head.DLC = std::min(data.size(), (size_t)8);
+    head.DLC = std::min(data.size( ), (size_t)8);
 
-    if (WaitForFreeMailbox() == false)
+    if (WaitForFreeMailbox( ) == false)
     {
-        LOG_ERROR("In %s::TransmitFrame: Timed out before a Tx mailbox is free", m_label.c_str());
+        LOG_ERROR("In %s::TransmitFrame: Timed out before a Tx mailbox is free", m_label.c_str( ));
         return CEP_CAN::Status::TX_ERROR;
     }
 
@@ -116,10 +111,10 @@ CanModule::TransmitFrame(uint32_t addr, const std::vector<uint8_t>& data, bool f
 
     // Add frame to the mailbox.
     // Using const_cast here because data.data() is a const uint8_t* and not a uint8_t*.
-    if (HAL_CAN_AddTxMessage(m_handle, &head, const_cast<uint8_t*>(data.data()), &buffNum) !=
+    if (HAL_CAN_AddTxMessage(m_handle, &head, const_cast<uint8_t*>(data.data( )), &buffNum) !=
         HAL_OK)
     {
-        LOG_ERROR("In %s::TransmitFrame: Unable to add frame to mailbox", m_label.c_str());
+        LOG_ERROR("In %s::TransmitFrame: Unable to add frame to mailbox", m_label.c_str( ));
         return CEP_CAN::Status::TX_ERROR;
     }
 
@@ -127,7 +122,7 @@ CanModule::TransmitFrame(uint32_t addr, const std::vector<uint8_t>& data, bool f
 }
 
 CEP_CAN::Status
-CanModule::TransmitFrame(uint32_t addr, uint8_t* data, size_t len, bool forceExtended)
+    CanModule::TransmitFrame(uint32_t addr, const uint8_t* data, size_t len, bool forceExtended)
 {
     std::vector<uint8_t> dataV;
 
@@ -143,25 +138,19 @@ CanModule::TransmitFrame(uint32_t addr, uint8_t* data, size_t len, bool forceExt
     return TransmitFrame(addr, dataV, forceExtended);
 }
 
-void CanModule::SetCallback(CEP_CAN::Irq irq, const std::function<void()>& callback)
+void CanModule::SetCallback(CEP_CAN::Irq irq, const std::function<void( )>& callback)
 {
     m_callbacks[irq] = callback;
 }
-void CanModule::ClearCallback(CEP_CAN::Irq irq)
-{
-    m_callbacks[irq] = std::function<void()>();
-}
+void CanModule::ClearCallback(CEP_CAN::Irq irq) { m_callbacks[irq] = std::function<void( )>( ); }
 
-void CanModule::EnableInterrupt(CEP_CAN::Irq irq)
-{
-    __HAL_CAN_ENABLE_IT(m_handle, (uint32_t)irq);
-}
+void CanModule::EnableInterrupt(CEP_CAN::Irq irq) { __HAL_CAN_ENABLE_IT(m_handle, (uint32_t)irq); }
 void CanModule::DisableInterrupt(CEP_CAN::Irq irq)
 {
     __HAL_CAN_DISABLE_IT(m_handle, (uint32_t)irq);
 }
 
-void CanModule::HandleIrq()
+void CanModule::HandleIrq( )
 {
     // CAN Interrupt Register.
     uint32_t ier = m_handle->Instance->IER;
@@ -178,9 +167,9 @@ void CanModule::HandleIrq()
 
 void CanModule::HandleFrameReception(CEP_CAN::RxFifo fifo)
 {
-    CEP_CAN::Frame frame = CEP_CAN::Frame();
-    HAL_CAN_GetRxMessage(m_handle, (uint32_t)fifo, &frame.frame, frame.data.data());
-    frame.timestamp = HAL_GetTick();
+    CEP_CAN::Frame frame = CEP_CAN::Frame( );
+    HAL_CAN_GetRxMessage(m_handle, (uint32_t)fifo, &frame.frame, frame.data.data( ));
+    frame.timestamp = HAL_GetTick( );
 
     m_framesReceived.push_back(frame);
 
@@ -189,17 +178,17 @@ void CanModule::HandleFrameReception(CEP_CAN::RxFifo fifo)
         case CEP_CAN::RxFifo::Fifo0:
             if (m_callbacks[CEP_CAN::Irq::Fifo0MessagePending])
             {
-                m_callbacks[CEP_CAN::Irq::Fifo0MessagePending]();
+                m_callbacks[CEP_CAN::Irq::Fifo0MessagePending]( );
             }
             break;
         case CEP_CAN::RxFifo::Fifo1:
             if (m_callbacks[CEP_CAN::Irq::Fifo1MessagePending])
             {
-                m_callbacks[CEP_CAN::Irq::Fifo1MessagePending]();
+                m_callbacks[CEP_CAN::Irq::Fifo1MessagePending]( );
             }
             break;
         default:
-            CEP_ASSERT(false, "In %s::HandleFrameReception, invalid FIFO!", m_label.c_str());
+            CEP_ASSERT(false, "In %s::HandleFrameReception, invalid FIFO!", m_label.c_str( ));
     }
 }
 
@@ -222,7 +211,7 @@ void CanModule::HandleTxMailbox0Irq(uint32_t ier)
                 // If a callback is set, call it.
                 if (m_callbacks[CEP_CAN::Irq::TxMailboxEmpty])
                 {
-                    m_callbacks[CEP_CAN::Irq::TxMailboxEmpty]();
+                    m_callbacks[CEP_CAN::Irq::TxMailboxEmpty]( );
                 }
             }
 
@@ -242,13 +231,13 @@ void CanModule::HandleTxMailbox0Irq(uint32_t ier)
                 else
                 {
                     // Transmission Mailbox 0 abort callback.
-#if USE_HAL_CAN_REGISTER_CALLBACKS == 1
+#    if USE_HAL_CAN_REGISTER_CALLBACKS == 1
                     // Call registered callback.
                     m_handle->TxMailbox0AbortCallback(m_handle);
-#else
+#    else
                     // Call weak (surcharged) callback.
                     HAL_CAN_TxMailbox0AbortCallback(m_handle);
-#endif
+#    endif
                 }
             }
         }
@@ -274,7 +263,7 @@ void CanModule::HandleTxMailbox1Irq(uint32_t ier)
                 // If a callback is set, call it.
                 if (m_callbacks[CEP_CAN::Irq::TxMailboxEmpty])
                 {
-                    m_callbacks[CEP_CAN::Irq::TxMailboxEmpty]();
+                    m_callbacks[CEP_CAN::Irq::TxMailboxEmpty]( );
                 }
             }
 
@@ -294,13 +283,13 @@ void CanModule::HandleTxMailbox1Irq(uint32_t ier)
                 else
                 {
                     // Transmission Mailbox 1 abort callback.
-#if USE_HAL_CAN_REGISTER_CALLBACKS == 1
+#    if USE_HAL_CAN_REGISTER_CALLBACKS == 1
                     // Call registered callback.
                     m_handle->TxMailbox1AbortCallback(m_handle);
-#else
+#    else
                     // Call weak (surcharged) callback.
                     HAL_CAN_TxMailbox1AbortCallback(m_handle);
-#endif
+#    endif
                 }
             }
         }
@@ -326,7 +315,7 @@ void CanModule::HandleTxMailbox2Irq(uint32_t ier)
                 // If a callback is set, call it.
                 if (m_callbacks[CEP_CAN::Irq::TxMailboxEmpty])
                 {
-                    m_callbacks[CEP_CAN::Irq::TxMailboxEmpty]();
+                    m_callbacks[CEP_CAN::Irq::TxMailboxEmpty]( );
                 }
             }
             else
@@ -345,13 +334,13 @@ void CanModule::HandleTxMailbox2Irq(uint32_t ier)
                 else
                 {
                     // Transmission Mailbox 2 abort callback.
-#if USE_HAL_CAN_REGISTER_CALLBACKS == 1
+#    if USE_HAL_CAN_REGISTER_CALLBACKS == 1
                     // Call registered callback.
                     m_handle->TxMailbox2AbortCallback(m_handle);
-#else
+#    else
                     // Call weak (surcharged) callback.
                     HAL_CAN_TxMailbox2AbortCallback(m_handle);
-#endif
+#    endif
                 }
             }
         }
@@ -464,7 +453,7 @@ void CanModule::HandleSleepIrq(uint32_t ier)
             // Call the callback, if there's one.
             if (m_callbacks[CEP_CAN::Irq::SleepAck])
             {
-                m_callbacks[CEP_CAN::Irq::SleepAck]();
+                m_callbacks[CEP_CAN::Irq::SleepAck]( );
             }
         }
     }
@@ -484,7 +473,7 @@ void CanModule::HandleWakeupIrq(uint32_t ier)
             // If there's one, call the callback.
             if (m_callbacks[CEP_CAN::Irq::Wakeup])
             {
-                m_callbacks[CEP_CAN::Irq::Wakeup]();
+                m_callbacks[CEP_CAN::Irq::Wakeup]( );
             }
         }
     }
@@ -533,7 +522,7 @@ void CanModule::HandleErrorIrq(uint32_t ier)
                 // No need to clear the flag since it is read only.
                 if (m_callbacks[CEP_CAN::Irq::BusOffError])
                 {
-                    m_callbacks[CEP_CAN::Irq::BusOffError]();
+                    m_callbacks[CEP_CAN::Irq::BusOffError]( );
                 }
             }
             // Check last error code flag.
@@ -574,7 +563,7 @@ void CanModule::HandleErrorIrq(uint32_t ier)
 
                 if (m_callbacks[CEP_CAN::Irq::LastErrorCode])
                 {
-                    m_callbacks[CEP_CAN::Irq::LastErrorCode]();
+                    m_callbacks[CEP_CAN::Irq::LastErrorCode]( );
                 }
             }
         }
@@ -588,7 +577,7 @@ void CanModule::HandleErrorIrq(uint32_t ier)
 /* Private method definitions                                                */
 /*****************************************************************************/
 CAN_FilterTypeDef
-CanModule::AssertAndConvertFilterStruct(const CEP_CAN::FilterConfiguration& config)
+    CanModule::AssertAndConvertFilterStruct(const CEP_CAN::FilterConfiguration& config)
 {
     // clang-format off
     DISABLE_WARNING(-Wmissing-field-initializers)
@@ -610,11 +599,11 @@ CanModule::AssertAndConvertFilterStruct(const CEP_CAN::FilterConfiguration& conf
     return filter;
 }
 
-bool CanModule::WaitForFreeMailbox()
+bool CanModule::WaitForFreeMailbox( )
 {
-    uint32_t timeout = HAL_GetTick() + CanModule::TIMEOUT;
+    uint32_t timeout = HAL_GetTick( ) + CanModule::TIMEOUT;
 
-    while (HAL_GetTick() <= timeout)
+    while (HAL_GetTick( ) <= timeout)
     {
         if (HAL_CAN_GetTxMailboxesFreeLevel(m_handle) != 0)
         {
