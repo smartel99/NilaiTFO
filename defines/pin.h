@@ -10,23 +10,21 @@
  *
  ******************************************************************************
  */
-#ifndef _pin
-#define _pin
+#ifndef GUARD_PIN_H
+#define GUARD_PIN_H
 
 /*****************************************************************************/
 /* Includes */
+#if !defined(NILAI_TEST)
 #include "Core/Inc/gpio.h"
+#else
+#include "test/Mocks/GPIO/gpio.h"
+#endif
 
 #include <cstdint>
 
-/*****************************************************************************/
-/* Exported defines */
-
-
-/*****************************************************************************/
-/* Exported macro */
-
-
+namespace cep
+{
 /*****************************************************************************/
 /* Exported types */
 struct Pin
@@ -34,9 +32,12 @@ struct Pin
     GPIO_TypeDef* port = nullptr;
     uint16_t      pin  = 0;
 
-    void Set(bool state) { HAL_GPIO_WritePin(port, pin, (state ? GPIO_PIN_SET : GPIO_PIN_RESET)); }
+    void Set(bool state) const
+    {
+        HAL_GPIO_WritePin(port, pin, (state ? GPIO_PIN_SET : GPIO_PIN_RESET));
+    }
 
-    bool Get() const { return HAL_GPIO_ReadPin(port, pin); }
+    [[nodiscard]] bool Get() const { return (HAL_GPIO_ReadPin(port, pin) != 0u); }
 
 
     bool operator==(const Pin& other) const
@@ -45,12 +46,9 @@ struct Pin
     }
 };
 
-/*****************************************************************************/
-/* Exported functions */
-
-
+}    // namespace cep
 /* Have a wonderful day :) */
-#endif /* _pin */
+#endif /* GUARD_PIN_H */
 /**
  * @}
  */

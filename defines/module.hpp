@@ -32,9 +32,9 @@ class Module
 public:
     virtual ~Module() = default;
 
-    virtual bool               DoPost()         = 0;
-    virtual void               Run()            = 0;
-    virtual const std::string& GetLabel() const = 0;
+    virtual bool                             DoPost()         = 0;
+    virtual void                             Run()            = 0;
+    [[nodiscard]] virtual const std::string& GetLabel() const = 0;
 };
 
 }    // namespace cep

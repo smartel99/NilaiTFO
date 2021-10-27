@@ -16,7 +16,10 @@
 /* Includes ------------------------------------------------------------------------------------ */
 #    if defined(NILAI_USE_UART)
 #        include "defines/internalConfig.h"
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 #        include NILAI_HAL_HEADER
+#pragma GCC diagnostic pop
 #        if defined(HAL_UART_MODULE_ENABLED)
 #            include "defines/macros.hpp"
 #            include "defines/misc.hpp"
@@ -117,7 +120,7 @@ struct Frame
         len  = data.size( );
     }
 
-    std::string ToStr( ) const { return std::string{(char*)data.data( )}; }
+    [[nodiscard]] std::string ToStr( ) const { return std::string{(char*)data.data( )}; }
     bool        operator==(const std::string& s) const
     {
         return (std::string((char*)data.data( ), len) == s);
@@ -145,19 +148,19 @@ class UartModule : public cep::Module
 {
 public:
     UartModule(UART_HandleTypeDef* uart, const std::string& label);
-    virtual ~UartModule( ) override;
+    ~UartModule( ) override;
 
-    virtual bool DoPost( ) override;
-    virtual void Run( ) override;
+    bool DoPost( ) override;
+    void Run( ) override;
 
-    virtual const std::string& GetLabel( ) const override { return m_label; }
+    [[nodiscard]] const std::string& GetLabel( ) const override { return m_label; }
 
     void Transmit(const char* msg, size_t len);
     void Transmit(const std::string& msg);
     void Transmit(const std::vector<uint8_t>& msg);
     void VTransmit(const char* fmt, ...);
 
-    size_t GetNumberOfWaitingFrames( ) const
+    [[nodiscard]] size_t GetNumberOfWaitingFrames( ) const
     {
         return (m_framePending ? 1 : 0);
         // return m_latestFrames.size( );
@@ -187,7 +190,7 @@ private:
 
 private:
     UART_HandleTypeDef* m_handle = nullptr;
-    std::string         m_label  = "";
+    std::string         m_label;
 
     CEP_UART::Status     m_status           = CEP_UART::Status::Ok;
     size_t               m_txBytesRemaining = -1;
@@ -209,6 +212,8 @@ private:
     static constexpr uint32_t TIMEOUT    = 100;    // Systicks.
     static constexpr uint32_t RX_TIMEOUT = 50;     // Systicks.
 };
+
+
 #        else
 #            if WARN_MISSING_STM_DRIVERS
 #                warning NilaiTFO UART module enabled, but HAL_UART_MODULE_ENABLE is not defined!

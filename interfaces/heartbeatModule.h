@@ -10,8 +10,8 @@
  *
  ******************************************************************************
  */
-#ifndef _heartbeatModule
-#define _heartbeatModule
+#ifndef GUARD_HEARTBEATMODULE_H
+#define GUARD_HEARTBEATMODULE_H
 
 #if defined(NILAI_USE_HEARTBEAT)
 /*****************************************************************************/
@@ -34,16 +34,16 @@
 class HeartbeatModule : public cep::Module
 {
 public:
-    HeartbeatModule(const Pin& pin, const std::string& label);
-    virtual ~HeartbeatModule() = default;
+    HeartbeatModule(const cep::Pin& pin, const std::string& label);
+    ~HeartbeatModule() override = default;
 
-    virtual bool               DoPost() override;
-    virtual void               Run() override;
-    virtual const std::string& GetLabel() const override { return m_label; }
+    bool               DoPost() override;
+    void               Run() override;
+    [[nodiscard]] const std::string& GetLabel() const override { return m_label; }
 
 private:
-    std::string m_label = "";
-    Pin         m_led;
+    std::string m_label;
+    cep::Pin         m_led;
 
     cep::LedPattern m_defaultPattern{500, 500, -1};
 };
@@ -52,7 +52,7 @@ private:
 /* Exported functions */
 
 /* Have a wonderful day :) */
-#endif /* _heartbeatModule */
+#endif /* GUARD_HEARTBEATMODULE_H */
 #endif
 /**
  * @}

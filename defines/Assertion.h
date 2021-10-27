@@ -9,19 +9,19 @@
  *******************************************************************************
  */
 
-#ifndef ASSERTION_H_
-#define ASSERTION_H_
+#ifndef GUARD_ASSERTION_H
+#define GUARD_ASSERTION_H
 
-#include <stdint.h>
+#include <cstdint>
 
 #if defined(__cplusplus)
 extern "C"
 #endif
-    void
-    AssertFailed(const uint8_t* file, uint32_t line, uint8_t shouldPrint);
+  [[noreturn]] void
+  AssertFailed(const uint8_t* file, uint32_t line, uint8_t shouldPrint);
 
 /**
  * @}
  */
 /* END OF FILE */
-#endif /* ASSERTION_H_ */
+#endif /* GUARD_ASSERTION_H */

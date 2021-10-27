@@ -10,8 +10,8 @@
  *******************************************************************************
  */
 
-#ifndef NILAITFOCONFIG_H_
-#define NILAITFOCONFIG_H_
+#ifndef GUARD_NILAITFOCONFIG_H
+#define GUARD_NILAITFOCONFIG_H
 
 // Path of the main application header file.
 #define APPLICATION_HEADER "processes/MasterApplication.h"
@@ -102,4 +102,4 @@
  * @}
  */
 /* END OF FILE */
-#endif /* NILAITFOCONFIG_H_ */
+#endif /* GUARD_NILAITFOCONFIG_H */
