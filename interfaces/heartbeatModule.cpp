@@ -15,8 +15,8 @@
 #if defined(NILAI_USE_HEARTBEAT)
 #include "services/logger.hpp"
 
-HeartbeatModule::HeartbeatModule(const Pin& pin, const std::string& label)
-: m_label(label), m_led(pin)
+HeartbeatModule::HeartbeatModule(const cep::Pin& pin, std::string  label)
+: m_label(std::move(label)), m_led(pin)
 {
 }
 

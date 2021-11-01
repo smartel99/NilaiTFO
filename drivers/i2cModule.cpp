@@ -16,11 +16,13 @@
  * ------------------------------------------------------------------------------------
  */
 #include "drivers/i2cModule.hpp"
+
+#include <utility>
 #if defined(NILAI_USE_I2C) && defined(HAL_I2C_MODULE_ENABLED)
 #include "services/logger.hpp"
 
-I2cModule::I2cModule(I2C_HandleTypeDef* handle, const std::string& label)
-: m_handle(handle), m_label(label)
+I2cModule::I2cModule(I2C_HandleTypeDef* handle, std::string  label)
+: m_handle(handle), m_label(std::move(label))
 {
     CEP_ASSERT(handle != nullptr, "In I2cModule: handle is NULL!");
     LOG_INFO("[%s]: Initialized", m_label.c_str());

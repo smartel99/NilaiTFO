@@ -10,25 +10,25 @@
  *
  * @brief       UART communication module
  */
-#ifndef UART_MODULE_HPP_
-#    define UART_MODULE_HPP_
+#ifndef GUARD_UARTMODULE_HPP
+#define GUARD_UARTMODULE_HPP
 /*************************************************************************************************/
 /* Includes ------------------------------------------------------------------------------------ */
-#    if defined(NILAI_USE_UART)
-#        include "defines/internalConfig.h"
+#if defined(NILAI_USE_UART)
+#include "defines/internalConfig.h"
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
-#        include NILAI_HAL_HEADER
+#include NILAI_HAL_HEADER
 #pragma GCC diagnostic pop
-#        if defined(HAL_UART_MODULE_ENABLED)
-#            include "defines/macros.hpp"
-#            include "defines/misc.hpp"
-#            include "defines/module.hpp"
+#if defined(HAL_UART_MODULE_ENABLED)
+#include "defines/macros.hpp"
+#include "defines/misc.hpp"
+#include "defines/module.hpp"
 
-#            include <cstdint>       // For uint8_t, size_t
-#            include <functional>    // For std::function
-#            include <string>        // For std::string
-#            include <vector>        // For std::vector
+#include <cstdint>       // For uint8_t, size_t
+#include <functional>    // For std::function
+#include <string>        // For std::string
+#include <vector>        // For std::vector
 
 /*************************************************************************************************/
 /* Defines ------------------------------------------------------------------------------------- */
@@ -74,7 +74,10 @@ constexpr inline Status operator&(Status a, Status b)
     return static_cast<Status>(static_cast<std::underlying_type_t<Status>>(a) &
                                static_cast<std::underlying_type_t<Status>>(b));
 }
-constexpr inline Status operator|=(Status& a, const Status& b) { return a = a | b; }
+constexpr inline Status operator|=(Status& a, const Status& b)
+{
+    return a = a | b;
+}
 /**
  * @}
  */
@@ -87,16 +90,16 @@ enum class SectionState
 
 struct Frame
 {
-#            if 0
+#if 0
     uint8_t* data      = nullptr;
     size_t   len       = 0;
-#            endif
+#endif
     std::vector<uint8_t> data;
     size_t               len       = 0;
     uint32_t             timestamp = 0;
 
-    Frame( ) = default;
-#            if 0
+    Frame() = default;
+#if 0
     Frame(const std::vector<uint8_t>& d, uint32_t t) : timestamp(t)
     {
         data = new uint8_t[d.size()];
@@ -113,21 +116,21 @@ struct Frame
         data = nullptr;
         len  = 0;
     }
-#            endif
+#endif
     Frame(const std::vector<uint8_t>& d, uint32_t t) : timestamp(t)
     {
         data = d;
-        len  = data.size( );
+        len  = data.size();
     }
 
-    [[nodiscard]] std::string ToStr( ) const { return std::string{(char*)data.data( )}; }
-    bool        operator==(const std::string& s) const
+    [[nodiscard]] std::string ToStr() const { return std::string {(char*)data.data()}; }
+    bool                      operator==(const std::string& s) const
     {
-        return (std::string((char*)data.data( ), len) == s);
+        return (std::string((char*)data.data(), len) == s);
     }
     bool operator!=(const std::string& s) const
     {
-        return (std::string((char*)data.data( ), len) != s);
+        return (std::string((char*)data.data(), len) != s);
     }
 };
 
@@ -148,43 +151,43 @@ class UartModule : public cep::Module
 {
 public:
     UartModule(UART_HandleTypeDef* uart, const std::string& label);
-    ~UartModule( ) override;
+    ~UartModule() override;
 
-    bool DoPost( ) override;
-    void Run( ) override;
+    bool DoPost() override;
+    void Run() override;
 
-    [[nodiscard]] const std::string& GetLabel( ) const override { return m_label; }
+    [[nodiscard]] const std::string& GetLabel() const override { return m_label; }
 
-    void Transmit(const char* msg, size_t len);
-    void Transmit(const std::string& msg);
-    void Transmit(const std::vector<uint8_t>& msg);
-    void VTransmit(const char* fmt, ...);
+    void                  Transmit(const char* msg, size_t len);
+    void                  Transmit(const std::string& msg);
+    void                  Transmit(const std::vector<uint8_t>& msg);
+    [[maybe_unused]] void VTransmit(const char* fmt, ...);
 
-    [[nodiscard]] size_t GetNumberOfWaitingFrames( ) const
+    [[nodiscard]] size_t GetNumberOfWaitingFrames() const
     {
         return (m_framePending ? 1 : 0);
         // return m_latestFrames.size( );
     }
-    CEP_UART::Frame Receive( );
+    CEP_UART::Frame Receive();
 
     void SetExpectedRxLen(size_t len);
-    void ClearExpectedRxLen( );
+    void ClearExpectedRxLen();
 
-    void SetFrameReceiveCpltCallback(const std::function<void( )>& cb);
-    void ClearFrameReceiveCpltCallback( );
+    void SetFrameReceiveCpltCallback(const std::function<void()>& cb);
+    void ClearFrameReceiveCpltCallback();
 
     void SetStartOfFrameSequence(uint8_t* sof, size_t len);
     void SetStartOfFrameSequence(const std::string& sof);
     void SetStartOfFrameSequence(const std::vector<uint8_t>& sof);
-    void ClearStartOfFrameSequence( );
+    void ClearStartOfFrameSequence();
 
     void SetEndOfFrameSequence(uint8_t* eof, size_t len);
     void SetEndOfFrameSequence(const std::string& eof);
     void SetEndOfFrameSequence(const std::vector<uint8_t>& eof);
-    void ClearEndOfFrameSequence( );
+    void ClearEndOfFrameSequence();
 
 private:
-    bool WaitUntilTransmitionComplete( );
+    bool WaitUntilTransmitionComplete();
 
     bool ResizeDmaBuffer(size_t sofLen, size_t len, size_t eofLen);
 
@@ -205,7 +208,7 @@ private:
     bool        m_hasReceivedSof = false;
     std::string m_eof;
 
-    std::function<void( )> m_cb;
+    std::function<void()> m_cb;
 
     size_t m_dataBufferIdx = 0;
 
@@ -214,12 +217,12 @@ private:
 };
 
 
-#        else
-#            if WARN_MISSING_STM_DRIVERS
-#                warning NilaiTFO UART module enabled, but HAL_UART_MODULE_ENABLE is not defined!
-#            endif
-#        endif
-#    endif
+#else
+#if WARN_MISSING_STM_DRIVERS
+#warning NilaiTFO UART module enabled, but HAL_UART_MODULE_ENABLE is not defined!
+#endif
+#endif
+#endif
 #endif
 
 /**

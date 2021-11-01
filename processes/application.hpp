@@ -9,8 +9,8 @@
  * @author      Samuel Martel
  * @date        2020/07/06  -  09:02
  */
-#ifndef _APPLICATION_HPP_
-#    define _APPLICATION_HPP_
+#ifndef GUARD_APPLICATION_HPP
+#    define GUARD_APPLICATION_HPP
 /*************************************************************************************************/
 /* File includes ------------------------------------------------------------------------------- */
 

@@ -34,18 +34,18 @@
 class HeartbeatModule : public cep::Module
 {
 public:
-    HeartbeatModule(const cep::Pin& pin, const std::string& label);
+    HeartbeatModule(const cep::Pin& pin, std::string label);
     ~HeartbeatModule() override = default;
 
-    bool               DoPost() override;
-    void               Run() override;
+    bool                             DoPost() override;
+    void                             Run() override;
     [[nodiscard]] const std::string& GetLabel() const override { return m_label; }
 
 private:
     std::string m_label;
-    cep::Pin         m_led;
+    cep::Pin    m_led;
 
-    cep::LedPattern m_defaultPattern{500, 500, -1};
+    cep::LedPattern m_defaultPattern {500, 500, -1};
 };
 
 /*****************************************************************************/

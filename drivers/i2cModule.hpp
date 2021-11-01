@@ -11,8 +11,8 @@
  *
  * @brief       I2C communication module
  */
-#ifndef I2C_MODULE_HPP_
-#define I2C_MODULE_HPP_
+#ifndef GUARD_I2CMODULE_HPP
+#define GUARD_I2CMODULE_HPP
 /*************************************************************************************************/
 /* Includes
  * ------------------------------------------------------------------------------------
@@ -26,6 +26,7 @@
 #include "defines/module.hpp"
 
 #include <string>
+#include <utility>
 #include <vector>
 
 namespace CEP_I2C
@@ -81,14 +82,12 @@ struct Frame
     std::vector<uint8_t> data            = {};
 
     Frame() = default;
-    Frame(uint8_t devAddr, const std::vector<uint8_t>& pData = std::vector<uint8_t>())
-    : deviceAddress(devAddr), data(pData)
+    Frame(uint8_t devAddr, std::vector<uint8_t> pData = std::vector<uint8_t>())
+    : deviceAddress(devAddr), data(std::move(pData))
     {
     }
-    Frame(uint8_t                     devAddr,
-          uint8_t                     regAddr,
-          const std::vector<uint8_t>& pData = std::vector<uint8_t>())
-    : deviceAddress(devAddr), registerAddress(regAddr), data(pData)
+    Frame(uint8_t devAddr, uint8_t regAddr, std::vector<uint8_t> pData = std::vector<uint8_t>())
+    : deviceAddress(devAddr), registerAddress(regAddr), data(std::move(pData))
     {
     }
 };
@@ -97,12 +96,12 @@ struct Frame
 class I2cModule : public cep::Module
 {
 public:
-    I2cModule(I2C_HandleTypeDef* handle, const std::string& label);
-    virtual ~I2cModule() override = default;
+    I2cModule(I2C_HandleTypeDef* handle, std::string label);
+    ~I2cModule() override = default;
 
-    virtual bool               DoPost() override;
-    virtual void               Run() override;
-    virtual const std::string& GetLabel() const override { return m_label; }
+    bool                             DoPost() override;
+    void                             Run() override;
+    [[nodiscard]] const std::string& GetLabel() const override { return m_label; }
 
     void TransmitFrame(uint8_t addr, const uint8_t* data, size_t len);
     void TransmitFrame(uint8_t addr, const std::vector<uint8_t>& data)
@@ -121,18 +120,16 @@ public:
     }
     void TransmitFrameToRegister(const CEP_I2C::Frame& frame)
     {
-        TransmitFrameToRegister(frame.deviceAddress,
-                                frame.registerAddress,
-                                frame.data.data(),
-                                frame.data.size());
+        TransmitFrameToRegister(
+          frame.deviceAddress, frame.registerAddress, frame.data.data(), frame.data.size());
     }
 
     CEP_I2C::Frame ReceiveFrame(uint8_t addr, size_t len);
     CEP_I2C::Frame ReceiveFrameFromRegister(uint8_t addr, uint8_t regAddr, size_t len);
 
-private:
+protected:
     I2C_HandleTypeDef* m_handle = nullptr;
-    std::string        m_label  = "";
+    std::string        m_label;
 
     static constexpr uint16_t TIMEOUT = 200;
 };

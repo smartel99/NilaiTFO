@@ -1,15 +1,17 @@
 ﻿#include "adcModule.hpp"
+
+#include <utility>
 #if defined(NILAI_USE_ADC) && defined(HAL_ADC_MODULE_ENABLED)
-#include "services/logger.hpp"
 #include "defines/macros.hpp"
+#include "services/logger.hpp"
 
 static constexpr float ConvertToVolt(uint32_t val)
 {
-    return (((float)val / 4095.0f) * 3.3f);
+    return ((static_cast<float>(val) / 4095.0f) * 3.3f);
 }
 
 
-AdcModule::AdcModule(ADC_HandleTypeDef* adc, const std::string& label) : m_adc(adc), m_label(label)
+AdcModule::AdcModule(ADC_HandleTypeDef* adc, std::string  label) : m_adc(adc), m_label(std::move(label))
 {
     CEP_ASSERT(adc != nullptr, "[%s]: ADC handle is null!", m_label.c_str());
     m_channelCount = adc->Init.NbrOfConversion;
@@ -36,6 +38,12 @@ AdcModule::~AdcModule()
  */
 bool AdcModule::DoPost()
 {
+    if (m_channelBuff == nullptr)
+    {
+        LOG_ERROR("[%s]: Error in POST: m_channelBuff is null!", m_label.c_str());
+        return false;
+    }
+
     Start();
     HAL_Delay(5);    // To give time to take samples.
     bool isAllChannelsOk = true;
@@ -56,7 +64,7 @@ bool AdcModule::DoPost()
     }
     Stop();
 
-    if (isAllChannelsOk == true)
+    if (isAllChannelsOk)
     {
         LOG_INFO("[%s]: POST OK", m_label.c_str());
     }
@@ -75,12 +83,12 @@ float AdcModule::GetChannelReading(size_t channel) const
 
 void AdcModule::Start()
 {
-    HAL_ADC_Start_DMA(&hadc1, &m_channelBuff[0], m_channelCount);
+    HAL_ADC_Start_DMA(m_adc, &m_channelBuff[0], m_channelCount);
 }
 
 void AdcModule::Stop()
 {
-    HAL_ADC_Stop_DMA(&hadc1);
+    HAL_ADC_Stop_DMA(m_adc);
 }
 
 #endif
