@@ -23,12 +23,15 @@
 #define ESP_WARN(msg, ...)  LOG_WARNING("[%s]: " msg, m_label.c_str(), ##__VA_ARGS__)
 #define ESP_ERROR(msg, ...) LOG_ERROR("[%s]: " msg, m_label.c_str(), ##__VA_ARGS__)
 
-EspModule::EspModule(const std::string&     label,
-                     UartModule*            uart,
-                     const std::string&     deviceName,
-                     const CEP_ESP32::Pins& pins)
-: m_label(label), m_uart(uart), m_pins(pins)
-{
+EspModule::EspModule(
+  const std::string&     label,
+  UartModule*            uart,
+  uint8_t*               userData,
+  size_t                 dataLen,
+  const CEP_ESP32::Pins& pins)
+: m_label(label)
+, m_uart(uart)
+, m_pins(pins) {
     CEP_ASSERT(uart != nullptr, "UART handle is NULL!");
 
     // Set TPIN to high to allow the ESP to boot.
@@ -39,10 +42,8 @@ EspModule::EspModule(const std::string&     label,
     m_pins.boot.Set(true);
     m_pins.enable.Set(true);
 
-    if (deviceName.empty() == false)
-    {
-        m_deviceName = deviceName;
-    }
+    m_userData = userData;
+    m_dataLen  = dataLen;
 
     m_uart->SetExpectedRxLen(512);
 
@@ -61,26 +62,21 @@ EspModule::EspModule(const std::string&     label,
  *  - The ESP must respond with "OK".
  * @return True if the POST passes, false otherwise.
  */
-bool EspModule::DoPost()
-{
+bool EspModule::DoPost() {
     // Make sure that TPOUT is high.
-    if (m_pins.tpout.Get() == false)
-    {
+    if (m_pins.tpout.Get() == false) {
         ESP_ERROR("Error in POST: TPOUT is LOW!");
         return false;
     }
 
-    // Send the device name to the ESP, with null terminator.
-    m_uart->Transmit(m_deviceName.c_str(), m_deviceName.size() + 1);
+    SendUserData();
 
     // Wait for its response.
     size_t start = HAL_GetTick();
-    while (m_uart->GetNumberOfWaitingFrames() == 0)
-    {
+    while (m_uart->GetNumberOfWaitingFrames() == 0) {
         // Data is only processed in the Run function.
         m_uart->Run();
-        if (HAL_GetTick() >= start + EspModule::TIMEOUT)
-        {
+        if (HAL_GetTick() >= start + EspModule::TIMEOUT) {
             // Timed out.
             ESP_ERROR("Error in POST: No response from ESP!");
             return false;
@@ -90,8 +86,7 @@ bool EspModule::DoPost()
     // We got the response, check it.
     CEP_UART::Frame resp = m_uart->Receive();
 
-    if (resp != "OK")
-    {
+    if (resp != "OK") {
         ESP_ERROR("Error in POST: Invalid response from ESP! ('%s')", resp.ToStr().c_str());
         return false;
     }
@@ -102,25 +97,20 @@ bool EspModule::DoPost()
     return true;
 }
 
-void EspModule::Run()
-{
+void EspModule::Run() {
     // If TPOUT is LOW, there's a problem, reset the ESP.
-    if (m_pins.tpout.Get() == false)
-    {
+    if (m_pins.tpout.Get() == false) {
         ESP_WARN("TPOUT is LOW, resetting!");
         m_pins.enable.Set(false);
         HAL_Delay(1);
         m_pins.enable.Set(true);
 
-        // We must re-send the device name.
-        m_uart->Transmit(m_deviceName);
+        SendUserData();
 
         // Wait for its response.
         size_t start = HAL_GetTick();
-        while (m_uart->GetNumberOfWaitingFrames() == 0)
-        {
-            if (HAL_GetTick() >= start + EspModule::TIMEOUT)
-            {
+        while (m_uart->GetNumberOfWaitingFrames() == 0) {
+            if (HAL_GetTick() >= start + EspModule::TIMEOUT) {
                 // Timed out.
                 ESP_ERROR("No response from ESP!");
                 return;
@@ -130,44 +120,32 @@ void EspModule::Run()
         // We got the response, check it.
         CEP_UART::Frame resp = m_uart->Receive();
 
-        if (resp != "OK")
-        {
+        if (resp != "OK") {
             ESP_ERROR("Invalid response from ESP! ('%s')", resp.data);
             return;
         }
     }
 }
 
-void EspModule::Enable()
-{
+void EspModule::Enable() {
     m_pins.enable.Set(true);
     m_enabled = true;
 }
 
-void EspModule::Disable()
-{
+void EspModule::Disable() {
     m_pins.enable.Set(false);
     m_enabled = false;
 }
 
-void EspModule::SetBootMode(CEP_ESP32::BootMode mode)
-{
-    switch (mode)
-    {
-        case CEP_ESP32::BootMode::Normal:
-            m_pins.boot.Set(true);
-            break;
-        case CEP_ESP32::BootMode::Bootloader:
-            m_pins.boot.Set(false);
-            break;
-        default:
-            CEP_ASSERT(false, "Invalid boot mode");
-            break;
+void EspModule::SetBootMode(CEP_ESP32::BootMode mode) {
+    switch (mode) {
+        case CEP_ESP32::BootMode::Normal: m_pins.boot.Set(true); break;
+        case CEP_ESP32::BootMode::Bootloader: m_pins.boot.Set(false); break;
+        default: CEP_ASSERT(false, "Invalid boot mode"); break;
     }
 }
 
-bool EspModule::ProgramEsp(const std::string& filepath)
-{
+bool EspModule::ProgramEsp(const std::string& filepath) {
 #if !defined(NILAI_USE_FILESYSTEM)
     UNUSED(filepath);
     CEP_ASSERT(false, "The SD module must be enabled to use this function");
@@ -179,89 +157,77 @@ bool EspModule::ProgramEsp(const std::string& filepath)
 #endif
 }
 
-void EspModule::Transmit(const char* msg, size_t len)
-{
+void EspModule::Transmit(const char* msg, size_t len) {
     m_uart->Transmit(msg, len);
 }
 
-void EspModule::Transmit(const std::string& msg)
-{
+void EspModule::Transmit(const std::string& msg) {
     m_uart->Transmit(msg);
 }
 
-void EspModule::Transmit(const std::vector<uint8_t>& msg)
-{
+void EspModule::Transmit(const std::vector<uint8_t>& msg) {
     m_uart->Transmit(msg);
 }
 
-size_t EspModule::GetNumberOfWaitingFrames() const
-{
+size_t EspModule::GetNumberOfWaitingFrames() const {
     return m_uart->GetNumberOfWaitingFrames();
 }
 
-CEP_UART::Frame EspModule::Receive()
-{
+CEP_UART::Frame EspModule::Receive() {
     return m_uart->Receive();
 }
 
-void EspModule::SetExpectedRxLen(size_t len)
-{
+void EspModule::SetExpectedRxLen(size_t len) {
     m_uart->SetExpectedRxLen(len);
 }
 
-void EspModule::ClearExpectedRxLen()
-{
+void EspModule::ClearExpectedRxLen() {
     m_uart->ClearExpectedRxLen();
 }
 
-void EspModule::SetFrameReceiveCpltCallback(const std::function<void()>& cb)
-{
+void EspModule::SetFrameReceiveCpltCallback(const std::function<void()>& cb) {
     m_uart->SetFrameReceiveCpltCallback(cb);
 }
 
-void EspModule::ClearFrameReceiveCpltCallback()
-{
+void EspModule::ClearFrameReceiveCpltCallback() {
     m_uart->ClearFrameReceiveCpltCallback();
 }
 
-void EspModule::SetStartOfFrameSequence(const char* sof, size_t len)
-{
+void EspModule::SetStartOfFrameSequence(const char* sof, size_t len) {
     m_uart->SetStartOfFrameSequence(const_cast<uint8_t*>((const uint8_t*)sof), len);
 }
 
-void EspModule::SetStartOfFrameSequence(const std::string& sof)
-{
+void EspModule::SetStartOfFrameSequence(const std::string& sof) {
     m_uart->SetStartOfFrameSequence(sof);
 }
 
-void EspModule::SetStartOfFrameSequence(const std::vector<uint8_t>& sof)
-{
+void EspModule::SetStartOfFrameSequence(const std::vector<uint8_t>& sof) {
     m_uart->SetStartOfFrameSequence(sof);
 }
 
-void EspModule::ClearStartOfFrameSequence()
-{
+void EspModule::ClearStartOfFrameSequence() {
     m_uart->ClearStartOfFrameSequence();
 }
 
-void EspModule::SetEndOfFrameSequence(const char* eof, size_t len)
-{
+void EspModule::SetEndOfFrameSequence(const char* eof, size_t len) {
     m_uart->SetEndOfFrameSequence(const_cast<uint8_t*>((const uint8_t*)eof), len);
 }
 
-void EspModule::SetEndOfFrameSequence(const std::string& eof)
-{
+void EspModule::SetEndOfFrameSequence(const std::string& eof) {
     m_uart->SetEndOfFrameSequence(eof);
 }
 
-void EspModule::SetEndOfFrameSequence(const std::vector<uint8_t>& eof)
-{
+void EspModule::SetEndOfFrameSequence(const std::vector<uint8_t>& eof) {
     m_uart->SetEndOfFrameSequence(eof);
 }
 
-void EspModule::ClearEndOfFrameSequence()
-{
+void EspModule::ClearEndOfFrameSequence() {
     m_uart->ClearEndOfFrameSequence();
+}
+
+void EspModule::SendUserData() {
+    m_uart->Transmit((const char*)&m_dataLen, 1);    // Report the data size 256 is max length for now
+    if (m_dataLen != 0) m_uart->Transmit((const char*)m_userData, m_dataLen);    // Send the user data
 }
 
 #endif
