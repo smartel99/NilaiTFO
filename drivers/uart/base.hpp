@@ -21,6 +21,7 @@
 #include NILAI_HAL_HEADER
 #pragma GCC diagnostic pop
 #if defined(HAL_UART_MODULE_ENABLED)
+
 #include "defines/macros.hpp"
 #include "defines/misc.hpp"
 #include "defines/module.hpp"
@@ -35,8 +36,7 @@
 
 /*************************************************************************************************/
 /* Enumerated Types ---------------------------------------------------------------------------- */
-namespace CEP_UART
-{
+namespace CEP_UART {
 /**
  * @addtogroup  UART_Status
  * @brief       UART module status, mostly describing error states.
@@ -63,19 +63,17 @@ enum class Status
     //!< UART_BAD_START_OF_FRAME.
 };
 
+
 /** From: https://stackoverflow.com/a/15889501 */
-constexpr inline Status operator|(Status a, Status b)
-{
-    return static_cast<Status>(static_cast<std::underlying_type_t<Status>>(a) |
-                               static_cast<std::underlying_type_t<Status>>(b));
+constexpr inline Status operator|(Status a, Status b) {
+    return static_cast<Status>(
+      static_cast<std::underlying_type_t<Status>>(a) | static_cast<std::underlying_type_t<Status>>(b));
 }
-constexpr inline Status operator&(Status a, Status b)
-{
-    return static_cast<Status>(static_cast<std::underlying_type_t<Status>>(a) &
-                               static_cast<std::underlying_type_t<Status>>(b));
+constexpr inline Status operator&(Status a, Status b) {
+    return static_cast<Status>(
+      static_cast<std::underlying_type_t<Status>>(a) & static_cast<std::underlying_type_t<Status>>(b));
 }
-constexpr inline Status operator|=(Status& a, const Status& b)
-{
+constexpr inline Status operator|=(Status& a, const Status& b) {
     return a = a | b;
 }
 /**
@@ -88,8 +86,7 @@ enum class SectionState
     Complete,
 };
 
-struct Frame
-{
+struct Frame {
 #if 0
     uint8_t* data      = nullptr;
     size_t   len       = 0;
@@ -117,44 +114,48 @@ struct Frame
         len  = 0;
     }
 #endif
-    Frame(const std::vector<uint8_t>& d, uint32_t t) : timestamp(t)
-    {
+    Frame(const std::vector<uint8_t>& d, uint32_t t)
+    : timestamp(t) {
         data = d;
         len  = data.size();
     }
 
-    [[nodiscard]] std::string ToStr() const { return std::string {(char*)data.data()}; }
-    bool                      operator==(const std::string& s) const
-    {
-        return (std::string((char*)data.data(), len) == s);
-    }
-    bool operator!=(const std::string& s) const
-    {
-        return (std::string((char*)data.data(), len) != s);
-    }
+    [[nodiscard]] std::string ToStr() const { return std::string{(char*)data.data()}; }
+    bool operator==(const std::string& s) const { return (std::string((char*)data.data(), len) == s); }
+    bool operator!=(const std::string& s) const { return (std::string((char*)data.data(), len) != s); }
 };
 
-struct UartDataBuffer
-{
+// DMA Only
+struct UartDataBuffer {
     bool                 rcvCompleted = false;
     bool                 txCompleted  = true;
     UART_HandleTypeDef*  instance     = nullptr;
     std::vector<uint8_t> rxDmaData;
 
-    UartDataBuffer(size_t len, UART_HandleTypeDef* ins) : instance(ins) { rxDmaData.resize(len); }
+    UartDataBuffer(size_t len, UART_HandleTypeDef* ins)
+    : instance(ins) {
+        rxDmaData.resize(len);
+    }
 };
+
+enum class Kind
+{
+    IT,
+    DMA
+};
+
 }    // namespace CEP_UART
 
 /*************************************************************************************************/
 /* Classes ------------------------------------------------------------------------------------- */
-class UartModule : public cep::Module
-{
-public:
-    UartModule(UART_HandleTypeDef* uart, const std::string& label);
-    ~UartModule() override;
+class UartModule : public cep::Module {
+  public:
+    UartModule(UART_HandleTypeDef* uart, const std::string& label)
+    : m_handle(uart)
+    , m_label(label) { }
+    ~UartModule();
 
     bool DoPost() override;
-    void Run() override;
 
     [[nodiscard]] const std::string& GetLabel() const override { return m_label; }
 
@@ -163,41 +164,40 @@ public:
     void                  Transmit(const std::vector<uint8_t>& msg);
     [[maybe_unused]] void VTransmit(const char* fmt, ...);
 
-    [[nodiscard]] size_t GetNumberOfWaitingFrames() const
-    {
+    [[nodiscard]] size_t GetNumberOfWaitingFrames() const {
         return (m_framePending ? 1 : 0);
-        // return m_latestFrames.size( );
+        //    	    return m_latestFrames.size();
     }
     CEP_UART::Frame Receive();
 
-    void SetExpectedRxLen(size_t len);
-    void ClearExpectedRxLen();
+    virtual void SetExpectedRxLen(size_t len) = 0;
+    virtual void ClearExpectedRxLen()         = 0;
 
     void SetFrameReceiveCpltCallback(const std::function<void()>& cb);
     void ClearFrameReceiveCpltCallback();
 
-    void SetStartOfFrameSequence(uint8_t* sof, size_t len);
-    void SetStartOfFrameSequence(const std::string& sof);
-    void SetStartOfFrameSequence(const std::vector<uint8_t>& sof);
-    void ClearStartOfFrameSequence();
+    void         SetStartOfFrameSequence(uint8_t* sof, size_t len);
+    virtual void SetStartOfFrameSequence(const std::string& sof) = 0;
+    void         SetStartOfFrameSequence(const std::vector<uint8_t>& sof);
+    void         ClearStartOfFrameSequence();
 
-    void SetEndOfFrameSequence(uint8_t* eof, size_t len);
-    void SetEndOfFrameSequence(const std::string& eof);
-    void SetEndOfFrameSequence(const std::vector<uint8_t>& eof);
-    void ClearEndOfFrameSequence();
+    void         SetEndOfFrameSequence(uint8_t* eof, size_t len);
+    virtual void SetEndOfFrameSequence(const std::string& eof) = 0;
+    void         SetEndOfFrameSequence(const std::vector<uint8_t>& eof);
+    virtual void ClearEndOfFrameSequence() = 0;
 
-private:
+  protected:
     bool WaitUntilTransmitionComplete();
 
-    bool ResizeDmaBuffer(size_t sofLen, size_t len, size_t eofLen);
 
-private:
+  protected:
     UART_HandleTypeDef* m_handle = nullptr;
     std::string         m_label;
 
     CEP_UART::Status     m_status           = CEP_UART::Status::Ok;
     size_t               m_txBytesRemaining = -1;
     std::vector<uint8_t> m_txBuf;
+    std::vector<uint8_t> m_rxBuf;    // IT only
     size_t               m_expectedLen               = 0;
     uint32_t             m_lastCharReceivedTimestamp = 0;
     //    std::vector<UART::Frame> m_latestFrames;
@@ -210,12 +210,12 @@ private:
 
     std::function<void()> m_cb;
 
-    size_t m_dataBufferIdx = 0;
+    bool   m_hasNewData    = false;    // IT only
+    size_t m_dataBufferIdx = 0;        // DMA only
 
     static constexpr uint32_t TIMEOUT    = 100;    // Systicks.
     static constexpr uint32_t RX_TIMEOUT = 50;     // Systicks.
 };
-
 
 #else
 #if WARN_MISSING_STM_DRIVERS

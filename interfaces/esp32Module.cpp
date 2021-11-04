@@ -25,7 +25,7 @@
 
 EspModule::EspModule(
   const std::string&     label,
-  UartModule*            uart,
+  UartModuleIt*          uart,
   uint8_t*               userData,
   size_t                 dataLen,
   const CEP_ESP32::Pins& pins)

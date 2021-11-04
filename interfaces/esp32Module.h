@@ -22,7 +22,7 @@
 #include NILAI_HAL_HEADER
 #include "defines/module.hpp"
 #include "defines/pin.h"
-#include "drivers/uartModule.hpp"
+#include "drivers/uart/it.hpp"
 
 #include <array>
 #include <map>
@@ -43,13 +43,13 @@ enum class BootMode
  * Contains all the control pins of the ESP32 module.
  */
 struct Pins {
-    Pin enable = {};    //!< Enable pin of the ESP32. When high, the ESP32 is enabled.
-    Pin boot   = {};    /**< Boot selection pin.
-                         *   When high, normal boot.
-                         *   When low, runs the bootloader.
-                         */
-    Pin tpout = {};     //!< Heartbeat pin from the ESP32 to the STM32.
-    Pin tpin  = {};     //!< Debug signal from the STM32 to the ESP32, currently not used.
+    cep::Pin enable = {};    //!< Enable pin of the ESP32. When high, the ESP32 is enabled.
+    cep::Pin boot   = {};    /**< Boot selection pin.
+                              *   When high, normal boot.
+                              *   When low, runs the bootloader.
+                              */
+    cep::Pin tpout = {};     //!< Heartbeat pin from the ESP32 to the STM32.
+    cep::Pin tpin  = {};     //!< Debug signal from the STM32 to the ESP32, currently not used.
 };
 }    // namespace CEP_ESP32
 
@@ -60,7 +60,7 @@ class EspModule : public cep::Module {
   public:
     EspModule(
       const std::string&     label,
-      UartModule*            uart,
+      UartModuleIt*          uart,
       uint8_t*               userData,
       size_t                 dataLen,
       const CEP_ESP32::Pins& pins);
@@ -200,7 +200,7 @@ class EspModule : public cep::Module {
 
   private:
     std::string     m_label    = "";
-    UartModule*     m_uart     = nullptr;
+    UartModuleIt*   m_uart     = nullptr;
     uint8_t*        m_userData = nullptr;
     size_t          m_dataLen  = 0;
     CEP_ESP32::Pins m_pins     = {};
