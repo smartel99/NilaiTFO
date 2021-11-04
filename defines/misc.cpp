@@ -142,7 +142,7 @@ bool cep::plus_minus(double value, double compare, double margin)
 
 size_t cep::FindStringInVector(const std::string& str, const std::vector<uint8_t>& vec)
 {
-#if __cplusplus >= 201703L
+#if 0 //__cplusplus >= 201703L
     auto it = std::search(vec.begin( ), vec.end( ), str.begin( ), str.end( ));
     if (it == vec.end( ))
     {
