@@ -79,7 +79,9 @@ void UartModuleIt::Run() {
             m_hasReceivedSof = false;
             // Clear reception buffer and call the callback.
             m_rxBuf.clear();
-            if (m_cb) { m_cb(); }
+            if (m_cb) {
+                m_cb();
+            }
         }
     }
 }
@@ -127,6 +129,26 @@ void UartModuleIt::HandleReceptionIRQ() {
         // Re-enable RX IRQ, in case it was disabled.
         //        __HAL_UART_ENABLE_IT(m_handle, UART_IT_RXNE);
     }
+}
+
+void HAL_UART_ErrorCallback(UART_HandleTypeDef* huart) {
+    switch (huart->ErrorCode) {
+        case HAL_UART_ERROR_ORE:
+            __HAL_UART_CLEAR_FLAG(huart, UART_FLAG_RXNE);
+            __HAL_UART_CLEAR_OREFLAG(huart);
+            break;
+
+        case HAL_UART_ERROR_PE:
+        case HAL_UART_ERROR_NE:
+        case HAL_UART_ERROR_FE:
+        case HAL_UART_ERROR_DMA:
+        case HAL_UART_ERROR_RTO:
+        case HAL_UART_ERROR_NONE:
+        default:
+            break;
+    }
+
+    __HAL_UART_ENABLE_IT(huart, UART_IT_RXNE);
 }
 
 #endif
