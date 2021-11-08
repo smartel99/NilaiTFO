@@ -5,7 +5,7 @@
 
 class UartModuleDma : public UartModule {
   public:
-    UartModuleDma(UART_HandleTypeDef* uart, const std::string& label);
+    UartModuleDma(UART_HandleTypeDef* uart, const std::string& label, size_t rxLen = 1024);
 
     void Run() override;
 

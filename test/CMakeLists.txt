@@ -13,6 +13,7 @@ FetchContent_MakeAvailable(googletest)
 include(GoogleTest)
 enable_testing()
 
+
 get_filename_component(ROOT_DIR ${CMAKE_SOURCE_DIR}/.. ABSOLUTE)
 #get_filename_component(SERVICE_DIR ${ROOT_DIR}/services ABSOLUTE)
 #get_filename_component(PROCESS_DIR ${ROOT_DIR}/processes ABSOLUTE)
@@ -20,6 +21,8 @@ get_filename_component(ROOT_DIR ${CMAKE_SOURCE_DIR}/.. ABSOLUTE)
 include_directories(${ROOT_DIR})
 
 add_compile_options(-DNILAI_TEST)
+
+add_subdirectory(defines)
 
 # Pin
 # The executable that will do the tests.

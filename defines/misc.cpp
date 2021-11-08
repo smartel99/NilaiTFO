@@ -31,8 +31,7 @@
  * @param   size: The size in characters of the char array
  * @retval  None
  */
-void cep::forceNullTerminationCharacter(char* string, size_t size)
-{
+void cep::forceNullTerminationCharacter(char* string, size_t size) {
     /* Access last element of the array and clear it */
     string[size - 1] = '\0';
 }
@@ -43,7 +42,9 @@ void cep::forceNullTerminationCharacter(char* string, size_t size)
  * @param   length: the number of bytes to clear
  * @retval  None
  */
-void cep::clearArray(void* array, size_t length) { memset(array, 0x00U, length); }
+void cep::clearArray(void* array, size_t length) {
+    memset(array, 0x00U, length);
+}
 
 /**
  * @brief   Count the number of 1s in the passed bytes.
@@ -51,20 +52,16 @@ void cep::clearArray(void* array, size_t length) { memset(array, 0x00U, length);
  * @param   len:   The number of bytes to check
  * @retval  The number of 1s
  */
-size_t cep::countOfOnesInBytesInator(uint8_t* bytes, uint8_t len)
-{
+size_t cep::countOfOnesInBytesInator(uint8_t* bytes, uint8_t len) {
     size_t count = 0;
 #if defined(__GCC__)
-    for (std::size_t i = 0; i < len; i++)
-    {
+    for (std::size_t i = 0; i < len; i++) {
         count += __builtin_popcount(bytes[i]);
     }
 #else
 
-    for (size_t i = 0; i < len; i++)
-    {
-        for (size_t j = 0; j < 8; j++)
-        {
+    for (size_t i = 0; i < len; i++) {
+        for (size_t j = 0; j < 8; j++) {
             count += (uint8_t)((bytes[i] >> j) & 0x01);
         }
     }
@@ -90,8 +87,7 @@ size_t cep::countOfOnesInBytesInator(uint8_t* bytes, uint8_t len)
  *                second value.
  *          false: If the two values are too far apart from each other
  */
-bool cep::plus_minus(int32_t value, int32_t compare, int32_t margin)
-{
+bool cep::plus_minus(int32_t value, int32_t compare, int32_t margin) {
     /* Take the absolute values */
     value   = std::abs(value);
     compare = std::abs(compare);
@@ -100,12 +96,9 @@ bool cep::plus_minus(int32_t value, int32_t compare, int32_t margin)
     const int32_t upperRange = compare + margin;
     const int32_t lowerRange = (margin <= compare) ? compare - margin : 0;
 
-    if (value < upperRange && value > lowerRange)
-    {
+    if (value < upperRange && value > lowerRange) {
         return true;
-    }
-    else
-    {
+    } else {
         return false;
     }
 }
@@ -128,21 +121,16 @@ bool cep::plus_minus(int32_t value, int32_t compare, int32_t margin)
  *                second value.
  *          false: If the two values are too far apart from each other
  */
-bool cep::plus_minus(double value, double compare, double margin)
-{
-    if ((value <= (compare + margin)) && (value > (compare - margin)))
-    {
+bool cep::plus_minus(double value, double compare, double margin) {
+    if ((value <= (compare + margin)) && (value > (compare - margin))) {
         return true;
-    }
-    else
-    {
+    } else {
         return false;
     }
 }
 
-size_t cep::FindStringInVector(const std::string& str, const std::vector<uint8_t>& vec)
-{
-#if 0 //__cplusplus >= 201703L
+size_t cep::FindStringInVector(const std::string& str, const std::vector<uint8_t>& vec) {
+#if 0    //__cplusplus >= 201703L
     auto it = std::search(vec.begin( ), vec.end( ), str.begin( ), str.end( ));
     if (it == vec.end( ))
     {
@@ -153,23 +141,19 @@ size_t cep::FindStringInVector(const std::string& str, const std::vector<uint8_t
         return (it - vec.begin( ));
     }
 #else
-    size_t strLen = str.size( );
-    size_t vecLen = vec.size( );
+    size_t strLen = str.size();
+    size_t vecLen = vec.size();
 
     // If the string is bigger than the vector, we won't find the string in the vector ;)
-    if (strLen > vecLen)
-    {
+    if (strLen > vecLen) {
         return std::string::npos;
     }
-    for (size_t i = 0; i <= vecLen - strLen; ++i)
-    {
+    for (size_t i = 0; i <= vecLen - strLen; ++i) {
         size_t j = 0;
-        while (j < vecLen && vec[i + j] == str[j])
-        {
+        while (j < vecLen && vec[i + j] == str[j]) {
             j++;
         }
-        if (j == strLen)
-        {
+        if (j == strLen) {
             // Match found.
             return i;
         }
@@ -179,21 +163,38 @@ size_t cep::FindStringInVector(const std::string& str, const std::vector<uint8_t
 #endif
 }
 
-std::vector<uint8_t> cep::StrToVec(const std::string& str)
-{
-    std::vector<uint8_t> v;
-    v.reserve(str.size( ));
+size_t cep::FindStringInCircularBuffer(const std::string& str, const CircularBuffer<uint8_t>& cb) {
+    size_t strLen = str.size();
+    size_t cbLen  = cb.size();
 
-    for (const auto& c : str)
-    {
+    if (strLen > cbLen) {
+        return std::string::npos;
+    }
+
+    for (size_t i = 0; i <= cbLen - strLen; ++i) {
+        size_t j = 0;
+        while (j < cbLen && cb[i + j] == str[j]) {
+            ++j;
+        }
+        if (j == strLen) {
+            return i;
+        }
+    }
+    return std::string::npos;
+}
+
+std::vector<uint8_t> cep::StrToVec(const std::string& str) {
+    std::vector<uint8_t> v;
+    v.reserve(str.size());
+
+    for (const auto& c : str) {
         v.push_back(c);
     }
 
     return v;
 }
 
-std::string cep::IntToHex(size_t i)
-{
+std::string cep::IntToHex(size_t i) {
     char msg[9] = {0};
 
     sprintf(msg, "%08X", i);
@@ -201,16 +202,13 @@ std::string cep::IntToHex(size_t i)
     return std::string(msg);
 }
 
-std::vector<uint8_t> cep::StrToVec(const std::string& str, size_t maxSize)
-{
+std::vector<uint8_t> cep::StrToVec(const std::string& str, size_t maxSize) {
     std::vector<uint8_t> v;
     v.reserve(maxSize);
 
-    for (const auto& c : str)
-    {
+    for (const auto& c : str) {
         v.push_back(c);
-        if (v.size( ) >= maxSize)
-        {
+        if (v.size() >= maxSize) {
             break;
         }
     }

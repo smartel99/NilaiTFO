@@ -14,6 +14,7 @@
 /*************************************************************************************************/
 /* File includes ------------------------------------------------------------------------------- */
 
+#include "circular_buffer.hpp"
 #include "macros.hpp"
 
 #include <iomanip>
@@ -21,8 +22,7 @@
 #include <string>
 #include <vector>
 
-namespace cep
-{
+namespace cep {
 /*************************************************************************************************/
 /* Definitions --------------------------------------------------------------------------------- */
 
@@ -57,12 +57,11 @@ bool plus_minus(int32_t value, int32_t compare, int32_t margin);
 bool plus_minus(double value, double compare, double margin);
 
 size_t FindStringInVector(const std::string& str, const std::vector<uint8_t>& vec);
+size_t FindStringInCircularBuffer(const std::string& str, const CircularBuffer<uint8_t>& cb);
 
-constexpr uint64_t Hash(const char* str)
-{
+constexpr uint64_t Hash(const char* str) {
     uint64_t result = 0;
-    while (*str != 0)
-    {
+    while (*str != 0) {
         result = result * 31 + *str++;
     }
     return result;
@@ -70,15 +69,13 @@ constexpr uint64_t Hash(const char* str)
 
 std::string IntToHex(size_t i);
 
-template <typename T>
-std::vector<uint8_t> ValToVector(const T& val)
-{
+template<typename T>
+std::vector<uint8_t> ValToVector(const T& val) {
     std::vector<uint8_t> v;
     v.reserve(sizeof(T));
 
     const uint8_t* ptr = reinterpret_cast<const uint8_t*>(&val);
-    for (size_t i = 0; i < sizeof(T); i++)
-    {
+    for (size_t i = 0; i < sizeof(T); i++) {
         v.push_back(*ptr);
         ptr++;
     }
@@ -86,22 +83,19 @@ std::vector<uint8_t> ValToVector(const T& val)
     return v;
 }
 
-template <typename T>
-T VectorToVal(const std::vector<uint8_t>& vec)
-{
-    return (*reinterpret_cast<const T*>(vec.data( )));
+template<typename T>
+T VectorToVal(const std::vector<uint8_t>& vec) {
+    return (*reinterpret_cast<const T*>(vec.data()));
 }
 
-template <typename T, size_t N>
-T VectorToVal(const std::array<uint8_t, N>& arr)
-{
-    return (*reinterpret_cast<const T*>(arr.data( )));
+template<typename T, size_t N>
+T VectorToVal(const std::array<uint8_t, N>& arr) {
+    return (*reinterpret_cast<const T*>(arr.data()));
 }
 
-template <size_t N>
-std::string VectorToVal(const std::array<uint8_t, N>& arr)
-{
-    return std::string((const char*)arr.data( ), arr.size( ));
+template<size_t N>
+std::string VectorToVal(const std::array<uint8_t, N>& arr) {
+    return std::string((const char*)arr.data(), arr.size());
 }
 
 std::vector<uint8_t> StrToVec(const std::string& str);

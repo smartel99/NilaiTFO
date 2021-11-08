@@ -22,10 +22,12 @@
 #pragma GCC diagnostic pop
 #if defined(HAL_UART_MODULE_ENABLED)
 
+#include "defines/circular_buffer.hpp"
 #include "defines/macros.hpp"
 #include "defines/misc.hpp"
 #include "defines/module.hpp"
 
+#include <algorithm>
 #include <cstdint>       // For uint8_t, size_t
 #include <functional>    // For std::function
 #include <string>        // For std::string
@@ -114,15 +116,29 @@ struct Frame {
         len  = 0;
     }
 #endif
+    Frame(uint8_t* buf, size_t len, uint32_t t)
+    : timestamp(t) {
+        //        std::copy_n(buf, len, data); // Cannot be used, no iterator for uint8_t, somehow
+        for (size_t i = 0; i < len; ++i)
+            data.push_back(buf[i]);
+        this->len = len;
+    }
+
     Frame(const std::vector<uint8_t>& d, uint32_t t)
     : timestamp(t) {
         data = d;
         len  = data.size();
     }
 
-    [[nodiscard]] std::string ToStr() const { return std::string{(char*)data.data()}; }
-    bool operator==(const std::string& s) const { return (std::string((char*)data.data(), len) == s); }
-    bool operator!=(const std::string& s) const { return (std::string((char*)data.data(), len) != s); }
+    [[nodiscard]] std::string ToStr() const {
+        return std::string((char*)data.data(), len);
+    }
+    bool operator==(const std::string& s) const {
+        return (std::string((char*)data.data(), len) == s);
+    }
+    bool operator!=(const std::string& s) const {
+        return (std::string((char*)data.data(), len) != s);
+    }
 };
 
 // DMA Only
@@ -152,12 +168,15 @@ class UartModule : public cep::Module {
   public:
     UartModule(UART_HandleTypeDef* uart, const std::string& label)
     : m_handle(uart)
-    , m_label(label) { }
+    , m_label(label) {
+    }
     ~UartModule();
 
     bool DoPost() override;
 
-    [[nodiscard]] const std::string& GetLabel() const override { return m_label; }
+    [[nodiscard]] const std::string& GetLabel() const override {
+        return m_label;
+    }
 
     void                  Transmit(const char* msg, size_t len);
     void                  Transmit(const std::string& msg);
@@ -197,9 +216,10 @@ class UartModule : public cep::Module {
     CEP_UART::Status     m_status           = CEP_UART::Status::Ok;
     size_t               m_txBytesRemaining = -1;
     std::vector<uint8_t> m_txBuf;
-    std::vector<uint8_t> m_rxBuf;    // IT only
-    size_t               m_expectedLen               = 0;
-    uint32_t             m_lastCharReceivedTimestamp = 0;
+    //    std::vector<uint8_t> m_rxBuf;    // IT only
+    CircularBuffer<uint8_t> m_rxBuf;
+    size_t                  m_expectedLen               = 0;
+    uint32_t                m_lastCharReceivedTimestamp = 0;
     //    std::vector<UART::Frame> m_latestFrames;
     CEP_UART::Frame m_latestFrames;
     bool            m_framePending = false;

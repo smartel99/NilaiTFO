@@ -5,7 +5,7 @@
 
 class UartModuleIt : public UartModule {
   public:
-    UartModuleIt(UART_HandleTypeDef* uart, const std::string& label);
+    UartModuleIt(UART_HandleTypeDef* uart, const std::string& label, size_t rxLen = 512);
 
     void Run() override;
 

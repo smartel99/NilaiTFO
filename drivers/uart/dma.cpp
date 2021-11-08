@@ -14,13 +14,14 @@ static std::vector<CEP_UART::UartDataBuffer> s_dataBuffers;
 /*************************************************************************************************/
 /* Public method definitions                                                                     */
 /*************************************************************************************************/
-UartModuleDma::UartModuleDma(UART_HandleTypeDef* uart, const std::string& label)
+UartModuleDma::UartModuleDma(UART_HandleTypeDef* uart, const std::string& label, size_t rxLen)
 : UartModule(uart, label) {
     CEP_ASSERT(uart != nullptr, "UART Handle is NULL!");
     m_txBuf.reserve(64);
     m_sof.reserve(2);
     m_eof.reserve(2);
     //        m_latestFrames.reserve(8);
+    m_rxBuf.init(rxLen);
 
     s_dataBuffers.emplace_back(515, uart);
     m_dataBufferIdx = s_dataBuffers.size() - 1;
@@ -98,7 +99,9 @@ bool UartModuleDma::ResizeDmaBuffer(size_t sofLen, size_t len, size_t eofLen) {
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef* huart) {
     for (auto& buff : s_dataBuffers) {
         // Search for the corresponding data buffer.
-        if (buff.instance != huart) { continue; }
+        if (buff.instance != huart) {
+            continue;
+        }
 
         // Mark the reception as being completed.
         buff.rcvCompleted = true;
