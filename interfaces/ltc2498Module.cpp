@@ -39,8 +39,11 @@ std::array<uint8_t, 4> ConversionSettings::ToRegValues() const
 }
 }    // namespace LTC2498
 
-Ltc2498Module::Ltc2498Module(
-  const std::string& label, SpiModule* spi, const Pin& inPin, const Pin& csPin, float vcom)
+Ltc2498Module::Ltc2498Module(const std::string& label,
+                             SpiModule*         spi,
+                             const cep::Pin&    inPin,
+                             const cep::Pin&    csPin,
+                             float              vcom)
 : m_label(label), m_spi(spi), m_misoPin(inPin), m_csPin(csPin), m_vcom(vcom)
 {
     // Enable the LTC2498 chip select signal to monitor its status.
@@ -307,66 +310,63 @@ void Ltc2498Module::ParseConversionResult(const std::array<uint8_t, 4>&      res
     if ((raw & 0x40000000) != 0)
     {
         LTC_ERROR("Dummy bit is not 0!\t0x%08X", raw);
-        return;
-    }
+        // Bit 29 is the sign of the result.
+        int sign = ((raw & 0x20000000) ? 1 : -1);
 
-    // Bit 29 is the sign of the result.
-    int sign = ((raw & 0x20000000) ? 1 : -1);
-
-    // Combining bit 29 and bit 28 gives us the status of the conversion.
-    // If both bits are the same, we are over the acceptable range of the ADC.
-    if ((raw & 0x30000000) == 0x30000000)
-    {
-        LTC_ERROR("Over range detected! (0x%08X)", raw);
-        m_lastReading.raw     = 0x30000000 >> 5;    // Code for over range.
-        m_lastReading.reading = 0.0f;
-        return;
-    }
-    else if ((raw & 0x30000000) == 0x00000000)
-    {
-        LTC_ERROR("Under range detected! (0x%08X)", raw);
-        m_lastReading.raw     = 0x0FFFFFFF;    // Code for under range.
-        m_lastReading.reading = 0.0f;
-        return;
-    }
-
-    // Bit 28 to 5 is the conversion result.
-    raw = (raw & 0x1FFFFFE0) >> 5;
-
-    // Apply the sign.
-    int32_t hex = (int32_t)raw * sign;
-
-    m_lastReading.raw = hex;
-
-    // Convert the raw reading into volts.
-    // Full scale of the chip is 0.5Vref, Vref being 5V.
-    float value = (float)hex * (5.0f / 16777216.0f);
-
-    // In the case of a single-ended conversion, it was observed that if the input voltage is
-    // inferior to the common voltage, the measured voltage is equal to `-Vcom - Vin` instead of
-    // the `Vin - Vcom` that is expected. We thus need to compensate for this.
-    if (config.type == LTC2498::AcquisitionTypes::SingleEnded)
-    {
-        if (value < 0.0f)
+        // Combining bit 29 and bit 28 gives us the status of the conversion.
+        // If both bits are the same, we are over the acceptable range of the ADC.
+        if ((raw & 0x30000000) == 0x30000000)
         {
-            value = (value * -1.0f) - m_vcom;
+            LTC_ERROR("Over range detected! (0x%08X)", raw);
+            m_lastReading.raw     = 0x30000000 >> 5;    // Code for over range.
+            m_lastReading.reading = 0.0f;
+            return;
+        }
+        else if ((raw & 0x30000000) == 0x00000000)
+        {
+            LTC_ERROR("Under range detected! (0x%08X)", raw);
+            m_lastReading.raw     = 0x0FFFFFFF;    // Code for under range.
+            m_lastReading.reading = 0.0f;
+            return;
+        }
+
+        // Bit 28 to 5 is the conversion result.
+        raw = (raw & 0x1FFFFFE0) >> 5;
+
+        // Apply the sign.
+        int32_t hex = (int32_t)raw * sign;
+
+        m_lastReading.raw = hex;
+
+        // Convert the raw reading into volts.
+        // Full scale of the chip is 0.5Vref, Vref being 5V.
+        float value = (float)hex * (5.0f / 16777216.0f);
+
+        // In the case of a single-ended conversion, it was observed that if the input voltage is
+        // inferior to the common voltage, the measured voltage is equal to `-Vcom - Vin` instead of
+        // the `Vin - Vcom` that is expected. We thus need to compensate for this.
+        if (config.type == LTC2498::AcquisitionTypes::SingleEnded)
+        {
+            if (value < 0.0f)
+            {
+                value = (value * -1.0f) - m_vcom;
+            }
+            else
+            {
+                value = (value + m_vcom);
+            }
         }
         else
         {
-            value = (value + m_vcom);
+            // In the case of a differential conversion, it was observed that if V+'s voltage is
+            // under V-'s, the measured voltage is equal to `-5.0 + abs(V+ - V-)`.
+            if (value < 0.0f)
+            {
+                value = -5.0f - value;
+            }
         }
-    }
-    else
-    {
-        // In the case of a differential conversion, it was observed that if V+'s voltage is under
-        // V-'s, the measured voltage is equal to `-5.0 + abs(V+ - V-)`.
-        if (value < 0.0f)
-        {
-            value = -5.0f - value;
-        }
-    }
 
-    m_lastReading.reading = value;
-}
+        m_lastReading.reading = value;
+    }
 
 #endif

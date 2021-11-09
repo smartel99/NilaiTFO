@@ -22,7 +22,6 @@
 #include NILAI_HAL_HEADER
 #include "defines/module.hpp"
 #include "defines/pin.h"
-
 #include "drivers/uartModule.hpp"
 
 #include <array>
@@ -30,8 +29,7 @@
 
 /***********************************************/
 /* Defines */
-namespace CEP_ESP32
-{
+namespace CEP_ESP32 {
 /**
  * Boot modes for the ESP32.
  */
@@ -44,8 +42,7 @@ enum class BootMode
 /**
  * Contains all the control pins of the ESP32 module.
  */
-struct Pins
-{
+struct Pins {
     Pin enable = {};    //!< Enable pin of the ESP32. When high, the ESP32 is enabled.
     Pin boot   = {};    /**< Boot selection pin.
                          *   When high, normal boot.
@@ -59,13 +56,14 @@ struct Pins
 /***********************************************/
 /* Function declarations */
 
-class EspModule : public cep::Module
-{
-public:
-    EspModule(const std::string&     label,
-              UartModule*            uart,
-              const std::string&     deviceName,
-              const CEP_ESP32::Pins& pins);
+class EspModule : public cep::Module {
+  public:
+    EspModule(
+      const std::string&     label,
+      UartModule*            uart,
+      uint8_t*               userData,
+      size_t                 dataLen,
+      const CEP_ESP32::Pins& pins);
     virtual ~EspModule() override = default;
 
     virtual bool               DoPost() override;
@@ -200,14 +198,17 @@ public:
      */
     void ClearEndOfFrameSequence();
 
-private:
-    std::string     m_label      = "";
-    UartModule*     m_uart       = nullptr;
-    std::string     m_deviceName = "STM32";
-    CEP_ESP32::Pins m_pins       = {};
-    bool            m_enabled    = false;
+  private:
+    std::string     m_label    = "";
+    UartModule*     m_uart     = nullptr;
+    uint8_t*        m_userData = nullptr;
+    size_t          m_dataLen  = 0;
+    CEP_ESP32::Pins m_pins     = {};
+    bool            m_enabled  = false;
 
     static constexpr size_t TIMEOUT = 500;
+
+    void SendUserData();
 };
 
 /**
