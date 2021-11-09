@@ -12,12 +12,12 @@
  */
 
 #ifndef _relayModule
-#define _relayModule
+#    define _relayModule
 
-#if defined(NILAI_USE_RELAY)
+#    if defined(NILAI_USE_RELAY)
 /*****************************************************************************/
 /* Includes */
-#include <functional>
+#        include <functional>
 
 /*****************************************************************************/
 /* Exported defines */
@@ -67,7 +67,7 @@ private:
 /* Exported functions */
 
 /* Have a wonderful day :) */
-#endif /* _relayModule */
+#    endif /* _relayModule */
 #endif
 /**
  * @}

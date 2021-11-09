@@ -11,9 +11,9 @@
 
 #include "rtcModule.h"
 #if defined(NILAI_USE_RTC) && defined(HAL_RTC_MODULE_ENABLED)
-#include "services/logger.hpp"
+#    include "services/logger.hpp"
 
-#include <ctime>
+#    include <ctime>
 
 namespace CEP_RTC
 {
@@ -22,17 +22,10 @@ Time::Time(const RTC_TimeTypeDef& time)
 {
     switch (time.DayLightSaving)
     {
-        case RTC_DAYLIGHTSAVING_SUB1H:
-            dayLightSaving = CEP_RTC::DayLightSaving::SubOne;
-            break;
-        case RTC_DAYLIGHTSAVING_ADD1H:
-            dayLightSaving = CEP_RTC::DayLightSaving::AddOne;
-            break;
-        case RTC_DAYLIGHTSAVING_NONE:
-            [[fallthrough]];
-        default:
-            dayLightSaving = CEP_RTC::DayLightSaving::None;
-            break;
+        case RTC_DAYLIGHTSAVING_SUB1H: dayLightSaving = CEP_RTC::DayLightSaving::SubOne; break;
+        case RTC_DAYLIGHTSAVING_ADD1H: dayLightSaving = CEP_RTC::DayLightSaving::AddOne; break;
+        case RTC_DAYLIGHTSAVING_NONE: [[fallthrough]];
+        default: dayLightSaving = CEP_RTC::DayLightSaving::None; break;
     }
 }
 
@@ -46,17 +39,10 @@ RTC_TimeTypeDef Time::ToHal() const
     time.StoreOperation = RTC_STOREOPERATION_SET;
     switch (dayLightSaving)
     {
-        case CEP_RTC::DayLightSaving::SubOne:
-            time.DayLightSaving = RTC_DAYLIGHTSAVING_SUB1H;
-            break;
-        case CEP_RTC::DayLightSaving::AddOne:
-            time.DayLightSaving = RTC_DAYLIGHTSAVING_ADD1H;
-            break;
-        case CEP_RTC::DayLightSaving::None:
-            [[fallthrough]];
-        default:
-            time.DayLightSaving = RTC_DAYLIGHTSAVING_NONE;
-            break;
+        case CEP_RTC::DayLightSaving::SubOne: time.DayLightSaving = RTC_DAYLIGHTSAVING_SUB1H; break;
+        case CEP_RTC::DayLightSaving::AddOne: time.DayLightSaving = RTC_DAYLIGHTSAVING_ADD1H; break;
+        case CEP_RTC::DayLightSaving::None: [[fallthrough]];
+        default: time.DayLightSaving = RTC_DAYLIGHTSAVING_NONE; break;
     }
 
     return time;
@@ -68,7 +54,7 @@ std::string Time::ToStr() const
 
     sprintf(t, "%02i:%02i:%02i", hours, minutes, seconds);
 
-    return std::string{t};
+    return std::string {t};
 }
 
 Date::Date(const RTC_DateTypeDef& date)
@@ -80,22 +66,14 @@ std::string Date::DotWtoStr() const
 {
     switch (dotw)
     {
-        case RTC_WEEKDAY_MONDAY:
-            return "MON";
-        case RTC_WEEKDAY_TUESDAY:
-            return "TUE";
-        case RTC_WEEKDAY_WEDNESDAY:
-            return "WED";
-        case RTC_WEEKDAY_THURSDAY:
-            return "THU";
-        case RTC_WEEKDAY_FRIDAY:
-            return "FRI";
-        case RTC_WEEKDAY_SATURDAY:
-            return "SAT";
-        case RTC_WEEKDAY_SUNDAY:
-            return "SUN";
-        default:
-            return "ERR";
+        case RTC_WEEKDAY_MONDAY: return "MON";
+        case RTC_WEEKDAY_TUESDAY: return "TUE";
+        case RTC_WEEKDAY_WEDNESDAY: return "WED";
+        case RTC_WEEKDAY_THURSDAY: return "THU";
+        case RTC_WEEKDAY_FRIDAY: return "FRI";
+        case RTC_WEEKDAY_SATURDAY: return "SAT";
+        case RTC_WEEKDAY_SUNDAY: return "SUN";
+        default: return "ERR";
     }
 }
 
@@ -103,32 +81,19 @@ std::string Date::MonthtoStr() const
 {
     switch (month)
     {
-        case RTC_MONTH_JANUARY:
-            return "JAN";
-        case RTC_MONTH_FEBRUARY:
-            return "FEB";
-        case RTC_MONTH_MARCH:
-            return "MAR";
-        case RTC_MONTH_APRIL:
-            return "APR";
-        case RTC_MONTH_MAY:
-            return "MAY";
-        case RTC_MONTH_JUNE:
-            return "JUN";
-        case RTC_MONTH_JULY:
-            return "JUL";
-        case RTC_MONTH_AUGUST:
-            return "AUG";
-        case RTC_MONTH_SEPTEMBER:
-            return "SEP";
-        case RTC_MONTH_OCTOBER:
-            return "OCT";
-        case RTC_MONTH_NOVEMBER:
-            return "NOV";
-        case RTC_MONTH_DECEMBER:
-            return "DEC";
-        default:
-            return "ERR";
+        case RTC_MONTH_JANUARY: return "JAN";
+        case RTC_MONTH_FEBRUARY: return "FEB";
+        case RTC_MONTH_MARCH: return "MAR";
+        case RTC_MONTH_APRIL: return "APR";
+        case RTC_MONTH_MAY: return "MAY";
+        case RTC_MONTH_JUNE: return "JUN";
+        case RTC_MONTH_JULY: return "JUL";
+        case RTC_MONTH_AUGUST: return "AUG";
+        case RTC_MONTH_SEPTEMBER: return "SEP";
+        case RTC_MONTH_OCTOBER: return "OCT";
+        case RTC_MONTH_NOVEMBER: return "NOV";
+        case RTC_MONTH_DECEMBER: return "DEC";
+        default: return "ERR";
     }
 }
 
@@ -150,7 +115,7 @@ std::string Date::ToStr() const
 
     sprintf(d, "%02i-%02i-%02i", year - 2000, month, day);
 
-    return std::string{d};
+    return std::string {d};
 }
 }    // namespace CEP_RTC
 

@@ -16,12 +16,12 @@
 /* Includes */
 #if defined(NILAI_USE_FILESYSTEM)
 
-#include "defines/Core.h"
+#    include "defines/Core.h"
 
-#include "ff.h"
+#    include "ff.h"
 
-#include <functional>
-#include <string>
+#    include <functional>
+#    include <string>
 
 namespace cep
 {
@@ -105,14 +105,14 @@ public:
     template<typename... Ts>
     Result WriteFmtString(const char* fmt, Ts... args)
     {
-#if _FS_READONLY == 0 && _USE_STRFUNC >= 1
-#if defined(DEBUG)
+#    if _FS_READONLY == 0 && _USE_STRFUNC >= 1
+#        if defined(DEBUG)
         if (m_isOpen == false)
         {
             // File must be open and valid!
             CRASH;
         }
-#endif
+#        endif
         if (f_printf(&m_file, fmt, args...) <= 0)
         {
             m_status = (Result)f_error(&m_file);
@@ -124,10 +124,10 @@ public:
 
         return m_status;
 
-#else
+#    else
         CEP_ASSERT(false, "This function is not enabled");
         return 0;
-#endif
+#    endif
     }
 
     fsize_t Tell();

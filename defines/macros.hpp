@@ -45,10 +45,8 @@
             {                                                                                      \
                 if (!(x))                                                                          \
                 {                                                                                  \
-                    LOG_DEBUG("Assert Failed at line %i %s: " msg,                                 \
-                              __LINE__,                                                            \
-                              __FILE__,                                                            \
-                              ##__VA_ARGS__);                                                      \
+                    LOG_DEBUG(                                                                     \
+                      "Assert Failed at line %i %s: " msg, __LINE__, __FILE__, ##__VA_ARGS__);     \
                     AssertFailed((uint8_t*)__FILE__, __LINE__, 0);                                 \
                 }                                                                                  \
             } while (false)

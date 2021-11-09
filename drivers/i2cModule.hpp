@@ -12,22 +12,22 @@
  * @brief       I2C communication module
  */
 #ifndef GUARD_I2CMODULE_HPP
-#define GUARD_I2CMODULE_HPP
+#    define GUARD_I2CMODULE_HPP
 /*************************************************************************************************/
 /* Includes
  * ------------------------------------------------------------------------------------
  */
-#if defined(NILAI_USE_I2C)
-#include "defines/internalConfig.h"
-#include NILAI_HAL_HEADER
-#if defined(HAL_I2C_MODULE_ENABLED)
-#include "defines/macros.hpp"
-#include "defines/misc.hpp"
-#include "defines/module.hpp"
+#    if defined(NILAI_USE_I2C)
+#        include "defines/internalConfig.h"
+#        include NILAI_HAL_HEADER
+#        if defined(HAL_I2C_MODULE_ENABLED)
+#            include "defines/macros.hpp"
+#            include "defines/misc.hpp"
+#            include "defines/module.hpp"
 
-#include <string>
-#include <utility>
-#include <vector>
+#            include <string>
+#            include <utility>
+#            include <vector>
 
 namespace CEP_I2C
 {
@@ -133,12 +133,12 @@ protected:
 
     static constexpr uint16_t TIMEOUT = 200;
 };
-#else
-#if WARN_MISSING_STM_DRIVERS
-#warning NilaiTFO I2C Module enabled, but HAL_I2C_MODULE_ENABLED is not defined!
-#endif
-#endif
-#endif
+#        else
+#            if WARN_MISSING_STM_DRIVERS
+#                warning NilaiTFO I2C Module enabled, but HAL_I2C_MODULE_ENABLED is not defined!
+#            endif
+#        endif
+#    endif
 /**
  * @}
  * @}

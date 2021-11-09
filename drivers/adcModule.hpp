@@ -60,7 +60,7 @@ private:
     uint32_t*          m_channelBuff  = nullptr;
     size_t             m_channelCount = 0;
     std::string        m_label;
-    bool m_isRunning = false;
+    bool               m_isRunning = false;
 
     std::map<std::string, std::function<void(AdcModule*)>> m_convCpltCallbacks;
     std::map<std::string, std::function<void(AdcModule*)>> m_errorCallbacks;

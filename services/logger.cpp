@@ -39,7 +39,7 @@ Logger::Logger(const LogFunc& logFunc)
 }
 #    endif
 
-Logger::~Logger( )
+Logger::~Logger()
 {
 #    if defined(NILAI_USE_UART)
     delete m_uart;

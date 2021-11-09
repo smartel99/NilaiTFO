@@ -54,7 +54,7 @@ Pca9505Module::Pca9505Module(const PCA9505::Config& config, const std::string& l
 
 bool Pca9505Module::DoPost()
 {
-#warning No POSTs have been written for this module!
+#    warning No POSTs have been written for this module!
     return false;
 }
 

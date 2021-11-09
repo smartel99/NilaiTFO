@@ -15,15 +15,15 @@
 /***********************************************/
 /* Includes */
 #if defined(NILAI_USE_PWM)
-#include "defines/internalConfig.h"
-#include NILAI_HAL_HEADER
-#if defined(HAL_TIM_MODULE_ENABLED)
-#include "defines/macros.hpp"
-#include "defines/misc.hpp"
-#include "defines/module.hpp"
+#    include "defines/internalConfig.h"
+#    include NILAI_HAL_HEADER
+#    if defined(HAL_TIM_MODULE_ENABLED)
+#        include "defines/macros.hpp"
+#        include "defines/misc.hpp"
+#        include "defines/module.hpp"
 
-#include <string>
-#include <vector>
+#        include <string>
+#        include <vector>
 
 namespace PWM
 {
@@ -65,11 +65,11 @@ private:
     bool     m_isActive        = false;
 };
 
-#else
-#if WARN_MISSING_STM_DRIVERS
-#warning NilaiTFO PWM Module enabled, but HAL_TIM_MODULE_ENABLED is not defined!
-#endif
-#endif
+#    else
+#        if WARN_MISSING_STM_DRIVERS
+#            warning NilaiTFO PWM Module enabled, but HAL_TIM_MODULE_ENABLED is not defined!
+#        endif
+#    endif
 #endif
 
 /***********************************************/

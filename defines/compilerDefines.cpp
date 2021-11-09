@@ -13,16 +13,37 @@
 #include <malloc.h>
 #include <new>
 
-void* operator new(std::size_t size) { return malloc(size); }
+void* operator new(std::size_t size)
+{
+    return malloc(size);
+}
 
-void* operator new[](std::size_t size) { return malloc(size); }
+void* operator new[](std::size_t size)
+{
+    return malloc(size);
+}
 
-void operator delete(void* ptr) { free(ptr); }
+void operator delete(void* ptr)
+{
+    free(ptr);
+}
 
-void operator delete[](void* ptr) { free(ptr); }
+void operator delete[](void* ptr)
+{
+    free(ptr);
+}
 
-void operator delete(void* ptr, size_t) { free(ptr); }
+void operator delete(void* ptr, size_t)
+{
+    free(ptr);
+}
 
-void operator delete[](void* ptr, size_t) { free(ptr); }
+void operator delete[](void* ptr, size_t)
+{
+    free(ptr);
+}
 
-extern "C" void __cxa_pure_virtual( ) { AssertFailed((const uint8_t*)__FILE__, __LINE__, 1); }
+extern "C" void __cxa_pure_virtual()
+{
+    AssertFailed((const uint8_t*)__FILE__, __LINE__, 1);
+}

@@ -30,12 +30,12 @@
 class Max14763Module
 {
 public:
-    Max14763Module( ) = default;
+    Max14763Module() = default;
     Max14763Module(const std::function<void(bool)>& setFunc) : m_setFunc(setFunc) {}
 
     void SetFunc(const std::function<void(bool)>& func) { m_setFunc = func; }
 
-    void Set( )
+    void Set()
     {
         if (m_setFunc)
         {
@@ -43,7 +43,7 @@ public:
         }
     }
 
-    void Reset( )
+    void Reset()
     {
         if (m_setFunc)
         {

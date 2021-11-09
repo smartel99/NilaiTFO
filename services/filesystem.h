@@ -16,16 +16,18 @@
 /* Includes */
 #if defined(NILAI_USE_FILESYSTEM)
 
-#include "defines/pin.h"
-#include "ff.h"
-#include "file.h"
+#    include "defines/pin.h"
+#    include "ff.h"
+#    include "file.h"
 
-#include <string>
+#    include <string>
 
 
-namespace cep {
+namespace cep
+{
 // TODO Make the file system an object-oriented class that actually represents a file system.
-namespace Filesystem {
+namespace Filesystem
+{
 using partSize_t = DWORD;
 using dword_t    = unsigned long;
 using fs_t       = FATFS;
@@ -64,7 +66,8 @@ enum class CodePages
 };
 
 
-struct MakeVolumeParams {
+struct MakeVolumeParams
+{
     // TODO
 };
 
@@ -87,7 +90,10 @@ Result SetCodePage(CodePages code);
 Result OpenDir(const std::string& path, dir_t* outDir);
 Result CloseDir(dir_t* dir);
 Result ReadDir(dir_t* dir, fileInfo_t* outInfo);
-Result FindFirst(dir_t* outDir, fileInfo_t* outInfo, const std::string& dirPath, const std::string& pattern = "");
+Result FindFirst(dir_t*             outDir,
+                 fileInfo_t*        outInfo,
+                 const std::string& dirPath,
+                 const std::string& pattern = "");
 Result FindNext(dir_t* dir, fileInfo_t* outInfo);
 
 Result GetStat(const std::string& path, fileInfo_t* outInfo);

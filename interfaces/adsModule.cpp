@@ -21,16 +21,16 @@
 
 #    include <limits>
 
-#    define ADS_INFO(msg, ...)  LOG_INFO("[%s] " msg, m_label.c_str( ), ##__VA_ARGS__)
-#    define ADS_ERROR(msg, ...) LOG_ERROR("[%s] " msg, m_label.c_str( ), ##__VA_ARGS__)
+#    define ADS_INFO(msg, ...)  LOG_INFO("[%s] " msg, m_label.c_str(), ##__VA_ARGS__)
+#    define ADS_ERROR(msg, ...) LOG_ERROR("[%s] " msg, m_label.c_str(), ##__VA_ARGS__)
 
 AdsModule::AdsModule(SpiModule* spi, const std::string& label)
-    : m_spi(spi), m_label(label), m_config(ADS::Config( ))
+: m_spi(spi), m_label(label), m_config(ADS::Config())
 {
     ADS_INFO("Initialized.");
 }
 
-bool AdsModule::DoPost( )
+bool AdsModule::DoPost()
 {
     if (m_isConfigured == true)
     {
@@ -44,7 +44,7 @@ bool AdsModule::DoPost( )
     }
 }
 
-void AdsModule::Run( )
+void AdsModule::Run()
 {
     static bool wasTriggered = false;
 
@@ -53,11 +53,11 @@ void AdsModule::Run( )
         wasTriggered = m_hasTriggered;
         if (m_hasTriggered == true)
         {
-            ADS_INFO("Sampling triggered: %0.6fV %s %0.6fV",
-                     m_channels[m_trigChannel][0],
-                     (m_trigEdge == TrigEdge::Alter ? "<>"
-                                                    : (m_trigEdge == TrigEdge::Rising ? ">" : "<")),
-                     m_trigLevel);
+            ADS_INFO(
+              "Sampling triggered: %0.6fV %s %0.6fV",
+              m_channels[m_trigChannel][0],
+              (m_trigEdge == TrigEdge::Alter ? "<>" : (m_trigEdge == TrigEdge::Rising ? ">" : "<")),
+              m_trigLevel);
         }
         ADS_INFO("%s", (m_hasTriggered == true ? "Trigger level detected!" : "Trigger reset."));
     }
@@ -73,14 +73,14 @@ void AdsModule::Configure(const ADS::Config& config, bool force)
         return;
     }
 
-    uint32_t startTime = HAL_GetTick( );
+    uint32_t startTime = HAL_GetTick();
 
     m_config       = config;
     m_active       = false;
     m_isConfigured = false;
 
     ADS_INFO("Configuring ADS...");
-    Reset( );
+    Reset();
 
     // CMD -> 0x0011    Resp -> 0xFF04
     if (SendCommand(ADS::SysCommands::Reset, ADS::Acknowledges::Ready) == false)
@@ -171,11 +171,11 @@ void AdsModule::Configure(const ADS::Config& config, bool force)
         return;
     }
 
-    ADS_INFO("Done! %i ms", HAL_GetTick( ) - startTime);
+    ADS_INFO("Done! %i ms", HAL_GetTick() - startTime);
     m_isConfigured = true;
 }
 
-void AdsModule::Enable( )
+void AdsModule::Enable()
 {
     if (m_active == false)
     {
@@ -183,11 +183,11 @@ void AdsModule::Enable( )
         m_config.enable = ADS::Enable::Enable;
         Configure(m_config, true);
         m_active        = true;
-        m_lastStartTime = HAL_GetTick( );
+        m_lastStartTime = HAL_GetTick();
     }
 }
 
-void AdsModule::Disable( )
+void AdsModule::Disable()
 {
     if (m_active == true)
     {
@@ -211,14 +211,14 @@ const AdsPacket& AdsModule::RefreshValues(uint32_t timeout)
     // If a timeout was specified:
     if (timeout > 0)
     {
-        uint32_t timeoutTime = HAL_GetTick( ) + timeout;
+        uint32_t timeoutTime = HAL_GetTick() + timeout;
 
         // Wait for DRDY to be active (LOW).
         while (HAL_GPIO_ReadPin(m_config.pins.dataReady.port, m_config.pins.dataReady.pin) !=
                GPIO_PIN_RESET)
         {
             // If we time out:
-            if (HAL_GetTick( ) >= timeoutTime)
+            if (HAL_GetTick() >= timeoutTime)
             {
                 // Don't update the cached values and bail out.
                 return m_latestFrame;
@@ -253,8 +253,8 @@ const AdsPacket& AdsModule::RefreshValues(uint32_t timeout)
     }
     else
     {
-        static float lastRead = std::numeric_limits<float>::lowest( );
-        if (lastRead == std::numeric_limits<float>::lowest( ))
+        static float lastRead = std::numeric_limits<float>::lowest();
+        if (lastRead == std::numeric_limits<float>::lowest())
         {
             lastRead = chs[m_trigChannel];
         }
@@ -293,10 +293,10 @@ const AdsPacket& AdsModule::RefreshValues(uint32_t timeout)
     if (m_samplesTaken >= m_samplesToTake)
     {
         m_hasTriggered = false;
-        UpdateLatestFrame( );
+        UpdateLatestFrame();
         if (m_repeat == false)
         {
-            Disable( );
+            Disable();
         }
         if (m_callback)
         {
@@ -311,7 +311,7 @@ const AdsPacket& AdsModule::RefreshValues(uint32_t timeout)
 /* Private method definitions                                                */
 /*****************************************************************************/
 
-void AdsModule::Reset( )
+void AdsModule::Reset()
 {
     CEP_ASSERT(m_config.pins.chipSelect.port != nullptr, "ADS's Chip Select GPIO Port is NULL!");
     CEP_ASSERT(m_config.pins.dataReady.port != nullptr, "ADS's Data Ready GPIO Port is NULL!");
@@ -341,7 +341,7 @@ bool AdsModule::SendCommand(uint16_t cmd, uint16_t expectedResponse)
         attempts++;
 
         Send(cep::swap(cmd));
-        resp = ReadCommandResponse( );
+        resp = ReadCommandResponse();
         if (resp == expectedResponse)
         {
             break;
@@ -384,7 +384,7 @@ bool AdsModule::SendConfig(uint8_t addr, uint8_t data)
 
     // Data is MSB in command because SPI sends LSB-first.
     uint16_t cmd =
-        (ADS::Commands::WriteSingleRegisterMask | (uint16_t)addr << 8) | ((uint16_t)(data)&0x00FF);
+      (ADS::Commands::WriteSingleRegisterMask | (uint16_t)addr << 8) | ((uint16_t)(data)&0x00FF);
 
     return SendCommand(cmd, response);
 }
@@ -410,7 +410,7 @@ uint16_t AdsModule::Send(uint16_t data)
     return (cep::combine(&resp[0], 2));
 }
 
-uint16_t AdsModule::ReadCommandResponse( )
+uint16_t AdsModule::ReadCommandResponse()
 {
     uint32_t response = 0;
 
@@ -472,14 +472,14 @@ const std::vector<float>& AdsModule::GetChannel(size_t channel) const
     return m_channels[channel];
 }
 
-void AdsModule::UpdateLatestFrame( )
+void AdsModule::UpdateLatestFrame()
 {
     float tot1 = 0, tot2 = 0, tot3 = 0, tot4 = 0;
-    float min1 = std::numeric_limits<float>::max( ), min2 = min1, min3 = min1, min4 = min1;
-    float max1 = std::numeric_limits<float>::lowest( ), max2 = max1, max3 = max1, max4 = max1;
+    float min1 = std::numeric_limits<float>::max(), min2 = min1, min3 = min1, min4 = min1;
+    float max1 = std::numeric_limits<float>::lowest(), max2 = max1, max3 = max1, max4 = max1;
     // Ignore the first half of the samples taken.
     int cnt = 0;
-    for (size_t i = m_samplesToIgnore; i < m_channels.size( ); i++)
+    for (size_t i = m_samplesToIgnore; i < m_channels.size(); i++)
     {
         min1 = std::min(min1, m_channels.channel1[i]);
         min2 = std::min(min2, m_channels.channel2[i]);
@@ -518,7 +518,7 @@ void AdsModule::UpdateLatestFrame( )
     m_latestFrame.maxChannel2 = (max2);
     m_latestFrame.maxChannel3 = (max3);
     m_latestFrame.maxChannel4 = (max4);
-    m_latestFrame.timestamp   = HAL_GetTick( );
+    m_latestFrame.timestamp   = HAL_GetTick();
 
     // Clear all of the buffers for the next run.
     m_samplesTaken = 0;
@@ -548,7 +548,7 @@ void AdsModule::UpdateLatestFrame( )
              min4,
              max4);
 #    endif
-    m_lastStartTime = HAL_GetTick( );
+    m_lastStartTime = HAL_GetTick();
 }
 #endif
 /* Have a wonderful day :) */

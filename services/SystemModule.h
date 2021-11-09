@@ -11,16 +11,16 @@
  ******************************************************************************
  */
 #ifndef _SystemModule
-#define _SystemModule
+#    define _SystemModule
 
 /*****************************************************************************/
 /* Includes */
-#if defined(NILAI_USE_SYSTEM)
-#if !defined(NILAI_USE_UMO)
-#error Cannot use System module without UMO!
-#else
-#include "defines/module.hpp"
-#include "version.h"
+#    if defined(NILAI_USE_SYSTEM)
+#        if !defined(NILAI_USE_UMO)
+#            error Cannot use System module without UMO!
+#        else
+#            include "defines/module.hpp"
+#            include "version.h"
 
 /*****************************************************************************/
 /* Exported defines */
@@ -105,8 +105,8 @@ private:
 
 /*****************************************************************************/
 /* Exported functions */
-#endif
-#endif
+#        endif
+#    endif
 /* Have a wonderful day :) */
 #endif /* _SystemModule */
 /**

@@ -22,12 +22,12 @@
 class TLP3545
 {
 public:
-    TLP3545( ) = default;
+    TLP3545() = default;
     TLP3545(const std::function<void(bool)>& func) : m_ctrlFunc(func) {}
 
     void SetCtrlFunc(const std::function<void(bool)>& func) { m_ctrlFunc = func; }
 
-    void Set( ) const
+    void Set() const
     {
         if (m_ctrlFunc)
         {
@@ -35,7 +35,7 @@ public:
         }
     }
 
-    void Reset( ) const
+    void Reset() const
     {
         if (m_ctrlFunc)
         {

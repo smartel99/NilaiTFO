@@ -11,16 +11,16 @@
  ******************************************************************************
  */
 #ifndef _pca9505Module
-#define _pca9505Module
+#    define _pca9505Module
 
-#if defined(NILAI_USE_PCA9505)
+#    if defined(NILAI_USE_PCA9505)
 /*****************************************************************************/
 /* Includes */
-#include "defines/module.hpp"
-#include "defines/pin.h"
-#include "drivers/i2cModule.hpp"
+#        include "defines/module.hpp"
+#        include "defines/pin.h"
+#        include "drivers/i2cModule.hpp"
 
-#include <array>
+#        include <array>
 
 /*****************************************************************************/
 /* Exported defines */
@@ -30,7 +30,8 @@
 
 /*****************************************************************************/
 /* Exported types */
-namespace PCA9505 {
+namespace PCA9505
+{
 enum class Pins
 {
     p0 = 0x0000,
@@ -80,7 +81,8 @@ enum class Interrupt
     Disable = 1,
 };
 
-struct PinConfig {
+struct PinConfig
+{
     Pins      pin       = Pins::p0;
     Ports     port      = Ports::p0;
     Polarity  polarity  = Polarity::Normal;
@@ -89,7 +91,8 @@ struct PinConfig {
     bool      state     = false;
 };
 
-struct Config {
+struct Config
+{
     I2cModule* i2c = nullptr;
     //! Set by hardware, between 0x40 and 0x4E.
     uint8_t                address      = 0x40;
@@ -99,8 +102,10 @@ struct Config {
     std::vector<PinConfig> pinConfig    = {};
 };
 
-union PortState {
-    struct {
+union PortState
+{
+    struct
+    {
         uint8_t pin0 : 1;
         uint8_t pin1 : 1;
         uint8_t pin2 : 1;
@@ -114,8 +119,9 @@ union PortState {
 };
 }    // namespace PCA9505
 
-class Pca9505Module : public cep::Module {
-  public:
+class Pca9505Module : public cep::Module
+{
+public:
     // Don't allow default construction.
     Pca9505Module() = delete;
     Pca9505Module(const PCA9505::Config& config, const std::string& label);
@@ -133,7 +139,11 @@ class Pca9505Module : public cep::Module {
     void ReleaseReset();
 
     void ConfigurePin(const PCA9505::PinConfig& config);
-    void ConfigurePort(PCA9505::Ports, uint8_t directions, uint8_t polarities, uint8_t interrupts, uint8_t states = 0);
+    void ConfigurePort(PCA9505::Ports,
+                       uint8_t directions,
+                       uint8_t polarities,
+                       uint8_t interrupts,
+                       uint8_t states = 0);
 
     // ReadPin doesn't actually reads the pin on the PCA but only returns the cached value.
     bool               ReadPin(PCA9505::Ports port, PCA9505::Pins pin);
@@ -143,7 +153,7 @@ class Pca9505Module : public cep::Module {
     void WritePin(PCA9505::Ports port, PCA9505::Pins pin, bool state);
     void WritePort(PCA9505::Ports port, uint8_t state);
 
-  private:
+private:
     I2cModule*  m_i2c;
     uint8_t     m_address;
     std::string m_label;
@@ -161,7 +171,7 @@ class Pca9505Module : public cep::Module {
 /* Exported functions */
 
 /* Have a wonderful day :) */
-#endif /* _pca9505Module */
+#    endif /* _pca9505Module */
 #endif
 /**
  * @}

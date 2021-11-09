@@ -55,7 +55,7 @@ TEST(Pin, Get_Single)
 
 TEST(Pin, Compare_eq)
 {
-    Pin a = {&GPIOA, 1};
+    Pin a  = {&GPIOA, 1};
     Pin a2 = {&GPIOA, 1};
 
     EXPECT_TRUE(a == a2) << "Expected pin a to be identical to pin a2";

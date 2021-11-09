@@ -19,9 +19,9 @@
 
 #include <utility>
 #if defined(NILAI_USE_I2C) && defined(HAL_I2C_MODULE_ENABLED)
-#include "services/logger.hpp"
+#    include "services/logger.hpp"
 
-I2cModule::I2cModule(I2C_HandleTypeDef* handle, std::string  label)
+I2cModule::I2cModule(I2C_HandleTypeDef* handle, std::string label)
 : m_handle(handle), m_label(std::move(label))
 {
     CEP_ASSERT(handle != nullptr, "In I2cModule: handle is NULL!");
@@ -44,11 +44,8 @@ void I2cModule::Run()
 
 void I2cModule::TransmitFrame(uint8_t addr, const uint8_t* data, size_t len)
 {
-    if (HAL_I2C_Master_Transmit(m_handle,
-                                addr,
-                                const_cast<uint8_t*>(data),
-                                (uint16_t)len,
-                                I2cModule::TIMEOUT) != HAL_OK)
+    if (HAL_I2C_Master_Transmit(
+          m_handle, addr, const_cast<uint8_t*>(data), (uint16_t)len, I2cModule::TIMEOUT) != HAL_OK)
     {
         LOG_ERROR("[%s]: In TransmitFrame, unable to transmit frame", m_label.c_str());
     }
@@ -79,11 +76,9 @@ CEP_I2C::Frame I2cModule::ReceiveFrame(uint8_t addr, size_t len)
     // Allocate memory for the data.
     frame.data.resize(len);
 
-    if (HAL_I2C_Master_Receive(m_handle,
-                               addr,
-                               frame.data.data(),
-                               (uint16_t)frame.data.size(),
-                               I2cModule::TIMEOUT) != HAL_OK)
+    if (HAL_I2C_Master_Receive(
+          m_handle, addr, frame.data.data(), (uint16_t)frame.data.size(), I2cModule::TIMEOUT) !=
+        HAL_OK)
     {
         LOG_ERROR("[%s]: In ReceiveFrame, unable to receive frame", m_label.c_str());
     }

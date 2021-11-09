@@ -11,16 +11,16 @@
  ******************************************************************************
  */
 #ifndef GUARD_HEARTBEATMODULE_H
-#define GUARD_HEARTBEATMODULE_H
+#    define GUARD_HEARTBEATMODULE_H
 
-#if defined(NILAI_USE_HEARTBEAT)
+#    if defined(NILAI_USE_HEARTBEAT)
 /*****************************************************************************/
 /* Includes */
-#include "defines/ledPattern.h"
-#include "defines/module.hpp"
-#include "defines/pin.h"
+#        include "defines/ledPattern.h"
+#        include "defines/module.hpp"
+#        include "defines/pin.h"
 
-#include <string>
+#        include <string>
 
 /*****************************************************************************/
 /* Exported defines */
@@ -52,7 +52,7 @@ private:
 /* Exported functions */
 
 /* Have a wonderful day :) */
-#endif /* GUARD_HEARTBEATMODULE_H */
+#    endif /* GUARD_HEARTBEATMODULE_H */
 #endif
 /**
  * @}

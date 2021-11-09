@@ -13,15 +13,15 @@
 #include "SystemModule.h"
 #if defined(NILAI_USE_SYSTEM) && defined(NILAI_USE_UMO)
 
-#include NILAI_HAL_HEADER
+#    include NILAI_HAL_HEADER
 
-#include "services/umoModule.h"
+#    include "services/umoModule.h"
 
-#include APPLICATION_HEADER
+#    include APPLICATION_HEADER
 
-#define SET_BIT(REG, BIT)   ((REG) |= (BIT))
-#define CLEAR_BIT(REG, BIT) ((REG) &= ~(BIT))
-#define READ_BIT(REG, BIT)  ((REG) & (BIT))
+#    define SET_BIT(REG, BIT)   ((REG) |= (BIT))
+#    define CLEAR_BIT(REG, BIT) ((REG) &= ~(BIT))
+#    define READ_BIT(REG, BIT)  ((REG) & (BIT))
 
 SystemModule::SystemModule(const std::string& label,
                            uint8_t            universe,
@@ -51,7 +51,7 @@ SystemModule::SystemModule(const std::string& label,
 
 bool SystemModule::DoPost()
 {
-#warning No POSTs have been written for this module!
+#    warning No POSTs have been written for this module!
     return false;
 }
 
@@ -86,9 +86,8 @@ void SystemModule::Run()
                          {(uint8_t)(m_status >> 8), (uint8_t)(m_status & 0x00FF)});
 
         // Update serial number in universe. 102
-        umo->SetChannels(m_universeId,
-                         m_snStartChannel,
-                         {(uint8_t)(m_sn >> 8), (uint8_t)(m_sn & 0x00FF)});
+        umo->SetChannels(
+          m_universeId, m_snStartChannel, {(uint8_t)(m_sn >> 8), (uint8_t)(m_sn & 0x00FF)});
 
         // Update version in universe. 130
         umo->SetChannels(m_universeId, m_versionChannel, m_versions, sizeof(m_versions));

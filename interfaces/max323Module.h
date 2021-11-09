@@ -25,9 +25,9 @@ namespace cep
 class MAX323
 {
 public:
-    MAX323( ) = default;
+    MAX323() = default;
     MAX323(const std::function<void(bool)>& set1, const std::function<void(bool)>& set2)
-        : m_set1(set1), m_set2(set2)
+    : m_set1(set1), m_set2(set2)
     {
     }
 

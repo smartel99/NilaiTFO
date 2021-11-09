@@ -11,12 +11,12 @@
  ******************************************************************************
  */
 #ifndef _adsModuleConfig
-#define _adsModuleConfig
+#    define _adsModuleConfig
 
-#if defined(NILAI_USE_ADS)
+#    if defined(NILAI_USE_ADS)
 /*****************************************************************************/
 /* Includes */
-#include "defines/pin.h"
+#        include "defines/pin.h"
 
 /*****************************************************************************/
 /* Exported defines */
@@ -27,7 +27,8 @@
 /*****************************************************************************/
 /* Exported types */
 
-namespace ADS {
+namespace ADS
+{
 /**
  ** @enum SampleRate
  ** @brief  fData rates at fMOD = 4.96MHz
@@ -52,8 +53,10 @@ enum class SampleRate
     Hz128000
 };
 
-constexpr int SampleRateEnumToVal(SampleRate sr) {
-    switch (sr) {
+constexpr int SampleRateEnumToVal(SampleRate sr)
+{
+    switch (sr)
+    {
         case SampleRate::Hz1000: return 1000;
         case SampleRate::Hz2000: return 2000;
         case SampleRate::Hz4000: return 4000;
@@ -320,38 +323,40 @@ enum class CrcEnable
     Disable = 0b0
 };
 
-struct Pins {
+struct Pins
+{
     cep::Pin chipSelect;
     cep::Pin reset;
     cep::Pin dataReady;
     cep::Pin done;
-    bool     operator==(const Pins& other) const {
-        return (
-          (chipSelect == other.chipSelect) && (this->reset == other.reset) && (this->dataReady == other.dataReady)
-          && (this->done == other.done));
+    bool     operator==(const Pins& other) const
+    {
+        return ((chipSelect == other.chipSelect) && (this->reset == other.reset) &&
+                (this->dataReady == other.dataReady) && (this->done == other.done));
     }
 };
 
-class Config {
-  public:
-    Pins                     pins;
-    SampleRate               sampleRate      = SampleRate::Hz1000;
-    Hamming                  hamming         = Hamming::Off;               /*!< Can only be changed by hardware */
-    WordSize                 wordSize        = WordSize::Size24;           /*!< Can only be changed by hardware */
-    SpiMode                  spiMode         = SpiMode::AsynchronousSlave; /*!< Can only be changed by hardware */
-    Threshold                threshold       = Threshold::P95;
-    Delay                    highZDelay      = Delay::Ns12;
-    Delay                    doneDelay       = Delay::Ns12;
-    ClockSource              clockSource     = ClockSource::CLKIN;
-    Resolution               resolution      = Resolution::HighRes;
-    ClockDivision            clockInDivision = ClockDivision::Div2;
-    ClockDivision            modulatorClockDivision   = ClockDivision::Div2;
-    Oversampling             oversampling             = (Oversampling)sampleRate;
-    Enable                   enable                   = Enable::Disable;
-    DigitalGain              ch1DigitalGain           = DigitalGain::Gain1;
-    DigitalGain              ch2DigitalGain           = DigitalGain::Gain1;
-    DigitalGain              ch3DigitalGain           = DigitalGain::Gain1;
-    DigitalGain              ch4DigitalGain           = DigitalGain::Gain1;
+class Config
+{
+public:
+    Pins          pins;
+    SampleRate    sampleRate  = SampleRate::Hz1000;
+    Hamming       hamming     = Hamming::Off;               /*!< Can only be changed by hardware */
+    WordSize      wordSize    = WordSize::Size24;           /*!< Can only be changed by hardware */
+    SpiMode       spiMode     = SpiMode::AsynchronousSlave; /*!< Can only be changed by hardware */
+    Threshold     threshold   = Threshold::P95;
+    Delay         highZDelay  = Delay::Ns12;
+    Delay         doneDelay   = Delay::Ns12;
+    ClockSource   clockSource = ClockSource::CLKIN;
+    Resolution    resolution  = Resolution::HighRes;
+    ClockDivision clockInDivision                     = ClockDivision::Div2;
+    ClockDivision modulatorClockDivision              = ClockDivision::Div2;
+    Oversampling  oversampling                        = (Oversampling)sampleRate;
+    Enable        enable                              = Enable::Disable;
+    DigitalGain   ch1DigitalGain                      = DigitalGain::Gain1;
+    DigitalGain   ch2DigitalGain                      = DigitalGain::Gain1;
+    DigitalGain   ch3DigitalGain                      = DigitalGain::Gain1;
+    DigitalGain   ch4DigitalGain                      = DigitalGain::Gain1;
     InternalReferenceEnable  internalReferenceEnable  = InternalReferenceEnable::Enable;
     NegativeChargePumpEnable negativeChargePumpEnable = NegativeChargePumpEnable::Enable;
     ReferenceVoltage         referenceVoltage         = ReferenceVoltage::Ref2V442;
@@ -369,33 +374,39 @@ class Config {
      **             DoStuff();
      **         }
      ** */
-    bool operator==(const Config& other) const {
+    bool operator==(const Config& other) const
+    {
         return (
-          (this->pins == other.pins) && (this->sampleRate == other.sampleRate) && (this->hamming == other.hamming)
-          && (this->wordSize == other.wordSize) && (this->spiMode == other.spiMode)
-          && (this->threshold == other.threshold) && (this->highZDelay == other.highZDelay)
-          && (this->doneDelay == other.doneDelay) && (this->clockSource == other.clockSource)
-          && (this->resolution == other.resolution) && (this->clockInDivision == other.clockInDivision)
-          && (this->modulatorClockDivision == other.modulatorClockDivision)
-          && (this->oversampling == other.oversampling) && (this->enable == other.enable)
-          && (this->ch1DigitalGain == other.ch1DigitalGain) && (this->ch2DigitalGain == other.ch2DigitalGain)
-          && (this->ch3DigitalGain == other.ch3DigitalGain) && (this->ch4DigitalGain == other.ch4DigitalGain)
-          && (this->internalReferenceEnable == other.internalReferenceEnable)
-          && (this->negativeChargePumpEnable == other.negativeChargePumpEnable)
-          && (this->referenceVoltage == other.referenceVoltage) && (this->watchdogEnable == other.watchdogEnable)
-          && (this->crcMode == other.crcMode) && (this->frameMode == other.frameMode)
-          && (this->crcEnable == other.crcEnable));
+          (this->pins == other.pins) && (this->sampleRate == other.sampleRate) &&
+          (this->hamming == other.hamming) && (this->wordSize == other.wordSize) &&
+          (this->spiMode == other.spiMode) && (this->threshold == other.threshold) &&
+          (this->highZDelay == other.highZDelay) && (this->doneDelay == other.doneDelay) &&
+          (this->clockSource == other.clockSource) && (this->resolution == other.resolution) &&
+          (this->clockInDivision == other.clockInDivision) &&
+          (this->modulatorClockDivision == other.modulatorClockDivision) &&
+          (this->oversampling == other.oversampling) && (this->enable == other.enable) &&
+          (this->ch1DigitalGain == other.ch1DigitalGain) &&
+          (this->ch2DigitalGain == other.ch2DigitalGain) &&
+          (this->ch3DigitalGain == other.ch3DigitalGain) &&
+          (this->ch4DigitalGain == other.ch4DigitalGain) &&
+          (this->internalReferenceEnable == other.internalReferenceEnable) &&
+          (this->negativeChargePumpEnable == other.negativeChargePumpEnable) &&
+          (this->referenceVoltage == other.referenceVoltage) &&
+          (this->watchdogEnable == other.watchdogEnable) && (this->crcMode == other.crcMode) &&
+          (this->frameMode == other.frameMode) && (this->crcEnable == other.crcEnable));
     }
 };
 
-namespace Registers {
+namespace Registers
+{
 /**
  ** @class  Id
  ** @brief  ID code register
  ** @note   Read-only
  ** */
-class Id {
-  public:
+class Id
+{
+public:
     Id() = default;
 
     static const uint8_t Address = 0x00;
@@ -408,8 +419,9 @@ class Id {
     uint8_t nbChannels = 0;
 };
 
-class Revision {
-  public:
+class Revision
+{
+public:
     Revision() = default;
 
     static const uint8_t Address = 0x01;
@@ -417,14 +429,17 @@ class Revision {
     uint8_t revId = 0;
 };
 
-class ModePin {
-  public:
+class ModePin
+{
+public:
     ModePin() = default;
 
     static const uint8_t Address = 0x07;
 
-    union {
-        struct {
+    union
+    {
+        struct
+        {
             /** @brief  Status of hardware M0 pin:
              *        - 00 : GND - Synchronous master mode
              *        - 01 : VDD - Asynchronous slave mode
@@ -461,14 +476,17 @@ class ModePin {
     };
 };
 
-class GenericErrors {
-  public:
+class GenericErrors
+{
+public:
     GenericErrors() = default;
 
     static const uint8_t Address = 0x02;
 
-    union {
-        struct {
+    union
+    {
+        struct
+        {
             uint8_t crcInputError : 1;
             uint8_t dataDropped : 1;
             uint8_t spiSyncError : 1;
@@ -483,14 +501,17 @@ class GenericErrors {
     };
 };
 
-class PosThresholdError {
-  public:
+class PosThresholdError
+{
+public:
     PosThresholdError() = default;
 
     static const uint8_t Address = 0x03;
 
-    union {
-        struct {
+    union
+    {
+        struct
+        {
             uint8_t channel1OverThreshold : 1;
             uint8_t channel2OverThreshold : 1;
             uint8_t channel3OverThreshold : 1;
@@ -501,14 +522,17 @@ class PosThresholdError {
     };
 };
 
-class NegThresholdError {
-  public:
+class NegThresholdError
+{
+public:
     NegThresholdError() = default;
 
     static const uint8_t Address = 0x04;
 
-    union {
-        struct {
+    union
+    {
+        struct
+        {
             uint8_t channel1UnderThreshold : 1;
             uint8_t channel2UnderThreshold : 1;
             uint8_t channel3UnderThreshold : 1;
@@ -519,14 +543,17 @@ class NegThresholdError {
     };
 };
 
-class SpiError {
-  public:
+class SpiError
+{
+public:
     SpiError() = default;
 
     static const uint8_t Address = 0x05;
 
-    union {
-        struct {
+    union
+    {
+        struct
+        {
             uint8_t missingSclkCycles : 1;
             uint8_t invalidChipSelectTransition : 1;
             uint8_t powerUpError : 1;
@@ -536,8 +563,9 @@ class SpiError {
     };
 };
 
-class ErrorCount {
-  public:
+class ErrorCount
+{
+public:
     ErrorCount() = default;
 
     static const uint8_t Address = 0x06;
@@ -545,10 +573,12 @@ class ErrorCount {
     uint8_t errorCount = 0;
 };
 
-class AnalogSysConfig {
-  public:
+class AnalogSysConfig
+{
+public:
     AnalogSysConfig() = default;
-    AnalogSysConfig(const Config& config) {
+    AnalogSysConfig(const Config& config)
+    {
         comparatorThreshold      = (uint8_t)config.threshold;
         internalRef              = (uint8_t)config.internalReferenceEnable;
         referenceVoltage         = (uint8_t)config.referenceVoltage;
@@ -559,8 +589,10 @@ class AnalogSysConfig {
 
     static const uint8_t Address = 0x0B;
 
-    union {
-        struct {
+    union
+    {
+        struct
+        {
             /** @brief  Comparator threshold select:
              *        - 000 : 95%   VDD   | 5%    VSS / -1.5V
              *        - 001 : 92.5% VDD   | 7.5%  VSS / -1.5V
@@ -608,10 +640,12 @@ class AnalogSysConfig {
     };
 };
 
-class DigitalSysConfig {
-  public:
+class DigitalSysConfig
+{
+public:
     DigitalSysConfig() = default;
-    DigitalSysConfig(const Config& config) {
+    DigitalSysConfig(const Config& config)
+    {
         crcEnable      = (uint8_t)config.crcEnable;
         frameMode      = (uint8_t)config.frameMode;
         highZDelay     = (uint8_t)config.highZDelay;
@@ -622,8 +656,10 @@ class DigitalSysConfig {
 
     static const uint8_t Address = 0x0C;
 
-    union {
-        struct {
+    union
+    {
+        struct
+        {
             uint8_t crcEnable : 1; /** @brief  CRC enable */
 
             /** @brief  Fixed word size enabled:
@@ -679,18 +715,22 @@ class DigitalSysConfig {
     };
 };
 
-class ClockConfig1 {
-  public:
+class ClockConfig1
+{
+public:
     ClockConfig1() = default;
-    ClockConfig1(const Config& config) {
+    ClockConfig1(const Config& config)
+    {
         clockDivider = (uint8_t)config.clockInDivision;
         clockSource  = (uint8_t)config.clockSource;
     }
 
     static const uint8_t Address = 0x0D;
 
-    union {
-        struct {
+    union
+    {
+        struct
+        {
             uint8_t : 1;
             uint8_t clockDivider : 3;
             uint8_t : 3;
@@ -700,18 +740,22 @@ class ClockConfig1 {
     };
 };
 
-class ClockConfig2 {
-  public:
+class ClockConfig2
+{
+public:
     ClockConfig2() = default;
-    ClockConfig2(const Config& config) {
+    ClockConfig2(const Config& config)
+    {
         oversampling    = (uint8_t)config.oversampling;
         modClockDivider = (uint8_t)config.modulatorClockDivision;
     }
 
     static const uint8_t Address = 0x0E;
 
-    union {
-        struct {
+    union
+    {
+        struct
+        {
             uint8_t oversampling : 4;
             uint8_t : 1;
             uint8_t modClockDivider : 3;
@@ -720,15 +764,18 @@ class ClockConfig2 {
     };
 };
 
-class ChannelEnable {
-  public:
+class ChannelEnable
+{
+public:
     ChannelEnable() = default;
     ChannelEnable(const Config& config) { channelEnable = (uint8_t)config.enable; }
 
     static const uint8_t Address = 0x0F;
 
-    union {
-        struct {
+    union
+    {
+        struct
+        {
             uint8_t channelEnable : 4;
             uint8_t : 4;
         };
@@ -736,15 +783,18 @@ class ChannelEnable {
     };
 };
 
-class Ch1DigitalGain {
-  public:
+class Ch1DigitalGain
+{
+public:
     Ch1DigitalGain() = default;
     Ch1DigitalGain(const Config& config) { gain = (uint8_t)config.ch1DigitalGain; }
 
     static const uint8_t Address = 0x11;
 
-    union {
-        struct {
+    union
+    {
+        struct
+        {
             uint8_t gain : 3;
             uint8_t : 5;
         };
@@ -752,15 +802,18 @@ class Ch1DigitalGain {
     };
 };
 
-class Ch2DigitalGain {
-  public:
+class Ch2DigitalGain
+{
+public:
     Ch2DigitalGain() = default;
     Ch2DigitalGain(const Config& config) { gain = (uint8_t)config.ch2DigitalGain; }
 
     static const uint8_t Address = 0x12;
 
-    union {
-        struct {
+    union
+    {
+        struct
+        {
             uint8_t gain : 3;
             uint8_t : 5;
         };
@@ -768,15 +821,18 @@ class Ch2DigitalGain {
     };
 };
 
-class Ch3DigitalGain {
-  public:
+class Ch3DigitalGain
+{
+public:
     Ch3DigitalGain() = default;
     Ch3DigitalGain(const Config& config) { gain = (uint8_t)config.ch3DigitalGain; }
 
     static const uint8_t Address = 0x13;
 
-    union {
-        struct {
+    union
+    {
+        struct
+        {
             uint8_t gain : 3;
             uint8_t : 5;
         };
@@ -784,15 +840,18 @@ class Ch3DigitalGain {
     };
 };
 
-class Ch4DigitalGain {
-  public:
+class Ch4DigitalGain
+{
+public:
     Ch4DigitalGain() = default;
     Ch4DigitalGain(const Config& config) { gain = (uint8_t)config.ch4DigitalGain; }
 
     static const uint8_t Address = 0x14;
 
-    union {
-        struct {
+    union
+    {
+        struct
+        {
             uint8_t gain : 3;
             uint8_t : 5;
         };
@@ -805,27 +864,29 @@ class Ch4DigitalGain {
  ** @enum   Acknowledges
  ** @brief  Acknowledge messages from the ADS
  ** */
-namespace Acknowledges {
+namespace Acknowledges
+{
 // Disable GCC's "unused variable" warning.
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused"
+#        pragma GCC diagnostic push
+#        pragma GCC diagnostic ignored "-Wunused"
 constexpr uint16_t Ready  = 0xFF04;
 constexpr uint16_t Lock   = 0x0555;
 constexpr uint16_t Unlock = 0x0655;
 constexpr uint16_t Wakeup = 0x0033;
 // Restore GCC's diagnostic options.
-#pragma GCC diagnostic pop
-#pragma GCC diagnostic pop
+#        pragma GCC diagnostic pop
+#        pragma GCC diagnostic pop
 }    // namespace Acknowledges
 
 /**
  ** @enum   SysCommands
  ** @brief  System commands to the ADS
  ** */
-namespace SysCommands {
+namespace SysCommands
+{
 // Disable GCC's "unused variable" warning.
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused"
+#        pragma GCC diagnostic push
+#        pragma GCC diagnostic ignored "-Wunused"
 constexpr uint16_t Null = 0x0000;
 /*!< Null command */
 constexpr uint16_t Reset = 0x0011;
@@ -839,14 +900,15 @@ constexpr uint16_t Lock = 0x0555;
 constexpr uint16_t Unlock = 0x0655;
 /*!< Exit locked state */
 // Restore GCC's diagnostic options.
-#pragma GCC diagnostic pop
-#pragma GCC diagnostic pop
+#        pragma GCC diagnostic pop
+#        pragma GCC diagnostic pop
 }    // namespace SysCommands
 
-namespace Commands {
+namespace Commands
+{
 // Disable GCC's "unused variable" warning.
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused"
+#        pragma GCC diagnostic push
+#        pragma GCC diagnostic ignored "-Wunused"
 /**
  ** @brief   Read a single register
  ** */
@@ -874,8 +936,8 @@ constexpr uint16_t WriteSingleRegisterMask = 0x4000;
  ** */
 constexpr uint16_t WriteRegistersMask = 0x6000;
 // Restore GCC's diagnostic options.
-#pragma GCC diagnostic pop
-#pragma GCC diagnostic pop
+#        pragma GCC diagnostic pop
+#        pragma GCC diagnostic pop
 }    // namespace Commands
 }    // namespace ADS
 
@@ -883,7 +945,7 @@ constexpr uint16_t WriteRegistersMask = 0x6000;
 /* Exported functions */
 
 /* Have a wonderful day :) */
-#endif /* _adsModuleConfig */
+#    endif /* _adsModuleConfig */
 #endif
 /**
  * @}

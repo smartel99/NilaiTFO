@@ -70,7 +70,7 @@ constexpr uint64_t Hash(const char* str)
 
 std::string IntToHex(size_t i);
 
-template <typename T>
+template<typename T>
 std::vector<uint8_t> ValToVector(const T& val)
 {
     std::vector<uint8_t> v;
@@ -86,22 +86,22 @@ std::vector<uint8_t> ValToVector(const T& val)
     return v;
 }
 
-template <typename T>
+template<typename T>
 T VectorToVal(const std::vector<uint8_t>& vec)
 {
-    return (*reinterpret_cast<const T*>(vec.data( )));
+    return (*reinterpret_cast<const T*>(vec.data()));
 }
 
-template <typename T, size_t N>
+template<typename T, size_t N>
 T VectorToVal(const std::array<uint8_t, N>& arr)
 {
-    return (*reinterpret_cast<const T*>(arr.data( )));
+    return (*reinterpret_cast<const T*>(arr.data()));
 }
 
-template <size_t N>
+template<size_t N>
 std::string VectorToVal(const std::array<uint8_t, N>& arr)
 {
-    return std::string((const char*)arr.data( ), arr.size( ));
+    return std::string((const char*)arr.data(), arr.size());
 }
 
 std::vector<uint8_t> StrToVec(const std::string& str);

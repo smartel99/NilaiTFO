@@ -29,18 +29,18 @@ namespace cep
 class Application
 {
 public:
-    Application( ) { std::signal(SIGABRT, &AbortionHandler); }
-    virtual ~Application( ) = default;
+    Application() { std::signal(SIGABRT, &AbortionHandler); }
+    virtual ~Application() = default;
 
-    virtual void Init( )   = 0;
-    virtual bool DoPost( ) = 0;
-    virtual void Run( )    = 0;
+    virtual void Init()   = 0;
+    virtual bool DoPost() = 0;
+    virtual void Run()    = 0;
 };
 
 class ModuleStack
 {
 public:
-    ModuleStack( ) { m_modules.reserve(16); }
+    ModuleStack() { m_modules.reserve(16); }
 
     Module* GetModule(const std::string& label)
     {
@@ -48,7 +48,7 @@ public:
         // A map breaks in Application::Run() though...
         for (const auto& module : m_modules)
         {
-            if (module->GetLabel( ) == label)
+            if (module->GetLabel() == label)
             {
                 return module;
             }
@@ -59,8 +59,8 @@ public:
 
     void AddModule(Module* module) { m_modules.push_back(module); }
 
-    std::vector<Module*>::iterator begin( ) { return m_modules.begin( ); }
-    std::vector<Module*>::iterator end( ) { return m_modules.end( ); }
+    std::vector<Module*>::iterator begin() { return m_modules.begin(); }
+    std::vector<Module*>::iterator end() { return m_modules.end(); }
 
 private:
     std::vector<Module*> m_modules;

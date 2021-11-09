@@ -10,10 +10,10 @@
  * @brief       Module class definition.
  */
 #ifndef MODULE_HPP_
-#define MODULE_HPP_
+#    define MODULE_HPP_
 /*************************************************************************************************/
 /* File includes ------------------------------------------------------------------------------- */
-#include <string>
+#    include <string>
 
 namespace cep
 {

@@ -12,21 +12,21 @@
  * @brief       SPI communication module
  */
 #ifndef SPI_MODULE_HPP_
-#define SPI_MODULE_HPP_
+#    define SPI_MODULE_HPP_
 /*************************************************************************************************/
 /* Includes
  * ------------------------------------------------------------------------------------
  */
-#if defined(NILAI_USE_SPI)
-#include "defines/internalConfig.h"
-#include NILAI_HAL_HEADER
-#if defined(HAL_CAN_MODULE_ENABLED)
-#include "defines/macros.hpp"
-#include "defines/misc.hpp"
-#include "defines/module.hpp"
+#    if defined(NILAI_USE_SPI)
+#        include "defines/internalConfig.h"
+#        include NILAI_HAL_HEADER
+#        if defined(HAL_CAN_MODULE_ENABLED)
+#            include "defines/macros.hpp"
+#            include "defines/misc.hpp"
+#            include "defines/module.hpp"
 
-#include <string>
-#include <vector>
+#            include <string>
+#            include <vector>
 
 /*************************************************************************************************/
 /* Defines
@@ -62,10 +62,10 @@ enum class Status
     FLAG = 0x00000020U,
     /*!< Error during SPI Abort procedure */
     ABORT = 0x00000040U,
-#if USE_HAL_SPI_REGISTER_CALLBACKS == 1
+#            if USE_HAL_SPI_REGISTER_CALLBACKS == 1
     /*!< Invalid Callback error  */
     SPI_ERROR_INVALID_CALLBACK = 0x00000080U,
-#endif /* USE_HAL_SPI_REGISTER_CALLBACKS */
+#            endif /* USE_HAL_SPI_REGISTER_CALLBACKS */
     /*!< Module is not enabled            */
     NOT_INIT = 0x00000100U,
     /*!< Bad initialization               */
@@ -168,10 +168,8 @@ public:
     }
     inline CEP_SPI::Status Transaction16(uint16_t txData, uint16_t* rxData)
     {
-        return Transaction(reinterpret_cast<uint8_t*>(&txData),
-                           2,
-                           reinterpret_cast<uint8_t*>(rxData),
-                           2);
+        return Transaction(
+          reinterpret_cast<uint8_t*>(&txData), 2, reinterpret_cast<uint8_t*>(rxData), 2);
     }
 
 private:
@@ -185,12 +183,12 @@ private:
     void ErrorHandler();
     bool WaitUntilNotBusy();
 };
-#else
-#if WARN_MISSING_STM_DRIVERS
-#warning NilaiTFO SPI module enabled, but HAL_SPI_USE_MODULE is not defined!
-#endif
-#endif
-#endif
+#        else
+#            if WARN_MISSING_STM_DRIVERS
+#                warning NilaiTFO SPI module enabled, but HAL_SPI_USE_MODULE is not defined!
+#            endif
+#        endif
+#    endif
 #endif
 /**
  * @}

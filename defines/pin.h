@@ -11,17 +11,17 @@
  ******************************************************************************
  */
 #ifndef GUARD_PIN_H
-#define GUARD_PIN_H
+#    define GUARD_PIN_H
 
 /*****************************************************************************/
 /* Includes */
-#if !defined(NILAI_TEST)
-#include "Core/Inc/gpio.h"
-#else
-#include "test/Mocks/GPIO/gpio.h"
-#endif
+#    if !defined(NILAI_TEST)
+#        include "Core/Inc/gpio.h"
+#    else
+#        include "test/Mocks/GPIO/gpio.h"
+#    endif
 
-#include <cstdint>
+#    include <cstdint>
 
 namespace cep
 {

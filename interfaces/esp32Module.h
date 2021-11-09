@@ -15,21 +15,22 @@
 /***********************************************/
 /* Includes */
 #if defined(NILAI_USE_ESP32)
-#if !defined(NILAI_USE_UART)
-#error The UART module must be enabled to use the ESP32 Module
-#endif
-#include "defines/internalConfig.h"
-#include NILAI_HAL_HEADER
-#include "defines/module.hpp"
-#include "defines/pin.h"
-#include "drivers/uartModule.hpp"
+#    if !defined(NILAI_USE_UART)
+#        error The UART module must be enabled to use the ESP32 Module
+#    endif
+#    include "defines/internalConfig.h"
+#    include NILAI_HAL_HEADER
+#    include "defines/module.hpp"
+#    include "defines/pin.h"
+#    include "drivers/uartModule.hpp"
 
-#include <array>
-#include <map>
+#    include <array>
+#    include <map>
 
 /***********************************************/
 /* Defines */
-namespace CEP_ESP32 {
+namespace CEP_ESP32
+{
 /**
  * Boot modes for the ESP32.
  */
@@ -42,7 +43,8 @@ enum class BootMode
 /**
  * Contains all the control pins of the ESP32 module.
  */
-struct Pins {
+struct Pins
+{
     Pin enable = {};    //!< Enable pin of the ESP32. When high, the ESP32 is enabled.
     Pin boot   = {};    /**< Boot selection pin.
                          *   When high, normal boot.
@@ -56,14 +58,14 @@ struct Pins {
 /***********************************************/
 /* Function declarations */
 
-class EspModule : public cep::Module {
-  public:
-    EspModule(
-      const std::string&     label,
-      UartModule*            uart,
-      uint8_t*               userData,
-      size_t                 dataLen,
-      const CEP_ESP32::Pins& pins);
+class EspModule : public cep::Module
+{
+public:
+    EspModule(const std::string&     label,
+              UartModule*            uart,
+              uint8_t*               userData,
+              size_t                 dataLen,
+              const CEP_ESP32::Pins& pins);
     virtual ~EspModule() override = default;
 
     virtual bool               DoPost() override;
@@ -198,7 +200,7 @@ class EspModule : public cep::Module {
      */
     void ClearEndOfFrameSequence();
 
-  private:
+private:
     std::string     m_label    = "";
     UartModule*     m_uart     = nullptr;
     uint8_t*        m_userData = nullptr;

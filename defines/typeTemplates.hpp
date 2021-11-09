@@ -204,7 +204,7 @@ struct is_string : is_string_helper<std::remove_cv_t<T>>
 
 /**
  * @brief   Converts a strongly-typed enum class into an int (or specified underlying type).
- * 
+ *
  * From:    https://stackoverflow.com/a/33083231
  */
 template<typename Enum>

@@ -9,11 +9,11 @@
  *******************************************************************************
  */
 #if defined(NILAI_USE_FILE_LOGGER)
-#include "fileLoggerModule.h"
+#    include "fileLoggerModule.h"
 
-#include "services/logger.hpp"
+#    include "services/logger.hpp"
 
-#include <cstring>
+#    include <cstring>
 
 FileLogger::FileLogger(const std::string& label, const std::string& path)
 : m_label(label), m_path(path)

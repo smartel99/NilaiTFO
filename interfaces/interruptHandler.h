@@ -11,13 +11,13 @@
  ******************************************************************************
  */
 #ifndef _interruptHandler
-#define _interruptHandler
+#    define _interruptHandler
 
 /*****************************************************************************/
 /* Includes */
-#include "bsp/stm32.h"
+#    include "bsp/stm32.h"
 
-#include <functional>
+#    include <functional>
 
 namespace cep
 {
@@ -37,12 +37,11 @@ class InterruptHandler
 {
 public:
     InterruptHandler();
-    
+
     void BindInterruptToFunction(Interrupts interrupt, std::function<void()> func);
-    
-    
+
+
 private:
-    
 };
 
 /*****************************************************************************/

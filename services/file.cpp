@@ -11,23 +11,23 @@
 
 
 #if defined(NILAI_USE_FILESYSTEM)
-#include "file.h"
-#include "filesystem.h"
+#    include "file.h"
+#    include "filesystem.h"
 
-#include "defines/macros.hpp"
-#include "services/logger.hpp"
+#    include "defines/macros.hpp"
+#    include "services/logger.hpp"
 
-#define FS_DEBUG(msg, ...)    LOG_DEBUG("[FS]: " msg, ##__VA_ARGS__)
-#define FS_INFO(msg, ...)     LOG_INFO("[FS]: " msg, ##__VA_ARGS__)
-#define FS_WARNING(msg, ...)  LOG_WARNING("[FS]: " msg, ##__VA_ARGS__)
-#define FS_ERROR(msg, ...)    LOG_ERROR("[FS]: " msg, ##__VA_ARGS__)
-#define FS_CRITICAL(msg, ...) LOG_CRITICAL("[FS]: " msg, ##__VA_ARGS__)
+#    define FS_DEBUG(msg, ...)    LOG_DEBUG("[FS]: " msg, ##__VA_ARGS__)
+#    define FS_INFO(msg, ...)     LOG_INFO("[FS]: " msg, ##__VA_ARGS__)
+#    define FS_WARNING(msg, ...)  LOG_WARNING("[FS]: " msg, ##__VA_ARGS__)
+#    define FS_ERROR(msg, ...)    LOG_ERROR("[FS]: " msg, ##__VA_ARGS__)
+#    define FS_CRITICAL(msg, ...) LOG_CRITICAL("[FS]: " msg, ##__VA_ARGS__)
 
-#define ASSERT_FILE_IS_OK()                                                                        \
-    do                                                                                             \
-    {                                                                                              \
-        CEP_ASSERT(m_isOpen == true, "File is not open!");                                         \
-    } while (0)
+#    define ASSERT_FILE_IS_OK()                                                                    \
+        do                                                                                         \
+        {                                                                                          \
+            CEP_ASSERT(m_isOpen == true, "File is not open!");                                     \
+        } while (0)
 
 namespace cep
 {
@@ -35,7 +35,7 @@ namespace Filesystem
 {
 File::File(const std::string& path, FileModes mode) : m_path(path), m_mode(mode)
 {
-    m_file = file_t{};
+    m_file = file_t {};
     Open(path, mode);
 }
 
@@ -122,82 +122,82 @@ Result File::Write(const void* data, size_t dataLen, size_t* dataWritten)
 
 Result File::Seek(fsize_t ofs)
 {
-#if _FS_MINIMIZE <= 2
+#    if _FS_MINIMIZE <= 2
     ASSERT_FILE_IS_OK();
 
     return (Result)f_lseek(&m_file, ofs);
-#else
+#    else
     CEP_ASSERT(false, "This function is not enabled");
     return Result::Ok;
-#endif
+#    endif
 }
 
 Result File::Rewind()
 {
-#if _FS_MINIMIZE <= 2
+#    if _FS_MINIMIZE <= 2
     ASSERT_FILE_IS_OK();
 
     return (Result)f_lseek(&m_file, 0);
-#else
+#    else
     CEP_ASSERT(false, "This function is not enabled");
     return Result::Ok;
-#endif
+#    endif
 }
 
 Result File::Truncate()
 {
-#if _FS_READONLY == 0 && _FS_MINIMIZE == 0
+#    if _FS_READONLY == 0 && _FS_MINIMIZE == 0
     ASSERT_FILE_IS_OK();
     return (Result)f_truncate(&m_file);
-#else
+#    else
     CEP_ASSERT(false, "This function is not enabled");
     return Result::Ok;
-#endif
+#    endif
 }
 
 Result File::Sync()
 {
-#if _FS_READONLY == 0
+#    if _FS_READONLY == 0
     ASSERT_FILE_IS_OK();
     return (Result)f_sync(&m_file);
-#else
+#    else
     CEP_ASSERT(false, "This function is not enabled");
     return Result::Ok;
-#endif
+#    endif
 }
 
 Result File::Forward(const std::function<size_t(const uint8_t*, size_t)>& func,
                      size_t                                               cntToFwd,
                      size_t*                                              forwarded)
 {
-#if _USE_FORWARD == 1
+#    if _USE_FORWARD == 1
     ASSERT_FILE_IS_OK();
-#error Not implemented!
-#else
+#        error Not implemented!
+#    else
     UNUSED(func);
     UNUSED(cntToFwd);
     UNUSED(forwarded);
     CEP_ASSERT(false, "This function is not enabled");
     return Result::Ok;
-#endif
+#    endif
 }
 
 Result File::Expand(fsize_t newSize, AllocModes mode)
 {
-#if _USE_EXPAND == 1 && _FS_READONLY == 0
+#    if _USE_EXPAND == 1 && _FS_READONLY == 0
     ASSERT_FILE_IS_OK();
-#error Not implemented!
-#else
+#        error Not implemented!
+#    else
     UNUSED(newSize);
     UNUSED(mode);
     CEP_ASSERT(false, "This function is not enabled");
     return Result::Ok;
-#endif
+#    endif
 }
 
 Result File::GetString(std::string& outStr, size_t maxLen)
 {
-#if _USE_STRFUNC >= 1
+#    if _USE_STRFUNC >= 1
     ASSERT_FILE_IS_OK();
 
     char* buff = new char[maxLen];
@@ -212,22 +212,22 @@ Result File::GetString(std::string& outStr, size_t maxLen)
         m_status = Result::Ok;
     }
 
-    outStr = std::string{buff};
+    outStr = std::string {buff};
 
     delete[] buff;
 
     return m_status;
-#else
+#    else
     UNUSED(outStr);
     UNUSED(maxLen);
     CEP_ASSERT(false, "This function is not enabled");
     return Result::Ok;
-#endif
+#    endif
 }
 
 Result File::WriteChar(uint8_t c)
 {
-#if _FS_READONLY == 0 && _USE_STRFUNC >= 1
+#    if _FS_READONLY == 0 && _USE_STRFUNC >= 1
     ASSERT_FILE_IS_OK();
 
     if (f_putc(c, &m_file) <= 0)
@@ -239,16 +239,16 @@ Result File::WriteChar(uint8_t c)
         m_status = Result::Ok;
     }
     return m_status;
-#else
+#    else
     UNUSED(c);
     CEP_ASSERT(false, "This function is not enabled");
     return Result::Ok;
-#endif
+#    endif
 }
 
 Result File::WriteString(const std::string& str)
 {
-#if _FS_READONLY == 0 && _USE_STRFUNC >= 1
+#    if _FS_READONLY == 0 && _USE_STRFUNC >= 1
     ASSERT_FILE_IS_OK();
 
     if (f_puts(str.c_str(), &m_file) <= 0)
@@ -261,11 +261,11 @@ Result File::WriteString(const std::string& str)
     }
     return m_status;
 
-#else
+#    else
     UNUSED(str);
     CEP_ASSERT(false, "This function is not enabled");
     return Result::Ok;
-#endif
+#    endif
 }
 
 fsize_t File::Tell()

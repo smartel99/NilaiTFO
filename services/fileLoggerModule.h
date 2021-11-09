@@ -15,12 +15,12 @@
 /***********************************************/
 /* Includes */
 #if defined(NILAI_USE_FILE_LOGGER)
-#include "defines/module.hpp"
+#    include "defines/module.hpp"
 
-#include "services/filesystem.h"
-#include "services/file.h"
+#    include "services/file.h"
+#    include "services/filesystem.h"
 
-#include <functional>
+#    include <functional>
 
 
 /***********************************************/

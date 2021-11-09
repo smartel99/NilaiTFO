@@ -11,24 +11,24 @@
  * @brief       UART communication module
  */
 #ifndef GUARD_UARTMODULE_HPP
-#define GUARD_UARTMODULE_HPP
+#    define GUARD_UARTMODULE_HPP
 /*************************************************************************************************/
 /* Includes ------------------------------------------------------------------------------------ */
-#if defined(NILAI_USE_UART)
-#include "defines/internalConfig.h"
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-#include NILAI_HAL_HEADER
-#pragma GCC diagnostic pop
-#if defined(HAL_UART_MODULE_ENABLED)
-#include "defines/macros.hpp"
-#include "defines/misc.hpp"
-#include "defines/module.hpp"
+#    if defined(NILAI_USE_UART)
+#        include "defines/internalConfig.h"
+#        pragma GCC diagnostic push
+#        pragma GCC diagnostic ignored "-Wunused-parameter"
+#        include NILAI_HAL_HEADER
+#        pragma GCC diagnostic pop
+#        if defined(HAL_UART_MODULE_ENABLED)
+#            include "defines/macros.hpp"
+#            include "defines/misc.hpp"
+#            include "defines/module.hpp"
 
-#include <cstdint>       // For uint8_t, size_t
-#include <functional>    // For std::function
-#include <string>        // For std::string
-#include <vector>        // For std::vector
+#            include <cstdint>       // For uint8_t, size_t
+#            include <functional>    // For std::function
+#            include <string>        // For std::string
+#            include <vector>        // For std::vector
 
 /*************************************************************************************************/
 /* Defines ------------------------------------------------------------------------------------- */
@@ -90,16 +90,16 @@ enum class SectionState
 
 struct Frame
 {
-#if 0
+#            if 0
     uint8_t* data      = nullptr;
     size_t   len       = 0;
-#endif
+#            endif
     std::vector<uint8_t> data;
     size_t               len       = 0;
     uint32_t             timestamp = 0;
 
     Frame() = default;
-#if 0
+#            if 0
     Frame(const std::vector<uint8_t>& d, uint32_t t) : timestamp(t)
     {
         data = new uint8_t[d.size()];
@@ -116,7 +116,7 @@ struct Frame
         data = nullptr;
         len  = 0;
     }
-#endif
+#            endif
     Frame(const std::vector<uint8_t>& d, uint32_t t) : timestamp(t)
     {
         data = d;
@@ -217,12 +217,12 @@ private:
 };
 
 
-#else
-#if WARN_MISSING_STM_DRIVERS
-#warning NilaiTFO UART module enabled, but HAL_UART_MODULE_ENABLE is not defined!
-#endif
-#endif
-#endif
+#        else
+#            if WARN_MISSING_STM_DRIVERS
+#                warning NilaiTFO UART module enabled, but HAL_UART_MODULE_ENABLE is not defined!
+#            endif
+#        endif
+#    endif
 #endif
 
 /**

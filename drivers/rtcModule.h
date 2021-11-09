@@ -10,21 +10,21 @@
  * @brief       Real-Time Clock Module
  */
 #ifndef RTC_MODULE_HPP_
-#define RTC_MODULE_HPP_
+#    define RTC_MODULE_HPP_
 /*************************************************************************************************/
 /* Includes
  * ------------------------------------------------------------------------------------
  */
-#if defined(NILAI_USE_RTC)
-#include "defines/internalConfig.h"
-#include NILAI_HAL_HEADER
-#if defined(HAL_RTC_MODULE_ENABLED)
-#include "defines/macros.hpp"
-#include "defines/misc.hpp"
-#include "defines/module.hpp"
+#    if defined(NILAI_USE_RTC)
+#        include "defines/internalConfig.h"
+#        include NILAI_HAL_HEADER
+#        if defined(HAL_RTC_MODULE_ENABLED)
+#            include "defines/macros.hpp"
+#            include "defines/misc.hpp"
+#            include "defines/module.hpp"
 
-#include <string>
-#include <vector>
+#            include <string>
+#            include <vector>
 
 /*************************************************************************************************/
 /* Defines
@@ -131,12 +131,12 @@ private:
 };
 
 
-#else
-#if WARN_MISSING_STM_DRIVERS
-#warning NilaiTFO RTC module enabled, but HAL_RTC_USE_MODULE is not defined!
-#endif
-#endif
-#endif
+#        else
+#            if WARN_MISSING_STM_DRIVERS
+#                warning NilaiTFO RTC module enabled, but HAL_RTC_USE_MODULE is not defined!
+#            endif
+#        endif
+#    endif
 #endif
 /**
  * @}

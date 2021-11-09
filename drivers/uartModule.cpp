@@ -14,11 +14,11 @@
 /* Includes ------------------------------------------------------------------------------------ */
 #include "drivers/uartModule.hpp"
 #if defined(NILAI_USE_UART) && defined(HAL_UART_MODULE_ENABLED)
-#include "main.h"
+#    include "main.h"
 
-#include <cstdarg>    // For va_list.
-#include <cstdio>
-#include <cstring>
+#    include <cstdarg>    // For va_list.
+#    include <cstdio>
+#    include <cstring>
 
 /*************************************************************************************************/
 /* Defines ------------------------------------------------------------------------------------- */

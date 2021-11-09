@@ -43,7 +43,10 @@ void cep::forceNullTerminationCharacter(char* string, size_t size)
  * @param   length: the number of bytes to clear
  * @retval  None
  */
-void cep::clearArray(void* array, size_t length) { memset(array, 0x00U, length); }
+void cep::clearArray(void* array, size_t length)
+{
+    memset(array, 0x00U, length);
+}
 
 /**
  * @brief   Count the number of 1s in the passed bytes.
@@ -143,18 +146,18 @@ bool cep::plus_minus(double value, double compare, double margin)
 size_t cep::FindStringInVector(const std::string& str, const std::vector<uint8_t>& vec)
 {
 #if __cplusplus >= 201703L
-    auto it = std::search(vec.begin( ), vec.end( ), str.begin( ), str.end( ));
-    if (it == vec.end( ))
+    auto it = std::search(vec.begin(), vec.end(), str.begin(), str.end());
+    if (it == vec.end())
     {
         return std::string::npos;
     }
     else
     {
-        return (it - vec.begin( ));
+        return (it - vec.begin());
     }
 #else
-    size_t strLen = str.size( );
-    size_t vecLen = vec.size( );
+    size_t strLen = str.size();
+    size_t vecLen = vec.size();
 
     // If the string is bigger than the vector, we won't find the string in the vector ;)
     if (strLen > vecLen)
@@ -182,7 +185,7 @@ size_t cep::FindStringInVector(const std::string& str, const std::vector<uint8_t
 std::vector<uint8_t> cep::StrToVec(const std::string& str)
 {
     std::vector<uint8_t> v;
-    v.reserve(str.size( ));
+    v.reserve(str.size());
 
     for (const auto& c : str)
     {
@@ -209,7 +212,7 @@ std::vector<uint8_t> cep::StrToVec(const std::string& str, size_t maxSize)
     for (const auto& c : str)
     {
         v.push_back(c);
-        if (v.size( ) >= maxSize)
+        if (v.size() >= maxSize)
         {
             break;
         }

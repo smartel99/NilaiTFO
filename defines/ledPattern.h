@@ -11,11 +11,11 @@
  ******************************************************************************
  */
 #ifndef _ledPattern
-#define _ledPattern
+#    define _ledPattern
 
 /*****************************************************************************/
 /* Includes */
-#include <vector>
+#    include <vector>
 
 namespace cep
 {

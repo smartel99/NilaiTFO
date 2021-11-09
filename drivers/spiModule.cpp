@@ -17,13 +17,13 @@
  */
 #include "drivers/spiModule.hpp"
 #if defined(NILAI_USE_SPI) && defined(HAL_CAN_MODULE_ENABLED)
-#include "processes/application.hpp"
-#include "defines/macros.hpp"
+#    include "defines/macros.hpp"
+#    include "processes/application.hpp"
 
-#include <algorithm>
-#include <array>
-#include <functional>
-#include <vector>
+#    include <algorithm>
+#    include <array>
+#    include <functional>
+#    include <vector>
 
 /*************************************************************************************************/
 /* Defines
@@ -119,8 +119,10 @@ CEP_SPI::Status SpiModule::Receive(uint8_t* ouptutData, size_t len)
     return CEP_SPI::Status::NONE;
 }
 
-CEP_SPI::Status
-SpiModule::Transaction(const uint8_t* txData, size_t txLen, uint8_t* rxData, size_t rxLen)
+CEP_SPI::Status SpiModule::Transaction(const uint8_t* txData,
+                                       size_t         txLen,
+                                       uint8_t*       rxData,
+                                       size_t         rxLen)
 {
     CEP_ASSERT(txData != nullptr, "TxData is NULL in SpiModule::Transaction");
     CEP_ASSERT(rxData != nullptr, "RxData is NULL in SpiModule::Transaction");
@@ -133,11 +135,9 @@ SpiModule::Transaction(const uint8_t* txData, size_t txLen, uint8_t* rxData, siz
         return CEP_SPI::Status::TIMEOUT;
     }
 
-    if (HAL_SPI_TransmitReceive(m_handle,
-                                const_cast<uint8_t*>(txData),
-                                rxData,
-                                (uint16_t)txLen,
-                                SpiModule::TIMEOUT) != HAL_OK)
+    if (HAL_SPI_TransmitReceive(
+          m_handle, const_cast<uint8_t*>(txData), rxData, (uint16_t)txLen, SpiModule::TIMEOUT) !=
+        HAL_OK)
     {
         m_status |= (CEP_SPI::Status)m_handle->ErrorCode;
         ErrorHandler();
@@ -147,8 +147,8 @@ SpiModule::Transaction(const uint8_t* txData, size_t txLen, uint8_t* rxData, siz
     return CEP_SPI::Status::NONE;
 }
 
-CEP_SPI::Status
-SpiModule::Transaction(const std::vector<uint8_t>& txData, std::vector<uint8_t>& rxData)
+CEP_SPI::Status SpiModule::Transaction(const std::vector<uint8_t>& txData,
+                                       std::vector<uint8_t>&       rxData)
 {
     // Make sure we got enough space in rxData.
     rxData.resize(txData.size());
