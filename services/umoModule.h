@@ -13,7 +13,7 @@
 
 /**
  * DEFINITION:
- * * Universe: A collection of [TBD] 8-bit channels.
+ * * Universe: A collection of 512 8-bit channels.
  *
  * STEPS:
  * - PC sends Universe to board
@@ -31,40 +31,43 @@
  *  - Ignore Universe
  */
 #ifndef _umoModule
-#    define _umoModule
+#define _umoModule
 
 /*****************************************************************************/
 /* Includes */
-#    include "defines/module.hpp"
-#    if defined(NILAI_USE_UMO)
-#        if defined(NILAI_UMO_USE_UART)
-#            if !defined(NILAI_USE_UART)
-#                error Cannot use the UMO module without the UART module!
-#            else
-#                include "drivers/uartModule.hpp"
-#            endif
-#        elif defined(NILAI_UMO_USE_CAN)
-#            if !defined(NILAI_USE_CAN)
-#                error Cannot use the UMO module without the CAN module!
-#            else
-#                include "drivers/canModule.hpp"
-#            endif
-#        endif
+#include "defines/module.hpp"
+#if defined(NILAI_USE_UMO)
+#if defined(NILAI_UMO_USE_UART) && defined(NILAI_UMO_USE_CAN)
+#error Cannot use UMO with both CAN and UART!
+#endif
+#if defined(NILAI_UMO_USE_UART)
+#if !defined(NILAI_USE_UART)
+#error Cannot use the UMO module without the UART module!
+#else
+#include "drivers/uartModule.hpp"
+#endif
+#elif defined(NILAI_UMO_USE_CAN)
+#if !defined(NILAI_USE_CAN)
+#error Cannot use the UMO module without the CAN module!
+#else
+#include "drivers/canModule.hpp"
+#endif
+#endif
 
-#        include <array>
-#        include <string>
-#        include <vector>
+#include <array>
+#include <string>
+#include <vector>
 
 /*****************************************************************************/
 /* Exported defines */
-#        if defined(NILAI_UMO_USE_UART)
+#if defined(NILAI_UMO_USE_UART)
 using Handle_t = UartModule;
-#        elif defined(NILAI_UMO_USE_CAN)
+#elif defined(NILAI_UMO_USE_CAN)
 using Handle_t = CanModule;
-#        else
-#            error You must specify a hardware layer!
+#else
+#error You must specify a hardware layer!
 using Handle_t = void;
-#        endif
+#endif
 
 /*****************************************************************************/
 /* Exported macro */
@@ -90,11 +93,11 @@ class UmoModule : public cep::Module
 {
 public:
     UmoModule(Handle_t* handle, size_t universeCnt, const std::string& label);
-    virtual ~UmoModule( ) override = default;
+    virtual ~UmoModule() override = default;
 
-    virtual bool               DoPost( ) override;
-    virtual void               Run( ) override;
-    virtual const std::string& GetLabel( ) const override { return m_label; }
+    virtual bool               DoPost() override;
+    virtual void               Run() override;
+    virtual const std::string& GetLabel() const override { return m_label; }
 
     const std::vector<uint8_t>& GetUniverse(size_t universe) const;
 
@@ -117,7 +120,7 @@ private:
 
 /*****************************************************************************/
 /* Exported functions */
-#    endif
+#endif
 /* Have a wonderful day :) */
 #endif /* _umoModule */
 /**

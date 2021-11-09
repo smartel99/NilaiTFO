@@ -12,10 +12,10 @@
 #include "ltc2498Module.h"
 
 #if defined(NILAI_USE_LTC2498) && defined(NILAI_USE_SPI)
-#include "services/logger.hpp"
+#    include "services/logger.hpp"
 
-#define LTC_INFO(msg, ...)  LOG_INFO("[%s]: " msg, m_label.c_str(), ##__VA_ARGS__)
-#define LTC_ERROR(msg, ...) LOG_ERROR("[%s]: " msg, m_label.c_str(), ##__VA_ARGS__)
+#    define LTC_INFO(msg, ...)  LOG_INFO("[%s]: " msg, m_label.c_str(), ##__VA_ARGS__)
+#    define LTC_ERROR(msg, ...) LOG_ERROR("[%s]: " msg, m_label.c_str(), ##__VA_ARGS__)
 
 namespace LTC2498
 {
@@ -110,9 +110,8 @@ bool Ltc2498Module::DoPost()
     }
     else
     {
-        LTC_ERROR("Error in POST: Invalid temperature read: %0.2fC (%0.3fV)",
-                  temp,
-                  reading.reading);
+        LTC_ERROR(
+          "Error in POST: Invalid temperature read: %0.2fC (%0.3fV)", temp, reading.reading);
         return false;
     }
 }
@@ -265,8 +264,8 @@ LTC2498::CurrentConversion Ltc2498Module::GetNextConversion()
     }
 }
 
-std::array<uint8_t, 4>
-Ltc2498Module::SetNextConvAndReadResults(const std::array<uint8_t, 4>& config)
+std::array<uint8_t, 4> Ltc2498Module::SetNextConvAndReadResults(
+  const std::array<uint8_t, 4>& config)
 {
     std::array<uint8_t, 4> resp = {0};
 
@@ -298,14 +297,14 @@ void Ltc2498Module::ParseConversionResult(const std::array<uint8_t, 4>&      res
                    ((uint32_t)resp[2] << 8) | ((uint32_t)resp[3]);
 
     // Bit 31 is End of Conversion flag, should obviously be set to 0.
-    if ((raw & 0x80000000) == 1)
+    if ((raw & 0x80000000) != 0)
     {
         LTC_ERROR("End of conversion flag is not 0!\t0x%08X", raw);
         return;
     }
 
     // Bit 30 is a dummy bit, should always be 0.
-    if ((raw & 0x40000000) == 1)
+    if ((raw & 0x40000000) != 0)
     {
         LTC_ERROR("Dummy bit is not 0!\t0x%08X", raw);
         return;
