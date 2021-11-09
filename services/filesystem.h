@@ -16,19 +16,16 @@
 /* Includes */
 #if defined(NILAI_USE_FILESYSTEM)
 
-#include "file.h"
 #include "defines/pin.h"
-
 #include "ff.h"
+#include "file.h"
 
 #include <string>
 
 
-namespace cep
-{
+namespace cep {
 // TODO Make the file system an object-oriented class that actually represents a file system.
-namespace Filesystem
-{
+namespace Filesystem {
 using partSize_t = DWORD;
 using dword_t    = unsigned long;
 using fs_t       = FATFS;
@@ -61,20 +58,18 @@ enum class Result
 };
 
 
-
 enum class CodePages
 {
     // TODO http://elm-chan.org/fsw/ff/doc/setcp.html
 };
 
 
-struct MakeVolumeParams
-{
+struct MakeVolumeParams {
     // TODO
 };
 
 
-bool   Init(const Pin& detect);
+bool   Init(const cep::Pin& detect);
 void   Deinit();
 Result Mount(const std::string& drive = "", bool forceMount = false);
 Result Unmount();
@@ -92,10 +87,7 @@ Result SetCodePage(CodePages code);
 Result OpenDir(const std::string& path, dir_t* outDir);
 Result CloseDir(dir_t* dir);
 Result ReadDir(dir_t* dir, fileInfo_t* outInfo);
-Result FindFirst(dir_t*             outDir,
-                 fileInfo_t*        outInfo,
-                 const std::string& dirPath,
-                 const std::string& pattern = "");
+Result FindFirst(dir_t* outDir, fileInfo_t* outInfo, const std::string& dirPath, const std::string& pattern = "");
 Result FindNext(dir_t* dir, fileInfo_t* outInfo);
 
 Result GetStat(const std::string& path, fileInfo_t* outInfo);
@@ -108,7 +100,6 @@ Result Utime(const std::string& path, const fileInfo_t* fno);
 std::string ResultToStr(Result res);
 };    // namespace Filesystem
 }    // namespace cep
-
 
 
 /**

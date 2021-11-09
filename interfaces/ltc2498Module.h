@@ -20,22 +20,19 @@
 #endif
 #include "defines/internalConfig.h"
 #include NILAI_HAL_HEADER
-#include "defines/pin.h"
 #include "defines/module.hpp"
-
+#include "defines/pin.h"
 #include "drivers/spiModule.hpp"
 
 #include <array>
+#include <functional>
 #include <string>
 #include <vector>
-#include <functional>
-
 
 
 /***********************************************/
 /* Defines */
-namespace LTC2498
-{
+namespace LTC2498 {
 /**
  * @brief   Lists all the possible channels
  */
@@ -109,11 +106,10 @@ enum class Speeds
 /**
  * @brief   Contains all the settings used to start a conversion.
  */
-struct ConversionSettings
-{
-    Channels                                              channel  = Channels::CH0;
-    AcquisitionTypes                                      type     = AcquisitionTypes::Differential;
-    Polarities                                            polarity = Polarities::Positive;
+struct ConversionSettings {
+    Channels                                              channel   = Channels::CH0;
+    AcquisitionTypes                                      type      = AcquisitionTypes::Differential;
+    Polarities                                            polarity  = Polarities::Positive;
     InputTypes                                            inputType = InputTypes::External;
     Filters                                               filters   = Filters::All;
     Speeds                                                speed     = Speeds::x1;
@@ -122,23 +118,27 @@ struct ConversionSettings
     std::array<uint8_t, 4> ToRegValues() const;
 
     ConversionSettings() = default;
-    ConversionSettings(Channels                                                     ch,
-                       AcquisitionTypes                                             ty,
-                       Polarities                                                   pol,
-                       InputTypes                                                   in,
-                       Filters                                                      fil,
-                       Speeds                                                       s,
-                       const std::function<void(float, const ConversionSettings&)>& cb)
-    : channel(ch), type(ty), polarity(pol), inputType(in), filters(fil), speed(s), callback(cb)
-    {
-    }
+    ConversionSettings(
+      Channels                                                     ch,
+      AcquisitionTypes                                             ty,
+      Polarities                                                   pol,
+      InputTypes                                                   in,
+      Filters                                                      fil,
+      Speeds                                                       s,
+      const std::function<void(float, const ConversionSettings&)>& cb)
+    : channel(ch)
+    , type(ty)
+    , polarity(pol)
+    , inputType(in)
+    , filters(fil)
+    , speed(s)
+    , callback(cb) { }
 };
 
 /**
  * @brief   Contains the value read on a channel.
  */
-struct Reading
-{
+struct Reading {
     ConversionSettings config;            //!< The settings used for this conversion.
     float              reading = 0.0f;    //!< The value read by the conversion, in volts.
     int32_t            raw     = 0;       //!< The raw value read by the conversion, in LSBs.
@@ -148,22 +148,21 @@ using CurrentConversion = std::vector<ConversionSettings>::iterator;
 }    // namespace LTC2498
 
 
-class Ltc2498Module : public cep::Module
-{
-public:
-    Ltc2498Module(const std::string& label,
-                  SpiModule*         spi,
-                  const Pin&         inPin,
-                  const Pin&         csPin,
-                  float              vcom = 0.00f);
+class Ltc2498Module : public cep::Module {
+  public:
+    Ltc2498Module(
+      const std::string& label,
+      SpiModule*         spi,
+      const cep::Pin&    inPin,
+      const cep::Pin&    csPin,
+      float              vcom = 0.00f);
     virtual ~Ltc2498Module() override = default;
 
     virtual bool               DoPost() override;
     virtual void               Run() override;
     virtual const std::string& GetLabel() const override { return m_label; }
 
-    bool QueueConversions(const std::vector<LTC2498::ConversionSettings>& conversions,
-                          bool                                            repeat = false);
+    bool QueueConversions(const std::vector<LTC2498::ConversionSettings>& conversions, bool repeat = false);
 
     const LTC2498::Reading& GetLastReading() const { return m_lastReading; }
 
@@ -171,11 +170,11 @@ public:
 
     bool StartConversion(const LTC2498::ConversionSettings& config);
 
-private:
+  private:
     std::string m_label   = "";
     SpiModule*  m_spi     = nullptr;
-    Pin         m_misoPin = {};
-    Pin         m_csPin   = {};
+    cep::Pin    m_misoPin = {};
+    cep::Pin    m_csPin   = {};
     float       m_vcom    = 0.00f;
 
     std::vector<LTC2498::ConversionSettings> m_conversions       = {};
@@ -186,18 +185,16 @@ private:
 
     LTC2498::Reading m_lastReading = {};
 
-private:
+  private:
     void                       SetMisoAsGpio();
     void                       SetMisoAsMiso();
     LTC2498::CurrentConversion GetNextConversion();
     std::array<uint8_t, 4>     SetNextConvAndReadResults(const std::array<uint8_t, 4>& config);
-    void                       ParseConversionResult(const std::array<uint8_t, 4>&      resp,
-                                                     const LTC2498::ConversionSettings& config);
+    void ParseConversionResult(const std::array<uint8_t, 4>& resp, const LTC2498::ConversionSettings& config);
 };
 
 /***********************************************/
 /* Function declarations */
-
 
 
 /**
