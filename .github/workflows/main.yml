@@ -24,7 +24,7 @@ jobs:
         with:
           source: '.'
           exclude: './bsp'
-          extenstions: 'h,hpp,cpp,c'
+          extensions: 'h,hpp,cpp,c'
           clangFormatVersion: 13
           style: file
   
