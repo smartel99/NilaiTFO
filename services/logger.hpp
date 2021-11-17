@@ -57,31 +57,31 @@
 #    endif
 
 #    if defined(NILAI_LOG_ENABLE_DEBUG) && defined(INT_NILAI_LOG_IMPL_OK)
-#        define LOG_DEBUG(msg, ...) LOG_HELPER("[DEBUG   ]: " msg "\n\r\0", ##__VA_ARGS__)
+#        define LOG_DEBUG(msg, ...) LOG_HELPER("[DEB ]: " msg "\n\r\0", ##__VA_ARGS__)
 #    else
 #        define LOG_DEBUG(msg, ...)
 #    endif
 
 #    if defined(NILAI_LOG_ENABLE_INFO) && defined(INT_NILAI_LOG_IMPL_OK)
-#        define LOG_INFO(msg, ...) LOG_HELPER("[INFO    ]: " msg "\n\r\0", ##__VA_ARGS__)
+#        define LOG_INFO(msg, ...) LOG_HELPER("[INFO]: " msg "\n\r\0", ##__VA_ARGS__)
 #    else
 #        define LOG_INFO(msg, ...)
 #    endif
 
 #    if defined(NILAI_LOG_ENABLE_WARNING) && defined(INT_NILAI_LOG_IMPL_OK)
-#        define LOG_WARNING(msg, ...) LOG_HELPER("[WARN    ]: " msg "\n\r\0", ##__VA_ARGS__)
+#        define LOG_WARNING(msg, ...) LOG_HELPER("[WARN]: " msg "\n\r\0", ##__VA_ARGS__)
 #    else
 #        define LOG_WARNING(msg, ...)
 #    endif
 
 #    if defined(NILAI_LOG_ENABLE_ERROR) && defined(INT_NILAI_LOG_IMPL_OK)
-#        define LOG_ERROR(msg, ...) LOG_HELPER("[ERROR   ]: " msg "\n\r\0", ##__VA_ARGS__)
+#        define LOG_ERROR(msg, ...) LOG_HELPER("[ERR ]: " msg "\n\r\0", ##__VA_ARGS__)
 #    else
 #        define LOG_ERROR(msg, ...)
 #    endif
 
 #    if defined(NILAI_LOG_ENABLE_CRITICAL) && defined(INT_NILAI_LOG_IMPL_OK)
-#        define LOG_CRITICAL(msg, ...) LOG_HELPER("[CRITICAL]: " msg "\n\r\0", ##__VA_ARGS__)
+#        define LOG_CRITICAL(msg, ...) LOG_HELPER("[CRIT]: " msg "\n\r\0", ##__VA_ARGS__)
 #    else
 #        define LOG_CRITICAL(msg, ...)
 #    endif
@@ -96,7 +96,7 @@ class Logger
 {
 public:
 #    if defined(NILAI_USE_UART)
-    Logger(UartModule* uart = nullptr, const LogFunc& logFunc = {});
+    explicit Logger(UartModule* uart = nullptr, const LogFunc& logFunc = {});
 #    else
     Logger(const LogFunc& logFunc);
 #    endif
