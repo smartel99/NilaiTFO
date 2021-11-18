@@ -23,7 +23,7 @@ UartModuleDma::UartModuleDma(UART_HandleTypeDef* uart, const std::string& label,
     //        m_latestFrames.reserve(8);
     m_rxBuf.init(rxLen);
 
-    s_dataBuffers.emplace_back(515, uart);
+    s_dataBuffers.emplace_back(rxLen, uart);
     m_dataBufferIdx = s_dataBuffers.size() - 1;
     __HAL_UART_ENABLE_IT(m_handle, UART_IT_RXNE);
 

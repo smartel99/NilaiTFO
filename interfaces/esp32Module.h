@@ -68,7 +68,9 @@ class EspModule : public cep::Module {
 
     virtual bool               DoPost() override;
     virtual void               Run() override;
-    virtual const std::string& GetLabel() const { return m_label; }
+    virtual const std::string& GetLabel() const {
+        return m_label;
+    }
 
     /**
      * Enables the ESP32 through the enable pin.
@@ -83,7 +85,9 @@ class EspModule : public cep::Module {
      * Checks if the ESP32 is currently enabled.
      * @return True if the ESP32 is enabled, false otherwise.
      */
-    bool IsEnabled() const { return m_enabled; }
+    bool IsEnabled() const {
+        return m_enabled;
+    }
 
     /**
      * Sets the boot mode of the ESP32.

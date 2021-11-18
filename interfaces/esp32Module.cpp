@@ -73,6 +73,7 @@ bool EspModule::DoPost() {
 
     // Wait for its response.
     size_t start = HAL_GetTick();
+    HAL_Delay(1);
     while (m_uart->GetNumberOfWaitingFrames() == 0) {
         // Data is only processed in the Run function.
         m_uart->Run();
@@ -139,9 +140,15 @@ void EspModule::Disable() {
 
 void EspModule::SetBootMode(CEP_ESP32::BootMode mode) {
     switch (mode) {
-        case CEP_ESP32::BootMode::Normal: m_pins.boot.Set(true); break;
-        case CEP_ESP32::BootMode::Bootloader: m_pins.boot.Set(false); break;
-        default: CEP_ASSERT(false, "Invalid boot mode"); break;
+        case CEP_ESP32::BootMode::Normal:
+            m_pins.boot.Set(true);
+            break;
+        case CEP_ESP32::BootMode::Bootloader:
+            m_pins.boot.Set(false);
+            break;
+        default:
+            CEP_ASSERT(false, "Invalid boot mode");
+            break;
     }
 }
 
@@ -227,7 +234,8 @@ void EspModule::ClearEndOfFrameSequence() {
 
 void EspModule::SendUserData() {
     m_uart->Transmit((const char*)&m_dataLen, 1);    // Report the data size 256 is max length for now
-    if (m_dataLen != 0) m_uart->Transmit((const char*)m_userData, m_dataLen);    // Send the user data
+    if (m_dataLen != 0)
+        m_uart->Transmit((const char*)m_userData, m_dataLen);    // Send the user data
 }
 
 #endif

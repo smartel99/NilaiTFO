@@ -29,10 +29,10 @@ UartModuleIt::UartModuleIt(UART_HandleTypeDef* uart, const std::string& label, s
 
 void UartModuleIt::Run() {
     size_t pos;
-    if (m_hasNewData == true) {
+    if (m_hasNewData) {
         m_hasNewData = false;
         // If we want a sof:
-        if ((m_sof.empty() == false) && (m_hasReceivedSof == false)) {
+        if ((!m_sof.empty()) && (!m_hasReceivedSof)) {
             // Check if it is contained in the buffer.
             // #TODO Ideally we'd just want to do that when we don't know if we've received it yet.
             size_t s = m_rxBuf.size();
@@ -50,16 +50,19 @@ void UartModuleIt::Run() {
                     // margin.
                     m_rxBuf.pop(s);
                 }
+
+                // No start of sequence, no need to continue
+                return;
             } else {
                 // SoF is start of packet, just keep starting from there.
-                m_rxBuf.pop(m_sof.size());
+                m_rxBuf.pop(pos + m_sof.size());
                 m_hasReceivedSof = true;
             }
         }
 
         // If we want a EoF:
         bool rxComplete = false;
-        if (m_eof.empty() == false) {
+        if (!m_eof.empty()) {
             // Search for it in the buffer.
             pos = cep::FindStringInCircularBuffer(m_eof, m_rxBuf);
             if (pos != std::string::npos) {
@@ -76,10 +79,10 @@ void UartModuleIt::Run() {
             rxComplete = true;
         }
 
-        if (rxComplete == true) {
+        if (rxComplete) {
             //            m_latestFrames.push_back(UART::Frame(m_rxBuf, HAL_GetTick( )));
             //            m_latestFrames   = std::move(CEP_UART::Frame(m_rxBuf, HAL_GetTick()));
-            m_latestFrames = CEP_UART::Frame(m_rxBuf.data(), pos, HAL_GetTick());
+            m_latestFrames = CEP_UART::Frame(m_rxBuf, pos, HAL_GetTick());
             m_rxBuf.pop(pos + m_eof.size());
             m_framePending   = true;
             m_hasReceivedSof = false;

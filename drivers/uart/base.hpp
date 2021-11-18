@@ -124,6 +124,14 @@ struct Frame {
         this->len = len;
     }
 
+    Frame(const CircularBuffer<uint8_t>& buf, size_t len, uint32_t t)
+    : timestamp(t) {
+        for (size_t i = 0; i < len; ++i) {
+            data.push_back(buf[i]);
+            this->len = len;
+        }
+    }
+
     Frame(const std::vector<uint8_t>& d, uint32_t t)
     : timestamp(t) {
         data = d;

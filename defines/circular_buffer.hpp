@@ -7,7 +7,7 @@ template<typename T>
 class CircularBuffer {
   public:
     CircularBuffer()
-    : m_alloc(0) {
+    : m_capacity(0) {
     }
 
     ~CircularBuffer() {
@@ -15,8 +15,8 @@ class CircularBuffer {
     }
 
     void init(size_t size) {
-        if (m_alloc == 0) {
-            m_alloc = size;
+        if (m_capacity == 0) {
+            m_capacity = size;
             m_c     = (T*)malloc(sizeof(T) * size);
         }
     }
@@ -47,12 +47,12 @@ class CircularBuffer {
         if (n >= size())    // if we want to remove more elements that we stored, clear will be enough
             clear();
         else {
-            while (n >= m_alloc)
-                n -= m_alloc;
+            while (n >= m_capacity)
+                n -= m_capacity;
             m_read += n;
             m_size -= n;
-            while (m_read >= m_alloc)
-                m_read -= m_alloc;
+            while (m_read >= m_capacity)
+                m_read -= m_capacity;
         }
     }
 
@@ -62,7 +62,7 @@ class CircularBuffer {
      * @param t the element to insert
      */
     void push(const T t) {
-        if (size() < m_alloc) {
+        if (size() < m_capacity) {
             m_c[m_write] = t;
             m_write      = next(m_write);
             ++m_size;
@@ -112,7 +112,7 @@ class CircularBuffer {
 
   private:
     T*     m_c;
-    size_t m_alloc;    // Cannot be const, because we want default operator=
+    size_t m_capacity;    // Cannot be const, because we want default operator=
                        // This is used so we have different sized buffer
     size_t m_read  = 0;
     size_t m_write = 0;
@@ -120,15 +120,15 @@ class CircularBuffer {
 
     size_t next(size_t origin) const {
         size_t r = origin + 1;
-        while (r >= m_alloc)
-            r -= m_alloc;
+        while (r >= m_capacity)
+            r -= m_capacity;
         return r;
     }
 
     size_t idx(size_t idx) const {
         size_t r = m_read + idx;
-        while (r >= m_alloc)
-            r -= m_alloc;
+        while (r >= m_capacity)
+            r -= m_capacity;
         return r;
     }
 };
