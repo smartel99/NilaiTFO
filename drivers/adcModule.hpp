@@ -15,11 +15,7 @@
 #    include "defines/internalConfig.h"
 #    include NILAI_HAL_HEADER
 #    if defined(HAL_ADC_MODULE_ENABLED)
-#        if !defined(NILAI_TEST)
-#            include "Core/Inc/adc.h"
-#        else
-#            include "test/Mocks/adc.h"
-#        endif
+#        include "Core/Inc/adc.h"
 #        include "shared/defines/module.hpp"
 
 #        include <functional>
@@ -113,5 +109,7 @@ private:
 #            warning NilaiTFO ADC module is enabled, but HAL_ADC_MODULE_ENABLED is undefined!
 #        endif
 #    endif
+#elif defined(NILAI_TEST)
+#    include "test/Mocks/AdcModule.h"
 #endif
 #endif

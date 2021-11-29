@@ -30,6 +30,7 @@ std::map<ADC_HandleTypeDef*, AdcModule*> AdcModule::s_modules = {};
 AdcModule::AdcModule(ADC_HandleTypeDef* adc, std::string label)
 : m_adc(adc), m_label(std::move(label))
 {
+#if !defined(NILAI_TEST)
     CEP_ASSERT(adc != nullptr, "[%s]: ADC handle is null!", m_label.c_str());
     m_channelCount = adc->Init.NbrOfConversion;
     m_channelBuff  = new uint32_t[m_channelCount];
@@ -50,6 +51,7 @@ AdcModule::AdcModule(ADC_HandleTypeDef* adc, std::string label)
     Start();
 
     ADC_INFO("Initialized");
+#endif
 }
 
 AdcModule::~AdcModule()
@@ -136,10 +138,15 @@ float AdcModule::GetChannelReading(size_t channel) const
         Stop();
     }
     m_convCpltCallbacks[name] = cb;
+
     if (isRunning)
     {
         Start();
     }
+#if defined(NILAI_TEST)
+// For unit tests, instantly call it back.
+    cb(this);
+#endif
 }
 
 /**

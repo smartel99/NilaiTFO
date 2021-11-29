@@ -75,5 +75,4 @@ void Logger::VLog(const char* fmt, va_list args)
         m_logFunc(buff, s);
     }
 }
-
 #endif
