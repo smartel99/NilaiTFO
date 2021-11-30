@@ -6,7 +6,6 @@
  * @file        spiModule.hpp
  * @author      Lou-Gabriel Gaucher
  * @author      Pascal-Emmanuel Lachance
- * @p           https://www.github.com/Raesangur
  * @date        2020/08/13  -  09:25
  *
  * @brief       SPI communication module
@@ -20,7 +19,7 @@
 #    if defined(NILAI_USE_SPI)
 #        include "defines/internalConfig.h"
 #        include NILAI_HAL_HEADER
-#        if defined(HAL_CAN_MODULE_ENABLED)
+#        if defined(HAL_SPI_MODULE_ENABLED)
 #            include "defines/macros.hpp"
 #            include "defines/misc.hpp"
 #            include "defines/module.hpp"

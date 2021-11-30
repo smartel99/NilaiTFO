@@ -16,7 +16,7 @@
  * ------------------------------------------------------------------------------------
  */
 #include "drivers/spiModule.hpp"
-#if defined(NILAI_USE_SPI) && defined(HAL_CAN_MODULE_ENABLED)
+#if defined(NILAI_USE_SPI) && defined(HAL_SPI_MODULE_ENABLED)
 #    include "defines/macros.hpp"
 #    include "processes/application.hpp"
 
