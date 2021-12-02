@@ -39,19 +39,30 @@ public:
     }
     [[maybe_unused]] void RemoveCallback(const std::string& name) {}
 
-    void Start() {}
+    void Start() { m_started = true; }
 
-    void Stop() {}
+    void Stop() { m_started = false; }
 
     void                SetChannelCount(size_t cnt) { m_buf.resize(cnt); }
-    [[nodiscard]] float GetChannelReading(size_t channel) const { return m_buf[channel]; }
+    [[nodiscard]] float GetChannelReading(size_t channel) const
+    {
+        if (m_started)
+        {
+            return m_buf.at(channel);
+        }
+        else
+        {
+            return 0.0f;
+        }
+    }
 
-    void SetChannelReading(size_t channel, float v) { m_buf[channel] = v; }
+    void SetChannelReading(size_t channel, float v) { m_buf.at(channel) = v; }
 
 private:
     std::string m_label;
 
-    std::vector<float> m_buf = {};
+    bool               m_started = false;
+    std::vector<float> m_buf     = {};
 };
 
 
