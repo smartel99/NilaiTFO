@@ -11,7 +11,7 @@
 #ifndef GUARD_STM32F4XX_HAL_H
 #define GUARD_STM32F4XX_HAL_H
 #include <cstdint>
-
+#include "stm32f4xx_hal_gpio.h"
 
 extern "C" void HAL_Delay(uint32_t ms);
 
