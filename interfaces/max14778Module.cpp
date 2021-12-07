@@ -12,16 +12,9 @@
  */
 #include "max14778Module.h"
 #if defined(NILAI_USE_MAX14778)
-#    include "stm32f4xx_hal.h"
 
 #    include <utility>
 
-#    define CALL_SET_FN(fn, state)                                                                 \
-        do                                                                                         \
-        {                                                                                          \
-            if (m_config.fn) m_config.fn(state);                                                   \
-        } while (0)
-#    define CALL_GET_FN(fn) (m_config.fn ? m_config.fn() : 0)
 
 Max14778Module::Max14778Module(MAX14778::Config config) : m_config(std::move(config))
 {

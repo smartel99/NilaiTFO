@@ -34,20 +34,20 @@ namespace MAX14778
  */
 struct Config
 {
-    [[maybe_unused]] std::function<void(bool)> setEnAFunc = [](bool) {};
-    [[maybe_unused]] std::function<void(bool)> setEnBFunc = [](bool) {};
+    std::function<void(bool)> setEnAFunc = [](bool) {};
+    std::function<void(bool)> setEnBFunc = [](bool) {};
 
-    [[maybe_unused]] std::function<void(bool)> setSA0Func = [](bool) {};
-    [[maybe_unused]] std::function<void(bool)> setSA1Func = [](bool) {};
+    std::function<void(bool)> setSA0Func = [](bool) {};
+    std::function<void(bool)> setSA1Func = [](bool) {};
 
-    [[maybe_unused]] std::function<void(bool)> setSB0Func = [](bool) {};
-    [[maybe_unused]] std::function<void(bool)> setSB1Func = [](bool) {};
+    std::function<void(bool)> setSB0Func = [](bool) {};
+    std::function<void(bool)> setSB1Func = [](bool) {};
 
-    [[maybe_unused]] std::function<void(bool)> setAComFunc = [](bool) {};
-    [[maybe_unused]] std::function<void(bool)> setBComFunc = [](bool) {};
+    std::function<void(bool)> setAComFunc = [](bool) {};
+    std::function<void(bool)> setBComFunc = [](bool) {};
 
-    [[maybe_unused]] std::function<bool()> getAComFunc = []() -> bool { return false; };
-    [[maybe_unused]] std::function<bool()> getBComFunc = []() -> bool { return false; };
+    std::function<bool()> getAComFunc = []() -> bool { return false; };
+    std::function<bool()> getBComFunc = []() -> bool { return false; };
 };
 }    // namespace MAX14778
 
