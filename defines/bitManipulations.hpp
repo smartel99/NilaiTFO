@@ -108,7 +108,7 @@ constexpr T swap(T input)
  *
  * @retval  uint64_t: combined value
  */
-uint64_t combine(const uint8_t* array, uint8_t length)
+[[maybe_unused]] uint64_t combine(const uint8_t* array, uint8_t length)
 {
     if (array == nullptr)
     {
@@ -135,7 +135,7 @@ uint64_t combine(const uint8_t* array, uint8_t length)
  * @param   dest: Destination array to copy the values into
  * @retval  None
  */
-constexpr void arraynificator(void* src, size_t len, void* dest)
+[[maybe_unused]] constexpr void arraynificator(void* src, size_t len, void* dest)
 {
     if (src == nullptr || dest == nullptr)
     {
