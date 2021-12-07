@@ -119,7 +119,7 @@ private:
     LogFunc m_logFunc = {};
 };
 #elif defined(NILAI_TEST)
-#include "test/Mocks/Logger.h"
+#    include "test/Mocks/services/Logger.h"
 #endif
 /*************************************************************************************************/
 /* LOG_CRITICAL("Have a wonderful day! :)"); */

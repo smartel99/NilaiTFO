@@ -39,7 +39,21 @@
  * @note    The macro is embedded within a `do while` loop to allow for a `;` to be inserted at the
  *          end of the macro without warnings.
  */
-#    if defined(DEBUG)
+#    if defined(NILAI_TEST)
+#        include <cstdlib>
+#include <iostream>
+#        define CEP_ASSERT(x, msg, ...)                                                            \
+            do                                                                                     \
+            {                                                                                      \
+                if (!(x))                                                                          \
+                {                                                                                  \
+                    LOG_ERROR(                                                                     \
+                      "Assert failed at line %i in %s: " msg, __LINE__, __FILE__, ##__VA_ARGS__);  \
+                    std::cout << std::endl;                                                        \
+                    abort();                                                                       \
+                }                                                                                  \
+            } while (0)
+#    elif defined(DEBUG)
 #        define CEP_ASSERT(x, msg, ...)                                                            \
             do                                                                                     \
             {                                                                                      \

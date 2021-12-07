@@ -14,7 +14,7 @@
 #if defined(NILAI_USE_MAX14778)
 #    include "stm32f4xx_hal.h"
 
-#    include <algorithm>
+#    include <utility>
 
 #    define CALL_SET_FN(fn, state)                                                                 \
         do                                                                                         \
@@ -23,85 +23,85 @@
         } while (0)
 #    define CALL_GET_FN(fn) (m_config.fn ? m_config.fn() : 0)
 
-Max14778Module::Max14778Module(const MAX14778::Config& config) : m_config(config)
+Max14778Module::Max14778Module(MAX14778::Config config) : m_config(std::move(config))
 {
 }
 
 void Max14778Module::SetEnA(bool state) const
 {
-    CALL_SET_FN(setEnAFunc, state);
+    m_config.setEnAFunc(state);
 }
 
 void Max14778Module::SetEnB(bool state) const
 {
-    CALL_SET_FN(setEnBFunc, state);
+    m_config.setEnBFunc(state);
 }
 
 void Max14778Module::SelectA0() const
 {
-    CALL_SET_FN(setSA0Func, false);
-    CALL_SET_FN(setSA1Func, false);
+    m_config.setSA0Func(false);
+    m_config.setSA1Func(false);
 }
 
 void Max14778Module::SelectA1() const
 {
-    CALL_SET_FN(setSA0Func, true);
-    CALL_SET_FN(setSA1Func, false);
+    m_config.setSA0Func(true);
+    m_config.setSA1Func(false);
 }
 
 void Max14778Module::SelectA2() const
 {
-    CALL_SET_FN(setSA0Func, false);
-    CALL_SET_FN(setSA1Func, true);
+    m_config.setSA0Func(false);
+    m_config.setSA1Func(true);
 }
 
 void Max14778Module::SelectA3() const
 {
-    CALL_SET_FN(setSA0Func, true);
-    CALL_SET_FN(setSA1Func, true);
+    m_config.setSA0Func(true);
+    m_config.setSA1Func(true);
 }
 
 void Max14778Module::SelectB0() const
 {
-    CALL_SET_FN(setSB0Func, false);
-    CALL_SET_FN(setSB1Func, false);
+    m_config.setSB0Func(false);
+    m_config.setSB1Func(false);
 }
 
 void Max14778Module::SelectB1() const
 {
-    CALL_SET_FN(setSB0Func, true);
-    CALL_SET_FN(setSB1Func, false);
+    m_config.setSB0Func(true);
+    m_config.setSB1Func(false);
 }
 
 void Max14778Module::SelectB2() const
 {
-    CALL_SET_FN(setSB0Func, false);
-    CALL_SET_FN(setSB1Func, true);
+    m_config.setSB0Func(false);
+    m_config.setSB1Func(true);
 }
 
 void Max14778Module::SelectB3() const
 {
-    CALL_SET_FN(setSB0Func, true);
-    CALL_SET_FN(setSB1Func, true);
+    m_config.setSB0Func(true);
+    m_config.setSB1Func(true);
 }
 
 void Max14778Module::SetACom(bool state) const
 {
-    CALL_SET_FN(setAComFunc, state);
+    m_config.setAComFunc(state);
 }
 
 void Max14778Module::SetBCom(bool state) const
 {
-    CALL_SET_FN(setBComFunc, state);
+    m_config.setBComFunc(state);
 }
 
 bool Max14778Module::GetACom() const
 {
-    return CALL_GET_FN(getAComFunc);
+    return m_config.getAComFunc();
 }
 
 bool Max14778Module::GetBCom() const
 {
-    return CALL_GET_FN(getBComFunc);
+    return m_config.getBComFunc();
 }
 #endif

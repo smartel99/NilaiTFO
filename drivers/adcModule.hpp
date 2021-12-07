@@ -110,6 +110,6 @@ private:
 #        endif
 #    endif
 #elif defined(NILAI_TEST)
-#    include "test/Mocks/AdcModule.h"
+#    include "test/Mocks/drivers/AdcModule.h"
 #endif
 #endif

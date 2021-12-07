@@ -32,6 +32,9 @@ struct Pin
     GPIO_TypeDef* port = nullptr;
     uint16_t      pin  = 0;
 
+    constexpr Pin() = default;
+    constexpr Pin(GPIO_TypeDef* po, uint16_t pi) : port(po), pin(pi) {}
+
     void Set(bool state) const
     {
         HAL_GPIO_WritePin(port, pin, (state ? GPIO_PIN_SET : GPIO_PIN_RESET));

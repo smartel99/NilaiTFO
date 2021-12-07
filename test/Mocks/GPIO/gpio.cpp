@@ -10,7 +10,7 @@
  */
 #include "gpio.h"
 
-#include <cassert>
+#include "defines/macros.hpp"
 
 GPIO_TypeDef GPIOA = 0x0000;
 GPIO_TypeDef GPIOB = 0x0000;
@@ -27,7 +27,7 @@ static bool IsPortValid(const uint16_t* port);
 
 void HAL_GPIO_WritePin(GPIO_TypeDef* port, uint16_t pin, GPIO_PinState state)
 {
-    assert(IsPortValid(port));
+    CEP_ASSERT(IsPortValid(port), "GPIO port is invalid!");
 
     if (state == GPIO_PIN_SET)
     {
@@ -41,7 +41,7 @@ void HAL_GPIO_WritePin(GPIO_TypeDef* port, uint16_t pin, GPIO_PinState state)
 
 GPIO_PinState HAL_GPIO_ReadPin(GPIO_TypeDef* port, uint16_t pin)
 {
-    assert(IsPortValid(port));
+    CEP_ASSERT(IsPortValid(port), "GPIO port is invalid!");
 
     return (*port & pin) == 0 ? GPIO_PIN_RESET : GPIO_PIN_SET;
 }

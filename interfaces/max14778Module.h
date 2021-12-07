@@ -34,20 +34,20 @@ namespace MAX14778
  */
 struct Config
 {
-    std::function<void(bool)> setEnAFunc = {};
-    std::function<void(bool)> setEnBFunc = {};
+    [[maybe_unused]] std::function<void(bool)> setEnAFunc = [](bool) {};
+    [[maybe_unused]] std::function<void(bool)> setEnBFunc = [](bool) {};
 
-    std::function<void(bool)> setSA0Func = {};
-    std::function<void(bool)> setSA1Func = {};
+    [[maybe_unused]] std::function<void(bool)> setSA0Func = [](bool) {};
+    [[maybe_unused]] std::function<void(bool)> setSA1Func = [](bool) {};
 
-    std::function<void(bool)> setSB0Func = {};
-    std::function<void(bool)> setSB1Func = {};
+    [[maybe_unused]] std::function<void(bool)> setSB0Func = [](bool) {};
+    [[maybe_unused]] std::function<void(bool)> setSB1Func = [](bool) {};
 
-    std::function<void(bool)> setAComFunc = {};
-    std::function<void(bool)> setBComFunc = {};
+    [[maybe_unused]] std::function<void(bool)> setAComFunc = [](bool) {};
+    [[maybe_unused]] std::function<void(bool)> setBComFunc = [](bool) {};
 
-    std::function<bool()> getAComFunc = {};
-    std::function<bool()> getBComFunc = {};
+    [[maybe_unused]] std::function<bool()> getAComFunc = []() -> bool { return false; };
+    [[maybe_unused]] std::function<bool()> getBComFunc = []() -> bool { return false; };
 };
 }    // namespace MAX14778
 
@@ -55,26 +55,26 @@ class Max14778Module
 {
 public:
     Max14778Module() = default;
-    Max14778Module(const MAX14778::Config& config);
+    explicit Max14778Module(MAX14778::Config config);
 
-    void SetEnA(bool state) const;
-    void SetEnB(bool state) const;
+    [[maybe_unused]] void SetEnA(bool state) const;
+    [[maybe_unused]] void SetEnB(bool state) const;
 
-    void SelectA0() const;
-    void SelectA1() const;
-    void SelectA2() const;
-    void SelectA3() const;
+    [[maybe_unused]] void SelectA0() const;
+    [[maybe_unused]] void SelectA1() const;
+    [[maybe_unused]] void SelectA2() const;
+    [[maybe_unused]] void SelectA3() const;
 
-    void SelectB0() const;
-    void SelectB1() const;
-    void SelectB2() const;
-    void SelectB3() const;
+    [[maybe_unused]] void SelectB0() const;
+    [[maybe_unused]] void SelectB1() const;
+    [[maybe_unused]] void SelectB2() const;
+    [[maybe_unused]] void SelectB3() const;
 
-    void SetACom(bool state) const;
-    void SetBCom(bool state) const;
+    [[maybe_unused]] void SetACom(bool state) const;
+    [[maybe_unused]] void SetBCom(bool state) const;
 
-    bool GetACom() const;
-    bool GetBCom() const;
+    [[maybe_unused]] [[nodiscard]] bool GetACom() const;
+    [[maybe_unused]] [[nodiscard]] bool GetBCom() const;
 
 private:
     MAX14778::Config m_config;

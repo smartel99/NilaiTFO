@@ -11,4 +11,4 @@
 #include "Logger.h"
 
 
-Logger* Logger::s_instance = nullptr;
+Logger* Logger::s_instance = new Logger();
