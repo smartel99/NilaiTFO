@@ -40,6 +40,7 @@ std::map<I2C_HandleTypeDef*, I2cModule*> I2cModule::s_modules = {};
 
 #    define I2C_INFO(msg, ...)  LOG_INFO("[%s]: " msg, m_label.c_str(), ##__VA_ARGS__)
 #    define I2C_ERROR(msg, ...) LOG_ERROR("[%s]: " msg, m_label.c_str(), ##__VA_ARGS__)
+#    define I2C_CRITICAL(msg, ...) LOG_CRITICAL("[%s]: " msg, m_label.c_str(), ##__VA_ARGS__)
 
 
 I2cModule::I2cModule(I2C_HandleTypeDef* handle, std::string label)
@@ -50,21 +51,13 @@ I2cModule::I2cModule(I2C_HandleTypeDef* handle, std::string label)
 #    if USE_HAL_I2C_REGISTER_CALLBACKS == 1
     m_callbacks.resize(static_cast<size_t>(CEP_I2C::CallbackTypes::CallbackTypesCount));
 
-    REGISTER_CALLBACK(HAL_I2C_MASTER_TX_COMPLETE_CB_ID, &I2CMasterTxCpltCallback);
-    REGISTER_CALLBACK(HAL_I2C_MASTER_RX_COMPLETE_CB_ID, &I2CMasterRxCpltCallback);
-    REGISTER_CALLBACK(HAL_I2C_SLAVE_TX_COMPLETE_CB_ID, &I2CSlaveTxCpltCallback);
-    REGISTER_CALLBACK(HAL_I2C_SLAVE_RX_COMPLETE_CB_ID, &I2CSlaveRxCpltCallback);
-    // No callback for Addr, apparently.
-    REGISTER_CALLBACK(HAL_I2C_LISTEN_COMPLETE_CB_ID, &I2CListenCpltCallback);
-    REGISTER_CALLBACK(HAL_I2C_MEM_TX_COMPLETE_CB_ID, &I2CMemTxCpltCallback);
-    REGISTER_CALLBACK(HAL_I2C_MEM_RX_COMPLETE_CB_ID, &I2CMemRxCpltCallback);
-    REGISTER_CALLBACK(HAL_I2C_ERROR_CB_ID, &I2CErrorCallback);
-    REGISTER_CALLBACK(HAL_I2C_ABORT_CB_ID, &I2CAbortCallback);
+    RegisterCallbacks();
     s_modules[handle] = this;
 #    endif
 
     I2C_INFO("Initialized");
 }
+
 
 /**
  * If the initialization passed, the POST passes.
@@ -78,11 +71,38 @@ bool I2cModule::DoPost()
 
 void I2cModule::Run()
 {
+#    if USE_HAL_I2C_REGISTER_CALLBACKS == 1
     if (m_hasError)
     {
         m_hasError = false;
-        I2C_ERROR("An error occurred (0x%08X): %s", m_lastError, I2cStatusToStr(m_lastError));
+        // Iterate through the error code, in case multiple ones occurred simultaneously
+        for (uint8_t i = 0; i < 32; i++)
+        {
+            uint32_t bit = (m_lastError & (1 << i));
+            if (bit != 0)
+            {
+                I2C_ERROR(
+                  "An error occurred (0x%08X): %s", bit, I2cStatusToStr(bit));
+            }
+        }
+
+        // Restart the peripheral.
+        if(HAL_I2C_DeInit(m_handle) == HAL_OK)
+        {
+            if(HAL_I2C_Init(m_handle) != HAL_OK)
+            {
+                I2C_CRITICAL("Unable to re-initialize the I2C peripheral!");
+            }
+            else{
+                RegisterCallbacks();
+                I2C_INFO("I2C Re-initialized");
+            }
+        }
+        else{
+            I2C_CRITICAL("Unable to de-initialize the I2C peripheral!");
+        }
     }
+#endif
 }
 
 void I2cModule::TransmitFrame(uint8_t addr, const uint8_t* data, size_t len)
@@ -166,7 +186,8 @@ bool I2cModule::TransmitFrameIt(uint8_t addr, const uint8_t* data, size_t len)
     if (HAL_I2C_Master_Transmit_IT(m_handle, addr, const_cast<uint8_t*>(data), (uint16_t)len) !=
         HAL_OK)
     {
-        I2C_ERROR("In TransmitFrameIt, unable to transmit frame: %s",
+        I2C_ERROR("In TransmitFrameIt, unable to transmit frame (0x%04X): %s",
+                  m_handle->ErrorCode,
                   I2cStatusToStr(m_handle->ErrorCode));
         return false;
     }
@@ -192,7 +213,8 @@ bool I2cModule::TransmitFrameToRegisterIt(uint8_t        addr,
           m_handle, addr, regAddr, sizeof(regAddr), const_cast<uint8_t*>(data), (uint16_t)len) !=
         HAL_OK)
     {
-        I2C_ERROR("In TransmitFrameToRegisterIt, unable to transmit frame: %s",
+        I2C_ERROR("In TransmitFrameToRegisterIt, unable to transmit frame (0x%04X): %s",
+                  m_handle->ErrorCode,
                   I2cStatusToStr(m_handle->ErrorCode));
         return false;
     }
@@ -216,7 +238,8 @@ bool I2cModule::ReceiveFrameIt(uint8_t addr, size_t len)
     if (HAL_I2C_Master_Receive_IT(
           m_handle, addr, m_currentFrame.data.data(), m_currentFrame.data.size()) != HAL_OK)
     {
-        I2C_ERROR("In ReceiveFrameIt, unable to receive frame: %s",
+        I2C_ERROR("In ReceiveFrameIt, unable to receive frame (0x%04X): %s",
+                  m_handle->ErrorCode,
                   I2cStatusToStr(m_handle->ErrorCode));
         return false;
     }
@@ -242,7 +265,8 @@ bool I2cModule::ReceiveFrameFromRegisterIt(uint8_t addr, uint8_t regAddr, size_t
     if (HAL_I2C_Mem_Read_IT(
           m_handle, addr, regAddr, sizeof(regAddr), m_currentFrame.data.data(), len) != HAL_OK)
     {
-        I2C_ERROR("In ReceiveFrameFromRegisterIt, unable to receive frame: %s",
+        I2C_ERROR("In ReceiveFrameFromRegisterIt, unable to receive frame (0x%04X): %s",
+                  m_handle->ErrorCode,
                   I2cStatusToStr(m_handle->ErrorCode));
         return false;
     }
@@ -335,6 +359,20 @@ I2cModule* I2cModule::GetModuleFromHandle(I2C_HandleTypeDef* i2c)
 
 
 //<editor-fold desc="Callbacks">
+void I2cModule::RegisterCallbacks() const
+{
+    REGISTER_CALLBACK(HAL_I2C_MASTER_TX_COMPLETE_CB_ID, &I2CMasterTxCpltCallback);
+    REGISTER_CALLBACK(HAL_I2C_MASTER_RX_COMPLETE_CB_ID, &I2CMasterRxCpltCallback);
+    REGISTER_CALLBACK(HAL_I2C_SLAVE_TX_COMPLETE_CB_ID, &I2CSlaveTxCpltCallback);
+    REGISTER_CALLBACK(HAL_I2C_SLAVE_RX_COMPLETE_CB_ID, &I2CSlaveRxCpltCallback);
+    // No callback for Addr, apparently.
+    REGISTER_CALLBACK(HAL_I2C_LISTEN_COMPLETE_CB_ID, &I2CListenCpltCallback);
+    REGISTER_CALLBACK(HAL_I2C_MEM_TX_COMPLETE_CB_ID, &I2CMemTxCpltCallback);
+    REGISTER_CALLBACK(HAL_I2C_MEM_RX_COMPLETE_CB_ID, &I2CMemRxCpltCallback);
+    REGISTER_CALLBACK(HAL_I2C_ERROR_CB_ID, &I2CErrorCallback);
+    REGISTER_CALLBACK(HAL_I2C_ABORT_CB_ID, &I2CAbortCallback);
+}
+
 [[maybe_unused]] void I2cModule::RemoveCallback(CEP_I2C::CallbackTypes type, const std::string& id)
 {
     auto it = m_callbacks[static_cast<size_t>(type)].find(id);

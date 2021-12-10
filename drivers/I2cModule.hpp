@@ -152,7 +152,7 @@ public:
 
     CEP_I2C::Frame ReceiveFrame(uint8_t addr, size_t len);
     CEP_I2C::Frame ReceiveFrameFromRegister(uint8_t addr, uint8_t regAddr, size_t len);
-;
+    ;
 
     // Interrupt-based functionalities is only available when register callbacks are enabled.
 #            if USE_HAL_I2C_REGISTER_CALLBACKS == 1
@@ -353,6 +353,7 @@ protected:
 
     [[nodiscard]] static inline I2cModule* GetModuleFromHandle(I2C_HandleTypeDef* i2c);
 
+    void RegisterCallbacks() const;
     void PropagateCallback(CEP_I2C::CallbackTypes t);
     // Hardware callbacks for the HAL.
     static void I2CMasterTxCpltCallback(I2C_HandleTypeDef* i2c);
@@ -373,7 +374,7 @@ protected:
     bool m_isTransmitting = false;
     bool m_isReceiving    = false;
 
-    bool m_hasError = false;
+    bool     m_hasError  = false;
     uint32_t m_lastError = 0;
 
     std::vector<std::map<std::string, CEP_I2C::CallbackFunc>> m_callbacks;
