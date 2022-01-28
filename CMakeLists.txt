@@ -1,6 +1,19 @@
-cmake_minimum_required(VERSION 3.21)
-project(NilaiTFO C CXX)
-set(CMAKE_CXX_STANDARD 17)
+cmake_minimum_required(VERSION 3.11)
+# Only make this a project if it's not part of one.
+if("${CMAKE_PROJECT_NAME}" STREQUAL "")
+    project(NilaiTFO 
+        LANGUAGES C CXX
+        HOMEPAGE_URL https://github.com/smartel99/NilaiTFO)
+    set(CMAKE_CXX_STANDARD 17)
+else()
+    if("${CMAKE_CXX_STANDARD}" LESS 17)
+        message(FATAL_ERROR "Minimum supported C++ version is C++17")
+    endif()
+
+    if("${CMAKE_C_STANDARD}" LESS 11)
+        message(FATAL_ERROR "Minimum supported C version is C11")
+    endif()
+endif()
 
 #------------------------------------------------------------------------------
 # Options
@@ -70,7 +83,20 @@ option(NILAI_USE_FILESYSTEM "Enables the Filesystem service (requires FATFS)" OF
 # Option verification
 if("${NILAI_APPLICATION_HEADER_PATH}" STREQUAL "")
     message(FATAL_ERROR "NILAI_APPLICATION_HEADER_PATH was not defined")
+elseif(NOT EXISTS "${NILAI_APPLICATION_HEADER_PATH}")
+    message(FATAL_ERROR "Unable to find application header at '${NILAI_APPLICATION_HEADER_PATH}'")
 endif()
+
+if("${NILAI_DRIVERS_PATH}" STREQUAL "")
+    message(FATAL_ERROR "NILAI_DRIVERS_PATH was not defined")
+elseif(NOT EXISTS "${NILAI_DRIVERS_PATH}")
+    message(FATAL_ERROR "Unable to find application header at '${NILAI_DRIVERS_PATH}'")
+endif()
+
+if((NOT "${NILAI_MCU}" STREQUAL "MOCK") AND ("${NILAI_MOCK_RANDOM_DATA}" STREQUAL "ON"))
+    message(WARNING "NILAI_MOCK_RANDOM_DATA is enabled, but MCU type is not MOCK")
+endif()
+
 
 # Disable -Wregister, which warns of the use of the register keyword in C++17 and later.
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-register")
