@@ -15,10 +15,10 @@
 /* Includes
  * ------------------------------------------------------------------------------------
  */
-#include "drivers/spiModule.hpp"
+#include "spiModule.hpp"
 #if defined(NILAI_USE_SPI) && defined(HAL_SPI_MODULE_ENABLED)
-#    include "defines/macros.hpp"
-#    include "processes/application.hpp"
+#    include "../defines/macros.hpp"
+#    include "../processes/application.hpp"
 
 #    include <algorithm>
 #    include <array>
@@ -82,7 +82,7 @@ CEP_SPI::Status SpiModule::Transmit(const uint8_t* data, size_t len)
     CEP_ASSERT(len != 0, "SPI Transmit data length is 0 in SpiModule::Transmit");
 
     // Wait for peripheral to be free.
-    if (WaitUntilNotBusy() == false)
+    if (!WaitUntilNotBusy())
     {
         return CEP_SPI::Status::TIMEOUT;
     }
@@ -104,7 +104,7 @@ CEP_SPI::Status SpiModule::Receive(uint8_t* ouptutData, size_t len)
     CEP_ASSERT(len > 0, "Length is 0 in SpiModule::Receive");
 
     // Wait for SPI peripheral to be ready.
-    if (WaitUntilNotBusy() == false)
+    if (!WaitUntilNotBusy())
     {
         return CEP_SPI::Status::TIMEOUT;
     }
@@ -130,7 +130,7 @@ CEP_SPI::Status SpiModule::Transaction(const uint8_t* txData,
     CEP_ASSERT(txLen == rxLen, "TxLen is not equal to RxLen in SpiModule::Transaction");
 
     // Wait for SPI peripheral to be ready.
-    if (WaitUntilNotBusy() == false)
+    if (!WaitUntilNotBusy())
     {
         return CEP_SPI::Status::TIMEOUT;
     }

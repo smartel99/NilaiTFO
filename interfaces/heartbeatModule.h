@@ -16,9 +16,9 @@
 #    if defined(NILAI_USE_HEARTBEAT)
 /*****************************************************************************/
 /* Includes */
-#        include "defines/ledPattern.h"
-#        include "defines/module.hpp"
-#        include "defines/pin.h"
+#        include "../defines/ledPattern.h"
+#        include "../defines/module.hpp"
+#        include "../defines/pin.h"
 
 #        include <string>
 

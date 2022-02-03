@@ -15,15 +15,15 @@
 /*************************************************************************************************/
 /* Includes ------------------------------------------------------------------------------------ */
 #    if defined(NILAI_USE_UART)
-#        include "defines/internalConfig.h"
+#        include "../defines/internalConfig.h"
 #        pragma GCC diagnostic push
 #        pragma GCC diagnostic ignored "-Wunused-parameter"
 #        include NILAI_HAL_HEADER
 #        pragma GCC diagnostic pop
 #        if defined(HAL_UART_MODULE_ENABLED)
-#            include "defines/macros.hpp"
-#            include "defines/misc.hpp"
-#            include "defines/module.hpp"
+#            include "../defines/macros.hpp"
+#            include "../defines/misc.hpp"
+#            include "../defines/module.hpp"
 
 #            include <cstdint>       // For uint8_t, size_t
 #            include <functional>    // For std::function

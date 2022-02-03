@@ -12,7 +12,7 @@
  */
 /*************************************************************************************************/
 /* Includes ------------------------------------------------------------------------------------ */
-#include "drivers/uartModule.hpp"
+#include "uartModule.hpp"
 #if defined(NILAI_USE_UART) && defined(HAL_UART_MODULE_ENABLED)
 #    include "main.h"
 

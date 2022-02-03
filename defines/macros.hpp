@@ -12,8 +12,8 @@
 #ifndef _MACROS_HPP_H_
 #    define _MACROS_HPP_H_
 
-#    include "processes/application.hpp"
-#    include "services/logger.hpp"
+#    include "../defines/Assertion.h"
+#    include "../services/logger.hpp"
 
 /*************************************************************************************************/
 /* Defines ------------------------------------------------------------------------------------- */

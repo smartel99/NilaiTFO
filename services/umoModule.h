@@ -35,8 +35,8 @@
 
 /*****************************************************************************/
 /* Includes */
-#    include "defines/module.hpp"
 #    if defined(NILAI_USE_UMO)
+#    include "defines/module.hpp"
 #        if defined(NILAI_UMO_USE_UART) && defined(NILAI_UMO_USE_CAN)
 #            error Cannot use UMO with both CAN and UART!
 #        endif

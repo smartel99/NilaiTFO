@@ -14,7 +14,7 @@
 
 /*************************************************************************************************/
 /* Includes ------------------------------------------------------------------------------------ */
-#    include "defines/internalConfig.h"
+#    include "../defines/internalConfig.h"
 
 #    include <cstdarg>    // For va_list
 #    include <functional>

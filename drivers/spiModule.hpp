@@ -17,12 +17,12 @@
  * ------------------------------------------------------------------------------------
  */
 #    if defined(NILAI_USE_SPI)
-#        include "defines/internalConfig.h"
+#        include "../defines/internalConfig.h"
 #        include NILAI_HAL_HEADER
 #        if defined(HAL_SPI_MODULE_ENABLED)
-#            include "defines/macros.hpp"
-#            include "defines/misc.hpp"
-#            include "defines/module.hpp"
+#            include "../defines/macros.hpp"
+#            include "../defines/misc.hpp"
+#            include "../defines/module.hpp"
 
 #            include <string>
 #            include <vector>

@@ -13,7 +13,7 @@
  */
 /*************************************************************************************************/
 /* File includes ------------------------------------------------------------------------------- */
-#include "shared/defines/misc.hpp"
+#include "misc.hpp"
 
 #include <algorithm>
 #include <cmath>
@@ -54,7 +54,7 @@ void cep::clearArray(void* array, size_t length)
  * @param   len:   The number of bytes to check
  * @retval  The number of 1s
  */
-size_t cep::countOfOnesInBytesInator(uint8_t* bytes, uint8_t len)
+size_t cep::countOfOnesInBytesInator(const uint8_t* bytes, uint8_t len)
 {
     size_t count = 0;
 #if defined(__GCC__)

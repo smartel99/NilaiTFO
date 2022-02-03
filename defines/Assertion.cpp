@@ -11,7 +11,7 @@
 #include "Assertion.h"
 
 #if defined(NILAI_USE_LOGGER)
-#    include "services/logger.hpp"
+#    include "../services/logger.hpp"
 #endif
 
 // For our C friends:

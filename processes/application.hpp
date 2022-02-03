@@ -14,8 +14,8 @@
 /*************************************************************************************************/
 /* File includes ------------------------------------------------------------------------------- */
 
-#    include "defines/Assertion.h"
-#    include "defines/module.hpp"
+#    include "../defines/Assertion.h"
+#    include "../defines/module.hpp"
 
 #    include <csignal>
 #    include <vector>

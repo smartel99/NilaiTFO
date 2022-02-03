@@ -51,7 +51,7 @@ namespace cep
 void forceNullTerminationCharacter(char* string, size_t size);
 void clearArray(void* array, size_t length);
 
-size_t countOfOnesInBytesInator(uint8_t* bytes, uint8_t len);
+size_t countOfOnesInBytesInator(const uint8_t* bytes, uint8_t len);
 
 bool plus_minus(int32_t value, int32_t compare, int32_t margin);
 bool plus_minus(double value, double compare, double margin);

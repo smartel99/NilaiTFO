@@ -11,9 +11,9 @@
 
 #if defined(NILAI_USE_LOGGER)
 #    include "logger.hpp"
-#    include "defines/macros.hpp"
+#    include "../defines/macros.hpp"
 #    if defined(NILAI_USE_UART)
-#        include "drivers/uartModule.hpp"
+#        include "../drivers/uartModule.hpp"
 #    endif
 
 #    include <cstdarg>

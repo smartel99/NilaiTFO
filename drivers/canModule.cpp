@@ -12,7 +12,7 @@
  */
 /*************************************************************************************************/
 /* Includes ------------------------------------------------------------------------------------ */
-#include "drivers/canModule.hpp"
+#include "canModule.hpp"
 
 #if defined(NILAI_USE_CAN) && defined(HAL_CAN_MODULE_ENABLED)
 #    include "services/logger.hpp"
