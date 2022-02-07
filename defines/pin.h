@@ -39,11 +39,14 @@ struct Pin
 
     [[nodiscard]] bool Get() const { return (HAL_GPIO_ReadPin(port, pin) != 0u); }
 
-
     bool operator==(const Pin& other) const
     {
         return ((this->port == other.port) && (this->pin == other.pin));
     }
+
+    bool operator!=(const Pin& other) const { return !(*this == other); }
+
+    explicit operator bool() const { return Get(); }
 };
 
 }    // namespace cep

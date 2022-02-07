@@ -13,6 +13,8 @@ FetchContent_MakeAvailable(googletest)
 include(GoogleTest)
 enable_testing()
 
+set(CMAKE_CXX_STANDARD 17)
+
 get_filename_component(ROOT_DIR ${CMAKE_SOURCE_DIR}/.. ABSOLUTE)
 #get_filename_component(SERVICE_DIR ${ROOT_DIR}/services ABSOLUTE)
 #get_filename_component(PROCESS_DIR ${ROOT_DIR}/processes ABSOLUTE)
@@ -21,33 +23,9 @@ include_directories(${ROOT_DIR})
 
 add_compile_options(-DNILAI_TEST)
 
-# Pin
-# The executable that will do the tests.
-add_executable(
-        Pin_test
-        Mocks/GPIO/gpio.cpp
-        Pin/Test.cpp
-)
-
-target_link_libraries(
-        Pin_test
-        gtest_main
-)
-
-gtest_discover_tests(Pin_test)
+add_subdirectory(BitManipulations)
+add_subdirectory(Pin)
+add_subdirectory(Interfaces/TAS5705)
+add_subdirectory(Interfaces/TAS5707)
 
 
-# Bit manipulation
-add_executable(
-        BitManipulation_test
-        BitManipulations/swap.cpp
-        BitManipulations/combine.cpp
-        BitManipulations/arraynificator.cpp
-)
-
-target_link_libraries(
-        BitManipulation_test
-        gtest_main
-)
-
-gtest_discover_tests(BitManipulation_test)
