@@ -107,7 +107,7 @@ public:
     {
 #    if _FS_READONLY == 0 && _USE_STRFUNC >= 1
 #        if defined(DEBUG)
-        if (m_isOpen == false)
+        if (!m_isOpen)
         {
             // File must be open and valid!
             CRASH;
@@ -144,7 +144,7 @@ private:
     FileModes   m_mode = FileModes::Read | FileModes::OpenExisting;
     file_t      m_file;
     bool        m_isOpen = false;
-    Result      m_status;
+    Result      m_status = {};
 };
 }    // namespace Filesystem
 }    // namespace cep

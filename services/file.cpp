@@ -14,8 +14,8 @@
 #    include "file.h"
 #    include "filesystem.h"
 
-#    include "defines/macros.hpp"
-#    include "services/logger.hpp"
+#    include "../defines/macros.hpp"
+#    include "../services/logger.hpp"
 
 #    define FS_DEBUG(msg, ...)    LOG_DEBUG("[FS]: " msg, ##__VA_ARGS__)
 #    define FS_INFO(msg, ...)     LOG_INFO("[FS]: " msg, ##__VA_ARGS__)

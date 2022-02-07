@@ -16,7 +16,7 @@
 /* Includes */
 #if defined(NILAI_USE_FILESYSTEM)
 
-#    include "defines/pin.h"
+#    include "../defines/pin.h"
 #    include "ff.h"
 #    include "file.h"
 
@@ -72,7 +72,7 @@ struct MakeVolumeParams
 };
 
 
-bool   Init(const cep::Pin& detect);
+bool   Init(const cep::Pin& detect = {});
 void   Deinit();
 Result Mount(const std::string& drive = "", bool forceMount = false);
 Result Unmount();

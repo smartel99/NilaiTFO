@@ -11,7 +11,7 @@
 #if defined(NILAI_USE_FILESYSTEM)
 #    include "filesystem.h"
 
-#    include "defines/macros.hpp"
+#    include "../defines/macros.hpp"
 #    include "ff_gen_drv.h"
 #    include "user_diskio.h"
 
@@ -25,7 +25,7 @@
 struct FsData
 {
     cep::Pin sdPin;
-    char     sdPath[4];    //!< SD logical drive path.
+    char     sdPath[4] = {0};    //!< SD logical drive path.
     FATFS*   fs        = nullptr;
     bool     isInit    = false;
     bool     isMounted = false;
@@ -43,7 +43,7 @@ bool Init(const cep::Pin& pin)
     s_data.fs    = new FATFS;
     CEP_ASSERT(s_data.fs != nullptr, "Unable to allocate memory for file system!");
 
-    s_data.isInit = (FATFS_LinkDriver(&USER_Driver, s_data.sdPath) == 0 ? true : false);
+    s_data.isInit = FATFS_LinkDriver(&USER_Driver, s_data.sdPath) == 0;
 
     return s_data.isInit;
 }
@@ -56,7 +56,7 @@ void Deinit()
         s_data.fs = nullptr;
     }
 
-    s_data.isInit = (FATFS_UnLinkDriver(s_data.sdPath) == 0 ? false : true);
+    s_data.isInit = FATFS_UnLinkDriver(s_data.sdPath) != 0;
 }
 
 Result Mount(const std::string& drive, bool forceMount)
@@ -71,9 +71,10 @@ Result Mount(const std::string& drive, bool forceMount)
     // Wait a tiny bit to make sure that the SD card is properly powered.
     HAL_Delay(5);
     Result r = (Result)f_mount(s_data.fs, drive.c_str(), (BYTE)forceMount);
-    if (r == Result::Ok)
+    s_data.isMounted = r == Result::Ok;
+    if (r != Result::Ok)
     {
-        s_data.isMounted = true;
+        LOG_ERROR("Unable to mount drive '%s': (%d) %s", drive.c_str(), (int)r, ResultToStr(r).c_str());
     }
 
     return r;
