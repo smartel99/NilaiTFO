@@ -10,53 +10,12 @@
  */
 #include "gpio.h"
 
-#include <cassert>
-
-GPIO_TypeDef GPIOA = 0x0000;
-GPIO_TypeDef GPIOB = 0x0000;
-GPIO_TypeDef GPIOC = 0x0000;
-GPIO_TypeDef GPIOD = 0x0000;
-GPIO_TypeDef GPIOE = 0x0000;
-GPIO_TypeDef GPIOF = 0x0000;
-GPIO_TypeDef GPIOG = 0x0000;
-GPIO_TypeDef GPIOH = 0x0000;
-GPIO_TypeDef GPIOI = 0x0000;
-
-static bool IsPortValid(const uint16_t* port);
-
-
-void HAL_GPIO_WritePin(GPIO_TypeDef* port, uint16_t pin, GPIO_PinState state)
-{
-    assert(IsPortValid(port));
-
-    if (state == GPIO_PIN_SET)
-    {
-        *port |= pin;
-    }
-    else
-    {
-        *port &= static_cast<uint16_t>(~pin);
-    }
-}
-
-GPIO_PinState HAL_GPIO_ReadPin(GPIO_TypeDef* port, uint16_t pin)
-{
-    assert(IsPortValid(port));
-
-    return (*port & pin) == 0 ? GPIO_PIN_RESET : GPIO_PIN_SET;
-}
-
-
-bool IsPortValid(const uint16_t* port)
-{
-    if ((port == &GPIOA) || (port == &GPIOB) || (port == &GPIOC) || (port == &GPIOD) ||
-        (port == &GPIOE) || (port == &GPIOF) || (port == &GPIOG) || (port == &GPIOH) ||
-        (port == &GPIOI))
-    {
-        return true;
-    }
-    else
-    {
-        return false;
-    }
-}
+GPIO_TypeDef* GPIOA = new GPIO_TypeDef;
+GPIO_TypeDef* GPIOB = new GPIO_TypeDef;
+GPIO_TypeDef* GPIOC = new GPIO_TypeDef;
+GPIO_TypeDef* GPIOD = new GPIO_TypeDef;
+GPIO_TypeDef* GPIOE = new GPIO_TypeDef;
+GPIO_TypeDef* GPIOF = new GPIO_TypeDef;
+GPIO_TypeDef* GPIOG = new GPIO_TypeDef;
+GPIO_TypeDef* GPIOH = new GPIO_TypeDef;
+GPIO_TypeDef* GPIOI = new GPIO_TypeDef;

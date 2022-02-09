@@ -29,15 +29,13 @@ namespace cep
 /* Exported types */
 struct Pin
 {
-    GPIO_TypeDef* port = nullptr;
+    // Use GPIOA as a default port to avoid crashes with default-constructed pins.
+    GPIO_TypeDef* port = GPIOA;
     uint16_t      pin  = 0;
 
-    void Set(bool state) const
-    {
-        HAL_GPIO_WritePin(port, pin, (state ? GPIO_PIN_SET : GPIO_PIN_RESET));
-    }
+    void Set(bool state) const;
 
-    [[nodiscard]] bool Get() const { return (HAL_GPIO_ReadPin(port, pin) != 0u); }
+    [[nodiscard]] bool Get() const;
 
     bool operator==(const Pin& other) const
     {
