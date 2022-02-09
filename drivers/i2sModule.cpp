@@ -18,7 +18,7 @@
 
 #include "../defines/macros.hpp"
 
-#define I2S_INFO(msg, ...) LOG_INFO("[%s]: " msg, m_label.c_str(), ##__VA_ARGS__)
+#define I2S_INFO(msg, ...)  LOG_INFO("[%s]: " msg, m_label.c_str(), ##__VA_ARGS__)
 #define I2S_ERROR(msg, ...) LOG_ERROR("[%s]: " msg, m_label.c_str(), ##__VA_ARGS__)
 
 I2sModule::I2sModule(I2S_HandleTypeDef* handle, std::string label)
