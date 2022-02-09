@@ -21,8 +21,8 @@
 #    include "../defines/internalConfig.h"
 #    include NILAI_HAL_HEADER
 #    if defined(HAL_I2S_MODULE_ENABLED)
-#        include "Core/Inc/i2s.h"
 #        include "../defines/module.hpp"
+#        include "Core/Inc/i2s.h"
 
 class I2sModule : public cep::Module
 {
@@ -30,19 +30,19 @@ public:
     I2sModule(I2S_HandleTypeDef* handle, std::string label);
     ~I2sModule() override = default;
 
-    bool               DoPost() override;
-    void               Run() override;
-    [[nodiscard]] const std::string& GetLabel() const override { return m_label;}
+    bool                             DoPost() override;
+    void                             Run() override;
+    [[nodiscard]] const std::string& GetLabel() const override { return m_label; }
 
 private:
     I2S_HandleTypeDef* m_handle = nullptr;
-    std::string m_label;
+    std::string        m_label;
 };
 
-#else
+#    else
 #        if WARN_MISSING_STM_DRIVERS
 #            warning NilaiTFO I2S module is enabled, but HAL_I2S_MODULE_ENABLED is undefined!
 #        endif
-#endif
+#    endif
 #endif
 #endif    // NILAI_I2SMODULE_H

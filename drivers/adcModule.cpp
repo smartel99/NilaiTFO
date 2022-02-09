@@ -30,7 +30,7 @@ std::map<ADC_HandleTypeDef*, AdcModule*> AdcModule::s_modules = {};
 AdcModule::AdcModule(ADC_HandleTypeDef* adc, std::string label)
 : m_adc(adc), m_label(std::move(label))
 {
-#if !defined(NILAI_TEST)
+#    if !defined(NILAI_TEST)
     CEP_ASSERT(adc != nullptr, "[%s]: ADC handle is null!", m_label.c_str());
     m_channelCount = adc->Init.NbrOfConversion;
     m_channelBuff  = new uint32_t[m_channelCount];
@@ -40,18 +40,18 @@ AdcModule::AdcModule(ADC_HandleTypeDef* adc, std::string label)
                m_label.c_str());
 
     s_modules[adc] = this;
-#    if USE_HAL_ADC_REGISTER_CALLBACKS == 1
+#        if USE_HAL_ADC_REGISTER_CALLBACKS == 1
     // Register conversion complete and error callbacks.
     REGISTER_CALLBACK(HAL_ADC_CONVERSION_COMPLETE_CB_ID, &AdcModule::AdcModuleConvCpltCallback);
     REGISTER_CALLBACK(HAL_ADC_ERROR_CB_ID, &AdcModule::AdcModuleErrorCallback);
-#    else
-#        warning HAL is not configured to use ADC callbacks, using default handler.
-#    endif
+#        else
+#            warning HAL is not configured to use ADC callbacks, using default handler.
+#        endif
 
     Start();
 
     ADC_INFO("Initialized");
-#endif
+#    endif
 }
 
 AdcModule::~AdcModule()
@@ -143,10 +143,10 @@ float AdcModule::GetChannelReading(size_t channel) const
     {
         Start();
     }
-#if defined(NILAI_TEST)
-// For unit tests, instantly call it back.
+#    if defined(NILAI_TEST)
+    // For unit tests, instantly call it back.
     cb(this);
-#endif
+#    endif
 }
 
 /**

@@ -134,7 +134,9 @@ public:
      * @param timeout The maximum amount of time to wait for an acknowledge.
      * @return True if the target acknowledged, false otherwise.
      */
-    [[maybe_unused]] [[nodiscard]] bool CheckIfDevOnBus(uint8_t addr, size_t attempts = 5, size_t timeout = 2);
+    [[maybe_unused]] [[nodiscard]] bool CheckIfDevOnBus(uint8_t addr,
+                                                        size_t  attempts = 5,
+                                                        size_t  timeout  = 2);
 
 protected:
     I2C_HandleTypeDef* m_handle = nullptr;
