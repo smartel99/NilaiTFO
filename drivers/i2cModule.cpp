@@ -18,14 +18,17 @@
 #include "i2cModule.hpp"
 
 #if defined(NILAI_USE_I2C) && defined(HAL_I2C_MODULE_ENABLED)
-#include <utility>
-#    include "services/logger.hpp"
+#    include "../services/logger.hpp"
+#    include <utility>
+
+#    define I2C_INFO(msg, ...)  LOG_INFO("[%s]: " msg, m_label.c_str(), ##__VA_ARGS__)
+#    define I2C_ERROR(msg, ...) LOG_ERROR("[%s]: " msg, m_label.c_str(), ##__VA_ARGS__)
 
 I2cModule::I2cModule(I2C_HandleTypeDef* handle, std::string label)
 : m_handle(handle), m_label(std::move(label))
 {
     CEP_ASSERT(handle != nullptr, "In I2cModule: handle is NULL!");
-    LOG_INFO("[%s]: Initialized", m_label.c_str());
+    I2C_INFO("Initialized");
 }
 
 /**
@@ -34,7 +37,7 @@ I2cModule::I2cModule(I2C_HandleTypeDef* handle, std::string label)
  */
 bool I2cModule::DoPost()
 {
-    LOG_INFO("[%s]: POST OK", m_label.c_str());
+    I2C_INFO("POST OK");
     return true;
 }
 
@@ -47,7 +50,7 @@ void I2cModule::TransmitFrame(uint8_t addr, const uint8_t* data, size_t len)
     if (HAL_I2C_Master_Transmit(
           m_handle, addr, const_cast<uint8_t*>(data), (uint16_t)len, I2cModule::TIMEOUT) != HAL_OK)
     {
-        LOG_ERROR("[%s]: In TransmitFrame, unable to transmit frame", m_label.c_str());
+        I2C_ERROR("In TransmitFrame, unable to transmit frame");
     }
 }
 
@@ -64,13 +67,13 @@ void I2cModule::TransmitFrameToRegister(uint8_t        addr,
                           (uint16_t)len,
                           I2cModule::TIMEOUT) != HAL_OK)
     {
-        LOG_ERROR("[%s]: In TransmitFrameToRegister, unable to transmit frame", m_label.c_str());
+        I2C_ERROR("In TransmitFrameToRegister, unable to transmit frame");
     }
 }
 
-CEP_I2C::Frame I2cModule::ReceiveFrame(uint8_t addr, size_t len)
+cep::I2C::Frame I2cModule::ReceiveFrame(uint8_t addr, size_t len)
 {
-    CEP_I2C::Frame frame;
+    cep::I2C::Frame frame;
 
     frame.deviceAddress = addr;
     // Allocate memory for the data.
@@ -80,15 +83,15 @@ CEP_I2C::Frame I2cModule::ReceiveFrame(uint8_t addr, size_t len)
           m_handle, addr, frame.data.data(), (uint16_t)frame.data.size(), I2cModule::TIMEOUT) !=
         HAL_OK)
     {
-        LOG_ERROR("[%s]: In ReceiveFrame, unable to receive frame", m_label.c_str());
+        I2C_ERROR("In ReceiveFrame, unable to receive frame");
     }
 
     return frame;
 }
 
-CEP_I2C::Frame I2cModule::ReceiveFrameFromRegister(uint8_t addr, uint8_t regAddr, size_t len)
+cep::I2C::Frame I2cModule::ReceiveFrameFromRegister(uint8_t addr, uint8_t regAddr, size_t len)
 {
-    CEP_I2C::Frame frame;
+    cep::I2C::Frame frame;
 
     frame.deviceAddress   = addr;
     frame.registerAddress = regAddr;
@@ -102,10 +105,15 @@ CEP_I2C::Frame I2cModule::ReceiveFrameFromRegister(uint8_t addr, uint8_t regAddr
                          (uint16_t)frame.data.size(),
                          I2cModule::TIMEOUT) != HAL_OK)
     {
-        LOG_ERROR("[%s]: In ReceiveFrameFromRegister, unable to receive frame", m_label.c_str());
+        I2C_ERROR("In ReceiveFrameFromRegister, unable to receive frame");
     }
 
     return frame;
+}
+
+bool I2cModule::CheckIfDevOnBus(uint8_t addr, size_t attempts, size_t timeout)
+{
+    return HAL_I2C_IsDeviceReady(m_handle, addr, attempts, timeout) == HAL_OK;
 }
 #endif
 /**
