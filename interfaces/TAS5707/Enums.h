@@ -146,6 +146,18 @@ enum class Registers : uint8_t
     NewDevAddr = 0xF9,
     // 0xFA-0xFF: Reserved.
 };
+
+/**
+ * @brief
+ */
+namespace I2CAddresses
+{
+[[maybe_unused]] static constexpr uint8_t TAS5707Default  = 0x36;
+[[maybe_unused]] static constexpr uint8_t TAS5707Alt      = 0x38;
+[[maybe_unused]] static constexpr uint8_t TAS5707ADefault = 0x3A;
+[[maybe_unused]] static constexpr uint8_t TAS5707AAlt     = 0x3C;
+}    // namespace I2CAddresses
+
 /**
  * @addtogroup TAS5707 Clock Control Register
  * @{
@@ -959,7 +971,7 @@ namespace BankSampleRates
 //! Bank 3 is used by 8kHz, 11.025/12kHz, 16kHz and 22.025/24kHz by default.
 [[maybe_unused]] static constexpr uint8_t Bank3Default = 0x0F;
 //! Bank 2 is used by 48kHz by default.
-[[maybe_unused]] static constexpr uint8_t Bank2Default = 0x70;
+[[maybe_unused]] static constexpr uint8_t Bank2Default = 0x10;
 //! Bank 1 is used by 32kHz by default.
 [[maybe_unused]] static constexpr uint8_t Bank1Default = 0x80;
 

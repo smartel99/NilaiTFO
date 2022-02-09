@@ -44,6 +44,7 @@ namespace cep::Tas5707
  *  <li> @code cep::Pin Fault </li>
  *  <li> @code cep::Pin HeadphoneSelect </li>
  *  <li> @code cep::Pin Mute </li>
+ *  <li> @code cep::Pin PVddEn </li>
  */
 struct HardwareConfig
 {
@@ -107,6 +108,14 @@ href=https://www.ti.com/lit/ds/symlink/tas5705.pdf?HQS=dis-dk-null-digikeymode-d
      *  noiseless ramp to previous volume.
      */
     cep::Pin Mute = {};
+
+    /**
+     * @brief [Output] Pin that controls the PVDD supply of the chip.
+     *
+     * Setting this pin to low disables PVDD.
+     * Setting this pin to high enabled PVDD.
+     */
+     cep::Pin PVddEn = {};
 
     /**
      * @brief Checks that the mandatory information to use the chip are properly set.

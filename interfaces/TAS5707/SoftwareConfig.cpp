@@ -24,7 +24,7 @@
 namespace cep::Tas5707
 {
 
-constexpr bool SoftwareConfig::Validate() const
+bool SoftwareConfig::Validate() const
 {
     bool isValid = true;
 

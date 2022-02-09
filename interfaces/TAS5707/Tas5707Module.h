@@ -25,13 +25,54 @@
 #        include "../../drivers/i2cModule.hpp"
 #        include "../../drivers/i2sModule.h"
 
-#include "HardwareConfig.h"
-#include "SoftwareConfig.h"
+#        include "HardwareConfig.h"
+#        include "SoftwareConfig.h"
 
 class Tas5707Module : public cep::Module
 {
 public:
-    Tas5707Module(const cep::Tas5707::HardwareConfig& hw, const cep::Tas5707::SoftwareConfig& sw, std::string label);
+    /**
+     * @brief Initializes the TAS5707 digital amplifier using the provided parameters.
+     *
+     * The initialization sequence goes as follows:
+     * <ol>
+     *  <li> Hold all digital inputs low and ramp up AVDD/DVDD to at least 3V (should already be
+     * done if using the same supply as the STM32).</li>
+     *  <li> Initialize digital inputs and PVDD supply as follows:
+     *      <ul>
+     *          <li>Drive RESET=0, PDN=1, and other digital inputs to their desired state.</li>
+     *          <li>Provide stable and valid I2S clocks (MCLK, LRCLK and SCLK) then wait 100us</li>
+     *          <li>Drive RESET=1, then wait another 13.5ms</li>
+     *          <li>Ramp up PVDD to at least 8V while ensuring that it remains below 6V for at least
+     * 100us after AVDD/DVDD reaches 3V, then wait at least another 10us</li>
+     *      </ul>
+     *  </li>
+     *  <li>Identify the I2C address to use (0x36 for the TAS5707, 0x3A for the TAS5707A)</li>
+     *  <li>Trim oscillator (write 0x00 to register 0x1B) and wait at least 50ms.</li>
+     *  <li>Configure the DAP via I2C:
+     *      <ul>
+     *          <li>Biquads (0x29-0x36)</li>
+     *          <li>DRC parameters (0x3A-0x3C, 0x40-0x42 and 0x46)</li>
+     *          <li>Bank select (0x50)</li>
+     *      </ul>
+     *  </li>
+     *  <li>Configure remaining registers</li>
+     *  <li>Exit shutdown mode:
+     *      <ol>
+     *          <li>Ensure I2S clocks have been stable and valid for at least 50ms</li>
+     *          <li>Write 0x00 to register 0x05 (it may take up to 240ms for the exit shutdown to be
+     * executed by the chip following a power-up)</li>
+     *          <li>Wait at least 1ms+1.3*Tstart, where Tstart is specified by register 0x1A)</li>
+     *          <li>Proceed with normal operation</li>
+     *      </ol></li>
+     * </ol>
+     * @param hw
+     * @param sw
+     * @param label
+     */
+    Tas5707Module(const cep::Tas5707::HardwareConfig& hw,
+                  const cep::Tas5707::SoftwareConfig& sw,
+                  std::string                         label);
     ~Tas5707Module() override;
 
     bool                             DoPost() override;
@@ -39,9 +80,15 @@ public:
     [[nodiscard]] const std::string& GetLabel() const override { return m_label; }
 
 private:
+    bool FindTas5707I2CAddr();
+    void TrimOscillator();
+
     cep::Tas5707::HardwareConfig m_hw = {};
     cep::Tas5707::SoftwareConfig m_sw = {};
-    std::string m_label;
+    std::string                  m_label;
+
+    //! I2C address of the TAS5707 on the bus.
+    uint8_t m_i2cAddr = 0;
 };
 
 #    else

@@ -137,7 +137,7 @@ struct SoftwareConfig
     //! The TAS5707A's default address is 0x3A, which can be changed to 0x3A.
     uint8_t I2cAddr = 0x36;
 
-    [[nodiscard]] constexpr bool Validate() const;
+    [[nodiscard]] bool Validate() const;
 
     /**
      * @brief Combines the sample rate and the MCLK frequency.
@@ -145,7 +145,7 @@ struct SoftwareConfig
      */
     [[nodiscard]] uint8_t ToClockCtrlReg() const;
     /**
-     * @brief Combines the dc blocking filter, clock revovery mode and the de-emphasis mode.
+     * @brief Combines the dc blocking filter, clock recovery mode and the de-emphasis mode.
      * @return The value to write in the SysCtrl1 register.
      */
     [[nodiscard]] uint8_t ToSysCtrl1Reg() const;
