@@ -76,6 +76,7 @@ void UartModule::Run()
         HAL_UART_Receive_DMA(m_handle,
                              s_dataBuffers[m_dataBufferIdx].rxDmaData.data(),
                              s_dataBuffers[m_dataBufferIdx].rxDmaData.size());
+        m_cb();
     }
 }
 

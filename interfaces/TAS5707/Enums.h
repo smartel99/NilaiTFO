@@ -86,7 +86,7 @@ enum class Registers : uint8_t
      *  <li>Bytes 16 to 19: a2 coefficient, default: 0x00000000</li>
      * </ul>
      */
-    Ch1Bq_0 = 29,
+    Ch1Bq_0 = 0x29,
     Ch1Bq_1,
     Ch1Bq_2,
     Ch1Bq_3,
@@ -147,6 +147,13 @@ enum class Registers : uint8_t
     // 0xFA-0xFF: Reserved.
 };
 
+enum class Channels
+{
+    Master = 0,
+    Channel1,
+    Channel2,
+};
+
 /**
  * @brief
  */
@@ -157,6 +164,7 @@ namespace I2CAddresses
 [[maybe_unused]] static constexpr uint8_t TAS5707ADefault = 0x3A;
 [[maybe_unused]] static constexpr uint8_t TAS5707AAlt     = 0x3C;
 }    // namespace I2CAddresses
+
 
 /**
  * @addtogroup TAS5707 Clock Control Register

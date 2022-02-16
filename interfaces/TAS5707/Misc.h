@@ -18,6 +18,7 @@
 #define NILAI_TAS5707_MISCSTRUCTS_H
 
 #if defined(NILAI_USE_TAS5707)
+#    include "Enums.h"
 #    include <array>
 #    include <cstdint>
 
@@ -37,6 +38,10 @@ struct BiquadFilter
     uint32_t b2 = 0x00000000;
     uint32_t a1 = 0x00000000;
     uint32_t a2 = 0x00000000;
+
+    [[nodiscard]] std::array<uint8_t, 20> Serialize() const;
+
+    bool operator==(const BiquadFilter& o) const;
 };
 
 /**
@@ -60,8 +65,30 @@ struct BiquadBanks
 
 struct DynRangeCtrlCoeffs
 {
-    uint32_t a = 0x00800000;    //! Alpha factor
-    uint32_t oa = 0x00000000;   //! 1 - Alpha factor
+    uint32_t a  = 0x00800000;    //! Alpha factor
+    uint32_t oa = 0x00000000;    //! 1 - Alpha factor
+
+    [[nodiscard]] std::array<uint8_t, 8> Serialize() const;
+};
+
+struct DynamicRangeControl
+{
+    //! Toggles the Dynamic Range Control (DRC).
+    uint32_t State = DrcModes::Disabled;
+
+    //! Alpha of energy filter for Dynamic Range Control.
+    DynRangeCtrlCoeffs Ae = {};
+    //! Alpha of attack filter for Dynamic Range Control.
+    DynRangeCtrlCoeffs Aa = {};
+    //! Alpha of decay filter for Dynamic Range Control.
+    DynRangeCtrlCoeffs Ad = {};
+
+    //! DRC-T coefficient, using the 9.23 floating point number format.
+    uint32_t T = 0xFDA21490;
+    //! DRC-K coefficient, using the 3.23 floating point number format.
+    uint32_t K = 0x03842109;
+    //! DRC-O coefficient, using the 3.23 floating point number format.
+    uint32_t O = 0x00084210;
 };
 
 }    // namespace cep::Tas5707

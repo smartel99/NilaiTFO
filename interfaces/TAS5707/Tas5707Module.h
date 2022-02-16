@@ -28,7 +28,7 @@
 #        include "HardwareConfig.h"
 #        include "SoftwareConfig.h"
 
-class Tas5707Module : public cep::Module
+class Tas5707Module : public I2sModule
 {
 public:
     /**
@@ -72,12 +72,33 @@ public:
      */
     Tas5707Module(const cep::Tas5707::HardwareConfig& hw,
                   const cep::Tas5707::SoftwareConfig& sw,
+                  I2S_HandleTypeDef*                  i2s,
                   std::string                         label);
     ~Tas5707Module() override;
 
     bool                             DoPost() override;
     void                             Run() override;
     [[nodiscard]] const std::string& GetLabel() const override { return m_label; }
+
+    void ToggleSoftMute(bool ch1, bool ch2);
+    void SetMasterVolume(uint8_t vol);
+    void SetChannelVolume(cep::Tas5707::Channels ch, uint8_t vol);
+
+    void SendConfiguration();
+    bool Enable();
+    bool Disable();
+
+    void SetBiquadFilters(const cep::Tas5707::BiquadBanks& ch1,
+                          const cep::Tas5707::BiquadBanks& ch2 = {});
+    void SetDynamicRangeCtrl(const cep::Tas5707::DynamicRangeControl& drc);
+    void SetBankSwitchingMode(uint32_t mode);
+    void SetSerialDataInterface(uint8_t in);
+    void SetSysCtrl1Reg(uint8_t dcBlock, uint8_t muteRecover, uint8_t deEmphasis);
+    void SetChannelInputAndModes(uint32_t ch1Mode,
+                                 uint32_t ch1Source,
+                                 uint32_t ch2Mode,
+                                 uint32_t ch2Source);
+    void SetChannelOutputs(uint32_t ASrc, uint32_t BSrc, uint32_t CSrc, uint32_t DSrc);
 
 private:
     bool FindTas5707I2CAddr();
@@ -89,6 +110,13 @@ private:
 
     //! I2C address of the TAS5707 on the bus.
     uint8_t m_i2cAddr = 0;
+
+    //! Time at which the chip finished trimming its PLL.
+    uint32_t m_initStartTime = 0;
+
+    //! Minimum time required between oscillator trimming and shutdown request, 240ms as per the
+    //! datasheet.
+    static constexpr uint8_t s_pllTime = 240;
 };
 
 #    else

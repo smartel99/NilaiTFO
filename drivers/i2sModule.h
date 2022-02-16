@@ -24,6 +24,9 @@
 #        include "../defines/module.hpp"
 #        include "Core/Inc/i2s.h"
 
+#        include <functional>
+#        include <map>
+
 class I2sModule : public cep::Module
 {
 public:
@@ -34,9 +37,62 @@ public:
     void                             Run() override;
     [[nodiscard]] const std::string& GetLabel() const override { return m_label; }
 
+    void StartClock();
+    void StopClock();
+
+    void SetTxHalfCpltCb(const std::function<void()>& cb);
+    void SetTxCpltCb(const std::function<void()>& cb);
+
+    [[nodiscard]] bool IsStreaming() const { return m_isStreaming; }
+    /**
+     * @brief Streams I2S data using DMA.
+     * @param samples The samples to send. Must be valid until the DMA transfer is completed.
+     * @param cnt The number of samples to send, combining L+R channels.
+     * @return True if the stream was successfully started.
+     */
+    bool Stream(const uint16_t* samples, size_t cnt);
+    bool Restream(const uint16_t* samples, size_t cnt);
+
+    /**
+     * @brief Pauses an ongoing stream.
+     * @return True if successfully paused.
+     */
+    bool PauseStream();
+
+    /**
+     * @brief Resumes an ongoing stream.
+     * @return True if successfully resumed.
+     */
+    bool ResumeStream();
+
+    /**
+     * @brief Stops an ongoing stream.
+     * @return True if successfully stopped.
+     */
+    bool StopStream();
+
 private:
+    void TxHalfCplt();
+    void TxCplt();
+
+    void SetStreamingCallbacks();
+    void SetClockCallbacks();
+
+    static void HalTxHalfCplt(I2S_HandleTypeDef* i2s);
+    static void HalTxCplt(I2S_HandleTypeDef* i2s);
+    static void HalRestartClock(I2S_HandleTypeDef* i2s);
+
+private:
+    static std::map<I2S_HandleTypeDef*, I2sModule*> s_modules;
+
     I2S_HandleTypeDef* m_handle = nullptr;
     std::string        m_label;
+
+    std::function<void()> m_txHalfCpltCb;
+    std::function<void()> m_txCpltCb;
+
+    bool m_isStreaming   = false;
+    bool m_isClockActive = false;
 };
 
 #    else

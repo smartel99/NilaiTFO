@@ -56,7 +56,7 @@ bool SoftwareConfig::Validate() const
     isValid &= OutBSources::IsValid(OutBSource);
     isValid &= OutCSources::IsValid(OutCSource);
     isValid &= OutDSources::IsValid(OutDSource);
-    isValid &= DrcModes::IsValid(DrcState);
+    isValid &= DrcModes::IsValid(DRC.State);
     isValid &= EqModes::IsValid(UseEqs);
     isValid &= BiquadModes::IsValid(BiquadMode);
     isValid &= BankSwitchingModes::IsValid(BankSwitchMode);

@@ -92,8 +92,6 @@ struct SoftwareConfig
     uint32_t OutCSource = OutCSources::Ch2;
     //! PWM source of OUT_D.
     uint32_t OutDSource = OutDSources::Ch2P;
-    //! Toggles the Dynamic Range Control (DRC).
-    uint32_t DrcState = DrcModes::Disabled;
     //! Toggles the EQ filters.
     uint32_t UseEqs = EqModes::Enabled;
     //! Switch the behavior of the biquad filters.
@@ -118,19 +116,7 @@ struct SoftwareConfig
     //! TODO don't use this space if BiquadMode is Ganged
     BiquadBanks Ch2BiquadFilters = {};
 
-    //! Alpha of energy filter for Dynamic Range Control.
-    DynRangeCtrlCoeffs DrcEA = {};
-    //! Alpha of attack filter for Dynamic Range Control.
-    DynRangeCtrlCoeffs DrcAA = {};
-    //! Alpha of decay filter for Dynamic Range Control.
-    DynRangeCtrlCoeffs DrcDC = {};
-
-    //! DRC-T coefficient, using the 9.23 floating point number format.
-    uint32_t DrcT = 0xFDA21490;
-    //! DRC-K coefficient, using the 3.23 floating point number format.
-    uint32_t DrcK = 0x03842109;
-    //! DRC-O coefficient, using the 3.23 floating point number format.
-    uint32_t DrcO = 0x00084210;
+    DynamicRangeControl DRC = {};
 
     //! I2C address of the device.
     //! The TAS5707's default address is 0x36, which can be changed to 0x38.

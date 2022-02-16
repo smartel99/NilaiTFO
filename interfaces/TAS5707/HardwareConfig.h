@@ -34,7 +34,6 @@ namespace cep::Tas5707
  * Mandatory information:
  * <ul>
  *  <li> @code I2cModule* I2cHandle </li>
- *  <li> @code I2sModule* I2sHandle </li>
  *  <li> @code cep::Pin Reset </li>
  *  <li> @code cep::Pin PwrDwn </li>
  * </ul>
@@ -50,9 +49,6 @@ struct HardwareConfig
 {
     //! Handle to the I2C module controlling the registers.
     I2cModule* I2cHandle = nullptr;
-
-    //! Handle to the I2S module sending the audio data.
-    I2sModule* I2sHandle = nullptr;
 
     /**
      * @brief [Output] Reset pin, active low.
@@ -115,17 +111,16 @@ href=https://www.ti.com/lit/ds/symlink/tas5705.pdf?HQS=dis-dk-null-digikeymode-d
      * Setting this pin to low disables PVDD.
      * Setting this pin to high enabled PVDD.
      */
-     cep::Pin PVddEn = {};
+    cep::Pin PVddEn = {};
 
     /**
      * @brief Checks that the mandatory information to use the chip are properly set.
-     * @return True if I2cHandle and I2sHandle are not null, and that Reset and PwrDwn are not
+     * @return True if I2cHandle is not null, and that Reset and PwrDwn are not
      * empty.
      */
     [[nodiscard]] bool IsValid() const
     {
-        return ((I2cHandle != nullptr) && (I2sHandle != nullptr) && (Reset != cep::Pin {}) &&
-                (PwrDwn != cep::Pin {}));
+        return ((I2cHandle != nullptr) && (Reset != cep::Pin {}) && (PwrDwn != cep::Pin {}));
     }
 };
 }    // namespace cep::Tas5707
