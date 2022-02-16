@@ -199,3 +199,21 @@ void I2sModule::HalRestartClock(I2S_HandleTypeDef* i2s)
     static uint16_t s[2] = {0, 0};
     HAL_I2S_Transmit_DMA(i2s, s, 2);
 }
+
+cep::I2S::AudioFreqs I2sModule::GetAudioFreq() const
+{
+    return static_cast<cep::I2S::AudioFreqs>(m_handle->Init.AudioFreq);
+}
+
+void I2sModule::SetAudioFreq(cep::I2S::AudioFreqs f)
+{
+    if (m_isStreaming)
+    {
+        // Currently streaming, stop it first.
+        StopStream();
+    }
+
+    HAL_I2S_DeInit(m_handle);    // De-init the I2S peripheral.
+
+    CEP_ASSERT(HAL_I2S_Init(m_handle) == HAL_OK, "Unable to re-init I2S!");
+}

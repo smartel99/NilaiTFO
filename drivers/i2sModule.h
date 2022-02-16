@@ -27,6 +27,23 @@
 #        include <functional>
 #        include <map>
 
+namespace cep::I2S
+{
+enum class AudioFreqs
+{
+    f192k   = I2S_AUDIOFREQ_192K,
+    f96k    = I2S_AUDIOFREQ_96K,
+    f48k    = I2S_AUDIOFREQ_48K,
+    f44k1   = I2S_AUDIOFREQ_44K,
+    f32k    = I2S_AUDIOFREQ_32K,
+    f22k05  = I2S_AUDIOFREQ_22K,
+    f16k    = I2S_AUDIOFREQ_16K,
+    f11k025 = I2S_AUDIOFREQ_11K,
+    f8k     = I2S_AUDIOFREQ_8K,
+};
+
+}
+
 class I2sModule : public cep::Module
 {
 public:
@@ -36,6 +53,9 @@ public:
     bool                             DoPost() override;
     void                             Run() override;
     [[nodiscard]] const std::string& GetLabel() const override { return m_label; }
+
+    [[nodiscard]] cep::I2S::AudioFreqs GetAudioFreq() const;
+    void                               SetAudioFreq(cep::I2S::AudioFreqs f);
 
     void StartClock();
     void StopClock();
