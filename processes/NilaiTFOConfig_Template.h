@@ -97,6 +97,7 @@
 //#define NILAI_USE_LOGGER
 //#define NILAI_USE_FILE_LOGGER
 //#define NILAI_USE_FILESYSTEM
+//#define NILAI_USE_INI_PARSER
 
 /**
  * @}

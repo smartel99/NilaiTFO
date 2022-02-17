@@ -18,12 +18,12 @@
  * ------------------------------------------------------------------------------------
  */
 #    if defined(NILAI_USE_I2C)
-#        include "defines/internalConfig.h"
+#        include "../defines/internalConfig.h"
 #        include NILAI_HAL_HEADER
 #        if defined(HAL_I2C_MODULE_ENABLED)
-#            include "defines/macros.hpp"
-#            include "defines/misc.hpp"
-#            include "defines/module.hpp"
+#            include "../defines/macros.hpp"
+#            include "../defines/misc.hpp"
+#            include "../defines/module.hpp"
 
 #            include <string>
 #            include <utility>

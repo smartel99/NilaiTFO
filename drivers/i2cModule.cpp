@@ -19,7 +19,7 @@
 
 #if defined(NILAI_USE_I2C) && defined(HAL_I2C_MODULE_ENABLED)
 #include <utility>
-#    include "services/logger.hpp"
+#    include "../services/logger.hpp"
 
 I2cModule::I2cModule(I2C_HandleTypeDef* handle, std::string label)
 : m_handle(handle), m_label(std::move(label))
