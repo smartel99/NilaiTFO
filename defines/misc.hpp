@@ -86,10 +86,39 @@ std::vector<uint8_t> ValToVector(const T& val)
     return v;
 }
 
+template<bool, typename T>
+std::vector<uint8_t> ValToVector(const T& val)
+{
+    std::vector<uint8_t> v;
+    v.reserve(sizeof(T));
+
+    int off = (sizeof(T) * 8) - 8;    // Amount of bits to shift right.
+    for (int i = off; i >= 0; i -= 8)
+    {
+        v.push_back((uint8_t)(val >> i));
+    }
+
+    return v;
+}
+
 template<typename T>
 T VectorToVal(const std::vector<uint8_t>& vec)
 {
     return (*reinterpret_cast<const T*>(vec.data()));
+}
+
+template<typename T, bool>
+T VectorToVal(const std::vector<uint8_t>& vec)
+{
+    T      t   = {};
+    size_t off = (sizeof(T) * 8) - 8;    // Amount of bits to shift left.
+    for (const auto& v : vec)
+    {
+        t |= v << off;
+        off -= 8;
+    }
+
+    return t;
 }
 
 template<typename T, size_t N>

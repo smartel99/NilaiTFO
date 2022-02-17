@@ -72,6 +72,7 @@
 //#define NILAI_USE_ADC
 //#define NILAI_USE_CAN
 //#define NILAI_USE_I2C
+//#define NILAI_USE_I2S
 //#define NILAI_USE_SPI
 //#define NILAI_USE_UART
 //#define NILAI_USE_PWM
@@ -90,6 +91,7 @@
 //#define NILAI_USE_RELAY
 //#define NILAI_USE_RN2903
 //#define NILAI_USE_TLP3545
+//#define NILAI_USE_TAS5707
 
 // Services
 //#define NILAI_USE_UMO

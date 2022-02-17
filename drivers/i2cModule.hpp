@@ -29,7 +29,7 @@
 #            include <utility>
 #            include <vector>
 
-namespace CEP_I2C
+namespace cep::I2C
 {
 /**
  ** @enum   Status
@@ -40,7 +40,7 @@ enum class Status
     //!< No error.
     Ok = 0x00000000,
     /** Bus Error.
-     ** This error occures when the I2C interface detects an external Stop or
+     ** This error occurs when the I2C interface detects an external Stop or
      ** Start condition during an address or a data transfer.
      **/
     BusError = 0x00000001,
@@ -50,7 +50,7 @@ enum class Status
      **/
     ArbitrationLost = 0x00000002,
     /** Acknowledge Failure.
-     ** This error occurs when the interface detects a nonacknowledge bit.
+     ** This error occurs when the interface detects a non-acknowledge bit.
      **/
     AckFailure = 0x00000004,
     /** Overrun/underrun error.
@@ -91,7 +91,7 @@ struct Frame
     {
     }
 };
-}    // namespace CEP_I2C
+}    // namespace cep::I2C
 
 class I2cModule : public cep::Module
 {
@@ -108,7 +108,7 @@ public:
     {
         TransmitFrame(addr, data.data(), data.size());
     }
-    void TransmitFrame(const CEP_I2C::Frame& frame)
+    void TransmitFrame(const cep::I2C::Frame& frame)
     {
         TransmitFrame(frame.deviceAddress, frame.data.data(), frame.data.size());
     }
@@ -118,14 +118,25 @@ public:
     {
         TransmitFrameToRegister(addr, regAddr, data.data(), data.size());
     }
-    void TransmitFrameToRegister(const CEP_I2C::Frame& frame)
+    void TransmitFrameToRegister(const cep::I2C::Frame& frame)
     {
         TransmitFrameToRegister(
           frame.deviceAddress, frame.registerAddress, frame.data.data(), frame.data.size());
     }
 
-    CEP_I2C::Frame ReceiveFrame(uint8_t addr, size_t len);
-    CEP_I2C::Frame ReceiveFrameFromRegister(uint8_t addr, uint8_t regAddr, size_t len);
+    cep::I2C::Frame ReceiveFrame(uint8_t addr, size_t len);
+    cep::I2C::Frame ReceiveFrameFromRegister(uint8_t addr, uint8_t regAddr, size_t len);
+
+    /**
+     * @brief Checks if a device with the specified address is active on the I2C bus.
+     * @param addr The address of the target.
+     * @param attempts The number of attempts that should be made to contact the target.
+     * @param timeout The maximum amount of time to wait for an acknowledge.
+     * @return True if the target acknowledged, false otherwise.
+     */
+    [[maybe_unused]] [[nodiscard]] bool CheckIfDevOnBus(uint8_t addr,
+                                                        size_t  attempts = 5,
+                                                        size_t  timeout  = 2);
 
 protected:
     I2C_HandleTypeDef* m_handle = nullptr;

@@ -13,7 +13,11 @@
 
 #include <cstdint>
 
-using GPIO_TypeDef = uint16_t;
+struct GPIO_TypeDef
+{
+    uint32_t BSRR = 0;    // Output.
+    uint32_t IDR  = 0;    // Input.
+};
 
 extern GPIO_TypeDef* GPIOA;
 extern GPIO_TypeDef* GPIOB;
@@ -24,15 +28,5 @@ extern GPIO_TypeDef* GPIOF;
 extern GPIO_TypeDef* GPIOG;
 extern GPIO_TypeDef* GPIOH;
 extern GPIO_TypeDef* GPIOI;
-
-enum GPIO_PinState
-{
-    GPIO_PIN_RESET = 0,
-    GPIO_PIN_SET,
-};
-
-
-void          HAL_GPIO_WritePin(GPIO_TypeDef* port, uint16_t pin, GPIO_PinState state);
-GPIO_PinState HAL_GPIO_ReadPin(GPIO_TypeDef* port, uint16_t pin);
 
 #endif    // GUARD_GPIO_H
