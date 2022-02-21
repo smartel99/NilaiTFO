@@ -215,5 +215,6 @@ void I2sModule::SetAudioFreq(cep::I2S::AudioFreqs f)
 
     HAL_I2S_DeInit(m_handle);    // De-init the I2S peripheral.
 
+    m_handle->Init.AudioFreq = (uint32_t)f;
     CEP_ASSERT(HAL_I2S_Init(m_handle) == HAL_OK, "Unable to re-init I2S!");
 }
