@@ -40,6 +40,7 @@ bool I2sModule::DoPost()
     I2S_INFO("POST OK");
     return true;
 }
+
 void I2sModule::Run()
 {
 }
@@ -115,7 +116,7 @@ bool I2sModule::PauseStream()
 {
     if (!m_isStreaming)
     {
-        return false;
+        return true;
     }
 
     if (HAL_I2S_DMAPause(m_handle) != HAL_OK)
@@ -131,7 +132,7 @@ bool I2sModule::ResumeStream()
 {
     if (!m_isStreaming)
     {
-        return false;
+        return true;
     }
 
     if (HAL_I2S_DMAResume(m_handle) != HAL_OK)
