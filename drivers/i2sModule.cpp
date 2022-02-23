@@ -151,13 +151,13 @@ bool I2sModule::StopStream()
         return false;
     }
 
+    m_isStreaming = false;
+
     if (HAL_I2S_DMAStop(m_handle) != HAL_OK)
     {
         I2S_ERROR("Unable to stop stream!");
         return false;
     }
-
-    m_isStreaming = false;
 
     // Restart the clock if it was running.
     if (m_isClockActive)
