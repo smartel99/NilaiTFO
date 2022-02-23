@@ -119,7 +119,7 @@ public:
         }
         else
         {
-            m_status = 0;
+            m_status = static_cast<Result>(0);
         }
 
         return m_status;

@@ -22,10 +22,13 @@
 #    include "filesystem.h"
 #    include "logger.hpp"
 
+static std::string GetSectionFromKey(const std::string& k);
+static std::string GetNameFromKey(const std::string& k);
+
 namespace cep
 {
 
-IniParser::IniParser(const std::string& fp)
+IniParser::IniParser(std::string fp) : m_fp(std::move(fp))
 {
     using namespace cep::Filesystem;
     // Open the file first.
@@ -52,70 +55,81 @@ IniParser::IniParser(const std::string& fp)
         file += l;
     }
 
+    f.Close();
+
     m_error = ini_parse_string(file.c_str(), ValueHandler, this);
 }
 
-IniParser::IniParser(const char* buff, size_t len)
+void IniParser::Save()
 {
-    std::string c(buff, len);
-    m_error = ini_parse(c.c_str(), ValueHandler, this);
+    using namespace cep::Filesystem;
+
+    File f(m_fp, FileModes::Write);
+    if (!f.IsOpen())
+    {
+        LOG_ERROR("Unable to open '%s': (%i) %s",
+                  m_fp.c_str(),
+                  (int)f.GetError(),
+                  ResultToStr(f.GetError()).c_str());
+        return;
+    }
+
+    // Find all the sections.
+    struct Kvp
+    {
+        std::string K;
+        std::string V;
+
+        Kvp(std::string k, std::string v) : K(std::move(k)), V(std::move(v)) {}
+    };
+
+    std::map<std::string, std::vector<Kvp>> data;
+    for (const auto& [secNName, v] : m_values)
+    {
+        data[::GetSectionFromKey(secNName)].emplace_back(::GetNameFromKey(secNName), v);
+    }
+
+    // Dump the sections and key-value pairs.
+    for (const auto& [section, kvp] : data)
+    {
+        f.WriteFmtString("[%s]\n\r", section.c_str());
+        for (const auto& [k, v] : kvp)
+        {
+            f.WriteFmtString("%s=%s\n\r", k.c_str(), v.c_str());
+        }
+    }
+
+    f.Close();
+    m_isDirty = false;
 }
 
-const std::string& IniParser::Get(const std::string& section,
-                                  const std::string& name,
-                                  const std::string& def) const
+template<cep::IsIniType T>
+void IniParser::Set(const std::string& section, const std::string& name, const T& v)
+{
+    m_isDirty     = true;
+    std::string k = MakeKey(section, name);
+    if constexpr (std::is_same_v<T, std::string>)
+    {
+        m_values[k] = v;
+    }
+    else if constexpr (std::is_same_v<T, bool>)
+    {
+        m_values[k] = v ? "true" : "false";
+    }
+    else
+    {
+        m_values[k] = std::to_string(v);
+    }
+}
+
+const std::string& IniParser::GetField(const std::string& section,
+                                       const std::string& name,
+                                       const std::string& def) const
 {
     std::string k = MakeKey(section, name);
     return m_values.count(k) != 0 ? m_values.at(k) : def;
 }
 
-std::string IniParser::GetString(const std::string& section,
-                                 const std::string& name,
-                                 const std::string& def) const
-{
-    const std::string& s = Get(section, name);
-    return s.empty() ? def : s;
-}
-
-uint32_t IniParser::GetInteger(const std::string& section,
-                               const std::string& name,
-                               uint32_t           def) const
-{
-    const std::string& valstr = Get(section, name);
-    const char*        value  = valstr.c_str();
-    char*              end;
-    // This parses "1234" (decimal) and also "0x4D2" (hex)
-    uint32_t n = strtol(value, &end, 0);
-    return end > value ? n : def;
-}
-
-double IniParser::GetDecimal(const std::string& section, const std::string& name, double def) const
-{
-    const std::string& valstr = Get(section, name);
-    const char*        value  = valstr.c_str();
-    char*              end;
-    double             n = strtod(value, &end);
-    return end > value ? n : def;
-}
-
-bool IniParser::GetBoolean(const std::string& section, const std::string& name, bool def) const
-{
-    std::string valstr = Get(section, name);
-    // Convert to lower case to make string comparisons case-insensitive
-    std::transform(valstr.begin(), valstr.end(), valstr.begin(), ::tolower);
-    if (valstr == "true" || valstr == "yes" || valstr == "on" || valstr == "1")
-    {
-        return true;
-    }
-    else if (valstr == "false" || valstr == "no" || valstr == "off" || valstr == "0")
-    {
-        return false;
-    }
-    else
-    {
-        return def;
-    }
-}
 
 bool IniParser::HasSection(const std::string& section) const
 {
@@ -164,6 +178,17 @@ int IniParser::ValueHandler(void* usr, const char* section, const char* name, co
     reader->m_values[key] += value != nullptr ? value : "";
     return 1;
 }
+
+std::string GetSectionFromKey(const std::string& k)
+{
+    return k.substr(0, k.find_last_of('='));
+}
+
+std::string GetNameFromKey(const std::string& k)
+{
+    return k.substr(k.find_last_of('='));
+}
+
 
 }    // namespace cep
 #endif

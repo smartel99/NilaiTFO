@@ -3647,7 +3647,7 @@ static uint32_t SD_InitCard(SD_HandleTypeDef* hsd)
     /* Get the Card Class */
     hsd->SdCard.Class = (SDMMC_GetResponse(hsd->Instance, SDMMC_RESP2) >> 20U);
 
-    /* Get CSD parameters */
+    /* GetField CSD parameters */
     if (HAL_SD_GetCardCSD(hsd, &CSD) != HAL_OK)
     {
         return HAL_SD_ERROR_UNSUPPORTED_FEATURE;
