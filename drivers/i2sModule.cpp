@@ -40,6 +40,7 @@ bool I2sModule::DoPost()
     I2S_INFO("POST OK");
     return true;
 }
+
 void I2sModule::Run()
 {
 }
@@ -115,7 +116,7 @@ bool I2sModule::PauseStream()
 {
     if (!m_isStreaming)
     {
-        return false;
+        return true;
     }
 
     if (HAL_I2S_DMAPause(m_handle) != HAL_OK)
@@ -131,7 +132,7 @@ bool I2sModule::ResumeStream()
 {
     if (!m_isStreaming)
     {
-        return false;
+        return true;
     }
 
     if (HAL_I2S_DMAResume(m_handle) != HAL_OK)
@@ -150,13 +151,13 @@ bool I2sModule::StopStream()
         return false;
     }
 
+    m_isStreaming = false;
+
     if (HAL_I2S_DMAStop(m_handle) != HAL_OK)
     {
         I2S_ERROR("Unable to stop stream!");
         return false;
     }
-
-    m_isStreaming = false;
 
     // Restart the clock if it was running.
     if (m_isClockActive)
@@ -215,5 +216,6 @@ void I2sModule::SetAudioFreq(cep::I2S::AudioFreqs f)
 
     HAL_I2S_DeInit(m_handle);    // De-init the I2S peripheral.
 
+    m_handle->Init.AudioFreq = (uint32_t)f;
     CEP_ASSERT(HAL_I2S_Init(m_handle) == HAL_OK, "Unable to re-init I2S!");
 }
