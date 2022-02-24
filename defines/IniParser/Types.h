@@ -14,8 +14,8 @@
  * You should have received a copy of the GNU General Public License along with this program. If
  * not, see <a href=https://www.gnu.org/licenses/>https://www.gnu.org/licenses/<a/>.
  */
-#ifndef DERISKING_SD_DAC_I2S_TYPES_H
-#define DERISKING_SD_DAC_I2S_TYPES_H
+#ifndef NILAI_TYPES_H
+#define NILAI_TYPES_H
 
 #if defined(NILAI_USE_INI_PARSER)
 
@@ -26,7 +26,11 @@
 
 namespace cep
 {
+#    if defined(__cpp_concepts)
+template<cep::IsIniType T>
+#    else
 template<typename T>
+#    endif
 inline static T StrToVal(const std::string& s)
 {
     if constexpr (std::is_same_v<T, std::string>)
@@ -60,4 +64,4 @@ inline static T StrToVal(const std::string& s)
 
 #endif
 
-#endif    // DERISKING_SD_DAC_I2S_TYPES_H
+#endif    // NILAI_TYPES_H

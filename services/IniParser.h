@@ -47,17 +47,24 @@ public:
     [[nodiscard]] int GetError() const { return m_error; }
 
     [[nodiscard]] bool IsDirty() const { return m_isDirty; }
-    void Save();
+    void               Save();
 
-    template<cep::IsIniType T>
+#        if defined(__cpp_concepts)
+    template<IsIniType T>
+#        else
+    template<typename T>
+#        endif
     [[nodiscard]] T Get(const std::string& section, const std::string& name, const T& def = {})
     {
         std::string f = GetField(section, name, "");
         return f.empty() ? def : StrToVal<T>(f);
     }
 
-    template<cep::IsIniType T>
-    void Set(const std::string& section, const std::string& name, const T& v);
+    void SetStr(const std::string& section, const std::string& name, const std::string& v);
+    void SetBool(const std::string& section, const std::string& name, bool v);
+    void SetInt(const std::string& section, const std::string& name, int32_t v);
+    void SetUInt(const std::string& section, const std::string& name, uint32_t v);
+    void SetDouble(const std::string& section, const std::string& name, double v);
 
     /**
      * @brief Returns true if the given @c section exists.

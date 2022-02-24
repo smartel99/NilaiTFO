@@ -14,17 +14,15 @@
  * You should have received a copy of the GNU General Public License along with this program. If
  * not, see <a href=https://www.gnu.org/licenses/>https://www.gnu.org/licenses/<a/>.
  */
-#ifndef DERISKING_SD_DAC_I2S_CONCEPTS_H
-#define DERISKING_SD_DAC_I2S_CONCEPTS_H
+#ifndef NILAI_CONCEPTS_H
+#define NILAI_CONCEPTS_H
 
 #if defined(NILAI_USE_INI_PARSER)
 
-#    if !defined(__cpp_concepts)
-#        error The IniParser requires concepts (C++20)!
-#    endif
+#    if defined(__cpp_concepts)
 
-#    include <string>
-#    include <type_traits>
+#        include <string>
+#        include <type_traits>
 
 namespace cep
 {
@@ -59,6 +57,7 @@ concept IsBool = requires(T t)
 };
 
 }    // namespace cep
+#    endif
 #endif
 
-#endif    // DERISKING_SD_DAC_I2S_CONCEPTS_H
+#endif    // NILAI_CONCEPTS_H

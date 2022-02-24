@@ -27,16 +27,15 @@ static std::string GetNameFromKey(const std::string& k);
 
 namespace cep
 {
-
 IniParser::IniParser(std::string fp) : m_fp(std::move(fp))
 {
     using namespace cep::Filesystem;
     // Open the file first.
-    File f(fp, FileModes::Read);
+    File f(m_fp, FileModes::Read);
     if (!f.IsOpen())
     {
         LOG_ERROR("Unable to open '%s': (%i) %s",
-                  fp.c_str(),
+                  m_fp.c_str(),
                   (int)f.GetError(),
                   ResultToStr(f.GetError()).c_str());
         // Unable to open the file.
@@ -80,46 +79,55 @@ void IniParser::Save()
         std::string K;
         std::string V;
 
-        Kvp(std::string k, std::string v) : K(std::move(k)), V(std::move(v)) {}
+        Kvp(const std::string& k, const std::string& v) : K(k), V(v) {}
     };
 
     std::map<std::string, std::vector<Kvp>> data;
     for (const auto& [secNName, v] : m_values)
     {
-        data[::GetSectionFromKey(secNName)].emplace_back(::GetNameFromKey(secNName), v);
+        data[GetSectionFromKey(secNName)].emplace_back(GetNameFromKey(secNName), v);
     }
+
 
     // Dump the sections and key-value pairs.
     for (const auto& [section, kvp] : data)
     {
-        f.WriteFmtString("[%s]\n\r", section.c_str());
+        f.WriteFmtString("[%s]\n", section.c_str());
         for (const auto& [k, v] : kvp)
         {
-            f.WriteFmtString("%s=%s\n\r", k.c_str(), v.c_str());
+            f.WriteFmtString("%s=%s\n", k.c_str(), v.c_str());
         }
+        f.WriteString("\n");
     }
 
     f.Close();
     m_isDirty = false;
 }
 
-template<cep::IsIniType T>
-void IniParser::Set(const std::string& section, const std::string& name, const T& v)
+void IniParser::SetStr(const std::string& section, const std::string& name, const std::string& v)
 {
-    m_isDirty     = true;
-    std::string k = MakeKey(section, name);
-    if constexpr (std::is_same_v<T, std::string>)
-    {
-        m_values[k] = v;
-    }
-    else if constexpr (std::is_same_v<T, bool>)
-    {
-        m_values[k] = v ? "true" : "false";
-    }
-    else
-    {
-        m_values[k] = std::to_string(v);
-    }
+    m_isDirty                        = true;
+    m_values[MakeKey(section, name)] = v;
+}
+
+void IniParser::SetBool(const std::string& section, const std::string& name, bool v)
+{
+    SetStr(section, name, std::string {v ? "true" : "false"});
+}
+
+void IniParser::SetInt(const std::string& section, const std::string& name, int32_t v)
+{
+    SetStr(section, name, std::to_string(v));
+}
+
+void IniParser::SetUInt(const std::string& section, const std::string& name, uint32_t v)
+{
+    SetStr(section, name, std::to_string(v));
+}
+
+void IniParser::SetDouble(const std::string& section, const std::string& name, double v)
+{
+    SetStr(section, name, std::to_string(v));
 }
 
 const std::string& IniParser::GetField(const std::string& section,
@@ -179,6 +187,8 @@ int IniParser::ValueHandler(void* usr, const char* section, const char* name, co
     return 1;
 }
 
+}    // namespace cep
+
 std::string GetSectionFromKey(const std::string& k)
 {
     return k.substr(0, k.find_last_of('='));
@@ -186,9 +196,8 @@ std::string GetSectionFromKey(const std::string& k)
 
 std::string GetNameFromKey(const std::string& k)
 {
-    return k.substr(k.find_last_of('='));
+    return k.substr(k.find_last_of('=') + 1);
 }
 
 
-}    // namespace cep
 #endif
