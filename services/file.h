@@ -17,6 +17,7 @@
 #if defined(NILAI_USE_FILESYSTEM)
 
 #    include "../defines/Core.h"
+#    include "../defines/Filesystem/ErrorCodes.h"
 
 #    include "ff.h"
 
@@ -27,7 +28,6 @@ namespace cep
 {
 namespace Filesystem
 {
-enum class Result;
 using file_t  = FIL;
 using fsize_t = FSIZE_t;
 
@@ -110,7 +110,7 @@ public:
         if (!m_isOpen)
         {
             // File must be open and valid!
-            CRASH;
+            return Result::NoFile;
         }
 #        endif
         if (f_printf(&m_file, fmt, args...) <= 0)
@@ -130,17 +130,17 @@ public:
 #    endif
     }
 
-    fsize_t Tell();
-    bool    AtEoF();
-    fsize_t GetSize();
-    bool    HasError();
-    Result  GetError() const { return m_status; }
+    fsize_t              Tell();
+    bool                 AtEoF();
+    fsize_t              GetSize();
+    bool                 HasError();
+    [[nodiscard]] Result GetError() const { return m_status; }
 
-    bool IsOpen() const { return m_isOpen; }
-         operator bool() const { return IsOpen(); }
+    [[nodiscard]] bool IsOpen() const { return m_isOpen; }
+                       operator bool() const { return IsOpen(); }
 
 private:
-    std::string m_path = "";
+    std::string m_path;
     FileModes   m_mode = FileModes::Read | FileModes::OpenExisting;
     file_t      m_file;
     bool        m_isOpen = false;
