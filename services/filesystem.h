@@ -17,6 +17,7 @@
 #if defined(NILAI_USE_FILESYSTEM)
 
 #    include "../defines/pin.h"
+#include "../defines/Filesystem/ErrorCodes.h"
 #    include "ff.h"
 #    include "file.h"
 
@@ -33,32 +34,6 @@ using dword_t    = unsigned long;
 using fs_t       = FATFS;
 using dir_t      = DIR;
 using fileInfo_t = FILINFO;
-
-
-enum class Result
-{
-    Ok               = FR_OK,
-    DiskError        = FR_DISK_ERR,
-    IntErr           = FR_INT_ERR,
-    NotReady         = FR_NOT_READY,
-    NoFile           = FR_NO_FILE,
-    NoPath           = FR_NO_PATH,
-    InvalidName      = FR_INVALID_NAME,
-    Denied           = FR_DENIED,
-    Exist            = FR_EXIST,
-    InvalidObject    = FR_INVALID_OBJECT,
-    WriteProtected   = FR_WRITE_PROTECTED,
-    InvalidDrive     = FR_INVALID_DRIVE,
-    NotEnabled       = FR_NOT_ENABLED,
-    NoFilesystem     = FR_NO_FILESYSTEM,
-    MkfsAborted      = FR_MKFS_ABORTED,
-    Timeout          = FR_TIMEOUT,
-    Locked           = FR_LOCKED,
-    NotEnoughCore    = FR_NOT_ENOUGH_CORE,
-    TooManyOpenFiles = FR_TOO_MANY_OPEN_FILES,
-    InvalidParameter = FR_INVALID_PARAMETER,
-};
-
 
 enum class CodePages
 {
