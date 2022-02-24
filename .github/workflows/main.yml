@@ -15,18 +15,18 @@ on:
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  format-verifier:
-    name: Format Verifier
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: DoozyX/clang-format-lint-action@v0.13
-        with:
-          source: '.'
-          exclude: './bsp'
-          extensions: 'h,hpp,cpp,c'
-          clangFormatVersion: 13
-          style: file
+#  format-verifier:
+#    name: Format Verifier
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: actions/checkout@v2
+#      - uses: DoozyX/clang-format-lint-action@v0.13
+#        with:
+#          source: '.'
+#          exclude: './bsp'
+#         extensions: 'h,hpp,cpp,c'
+#          clangFormatVersion: 13
+#          style: file
   
   run-unit-tests:
     name: Unit Tests
