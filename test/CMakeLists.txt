@@ -25,7 +25,8 @@ add_compile_options(-DNILAI_TEST)
 
 add_subdirectory(BitManipulations)
 add_subdirectory(Pin)
-add_subdirectory(Interfaces/TAS5705)
+add_subdirectory(Processes)
 add_subdirectory(Interfaces/TAS5707)
+add_subdirectory(Interfaces/TAS5760)
 
 

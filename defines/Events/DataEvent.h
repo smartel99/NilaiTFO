@@ -36,9 +36,9 @@ struct DataEvent : public Event
     {
         Len  = sizeof(T);
         Data = malloc(Len);
-        memcpy(Data, reinterpret_cast<void*>(&data), Len);
+        memcpy(Data, reinterpret_cast<void*>(const_cast<T*>(&data)), Len);
     }
-    ~DataEvent() { free(Data); }
+    virtual ~DataEvent() { free(Data); }
 
     template<typename T>
     const T& As() const

@@ -28,6 +28,7 @@ namespace cep::Events
  */
 struct Event
 {
+    virtual ~Event()   = default;
     uint32_t Timestamp = 0;
 };
 }    // namespace cep::Events

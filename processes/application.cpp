@@ -58,7 +58,7 @@ void Application::TriggerSoftEvent(Events::SoftwareEvents ch)
 {
     Events::ExtEvent e;
     e.IsFromSoft = true;
-    e.SrcCh = (uint8_t)ch;
+    e.SrcCh      = (uint8_t)ch;
 
     DispatchEvent((Events::EventTypes)ch, &e);
 }
@@ -67,7 +67,13 @@ size_t Application::InsertCallback(Application::EventCallbacks&     events,
                                    const Application::CallbackFunc& cb)
 {
     // Find the first free slot in the array.
-    auto it = std::find(events.begin(), events.end(), &DefaultEventCallback);
+    EventCallbacks::iterator it = std::find_if(events.begin(),
+                                               events.end(),
+                                               [](const CallbackFunc& f)
+                                               {
+                                                   auto fptr = f.target<bool (*)(Events::Event*)>();
+                                                   return fptr && *fptr == &DefaultEventCallback;
+                                               });
 
     // If a slot is found:
     if (it != events.end())
@@ -101,7 +107,7 @@ void Application::DispatchEvent(Events::EventTypes e, Events::Event* data)
     (void)signal;
     // This function will in most cases be called by the STL, in place of the standard _exit().
     AssertFailed((const uint8_t*)__FILE__, __LINE__, 1);
-    while (1)
+    while (true)
     {
     }
 }

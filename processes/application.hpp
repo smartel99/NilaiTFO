@@ -21,8 +21,8 @@
 
 #    if defined(NILAI_USE_EVENTS)
 #        include "../defines/Events/Events.h"
+#        include <array>
 #        include <functional>
-#        include <unordered_map>
 #    endif
 
 namespace cep
