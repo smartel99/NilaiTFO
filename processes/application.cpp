@@ -16,16 +16,14 @@
 
 namespace cep
 {
-#if defined(NILAI_USE_EVENTS)
-static Application* s_app = nullptr;
-#endif
+Application* Application::s_instance = nullptr;
 
 Application::Application()
 {
     std::signal(SIGABRT, &AbortionHandler);
 
+    s_instance = this;
 #if defined(NILAI_USE_EVENTS)
-    s_app = this;
     for (auto& event : m_callbacks)
     {
         for (auto& cb : event)

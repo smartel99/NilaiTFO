@@ -19,6 +19,9 @@
 
 #if defined(NILAI_USE_EVENTS)
 
+#    include "../../defines/internalConfig.h"
+#    include NILAI_HAL_HEADER
+
 #    include <cstdint>
 
 namespace cep::Events
@@ -28,6 +31,7 @@ namespace cep::Events
  */
 struct Event
 {
+    Event() : Timestamp(HAL_GetTick()) {}
     virtual ~Event()   = default;
     uint32_t Timestamp = 0;
 };

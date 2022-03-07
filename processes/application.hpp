@@ -78,11 +78,19 @@ public:
         Events::DataEvent e(data);
         DispatchEvent(Events::EventTypes::DataEvent, &e);
     }
+
+    /**
+     * @brief Dispatch an event to the other modules.
+     * @param e The event type.
+     * @param data The event data.
+     */
+    void DispatchEvent(Events::EventTypes e, Events::Event* data);
 #    endif
+
+    static Application* Get() { return s_instance; }
 
 #    if defined(NILAI_USE_EVENTS)
 private:
-    void DispatchEvent(Events::EventTypes e, Events::Event* data);
 
     static constexpr size_t s_maxEventCbCount = NILAI_EVENTS_MAX_CALLBACKS;
     static constexpr size_t s_numOfEvents     = (size_t)Events::EventTypes::Count;
@@ -94,6 +102,7 @@ private:
     static bool   DefaultEventCallback(Events::Event*) { return false; }
     static size_t InsertCallback(EventCallbacks& events, const CallbackFunc& cb);
 #    endif
+    static Application* s_instance;
 };
 
 }    // namespace cep

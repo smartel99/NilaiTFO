@@ -28,6 +28,9 @@ namespace cep::Events
  */
 struct ExtEvent : public Event
 {
+    ExtEvent() = default;
+    ExtEvent(bool fromSoft, uint8_t ch) : IsFromSoft(fromSoft), SrcCh(ch) {}
+
     //! Was the event triggered by software?
     bool IsFromSoft = false;
 
