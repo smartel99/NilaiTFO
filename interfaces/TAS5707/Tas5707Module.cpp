@@ -16,13 +16,15 @@
  */
 #include "Tas5707Module.h"
 
-#include "Enums.h"
+#if defined(NILAI_USE_TAS5707)
 
-#include "../../services/logger.hpp"
+#    include "Enums.h"
 
-#define TAS_DEBUG(msg, ...) LOG_DEBUG("[%s]: " msg, m_label.c_str(), ##__VA_ARGS__)
-#define TAS_INFO(msg, ...)  LOG_INFO("[%s]: " msg, m_label.c_str(), ##__VA_ARGS__)
-#define TAS_ERROR(msg, ...) LOG_ERROR("[%s]: " msg, m_label.c_str(), ##__VA_ARGS__)
+#    include "../../services/logger.hpp"
+
+#    define TAS_DEBUG(msg, ...) LOG_DEBUG("[%s]: " msg, m_label.c_str(), ##__VA_ARGS__)
+#    define TAS_INFO(msg, ...)  LOG_INFO("[%s]: " msg, m_label.c_str(), ##__VA_ARGS__)
+#    define TAS_ERROR(msg, ...) LOG_ERROR("[%s]: " msg, m_label.c_str(), ##__VA_ARGS__)
 
 /**
  * @brief Updates the value of a register.
@@ -45,7 +47,7 @@ static bool UpdateRegisterValue(
 
     i2c->TransmitFrameToRegister(addr, reg, cep::ValToVector<true>(regVal));
 
-#if defined(DEBUG)
+#    if defined(DEBUG)
     // Verify the data.
     T rb = cep::VectorToVal<T, true>(i2c->ReceiveFrameFromRegister(addr, reg, sizeof(T)).data);
 
@@ -53,7 +55,7 @@ static bool UpdateRegisterValue(
     {
         return false;
     }
-#endif
+#    endif
 
     return true;
 }
@@ -235,7 +237,7 @@ void Tas5707Module::SetBiquadFilters(const cep::Tas5707::BiquadBanks& ch1,
         writeFunc(action.Ch2);
     }
 
-#if defined(DEBUG)
+#    if defined(DEBUG)
     // Validate the write.
     for (const auto& action : actions)
     {
@@ -267,7 +269,7 @@ void Tas5707Module::SetBiquadFilters(const cep::Tas5707::BiquadBanks& ch1,
         fReg = (uint8_t)Registers::Ch2Bq_0;
         readFunc(action.Ch2);
     }
-#endif
+#    endif
 
     // Write the bank switch mode back.
     bankSwitchReg.back() = bankSwitchMode;
@@ -283,7 +285,7 @@ void Tas5707Module::SetDynamicRangeCtrl(const cep::Tas5707::DynamicRangeControl&
     auto writeFunc = [this](const auto& data, Registers reg) -> bool
     {
         m_hw.I2cHandle->TransmitFrameToRegister(m_i2cAddr, (uint8_t)reg, data.data(), data.size());
-#if defined(DEBUG)
+#    if defined(DEBUG)
         // Verify that the data was successfully written.
         auto rb =
           m_hw.I2cHandle->ReceiveFrameFromRegister(m_i2cAddr, (uint8_t)reg, data.size()).data;
@@ -292,7 +294,7 @@ void Tas5707Module::SetDynamicRangeCtrl(const cep::Tas5707::DynamicRangeControl&
             TAS_ERROR("Invalid DRC data read back at address %#02x!", reg);
             return false;
         }
-#endif
+#    endif
         return true;
     };
 
@@ -572,3 +574,6 @@ uint32_t StartStopRegValToTime(uint8_t ss)
         default: return 0;
     }
 }
+
+
+#endif
