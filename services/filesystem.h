@@ -1,23 +1,23 @@
 /**
- * @addtogroup sdModule.h
+ * @addtogroup filesystem.h
  * @{
  *******************************************************************************
- * @file	sdModule.h
+ * @file	filesystem.h
  * @author	Samuel Martel
  * @brief
  * Created on: Apr 9, 2021
  *******************************************************************************
  */
 
-#ifndef SDMODULE_H_
-#define SDMODULE_H_
+#ifndef NILAI_FILESYSTEM_H
+#define NILAI_FILESYSTEM_H
 
 /***********************************************/
 /* Includes */
 #if defined(NILAI_USE_FILESYSTEM)
 
+#    include "../defines/Filesystem/ErrorCodes.h"
 #    include "../defines/pin.h"
-#include "../defines/Filesystem/ErrorCodes.h"
 #    include "ff.h"
 #    include "file.h"
 
