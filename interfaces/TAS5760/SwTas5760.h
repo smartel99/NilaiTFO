@@ -34,6 +34,8 @@ public:
     void Run() override;
     bool DoPost() override;
 
+    void ToggleMute(bool s);
+
     void               ToggleSleep(bool s) override;
     [[nodiscard]] bool IsAsleep() const override;
 
@@ -43,6 +45,11 @@ public:
     void SetChannelVolume(cep::Tas5760::Channels ch, uint8_t vol);
 
     bool SetDigitalClipLevel(uint32_t lvl);
+
+    bool Stream(const uint16_t* samples, size_t cnt) override;
+    bool PauseStream() override;
+    bool ResumeStream() override;
+    bool StopStream() override;
 
 private:
     bool Init();

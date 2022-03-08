@@ -81,6 +81,12 @@ bool SwTas5760::DoPost()
     return Tas5760Module::DoPost();
 }
 
+void SwTas5760::ToggleMute(bool s)
+{
+    m_cfg.VolumeConfig.MuteL = s;
+    m_cfg.VolumeConfig.MuteR = s;
+    SetRegister(cep::Tas5760::Registers::VolCtrlCfg, m_cfg.VolumeConfig);
+}
 
 void SwTas5760::ToggleSleep(bool s)
 {
@@ -134,6 +140,30 @@ bool SwTas5760::SetDigitalClipLevel(uint32_t lvl)
     isGood &= SetRegister(cep::Tas5760::Registers::DigClip1, m_cfg.DigClipLev5_0);
 
     return isGood;
+}
+
+bool SwTas5760::Stream(const uint16_t* samples, size_t cnt)
+{
+    ToggleMute(false);
+    return I2sModule::Stream(samples, cnt);
+}
+
+bool SwTas5760::PauseStream()
+{
+    ToggleMute(true);
+    return I2sModule::PauseStream();
+}
+
+bool SwTas5760::ResumeStream()
+{
+    ToggleMute(false);
+    return I2sModule::ResumeStream();
+}
+
+bool SwTas5760::StopStream()
+{
+    ToggleMute(true);
+    return I2sModule::StopStream();
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -221,6 +251,7 @@ bool SwTas5760::SetRegister(cep::Tas5760::Registers r, uint8_t v)
     return true;
 #    endif
 }
+
 
 
 

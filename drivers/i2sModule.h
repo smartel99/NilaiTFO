@@ -70,26 +70,26 @@ public:
      * @param cnt The number of samples to send, combining L+R channels.
      * @return True if the stream was successfully started.
      */
-    bool Stream(const uint16_t* samples, size_t cnt);
-    bool Restream(const uint16_t* samples, size_t cnt);
+    virtual bool Stream(const uint16_t* samples, size_t cnt);
+    virtual bool Restream(const uint16_t* samples, size_t cnt);
 
     /**
      * @brief Pauses an ongoing stream.
      * @return True if successfully paused.
      */
-    bool PauseStream();
+    virtual bool PauseStream();
 
     /**
      * @brief Resumes an ongoing stream.
      * @return True if successfully resumed.
      */
-    bool ResumeStream();
+    virtual bool ResumeStream();
 
     /**
      * @brief Stops an ongoing stream.
      * @return True if successfully stopped.
      */
-    bool StopStream();
+    virtual bool StopStream();
 
 protected:
     void TxHalfCplt();
