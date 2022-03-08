@@ -91,7 +91,7 @@ public:
      */
     bool StopStream();
 
-private:
+protected:
     void TxHalfCplt();
     void TxCplt();
 
@@ -102,7 +102,7 @@ private:
     static void HalTxCplt(I2S_HandleTypeDef* i2s);
     static void HalRestartClock(I2S_HandleTypeDef* i2s);
 
-private:
+protected:
     static std::map<I2S_HandleTypeDef*, I2sModule*> s_modules;
 
     I2S_HandleTypeDef* m_handle = nullptr;

@@ -11,12 +11,12 @@
 
 #include "pwmModule.h"
 #if defined(NILAI_USE_PWM) && defined(HAL_TIM_MODULE_ENABLED)
-#    include "services/logger.hpp"
+#    include "../services/logger.hpp"
 
-PwmModule::PwmModule(TIM_HandleTypeDef* timer, PWM::Channels channel, const std::string& label)
+PwmModule::PwmModule(TIM_HandleTypeDef* timer, cep::Pwm::Channels channel, std::string label)
 : m_timer(timer),
   m_channel((uint32_t)channel),
-  m_label(label),
+  m_label(std::move(label)),
   m_activeFreq(0),
   m_activeDutyCycle(0),
   m_isActive(false)

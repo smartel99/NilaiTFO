@@ -15,17 +15,17 @@
 /***********************************************/
 /* Includes */
 #if defined(NILAI_USE_PWM)
-#    include "defines/internalConfig.h"
+#    include "../defines/internalConfig.h"
 #    include NILAI_HAL_HEADER
 #    if defined(HAL_TIM_MODULE_ENABLED)
-#        include "defines/macros.hpp"
-#        include "defines/misc.hpp"
-#        include "defines/module.hpp"
+#        include "../defines/macros.hpp"
+#        include "../defines/misc.hpp"
+#        include "../defines/module.hpp"
 
 #        include <string>
 #        include <vector>
 
-namespace PWM
+namespace cep::Pwm
 {
 enum class Channels
 {
@@ -39,26 +39,26 @@ enum class Channels
 class PwmModule : public cep::Module
 {
 public:
-    PwmModule(TIM_HandleTypeDef* timer, PWM::Channels channel, const std::string& label);
+    PwmModule(TIM_HandleTypeDef* timer, cep::Pwm::Channels channel, std::string label);
 
-    virtual bool               DoPost() override;
-    virtual void               Run() override;
-    virtual const std::string& GetLabel() const override { return m_label; }
+    bool               DoPost() override;
+    void               Run() override;
+    [[nodiscard]] const std::string& GetLabel() const override { return m_label; }
 
     void Enable();
     void Disable();
-    bool IsEnabled() const { return m_isActive; }
+    [[nodiscard]] bool IsEnabled() const { return m_isActive; }
 
     void     SetFrequency(uint64_t hz);
-    uint64_t GetFrequency() const { return m_activeFreq; }
+    [[nodiscard]] uint64_t GetFrequency() const { return m_activeFreq; }
 
     void     SetDutyCycle(uint32_t percent);
-    uint32_t GetDutyCycle() const { return m_activeDutyCycle; }
+    [[nodiscard]] uint32_t GetDutyCycle() const { return m_activeDutyCycle; }
 
 private:
     TIM_HandleTypeDef* m_timer   = nullptr;
     uint32_t           m_channel = 0;
-    std::string        m_label   = "";
+    std::string        m_label;
 
     uint64_t m_activeFreq      = 0;
     uint32_t m_activeDutyCycle = 0;
