@@ -23,6 +23,8 @@
 #    include "ExtEvent.h"
 #    include "GenericEvent.h"
 
+#include "../pin.h"
+
 
 namespace cep::Events
 {
@@ -72,6 +74,9 @@ enum class SoftwareEvents
     Event13 = (int)EventTypes::Exti13,
     Event14 = (int)EventTypes::Exti14,
 };
+
+EventTypes PinToEvent(const cep::Pin& p);
+
 }    // namespace cep::Events
 #endif
 

@@ -129,6 +129,11 @@
 #    define NILAI_TAS5760_PWM_MONO   1
 #    define NILAI_TAS5760_PWM_STEREO 2
 #    define NILAI_TAS5760_PWM_MODE   NILAI_TAS5760_PWM_NONE
+
+/**
+ * Controls if I2C writes should be verified or not.
+ */
+#define NILAI_TAS5760_VERIFY_WRITE
 #endif
 
 
