@@ -62,6 +62,18 @@
 //#define NILAI_UMO_USE_CAN
 #define NILAI_UMO_USE_UART
 
+/**
+ * Toggles the use of the event system.
+ */
+//#define NILAI_USE_EVENTS
+
+#if defined(NILAI_USE_EVENTS)
+/**
+ * Set the number of callbacks that can be assigned to an event (Default: 1).
+ */
+#    define NILAI_EVENTS_MAX_CALLBACKS 1
+#endif
+
 /******************************************************************************/
 /* [SECTION]: Module Activation                                               */
 /******************************************************************************/
@@ -92,6 +104,8 @@
 //#define NILAI_USE_RN2903
 //#define NILAI_USE_TLP3545
 //#define NILAI_USE_TAS5707
+//#define NILAI_USE_HW_TAS5760
+//#define NILAI_USE_SW_TAS5760
 
 // Services
 //#define NILAI_USE_UMO
@@ -100,6 +114,28 @@
 //#define NILAI_USE_FILE_LOGGER
 //#define NILAI_USE_FILESYSTEM
 //#define NILAI_USE_INI_PARSER
+
+/******************************************************************************/
+/* [SECTION]: Module-Specific Settings                                        */
+/******************************************************************************/
+#if defined(NILAI_USE_SW_TAS5760) || defined(NILAI_USE_HW_TAS5760)
+//--- TAS5760.
+
+/**
+ * Controls if the PWM outputs should be disabled (none), in mono (just one) or in stereo (two
+ * outputs).
+ */
+#    define NILAI_TAS5760_PWM_NONE   0
+#    define NILAI_TAS5760_PWM_MONO   1
+#    define NILAI_TAS5760_PWM_STEREO 2
+#    define NILAI_TAS5760_PWM_MODE   NILAI_TAS5760_PWM_NONE
+
+/**
+ * Controls if I2C writes should be verified or not.
+ */
+#define NILAI_TAS5760_VERIFY_WRITE
+#endif
+
 
 /**
  * @}

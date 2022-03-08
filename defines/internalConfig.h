@@ -61,6 +61,10 @@
 
 /***********************************************/
 /* Defines */
+#if defined(NILAI_USE_HW_TAS5760) || defined(NILAI_USE_SW_TAS5760)
+#define NILAI_USE_TAS5760
+#endif
+
 
 /***********************************************/
 /* Function declarations */

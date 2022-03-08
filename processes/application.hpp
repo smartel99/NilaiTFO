@@ -18,7 +18,12 @@
 #    include "../defines/module.hpp"
 
 #    include <csignal>
-#    include <vector>
+
+#    if defined(NILAI_USE_EVENTS)
+#        include "../defines/Events/Events.h"
+#        include <array>
+#        include <functional>
+#    endif
 
 namespace cep
 {
@@ -28,42 +33,76 @@ namespace cep
 
 class Application
 {
+#    if defined(NILAI_USE_EVENTS)
 public:
-    Application() { std::signal(SIGABRT, &AbortionHandler); }
+    /**
+     * @brief A callback function should return true if the event should not be propagated further,
+     * i.e if the following callbacks in the list should not be called after this one.
+     */
+    using CallbackFunc = std::function<bool(Events::Event*)>;
+#    endif
+public:
+    Application();
     virtual ~Application() = default;
 
     virtual void Init()   = 0;
     virtual bool DoPost() = 0;
     virtual void Run()    = 0;
-};
 
-class ModuleStack
-{
-public:
-    ModuleStack() { m_modules.reserve(16); }
+#    if defined(NILAI_USE_EVENTS)
+    /**
+     * @brief Registers a callback to an event.
+     * @param event The event to bind the callback to.
+     * @param cb The callback function. This function should return true if the event should not be
+     * propagated further.
+     * @return The ID of the callback. This ID is used to unregister the callback.
+     */
+    size_t RegisterEventCallback(Events::EventTypes event, const CallbackFunc& cb);
 
-    Module* GetModule(const std::string& label)
+    /**
+     * @brief Unregisters a callback that has previously been registered to an event.
+     * @param event The event to remove the callback from.
+     * @param id The ID of the callback to be removed.
+     */
+    void UnregisterEventCallback(Events::EventTypes event, size_t id);
+
+    /**
+     * @brief Dispatches a software event to the callbacks bound to the specified channel.
+     * @param ch The event channel to dispatch the event on.
+     */
+    void TriggerSoftEvent(Events::SoftwareEvents ch);
+
+    template<typename T>
+    void TriggerDataEvent(const T& data)
     {
-        // I really don't like having to iterate through the vector, checking each labels...
-        // A map breaks in Application::Run() though...
-        for (const auto& module : m_modules)
-        {
-            if (module->GetLabel() == label)
-            {
-                return module;
-            }
-        }
-
-        return nullptr;
+        Events::DataEvent e(data);
+        DispatchEvent(Events::EventTypes::DataEvent, &e);
     }
 
-    void AddModule(Module* module) { m_modules.push_back(module); }
+    /**
+     * @brief Dispatch an event to the other modules.
+     * @param e The event type.
+     * @param data The event data.
+     */
+    void DispatchEvent(Events::EventTypes e, Events::Event* data);
+#    endif
 
-    std::vector<Module*>::iterator begin() { return m_modules.begin(); }
-    std::vector<Module*>::iterator end() { return m_modules.end(); }
+    static Application* Get() { return s_instance; }
+
+#    if defined(NILAI_USE_EVENTS)
+private:
+
+    static constexpr size_t s_maxEventCbCount = NILAI_EVENTS_MAX_CALLBACKS;
+    static constexpr size_t s_numOfEvents     = (size_t)Events::EventTypes::Count;
+
+    using EventCallbacks = std::array<CallbackFunc, s_maxEventCbCount>;
+    std::array<EventCallbacks, s_numOfEvents> m_callbacks;
 
 private:
-    std::vector<Module*> m_modules;
+    static bool   DefaultEventCallback(Events::Event*) { return false; }
+    static size_t InsertCallback(EventCallbacks& events, const CallbackFunc& cb);
+#    endif
+    static Application* s_instance;
 };
 
 }    // namespace cep
