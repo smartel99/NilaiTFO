@@ -26,6 +26,7 @@
 
 using namespace cep;
 
+
 SwTas5760::SwTas5760(const cep::Tas5760::SwConfig& cfg,
                      I2S_HandleTypeDef*            i2s,
                      const std::string&            label)
@@ -41,7 +42,6 @@ SwTas5760::SwTas5760(const cep::Tas5760::SwConfig& cfg,
                                    [this](Events::Event*) -> bool
                                    {
                                        m_hasFault = true;
-                                       m_cfg.SpkShutdown.Set(false);
                                        return false;
                                    });
         m_faultFunction = [this]() { HandleFault(); };
@@ -60,14 +60,14 @@ SwTas5760::SwTas5760(const cep::Tas5760::SwConfig& cfg,
         m_hpChangeFunction = [this]() { HandleHeadphoneChange(); };
     }
 
-    if (Init())
-    {
-        TAS_INFO("Initialized.");
-    }
-    else
-    {
-        TAS_ERROR("Unable to initialize TAS5760.");
-    }
+//    if (Init())
+//    {
+//        TAS_INFO("Initialized.");
+//    }
+//    else
+//    {
+//        TAS_ERROR("Unable to initialize TAS5760.");
+//    }
 }
 
 void SwTas5760::Run()
@@ -90,12 +90,13 @@ void SwTas5760::ToggleMute(bool s)
 
 void SwTas5760::ToggleSleep(bool s)
 {
-    // TODO
+    m_cfg.PowerConfig.SpkSleep = s;
+    SetRegister(cep::Tas5760::Registers::PwrCtrl, m_cfg.PowerConfig);
 }
 
 bool SwTas5760::IsAsleep() const
 {
-    return false;
+    return m_cfg.PowerConfig.SpkSleep == 1;
 }
 
 void SwTas5760::ToggleShutdown(bool s)
@@ -144,25 +145,33 @@ bool SwTas5760::SetDigitalClipLevel(uint32_t lvl)
 
 bool SwTas5760::Stream(const uint16_t* samples, size_t cnt)
 {
-    ToggleMute(false);
-    return I2sModule::Stream(samples, cnt);
+    if (Init())
+    {
+        return I2sModule::Stream(samples, cnt);
+    }
+    else
+    {
+        return false;
+    }
 }
 
 bool SwTas5760::PauseStream()
 {
     ToggleMute(true);
+    ToggleSleep(true);
     return I2sModule::PauseStream();
 }
 
 bool SwTas5760::ResumeStream()
 {
     ToggleMute(false);
+    ToggleSleep(false);
     return I2sModule::ResumeStream();
 }
 
 bool SwTas5760::StopStream()
 {
-    ToggleMute(true);
+    Deinit();
     return I2sModule::StopStream();
 }
 
@@ -187,7 +196,6 @@ bool SwTas5760::StopStream()
  */
 bool SwTas5760::Init()
 {
-    //    HAL_Delay(13);
     m_cfg.SpkShutdown.Set(false);
 
     StartClock();
@@ -212,18 +220,50 @@ bool SwTas5760::Init()
         // Bring the chip out of shutdown.
         m_cfg.SpkShutdown.Set(true);
         // Unmute the 2 channels.
-        isConfigGood &= SetRegister(cep::Tas5760::Registers::VolCtrlCfg, m_cfg.VolumeConfig);
+        ToggleMute(false);
     }
 
     return isConfigGood;
 }
 
+bool SwTas5760::Deinit()
+{
+    ToggleMute(true);
+
+    m_cfg.SpkShutdown.Set(false);    // Shut the chip down.
+
+    StopClock();
+
+    return true;
+}
+
 void SwTas5760::HandleFault()
 {
+    if (m_hasFault)
+    {
+        uint8_t s =
+          m_cfg.I2c
+            ->ReceiveFrameFromRegister(
+              (uint8_t)m_cfg.Address, (uint8_t)cep::Tas5760::Registers::FaultCfgAndErrStatus, 1)
+            .data[0];
+
+        if ((s & s_latchingErrors) != 0)
+        {
+            // Error is latching, cleared by toggling the shutdown pin.
+            m_cfg.SpkShutdown.Set(false);
+        }
+        TAS_ERROR("A fault was detected: %s", StatusToStr(s).c_str());
+        m_hasFault = false;
+    }
 }
 
 void SwTas5760::HandleHeadphoneChange()
 {
+    if (m_hpChanged)
+    {
+        TAS_INFO("Headphone change detected: %i", (int)m_cfg.HpDetect.Get());
+        m_hpChanged = false;
+    }
 }
 
 bool SwTas5760::SetRegister(cep::Tas5760::Registers r, uint8_t v)
@@ -252,7 +292,29 @@ bool SwTas5760::SetRegister(cep::Tas5760::Registers r, uint8_t v)
 #    endif
 }
 
+std::string SwTas5760::StatusToStr(uint8_t s)
+{
+    std::string errStr;
 
+    if ((s & s_clkeMask) != 0)
+    {
+        errStr += "Clock error, ";
+    }
+    if ((s & s_oceMask) != 0)
+    {
+        errStr += "Over current, ";
+    }
+    if ((s & s_dceMask) != 0)
+    {
+        errStr += "DC error, ";
+    }
+    if ((s & s_oteMask) != 0)
+    {
+        errStr += "Over temperature";
+    }
+
+    return errStr;
+}
 
 
 #endif

@@ -23,7 +23,7 @@
 
 #    include "SwConfig.h"
 
-#include <functional>
+#    include <functional>
 
 class SwTas5760 : public Tas5760Module
 {
@@ -53,16 +53,19 @@ public:
 
 private:
     bool Init();
+    bool Deinit();
 
     void HandleFault();
     void HandleHeadphoneChange();
 
-    bool SetRegister(cep::Tas5760::Registers r, uint8_t v);
+    bool               SetRegister(cep::Tas5760::Registers r, uint8_t v);
+    static std::string StatusToStr(uint8_t s);
+
 private:
     cep::Tas5760::SwConfig m_cfg;
 
-    std::function<void()> m_faultFunction = [](){};
-    std::function<void()> m_hpChangeFunction = [](){};
+    std::function<void()> m_faultFunction    = []() {};
+    std::function<void()> m_hpChangeFunction = []() {};
 
     bool m_isShutdown = false;
 
@@ -77,8 +80,19 @@ private:
     uint8_t m_rVol = s_defaultVolume;
 
 private:
-    static constexpr uint8_t s_bothChMuted = 0x03;
+    static constexpr uint8_t s_bothChMuted   = 0x03;
     static constexpr uint8_t s_defaultVolume = 0xCF;
+
+    //! Clock error mask.
+    static constexpr uint8_t s_clkeMask = 0x08;
+    //! Over current error mask.
+    static constexpr uint8_t s_oceMask = 0x04;
+    //! DC offset error mask.
+    static constexpr uint8_t s_dceMask = 0x02;
+    //! Over temperature error mask.
+    static constexpr uint8_t s_oteMask = 0x01;
+    //! OCE, DCE and OTE are latching errors.
+    static constexpr uint8_t s_latchingErrors = 0x07;
 };
 
 #endif
