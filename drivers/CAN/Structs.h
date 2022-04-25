@@ -209,6 +209,13 @@ struct FilterConfiguration
     FilterScale scale = FilterScale::Scale32bit;
     //! Enable or disable the filter.
     FilterEnable activate = FilterEnable::Enable;
+
+    bool operator==(const FilterConfiguration& o) const
+    {
+        return filterId.fullId == o.filterId.fullId && maskId.fullId == o.maskId.fullId &&
+               fifo == o.fifo && bank == o.bank && mode == o.mode && scale == o.scale &&
+               activate == o.activate;
+    }
 };
 
 struct Frame
