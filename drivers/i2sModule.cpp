@@ -16,10 +16,11 @@
  */
 #include "i2sModule.h"
 
-#include "../defines/macros.hpp"
+#if defined(NILAI_USE_I2S)
+#    include "../defines/macros.hpp"
 
-#define I2S_INFO(msg, ...)  LOG_INFO("[%s]: " msg, m_label.c_str(), ##__VA_ARGS__)
-#define I2S_ERROR(msg, ...) LOG_ERROR("[%s]: " msg, m_label.c_str(), ##__VA_ARGS__)
+#    define I2S_INFO(msg, ...)  LOG_INFO("[%s]: " msg, m_label.c_str(), ##__VA_ARGS__)
+#    define I2S_ERROR(msg, ...) LOG_ERROR("[%s]: " msg, m_label.c_str(), ##__VA_ARGS__)
 
 std::map<I2S_HandleTypeDef*, I2sModule*> I2sModule::s_modules = {};
 
@@ -219,3 +220,4 @@ void I2sModule::SetAudioFreq(cep::I2S::AudioFreqs f)
     m_handle->Init.AudioFreq = (uint32_t)f;
     CEP_ASSERT(HAL_I2S_Init(m_handle) == HAL_OK, "Unable to re-init I2S!");
 }
+#endif
