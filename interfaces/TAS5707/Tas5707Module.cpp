@@ -18,6 +18,10 @@
 #if defined(NILAI_USE_TAS5707)
 #    include "Enums.h"
 
+#if defined(NILAI_USE_TAS5707)
+
+#    include "Enums.h"
+
 #    include "../../services/logger.hpp"
 
 #    define TAS_DEBUG(msg, ...) LOG_DEBUG("[%s]: " msg, m_label.c_str(), ##__VA_ARGS__)
@@ -572,4 +576,5 @@ uint32_t StartStopRegValToTime(uint8_t ss)
         default: return 0;
     }
 }
+
 #endif

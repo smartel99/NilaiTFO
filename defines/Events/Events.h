@@ -23,6 +23,10 @@
 #    include "ExtEvent.h"
 #    include "GenericEvent.h"
 
+#if defined(NILAI_USE_TIMER_EVENTS)
+#include "TimEvent.h"
+#endif
+
 #include "../pin.h"
 
 
@@ -51,6 +55,17 @@ enum class EventTypes
     Exti15,       //! External Event on pin 15 AND/OR Software-triggered event.
 
     DataEvent,    //! A software event carrying data.
+
+#if defined(NILAI_USE_TIMER_EVENTS)
+    //----------------------------------------------------------------------------------------------
+    // Timer Events.
+    Tim_PeriodElapsed,  //! Period of the timer is now completed.
+    Tim_OC_DelayElapsed,//! Output compare callback in non blocking mode.
+    Tim_IC_Capture, //! Input capture in non blocking mode.
+    Tim_PWM_PulseFinished, //! PWM pulse finished callback in non blocking mode.
+    Tim_Trigger,    //! Hall trigger detection callback in non blocking mode.
+    Tim_Error,  //! Timer error callback in non blocking mode.
+#endif
 
     //! Number of events, should always be last.
     Count

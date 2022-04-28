@@ -17,6 +17,7 @@
 #include "Misc.h"
 
 #if defined(NILAI_USE_TAS5707)
+
 namespace cep::Tas5707
 {
 std::array<uint8_t, 20> BiquadFilter::Serialize() const
@@ -47,4 +48,5 @@ std::array<uint8_t, 8> DynRangeCtrlCoeffs::Serialize() const
     };
 }
 }    // namespace cep::Tas5707
+
 #endif
