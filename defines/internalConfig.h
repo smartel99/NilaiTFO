@@ -47,6 +47,12 @@
 #else
 #    define NILAI_HAL_HEADER ""
 #    error No STM32 were defined in NilaiTFOConfig!
+
+#    define NILAI_UART_DATA_REG       RDR
+#    define NILAI_UART_IRQ_STATUS_REG ISR
+
+#    define NILAI_GPIO_BSRR_REG BSRR
+#    define NILAI_GPIO_IDR_REG  IDR
 #endif
 
 #if defined(NILAI_UMO_USE_CAN)

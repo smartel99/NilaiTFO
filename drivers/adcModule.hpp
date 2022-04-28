@@ -8,15 +8,15 @@
 *
 ******************************************************************************
 */
-#ifndef GUARD_ADCMODULE_HPP
-#define GUARD_ADCMODULE_HPP
+#ifndef NILAI_ADCMODULE_HPP
+#define NILAI_ADCMODULE_HPP
 
 #if defined(NILAI_USE_ADC)
 #    include "defines/internalConfig.h"
 #    include NILAI_HAL_HEADER
 #    if defined(HAL_ADC_MODULE_ENABLED)
 #        include "Core/Inc/adc.h"
-#        include "shared/defines/module.hpp"
+#        include "defines/module.hpp"
 
 #        include <functional>
 #        include <map>
