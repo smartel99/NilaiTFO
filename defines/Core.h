@@ -9,10 +9,12 @@
  *******************************************************************************
  */
 
-#ifndef CORE_H_
-#define CORE_H_
+#ifndef NILAI_CORE_H_
+#define NILAI_CORE_H_
 
 #include <memory>
+
+#include "Literals.h"
 
 namespace cep
 {
@@ -27,6 +29,8 @@ constexpr Ref<T> CreateRef(Args&&... args)
 }    // namespace cep
 
 
+
+
 /**
  * BLX(1) is not supported by the Cortex M3 CPU, but its behavior if used is still
  * defined: it always causes a hard fault, which is exactly what we want!
@@ -37,4 +41,4 @@ constexpr Ref<T> CreateRef(Args&&... args)
  * @}
  */
 /* END OF FILE */
-#endif /* CORE_H_ */
+#endif /* NILAI_CORE_H_ */

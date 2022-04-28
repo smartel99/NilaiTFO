@@ -15,6 +15,8 @@
  * not, see <a href=https://www.gnu.org/licenses/>https://www.gnu.org/licenses/<a/>.
  */
 #include "Tas5707Module.h"
+#if defined(NILAI_USE_TAS5707)
+#    include "Enums.h"
 
 #if defined(NILAI_USE_TAS5707)
 
@@ -574,6 +576,5 @@ uint32_t StartStopRegValToTime(uint8_t ss)
         default: return 0;
     }
 }
-
 
 #endif
