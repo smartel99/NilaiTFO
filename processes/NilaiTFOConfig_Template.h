@@ -72,6 +72,8 @@
  * Set the number of callbacks that can be assigned to an event (Default: 1).
  */
 #    define NILAI_EVENTS_MAX_CALLBACKS 1
+
+#    define NILAI_USE_TIMER_EVENTS
 #endif
 
 /******************************************************************************/
@@ -133,7 +135,7 @@
 /**
  * Controls if I2C writes should be verified or not.
  */
-#define NILAI_TAS5760_VERIFY_WRITE
+#    define NILAI_TAS5760_VERIFY_WRITE
 #endif
 
 

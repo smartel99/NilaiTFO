@@ -154,7 +154,8 @@ bool I2sModule::StopStream()
 
     m_isStreaming = false;
 
-    if (HAL_I2S_DMAStop(m_handle) != HAL_OK)
+    // If DMA is actually running, stop it.
+    if (m_handle->hdmatx->State == HAL_DMA_STATE_BUSY && HAL_I2S_DMAStop(m_handle) != HAL_OK)
     {
         I2S_ERROR("Unable to stop stream!");
         return false;

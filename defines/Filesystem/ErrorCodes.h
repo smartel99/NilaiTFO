@@ -19,6 +19,9 @@
 
 #if defined(NILAI_USE_FILESYSTEM)
 #    include "ff.h"
+namespace cep::Filesystem
+{
+
 enum class Result
 {
     Ok               = FR_OK,
@@ -42,6 +45,7 @@ enum class Result
     TooManyOpenFiles = FR_TOO_MANY_OPEN_FILES,
     InvalidParameter = FR_INVALID_PARAMETER,
 };
+}
 #endif
 
 #endif    // NILAI_ERRORCODES_H
