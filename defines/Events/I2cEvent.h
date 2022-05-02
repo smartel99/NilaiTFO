@@ -1,7 +1,7 @@
 /**
- * @file    ExtEvent.h
+ * @file    I2cEvents.h
  * @author  Samuel Martel
- * @date    2022-03-03
+ * @date    2022-05-02
  * @brief
  *
  * @copyright
@@ -14,34 +14,38 @@
  * You should have received a copy of the GNU General Public License along with this program. If
  * not, see <a href=https://www.gnu.org/licenses/>https://www.gnu.org/licenses/<a/>.
  */
-#ifndef NILAI_EVENTS_EXTEVENT_H
-#define NILAI_EVENTS_EXTEVENT_H
+#ifndef NILAI_EVENTS_I2CEVENTS_H
+#define NILAI_EVENTS_I2CEVENTS_H
 
-#if defined(NILAI_USE_EVENTS)
-
+#if defined(NILAI_USE_EVENTS) && defined(NILAI_USE_I2C_EVENTS)
 #    include "GenericEvent.h"
+
+#    include "../internalConfig.h"
+#    include NILAI_HAL_HEADER
 
 namespace cep::Events
 {
-/**
- * @brief External event triggered by a GPIO or by software.
- */
-struct ExtEvent : public Event
+struct I2cEvent : public Event
 {
-    ExtEvent() : Event(EventTypes::Exti_Generic, EventCategories::External) {}
-    ExtEvent(bool fromSoft, uint8_t ch, EventTypes t)
-    : Event(t, EventCategories::External), IsFromSoft(fromSoft), SrcCh(ch)
+    I2cEvent() : Event(EventTypes::I2C_Generic, EventCategories::I2C) {}
+    I2cEvent(I2C_HandleTypeDef* i2c, EventTypes t) : Event(t, EventCategories::Timer), I2c(i2c) {}
+
+    I2C_HandleTypeDef* I2c = nullptr;
+};
+
+struct I2cAddrEvent : public I2cEvent
+{
+    I2cAddrEvent(I2C_HandleTypeDef* i2c, uint8_t direction, uint16_t addrMatchCode)
+    : I2cEvent(i2c, EventTypes::I2C_Addr), Direction(direction), MatchCode(addrMatchCode)
     {
     }
 
-    //! Was the event triggered by software?
-    bool IsFromSoft = false;
-
-    //! Which channel is the event on?
-    uint8_t SrcCh = 0;
+    uint8_t  Direction = 0;
+    uint16_t MatchCode = 0;
 };
 }    // namespace cep::Events
 
+
 #endif
 
-#endif    // NILAI_EVENTS_EXTEVENT_H
+#endif    // NILAI_EVENTS_I2CEVENTS_H

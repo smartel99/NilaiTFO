@@ -1,7 +1,7 @@
 /**
- * @file    GenericEvent.h
+ * @file    Enums.h
  * @author  Samuel Martel
- * @date    2022-03-03
+ * @date    2022-05-02
  * @brief
  *
  * @copyright
@@ -14,32 +14,19 @@
  * You should have received a copy of the GNU General Public License along with this program. If
  * not, see <a href=https://www.gnu.org/licenses/>https://www.gnu.org/licenses/<a/>.
  */
-#ifndef NILAI_EVENTS_GENERICEVENT_H
-#define NILAI_EVENTS_GENERICEVENT_H
+#ifndef NILAI_RTC_ENUMS_H
+#define NILAI_RTC_ENUMS_H
 
-#if defined(NILAI_USE_EVENTS)
-
-#    include "../../defines/internalConfig.h"
-#    include "../../services/Time.h"
-#    include "Types.h"
-
-#    include <cstdint>
-
-namespace cep::Events
+#if defined(NILAI_USE_RTC)
+namespace cep::Rtc
 {
-/**
- * @brief Generic event structure.
- */
-struct Event
+enum class DayLightSaving
 {
-    Event(EventTypes t, EventCategories c) : Timestamp(cep::GetTime()), Type(t), Category(c) {}
-    virtual ~Event() = default;
-
-    uint32_t        Timestamp = 0;
-    EventTypes      Type;
-    EventCategories Category;
+    None   = 0,
+    AddOne = 1,
+    SubOne = 2
 };
-}    // namespace cep::Events
+}
 #endif
 
-#endif    // NILAI_EVENTS_GENERICEVENT_H
+#endif    // NILAI_RTC_ENUMS_H

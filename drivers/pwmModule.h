@@ -9,8 +9,8 @@
  *******************************************************************************
  */
 
-#ifndef PWMMODULE_H_
-#define PWMMODULE_H_
+#ifndef NILAI_PWMMODULE_H_
+#define NILAI_PWMMODULE_H_
 
 /***********************************************/
 /* Includes */
@@ -22,37 +22,37 @@
 #        include "../defines/misc.hpp"
 #        include "../defines/module.hpp"
 
+#        include "PWM/Enums.h"
+
+#        if defined(NILAI_USE_EVENTS)
+#            include "../defines/Events/Events.h"
+#        endif
+
 #        include <string>
 #        include <vector>
 
-namespace cep::Pwm
-{
-enum class Channels
-{
-    CH1 = 0,
-    CH2 = 1,
-    CH3 = 2,
-    CH4 = 3
-};
-}
 
 class PwmModule : public cep::Module
 {
 public:
-    PwmModule(TIM_HandleTypeDef* timer, cep::Pwm::Channels channel, std::string label);
+    PwmModule(TIM_HandleTypeDef* timer, cep::PWM::Channels channel, std::string label);
 
-    bool               DoPost() override;
-    void               Run() override;
-    [[nodiscard]] const std::string& GetLabel() const override { return m_label; }
+    bool                             DoPost() override;
+    void                             Run() override;
+    [[nodiscard]] const std::string& GetLabel() const { return m_label; }
 
-    void Enable();
-    void Disable();
+#        if defined(NILAI_USE_EVENTS)
+    bool OnEvent(cep::Events::Event* event) override;
+#        endif
+
+    void               Enable();
+    void               Disable();
     [[nodiscard]] bool IsEnabled() const { return m_isActive; }
 
-    void     SetFrequency(uint64_t hz);
+    void                   SetFrequency(uint64_t hz);
     [[nodiscard]] uint64_t GetFrequency() const { return m_activeFreq; }
 
-    void     SetDutyCycle(uint32_t percent);
+    void                   SetDutyCycle(uint32_t percent);
     [[nodiscard]] uint32_t GetDutyCycle() const { return m_activeDutyCycle; }
 
 private:
@@ -82,4 +82,4 @@ private:
  * @}
  */
 /* END OF FILE */
-#endif /* PWMMODULE_H_ */
+#endif /* NILAI_PWMMODULE_H_ */

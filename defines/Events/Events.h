@@ -22,74 +22,41 @@
 #    include "DataEvent.h"
 #    include "ExtEvent.h"
 #    include "GenericEvent.h"
+#    include "Types.h"
 
-#if defined(NILAI_USE_TIMER_EVENTS)
-#include "TimEvent.h"
-#endif
+#    if defined(NILAI_USE_ADC_EVENTS)
+#        include "AdcEvent.h"
+#    endif
 
-#include "../pin.h"
+#    if defined(NILAI_USE_TIMER_EVENTS)
+#        include "TimEvent.h"
+#    endif
+
+#    if defined(NILAI_USE_I2C_EVENTS)
+#        include "I2cEvent.h"
+#    endif
+
+#    if defined(NILAI_USE_I2S_EVENTS)
+#        include "I2sEvents.h"
+#    endif
+
+#    if defined(NILAI_USE_RTC_EVENTS)
+#        include "RtcEvent.h"
+#    endif
+
+#    if defined(NILAI_USE_SPI_EVENTS)
+#        include "SpiEvent.h"
+#    endif
+
+#    if defined(NILAI_USE_UART_EVENTS)
+#        include "UartEvent.h"
+#    endif
+
+#    include "../pin.h"
 
 
 namespace cep::Events
 {
-/**
- * @brief List of the possible events.
- */
-enum class EventTypes
-{
-    Exti0 = 0,    //! External Event on pin 0 AND/OR Software-triggered event.
-    Exti1,        //! External Event on pin 1 AND/OR Software-triggered event.
-    Exti2,        //! External Event on pin 2 AND/OR Software-triggered event.
-    Exti3,        //! External Event on pin 3 AND/OR Software-triggered event.
-    Exti4,        //! External Event on pin 4 AND/OR Software-triggered event.
-    Exti5,        //! External Event on pin 5 AND/OR Software-triggered event.
-    Exti6,        //! External Event on pin 6 AND/OR Software-triggered event.
-    Exti7,        //! External Event on pin 7 AND/OR Software-triggered event.
-    Exti8,        //! External Event on pin 8 AND/OR Software-triggered event.
-    Exti9,        //! External Event on pin 9 AND/OR Software-triggered event.
-    Exti10,       //! External Event on pin 10 AND/OR Software-triggered event.
-    Exti11,       //! External Event on pin 11 AND/OR Software-triggered event.
-    Exti12,       //! External Event on pin 12 AND/OR Software-triggered event.
-    Exti13,       //! External Event on pin 13 AND/OR Software-triggered event.
-    Exti14,       //! External Event on pin 14 AND/OR Software-triggered event.
-    Exti15,       //! External Event on pin 15 AND/OR Software-triggered event.
-
-    DataEvent,    //! A software event carrying data.
-
-#if defined(NILAI_USE_TIMER_EVENTS)
-    //----------------------------------------------------------------------------------------------
-    // Timer Events.
-    Tim_PeriodElapsed,  //! Period of the timer is now completed.
-    Tim_OC_DelayElapsed,//! Output compare callback in non blocking mode.
-    Tim_IC_Capture, //! Input capture in non blocking mode.
-    Tim_PWM_PulseFinished, //! PWM pulse finished callback in non blocking mode.
-    Tim_Trigger,    //! Hall trigger detection callback in non blocking mode.
-    Tim_Error,  //! Timer error callback in non blocking mode.
-#endif
-
-    //! Number of events, should always be last.
-    Count
-};
-
-enum class SoftwareEvents
-{
-    Event0  = (int)EventTypes::Exti0,
-    Event1  = (int)EventTypes::Exti1,
-    Event2  = (int)EventTypes::Exti2,
-    Event3  = (int)EventTypes::Exti3,
-    Event4  = (int)EventTypes::Exti4,
-    Event5  = (int)EventTypes::Exti5,
-    Event6  = (int)EventTypes::Exti6,
-    Event7  = (int)EventTypes::Exti7,
-    Event8  = (int)EventTypes::Exti8,
-    Event9  = (int)EventTypes::Exti9,
-    Event10 = (int)EventTypes::Exti10,
-    Event11 = (int)EventTypes::Exti11,
-    Event12 = (int)EventTypes::Exti12,
-    Event13 = (int)EventTypes::Exti13,
-    Event14 = (int)EventTypes::Exti14,
-};
-
 EventTypes PinToEvent(const cep::Pin& p);
 
 }    // namespace cep::Events

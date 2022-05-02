@@ -45,6 +45,18 @@ void I2cModule::Run()
 {
 }
 
+#    if defined(NILAI_USE_EVENTS)
+bool I2cModule::OnEvent([[maybe_unused]] cep::Events::Event* event)
+{
+#        if defined(NILAI_USE_I2C_EVENTS)
+    // TODO Read and parse error, possibly restarting the module as well.
+    return false;
+#        else
+    return false;
+#        endif
+}
+#    endif
+
 void I2cModule::TransmitFrame(uint8_t addr, const uint8_t* data, size_t len)
 {
     if (HAL_I2C_Master_Transmit(
@@ -115,6 +127,7 @@ bool I2cModule::CheckIfDevOnBus(uint8_t addr, size_t attempts, size_t timeout)
 {
     return HAL_I2C_IsDeviceReady(m_handle, addr, attempts, timeout) == HAL_OK;
 }
+
 #endif
 /**
  * @}

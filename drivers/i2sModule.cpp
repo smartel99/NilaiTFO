@@ -46,6 +46,18 @@ void I2sModule::Run()
 {
 }
 
+#    if defined(NILAI_USE_EVENTS)
+bool I2sModule::OnEvent(cep::Events::Event* event)
+{
+#        if defined(NILAI_USE_I2S_EVENTS)
+    // TODO Handle events.
+    return Module::OnEvent(event);
+#        else
+    return false;
+#        endif
+}
+#    endif
+
 void I2sModule::SetTxHalfCpltCb(const std::function<void()>& cb)
 {
     if (cb)
@@ -221,4 +233,5 @@ void I2sModule::SetAudioFreq(cep::I2S::AudioFreqs f)
     m_handle->Init.AudioFreq = (uint32_t)f;
     CEP_ASSERT(HAL_I2S_Init(m_handle) == HAL_OK, "Unable to re-init I2S!");
 }
+
 #endif

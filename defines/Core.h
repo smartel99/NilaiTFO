@@ -14,8 +14,6 @@
 
 #include <memory>
 
-#include "Literals.h"
-
 namespace cep
 {
 template<typename T>

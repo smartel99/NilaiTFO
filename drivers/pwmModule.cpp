@@ -13,7 +13,7 @@
 #if defined(NILAI_USE_PWM) && defined(HAL_TIM_MODULE_ENABLED)
 #    include "../services/logger.hpp"
 
-PwmModule::PwmModule(TIM_HandleTypeDef* timer, cep::Pwm::Channels channel, std::string label)
+PwmModule::PwmModule(TIM_HandleTypeDef* timer, cep::PWM::Channels channel, std::string label)
 : m_timer(timer),
   m_channel((uint32_t)channel),
   m_label(std::move(label)),
@@ -38,6 +38,17 @@ bool PwmModule::DoPost()
 void PwmModule::Run()
 {
 }
+
+#    if defined(NILAI_USE_EVENTS)
+bool PwmModule::OnEvent(cep::Events::Event* event)
+{
+#        if defined(NILAI_USE_TIM_EVENTS)
+    return Module::OnEvent(event);
+#        else
+    return false;
+#        endif
+}
+#    endif
 
 void PwmModule::Enable()
 {
@@ -140,5 +151,6 @@ void PwmModule::SetDutyCycle(uint32_t percent)
         HAL_TIM_PWM_Start(m_timer, m_channel);
     }
 }
+
 
 #endif

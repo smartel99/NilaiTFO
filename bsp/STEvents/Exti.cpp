@@ -15,17 +15,17 @@
  * not, see <a href=https://www.gnu.org/licenses/>https://www.gnu.org/licenses/<a/>.
  */
 #if defined(NILAI_USE_EVENTS)
-#include "../../defines/Events/Events.h"
-#include "../../processes/application.hpp"
+#    include "../../defines/Events/Events.h"
+#    include "../../processes/application.hpp"
 
-static uint8_t         PinIdToNum(uint16_t pin);
+static uint8_t PinIdToNum(uint16_t pin);
 
 extern "C" void HAL_GPIO_EXTI_Callback(uint16_t pin)
 {
-    uint8_t pinNum = PinIdToNum(pin);
-    cep::Events::ExtEvent e(false, pinNum);
+    uint8_t               pinNum = PinIdToNum(pin);
+    cep::Events::ExtEvent e(false, pinNum, cep::Events::EventTypes(pinNum - 1));
     // Pin number goes from 1 to 16,
-    cep::Application::Get()->DispatchEvent(cep::Events::EventTypes(pinNum-1), &e);
+    cep::Application::Get()->DispatchEvent(&e);
 }
 
 /**
@@ -41,7 +41,7 @@ uint8_t PinIdToNum(uint16_t pin)
     uint8_t pos = 1;
 
     // We assume that the pin is never going to be 0.
-    while(pin != 1)
+    while (pin != 1)
     {
         ++pos;
         pin >>= 1;

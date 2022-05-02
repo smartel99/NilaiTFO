@@ -1,7 +1,7 @@
 /**
- * @file    GenericEvent.h
+ * @file    Rtc.cpp
  * @author  Samuel Martel
- * @date    2022-03-03
+ * @date    2022-05-02
  * @brief
  *
  * @copyright
@@ -14,32 +14,20 @@
  * You should have received a copy of the GNU General Public License along with this program. If
  * not, see <a href=https://www.gnu.org/licenses/>https://www.gnu.org/licenses/<a/>.
  */
-#ifndef NILAI_EVENTS_GENERICEVENT_H
-#define NILAI_EVENTS_GENERICEVENT_H
-
-#if defined(NILAI_USE_EVENTS)
+#if defined(NILAI_USE_EVENTS) && defined(NILAI_USE_RTC_EVENTS)
+#    include "../../defines/Events/Events.h"
+#    include "../../processes/application.hpp"
 
 #    include "../../defines/internalConfig.h"
-#    include "../../services/Time.h"
-#    include "Types.h"
+#    include NILAI_HAL_HEADER
 
-#    include <cstdint>
-
-namespace cep::Events
+extern "C"
 {
-/**
- * @brief Generic event structure.
- */
-struct Event
-{
-    Event(EventTypes t, EventCategories c) : Timestamp(cep::GetTime()), Type(t), Category(c) {}
-    virtual ~Event() = default;
+    void HAL_RTC_AlarmAEventCallback(RTC_HandleTypeDef* hrtc)
+    {
+        cep::Events::RtcEvent e(hrtc, cep::Events::EventTypes::RTC_AlarmAEvent);
+        cep::Application::Get()->DispatchEvent(&e);
+    }
+}
 
-    uint32_t        Timestamp = 0;
-    EventTypes      Type;
-    EventCategories Category;
-};
-}    // namespace cep::Events
 #endif
-
-#endif    // NILAI_EVENTS_GENERICEVENT_H

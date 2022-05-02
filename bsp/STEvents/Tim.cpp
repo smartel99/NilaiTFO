@@ -20,37 +20,37 @@
 
 extern "C" void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim)
 {
-    cep::Events::TimEvent e(htim);
-    cep::Application::Get()->DispatchEvent(cep::Events::EventTypes::Tim_PeriodElapsed, &e);
+    cep::Events::TimEvent e(htim, cep::Events::EventTypes::Tim_PeriodElapsed);
+    cep::Application::Get()->DispatchEvent(&e);
 }
 
 extern "C" void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef* htim)
 {
-    cep::Events::TimEvent e(htim);
-    cep::Application::Get()->DispatchEvent(cep::Events::EventTypes::Tim_OC_DelayElapsed, &e);
+    cep::Events::TimEvent e(htim, cep::Events::EventTypes::Tim_OC_DelayElapsed);
+    cep::Application::Get()->DispatchEvent(&e);
 }
 
 extern "C" void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef* htim)
 {
-    cep::Events::TimEvent e(htim);
-    cep::Application::Get()->DispatchEvent(cep::Events::EventTypes::Tim_IC_Capture, &e);
+    cep::Events::TimEvent e(htim, cep::Events::EventTypes::Tim_IC_Capture);
+    cep::Application::Get()->DispatchEvent(&e);
 }
 
 extern "C" void HAL_TIM_PWM_PulseFinishedCallback(TIM_HandleTypeDef* htim)
 {
-    cep::Events::TimEvent e(htim);
-    cep::Application::Get()->DispatchEvent(cep::Events::EventTypes::Tim_PWM_PulseFinished, &e);
+    cep::Events::TimEvent e(htim, cep::Events::EventTypes::Tim_PWM_PulseFinished);
+    cep::Application::Get()->DispatchEvent(&e);
 }
 
 extern "C" void HAL_TIM_TriggerCallback(TIM_HandleTypeDef* htim)
 {
-    cep::Events::TimEvent e(htim);
-    cep::Application::Get()->DispatchEvent(cep::Events::EventTypes::Tim_Trigger, &e);
+    cep::Events::TimEvent e(htim, cep::Events::EventTypes::Tim_Trigger);
+    cep::Application::Get()->DispatchEvent(&e);
 }
 
 extern "C" void HAL_TIM_ErrorCallback(TIM_HandleTypeDef* htim)
 {
-    cep::Events::TimEvent e(htim);
-    cep::Application::Get()->DispatchEvent(cep::Events::EventTypes::Tim_Error, &e);
+    cep::Events::TimEvent e(htim, cep::Events::EventTypes::Tim_Error);
+    cep::Application::Get()->DispatchEvent(&e);
 }
 #endif

@@ -1,7 +1,7 @@
 /**
- * @file    GenericEvent.h
+ * @file    I2sEvents.h
  * @author  Samuel Martel
- * @date    2022-03-03
+ * @date    2022-05-02
  * @brief
  *
  * @copyright
@@ -14,32 +14,25 @@
  * You should have received a copy of the GNU General Public License along with this program. If
  * not, see <a href=https://www.gnu.org/licenses/>https://www.gnu.org/licenses/<a/>.
  */
-#ifndef NILAI_EVENTS_GENERICEVENT_H
-#define NILAI_EVENTS_GENERICEVENT_H
+#ifndef NILAI_EVENTS_I2SEVENTS_H
+#define NILAI_EVENTS_I2SEVENTS_H
 
-#if defined(NILAI_USE_EVENTS)
+#if defined(NILAI_USE_EVENTS) && defined(NILAI_USE_I2S_EVENTS)
+#    include "GenericEvent.h"
 
-#    include "../../defines/internalConfig.h"
-#    include "../../services/Time.h"
-#    include "Types.h"
-
-#    include <cstdint>
+#    include "../internalConfig.h"
+#    include NILAI_HAL_HEADER
 
 namespace cep::Events
 {
-/**
- * @brief Generic event structure.
- */
-struct Event
+struct I2sEvent : public Event
 {
-    Event(EventTypes t, EventCategories c) : Timestamp(cep::GetTime()), Type(t), Category(c) {}
-    virtual ~Event() = default;
+    I2sEvent() : Event(EventTypes::I2S_Generic, EventCategories::I2S) {}
+    I2sEvent(I2S_HandleTypeDef* i2s, EventTypes t) : Event(t, EventCategories::I2S), I2s(i2s) {}
 
-    uint32_t        Timestamp = 0;
-    EventTypes      Type;
-    EventCategories Category;
+    I2S_HandleTypeDef* I2s = nullptr;
 };
 }    // namespace cep::Events
 #endif
 
-#endif    // NILAI_EVENTS_GENERICEVENT_H
+#endif    // NILAI_EVENTS_I2SEVENTS_H

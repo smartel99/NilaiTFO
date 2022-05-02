@@ -38,6 +38,12 @@
 //#define NILAI_USES_STM32L4xx
 
 /**
+ * The maximum amount of modules that can operate simultaneously in the application.
+ * Default: 16
+ */
+#define NILAI_MAX_MODULE_AMOUNT 16
+
+/**
  * Select if the logger should use the system time or the RTC time.
  * To use the RTC, the RTC module must be enabled.
  * Uncomment to use the RTC, comment to use the system clock.
@@ -74,6 +80,12 @@
 #    define NILAI_EVENTS_MAX_CALLBACKS 1
 
 #    define NILAI_USE_TIMER_EVENTS
+#    define NILAI_USE_I2C_EVENTS
+#    define NILAI_USE_I2S_EVENTS
+#    define NILAI_USE_RTC_EVENTS
+#    define NILAI_USE_SPI_EVENTS
+#    define NILAI_USE_UART_EVENTS
+#    define NILAI_USE_ADC_EVENTS
 #endif
 
 /******************************************************************************/

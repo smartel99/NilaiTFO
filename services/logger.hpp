@@ -17,6 +17,7 @@
 /*************************************************************************************************/
 /* Includes ------------------------------------------------------------------------------------ */
 #    include "../defines/internalConfig.h"
+#include "../defines/Core.h"
 
 #    include <cstdarg>    // For va_list
 #    include <functional>
@@ -98,7 +99,7 @@ class Logger
 {
 public:
 #    if defined(NILAI_USE_UART)
-    explicit Logger(UartModule* uart = nullptr, const LogFunc& logFunc = {});
+    explicit Logger(cep::Ref<UartModule> uart = nullptr, const LogFunc& logFunc = {});
 #    else
     Logger(const LogFunc& logFunc);
 #    endif
@@ -107,7 +108,7 @@ public:
     void Log(const char* fmt, ...);
     void VLog(const char* fmt, va_list args);
 
-    UartModule*    GetUart() { return m_uart; }
+    cep::Ref<UartModule>    GetUart() { return m_uart; }
     static Logger* Get() { return s_instance; }
 
     void SetLogFunc(const LogFunc& logFunc) { m_logFunc = logFunc; }
@@ -116,7 +117,7 @@ private:
     static Logger* s_instance;
 
 #    if defined(NILAI_USE_UART)
-    UartModule* m_uart = nullptr;
+    cep::Ref<UartModule> m_uart = nullptr;
 #    endif
     LogFunc m_logFunc = {};
 };

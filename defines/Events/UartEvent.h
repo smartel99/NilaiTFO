@@ -1,7 +1,7 @@
 /**
- * @file    GenericEvent.h
+ * @file    UartEvent.h
  * @author  Samuel Martel
- * @date    2022-03-03
+ * @date    2022-05-02
  * @brief
  *
  * @copyright
@@ -14,32 +14,38 @@
  * You should have received a copy of the GNU General Public License along with this program. If
  * not, see <a href=https://www.gnu.org/licenses/>https://www.gnu.org/licenses/<a/>.
  */
-#ifndef NILAI_EVENTS_GENERICEVENT_H
-#define NILAI_EVENTS_GENERICEVENT_H
+#ifndef NILAI_EVENTS_UARTEVENT_H
+#define NILAI_EVENTS_UARTEVENT_H
 
-#if defined(NILAI_USE_EVENTS)
+#if defined(NILAI_USE_EVENTS) && defined(NILAI_USE_UART_EVENTS)
+#    include "GenericEvent.h"
 
 #    include "../../defines/internalConfig.h"
-#    include "../../services/Time.h"
-#    include "Types.h"
-
-#    include <cstdint>
+#    include NILAI_HAL_HEADER
 
 namespace cep::Events
 {
-/**
- * @brief Generic event structure.
- */
-struct Event
+struct UartEvent : public Event
 {
-    Event(EventTypes t, EventCategories c) : Timestamp(cep::GetTime()), Type(t), Category(c) {}
-    virtual ~Event() = default;
+    UartEvent() : Event(EventTypes::UART_Generic, EventCategories::Uart) {}
+    UartEvent(UART_HandleTypeDef* uart, EventTypes t) : Event(t, EventCategories::Uart), Uart(uart)
+    {
+    }
 
-    uint32_t        Timestamp = 0;
-    EventTypes      Type;
-    EventCategories Category;
+    UART_HandleTypeDef* Uart = nullptr;
+};
+
+struct UartRxEvent : public UartEvent
+{
+    UartRxEvent(UART_HandleTypeDef* uart, uint16_t size)
+    : UartEvent(uart, EventTypes::UART_RxEvent), Size(size)
+    {
+    }
+
+    uint16_t Size = 0;
 };
 }    // namespace cep::Events
+
 #endif
 
-#endif    // NILAI_EVENTS_GENERICEVENT_H
+#endif    // NILAI_EVENTS_UARTEVENT_H

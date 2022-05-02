@@ -18,15 +18,16 @@
 
 #    include <cstdarg>
 #    include <cstdio>
+#include <utility>
 
 Logger* Logger::s_instance = nullptr;
 
 #    if defined(NILAI_USE_UART)
-Logger::Logger(UartModule* uart, const LogFunc& logFunc)
+Logger::Logger(cep::Ref<UartModule> uart, const LogFunc& logFunc)
 {
     CEP_ASSERT(s_instance == nullptr, "Can only have one instance of Logger!");
     s_instance = this;
-    m_uart     = uart;
+    m_uart     = std::move(uart);
     m_logFunc  = logFunc;
 }
 #    else
@@ -41,9 +42,6 @@ Logger::Logger(const LogFunc& logFunc)
 
 Logger::~Logger()
 {
-#    if defined(NILAI_USE_UART)
-    delete m_uart;
-#    endif
     s_instance = nullptr;
 }
 

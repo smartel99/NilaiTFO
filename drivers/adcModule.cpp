@@ -40,7 +40,9 @@ AdcModule::AdcModule(ADC_HandleTypeDef* adc, std::string label)
                m_label.c_str());
 
     s_modules[adc] = this;
-#        if USE_HAL_ADC_REGISTER_CALLBACKS == 1
+#        if defined(NILAI_USE_EVENTS) && defined(NILAI_USE_ADC_EVENTS)
+
+#        elif USE_HAL_ADC_REGISTER_CALLBACKS == 1
     // Register conversion complete and error callbacks.
     REGISTER_CALLBACK(HAL_ADC_CONVERSION_COMPLETE_CB_ID, &AdcModule::AdcModuleConvCpltCallback);
     REGISTER_CALLBACK(HAL_ADC_ERROR_CB_ID, &AdcModule::AdcModuleErrorCallback);
@@ -110,6 +112,30 @@ void AdcModule::Run()
 {
 }
 
+#    if defined(NILAI_USE_EVENTS)
+bool AdcModule::OnEvent(cep::Events::Event* event)
+{
+#        if defined(NILAI_USE_ADC_EVENTS)
+    if (event->Category == cep::Events::EventCategories::Adc)
+    {
+        cep::Events::AdcEvent* adc = (cep::Events::AdcEvent*)event;
+        if (adc->Adc == m_adc)
+        {
+            if (adc->Type == cep::Events::EventTypes::ADC_Error)
+            {
+                // TODO Parse the error.
+                return true;
+            }
+        }
+    }
+
+    return false;
+#        else
+    return false;
+#        endif
+}
+#    endif
+
 float AdcModule::GetChannelReading(size_t channel) const
 {
     CEP_ASSERT(channel < m_channelCount,
@@ -130,7 +156,6 @@ float AdcModule::GetChannelReading(size_t channel) const
                                                      const std::function<void(AdcModule*)>& cb)
 {
     CEP_ASSERT(cb, "Callback function must be callable!");
-    //    ADC_DEBUG("Adding conversion complete callback '%s'", name.c_str());
 
     bool isRunning = m_isRunning;
     if (isRunning)
@@ -245,7 +270,8 @@ void AdcModule::ErrorCallback()
     }
 }
 
-#    if USE_HAL_ADC_REGISTER_CALLBACKS == 1
+#    if !(defined(NILAI_USE_EVENTS) && defined(NILAI_USE_ADC_EVENTS))
+#        if USE_HAL_ADC_REGISTER_CALLBACKS == 1
 /**
  * @brief Callback invoked by the HAL once a full sequence of conversion is completed.
  * @param adc Handle to the hardware peripheral.
@@ -271,7 +297,8 @@ void AdcModule::AdcModuleErrorCallback(ADC_HandleTypeDef* adc)
         module->second->ErrorCallback();
     }
 }
-#    else
+
+#        else
 void AdcModule::AdcModuleConvCpltCallback(ADC_HandleTypeDef*)
 {
 }
@@ -296,7 +323,6 @@ void HAL_ADC_ErrorCallback(ADC_HandleTypeDef* adc)
         module->second->ErrorCallback();
     }
 }
+#        endif
 #    endif
-
-
 #endif

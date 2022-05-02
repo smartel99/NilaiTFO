@@ -9,8 +9,8 @@
  * @author      Samuel Martel
  * @date        2020/07/06  -  09:02
  */
-#ifndef GUARD_APPLICATION_HPP
-#    define GUARD_APPLICATION_HPP
+#ifndef NILAI_APPLICATION_HPP
+#    define NILAI_APPLICATION_HPP
 /*************************************************************************************************/
 /* File includes ------------------------------------------------------------------------------- */
 
@@ -20,52 +20,65 @@
 #    include <csignal>
 
 #    if defined(NILAI_USE_EVENTS)
+#        include "../defines/Core.h"
 #        include "../defines/Events/Events.h"
+
 #        include <array>
 #        include <functional>
 #    endif
 
 namespace cep
 {
+[[noreturn]] void AbortionHandler(int signal);
 /*************************************************************************************************/
 /* Classes ------------------------------------------------------------------------------------- */
-[[noreturn]] void AbortionHandler(int signal);
+template<typename T>
+concept IsModule = std::is_base_of_v<Module, T>;
+
 
 class Application
 {
-#    if defined(NILAI_USE_EVENTS)
-public:
-    /**
-     * @brief A callback function should return true if the event should not be propagated further,
-     * i.e if the following callbacks in the list should not be called after this one.
-     */
-    using CallbackFunc = std::function<bool(Events::Event*)>;
-#    endif
+    struct ModuleInfo
+    {
+        Ref<Module> Mod = nullptr;
+        size_t      Id  = 0;
+
+        operator bool() const { return Mod != nullptr; }
+    };
+
 public:
     Application();
     virtual ~Application() = default;
 
-    virtual void Init()   = 0;
-    virtual bool DoPost() = 0;
-    virtual void Run()    = 0;
+    virtual void Init() {}
+    virtual bool DoPost() { return false; }
+    virtual void Run();
+
+    template<IsModule T, typename... Args>
+    Ref<T> AddModule(Args&&... args)
+    {
+        if (m_modules.size() >= NILAI_MAX_MODULE_AMOUNT)
+        {
+            // Too many modules!
+            return nullptr;
+        }
+        ModuleInfo m;
+        Ref<T> module = CreateRef<T>(std::forward<Args>(args)...);
+        m.Mod       = module;
+        m.Mod->m_id = m_lastId;
+        m.Id        = m_lastId;
+
+        m_modules.push_back(m);
+
+        ++m_lastId;
+
+        return module;
+    }
+
+    void        RemoveModule(size_t id);
+    Ref<Module> GetModule(size_t id);
 
 #    if defined(NILAI_USE_EVENTS)
-    /**
-     * @brief Registers a callback to an event.
-     * @param event The event to bind the callback to.
-     * @param cb The callback function. This function should return true if the event should not be
-     * propagated further.
-     * @return The ID of the callback. This ID is used to unregister the callback.
-     */
-    size_t RegisterEventCallback(Events::EventTypes event, const CallbackFunc& cb);
-
-    /**
-     * @brief Unregisters a callback that has previously been registered to an event.
-     * @param event The event to remove the callback from.
-     * @param id The ID of the callback to be removed.
-     */
-    void UnregisterEventCallback(Events::EventTypes event, size_t id);
-
     /**
      * @brief Dispatches a software event to the callbacks bound to the specified channel.
      * @param ch The event channel to dispatch the event on.
@@ -76,7 +89,7 @@ public:
     void TriggerDataEvent(const T& data)
     {
         Events::DataEvent e(data);
-        DispatchEvent(Events::EventTypes::DataEvent, &e);
+        DispatchEvent(&e);
     }
 
     /**
@@ -84,25 +97,23 @@ public:
      * @param e The event type.
      * @param data The event data.
      */
-    void DispatchEvent(Events::EventTypes e, Events::Event* data);
+    void DispatchEvent(Events::Event* data);
 #    endif
 
     static Application* Get() { return s_instance; }
 
-#    if defined(NILAI_USE_EVENTS)
 private:
+    size_t m_lastId = 0;
+    //! List of the modules to remove from the application.
+    std::vector<size_t> m_deletionQueue = {};
 
-    static constexpr size_t s_maxEventCbCount = NILAI_EVENTS_MAX_CALLBACKS;
-    static constexpr size_t s_numOfEvents     = (size_t)Events::EventTypes::Count;
+    bool m_modulesPendingDeletion = false;
 
-    using EventCallbacks = std::array<CallbackFunc, s_maxEventCbCount>;
-    std::array<EventCallbacks, s_numOfEvents> m_callbacks;
-
-private:
-    static bool   DefaultEventCallback(Events::Event*) { return false; }
-    static size_t InsertCallback(EventCallbacks& events, const CallbackFunc& cb);
-#    endif
     static Application* s_instance;
+
+protected:
+    //! Pointers to the modules of the application.
+    std::vector<ModuleInfo> m_modules = {};
 };
 
 }    // namespace cep

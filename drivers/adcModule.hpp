@@ -32,7 +32,11 @@ public:
 
     bool                             DoPost() override;
     void                             Run() override;
-    [[nodiscard]] const std::string& GetLabel() const override { return m_label; }
+    [[nodiscard]] const std::string& GetLabel() const { return m_label; }
+
+#        if defined(NILAI_USE_EVENTS)
+    bool OnEvent(cep::Events::Event* event) override;
+#        endif
 
     /**
      * @brief Adds a callback that willed be invoked whenever the conversion of all channel is
@@ -86,7 +90,6 @@ public:
 private:
     void ConvCpltCallback();
     void ErrorCallback();
-
 
     static void AdcModuleConvCpltCallback(ADC_HandleTypeDef* adc);
     static void AdcModuleErrorCallback(ADC_HandleTypeDef* adc);

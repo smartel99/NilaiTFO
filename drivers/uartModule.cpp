@@ -22,8 +22,11 @@
 
 /*************************************************************************************************/
 /* Defines ------------------------------------------------------------------------------------- */
+#    define UART_INFO(msg, ...)  LOG_INFO("[%s]: " msg, m_label.c_str(), ##__VA_ARGS__)
+#    define UART_ERROR(msg, ...) LOG_ERROR("[%s]: " msg, m_label.c_str(), ##__VA_ARGS__)
 
-static std::vector<CEP_UART::UartDataBuffer> s_dataBuffers;
+
+static std::vector<cep::Uart::UartDataBuffer> s_dataBuffers;
 
 /*************************************************************************************************/
 /* Private function declarations --------------------------------------------------------------- */
@@ -31,22 +34,23 @@ static std::vector<CEP_UART::UartDataBuffer> s_dataBuffers;
 /*************************************************************************************************/
 /* Public method definitions                                                                     */
 /*************************************************************************************************/
-UartModule::UartModule(UART_HandleTypeDef* uart, const std::string& label)
-: m_handle(uart), m_label(label)
+UartModule::UartModule(UART_HandleTypeDef* uart, std::string label)
+: m_handle(uart), m_label(std::move(label))
 {
     CEP_ASSERT(uart != nullptr, "UART Handle is NULL!");
     m_txBuf.reserve(64);
     m_sof.reserve(2);
     m_eof.reserve(2);
-    //        m_latestFrames.reserve(8);
 
     s_dataBuffers.emplace_back(515, uart);
     m_dataBufferIdx = s_dataBuffers.size() - 1;
 
     HAL_UART_Receive_DMA(
       m_handle, s_dataBuffers.back().rxDmaData.data(), s_dataBuffers.back().rxDmaData.size());
+
     __HAL_UART_ENABLE_IT(m_handle, UART_IT_RXNE);
-    LOG_INFO("[%s]: Initialized", label.c_str());
+
+    UART_INFO("Initialized");
 }
 
 UartModule::~UartModule()
@@ -60,7 +64,7 @@ UartModule::~UartModule()
  */
 bool UartModule::DoPost()
 {
-    LOG_INFO("[%s]: POST OK", m_label.c_str());
+    UART_INFO("POST OK");
     return true;
 }
 
@@ -69,7 +73,7 @@ void UartModule::Run()
     if (s_dataBuffers[m_dataBufferIdx].rcvCompleted)
     {
         // We received something! Copy it into our own buffer.
-        m_latestFrames = CEP_UART::Frame(s_dataBuffers[m_dataBufferIdx].rxDmaData, HAL_GetTick());
+        m_latestFrames = cep::Uart::Frame(s_dataBuffers[m_dataBufferIdx].rxDmaData, HAL_GetTick());
         s_dataBuffers[m_dataBufferIdx].rcvCompleted = false;
         m_framePending                              = true;
         // Restart the reception.
@@ -79,6 +83,30 @@ void UartModule::Run()
         m_cb();
     }
 }
+
+#    if defined(NILAI_USE_EVENTS)
+bool UartModule::OnEvent(cep::Events::Event* event)
+{
+#        if defined(NILAI_USE_UART_EVENTS)
+    if (event->Category != cep::Events::EventCategories::Uart)
+    {
+        return false;
+    }
+    else
+    {
+        if (event->Type == cep::Events::EventTypes::UART_RxCplt)
+        {
+            ReceptionCompleteCb(static_cast<cep::Events::UartEvent*>(event)->Uart);
+            return true;
+        }
+
+        return false;
+    }
+#        else
+    return false;
+#        endif
+}
+#    endif
 
 void UartModule::Transmit(const char* msg, size_t len)
 {
@@ -94,12 +122,10 @@ void UartModule::Transmit(const char* msg, size_t len)
     m_txBuf.resize(len);
     memcpy((void*)m_txBuf.data(), (void*)msg, len);
 
-    m_txBytesRemaining = m_txBuf.size();
-
     // Send the message.
     if (HAL_UART_Transmit_IT(m_handle, m_txBuf.data(), (uint16_t)m_txBuf.size()) != HAL_OK)
     {
-        LOG_ERROR("[%s]: In Transmit: Unable to transmit message", m_label.c_str());
+        UART_ERROR("In Transmit: Unable to transmit message");
         return;
     }
 }
@@ -126,11 +152,8 @@ void UartModule::Transmit(const std::vector<uint8_t>& msg)
     Transmit(buff, len);
 }
 
-CEP_UART::Frame UartModule::Receive()
+cep::Uart::Frame UartModule::Receive()
 {
-    //    UART::Frame frame = m_latestFrames.back( );
-    //    m_latestFrames.pop_back( );
-    //    return frame;
     m_framePending = false;
     return m_latestFrames;
 }
@@ -149,16 +172,15 @@ void UartModule::ClearExpectedRxLen()
 
 void UartModule::SetFrameReceiveCpltCallback(const std::function<void()>& cb)
 {
-    CEP_ASSERT(cb != nullptr,
-               "[%s]: In SetFrameReceiveCpltCallback, invalid callback function",
-               m_label.c_str());
+    CEP_ASSERT(
+      cb, "[%s]: In SetFrameReceiveCpltCallback, invalid callback function", m_label.c_str());
 
     m_cb = cb;
 }
 
 void UartModule::ClearFrameReceiveCpltCallback()
 {
-    m_cb = std::function<void()>();
+    m_cb = []() {};
 }
 
 void UartModule::SetStartOfFrameSequence(uint8_t* sof, size_t len)
@@ -181,7 +203,8 @@ void UartModule::SetStartOfFrameSequence(const std::vector<uint8_t>& sof)
 
 void UartModule::ClearStartOfFrameSequence()
 {
-    m_sof = "";
+    m_sof.clear();
+    ResizeDmaBuffer(m_sof.size(), m_expectedLen, m_eof.size());
 }
 
 void UartModule::SetEndOfFrameSequence(uint8_t* eof, size_t len)
@@ -204,7 +227,7 @@ void UartModule::SetEndOfFrameSequence(const std::vector<uint8_t>& eof)
 
 void UartModule::ClearEndOfFrameSequence()
 {
-    m_eof = "";
+    m_eof.clear();
     ResizeDmaBuffer(m_sof.size(), m_expectedLen, m_eof.size());
 }
 
@@ -233,7 +256,7 @@ bool UartModule::ResizeDmaBuffer(size_t sofLen, size_t len, size_t eofLen)
     HAL_StatusTypeDef s = HAL_UART_DMAStop(m_handle);
     if (s != HAL_OK)
     {
-        LOG_ERROR("[%s]: Unable to stop the DMA stream! %i", m_label.c_str(), (int)s);
+        UART_ERROR("Unable to stop the DMA stream! %i", (int)s);
         return false;
     }
 
@@ -243,16 +266,21 @@ bool UartModule::ResizeDmaBuffer(size_t sofLen, size_t len, size_t eofLen)
                              s_dataBuffers[m_dataBufferIdx].rxDmaData.size());
     if (s != HAL_OK)
     {
-        LOG_ERROR("[%s]: Unable to start the DMA stream! %i", m_label.c_str(), (int)s);
+        UART_ERROR("Unable to start the DMA stream! %i", (int)s);
         return false;
     }
 
     return true;
 }
 
+
 /*************************************************************************************************/
 /* Private functions definitions --------------------------------------------------------------- */
+#    if defined(NILAI_USE_UART_EVENTS)
+void UartModule::ReceptionCompleteCb(UART_HandleTypeDef* huart)
+#    else
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef* huart)
+#    endif
 {
     for (auto& buff : s_dataBuffers)
     {
@@ -264,6 +292,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef* huart)
 
         // Mark the reception as being completed.
         buff.rcvCompleted = true;
+        return;
     }
 }
 

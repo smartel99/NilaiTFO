@@ -55,20 +55,24 @@
 #    define NILAI_GPIO_IDR_REG  IDR
 #endif
 
-#if defined(NILAI_UMO_USE_CAN)
-#    if defined(NILAI_UMO_USE_UART)
-#        error Cant use Umo with UART when it already uses CAN!
-#    endif
-#elif defined(NILAI_UMO_USE_UART)
+#if defined(NILAI_USE_UMO)
 #    if defined(NILAI_UMO_USE_CAN)
-#        error Cant use Umo with CAN when it already uses UART!
+#        if defined(NILAI_UMO_USE_UART)
+#            error Cant use Umo with UART when it already uses CAN!
+#        endif
+#    elif defined(NILAI_UMO_USE_UART)
+#        if defined(NILAI_UMO_USE_CAN)
+#            error Cant use Umo with CAN when it already uses UART!
+#        endif
+#    else
+#        error A communication protocol must be chosen for UMO!
 #    endif
 #endif
 
 /***********************************************/
 /* Defines */
 #if defined(NILAI_USE_HW_TAS5760) || defined(NILAI_USE_SW_TAS5760)
-#define NILAI_USE_TAS5760
+#    define NILAI_USE_TAS5760
 #endif
 
 

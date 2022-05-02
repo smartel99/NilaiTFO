@@ -23,21 +23,24 @@
 #    include <algorithm>
 #    include <array>
 #    include <functional>
+#    include <utility>
 #    include <vector>
 
 /*************************************************************************************************/
 /* Defines
  * -------------------------------------------------------------------------------------
  */
+#    define SPI_INFO(msg, ...)  LOG_INFO("[%s]: " msg, m_label.c_str(), ##__VA_ARGS__)
+#    define SPI_ERROR(msg, ...) LOG_ERROR("[%s]: " msg, m_label.c_str(), ##__VA_ARGS__)
 
 /*************************************************************************************************/
 /* Public function definitions
  * --------------------------------------------------------------- */
-SpiModule::SpiModule(SPI_HandleTypeDef* handle, const std::string& label)
-: m_label(label), m_handle(handle)
+SpiModule::SpiModule(SPI_HandleTypeDef* handle, std::string label)
+: m_label(std::move(label)), m_handle(handle)
 {
     CEP_ASSERT(handle != nullptr, "SPI Handle is NULL!");
-    LOG_INFO("[%s]: Initialized", m_label.c_str());
+    SPI_INFO("Initialized");
 }
 
 SpiModule::~SpiModule()
@@ -45,14 +48,14 @@ SpiModule::~SpiModule()
     /* Abort ongoing messages on SPI peripheral */
     if (HAL_SPI_Abort_IT(m_handle) != HAL_OK)
     {
-        m_status |= (CEP_SPI::Status)m_handle->ErrorCode;
+        m_status |= (cep::SPI::Status)m_handle->ErrorCode;
         ErrorHandler();
     }
 
     /* De-init peripheral */
     if (HAL_SPI_DeInit(m_handle) != HAL_OK)
     {
-        m_status |= (CEP_SPI::Status)m_handle->ErrorCode;
+        m_status |= (cep::SPI::Status)m_handle->ErrorCode;
         ErrorHandler();
     }
 }
@@ -63,7 +66,7 @@ SpiModule::~SpiModule()
  */
 bool SpiModule::DoPost()
 {
-    LOG_INFO("[%s]: POST OK", m_label.c_str());
+    SPI_INFO("POST OK");
     return true;
 }
 
@@ -71,12 +74,23 @@ void SpiModule::Run()
 {
 }
 
-CEP_SPI::Status SpiModule::Transmit(const std::vector<uint8_t> pkt)
+#    if defined(NILAI_USE_EVENTS)
+bool SpiModule::OnEvent(cep::Events::Event* event)
+{
+#        if defined(NILAI_USE_SPI_EVENTS)
+    return Module::OnEvent(event);
+#        else
+    return false;
+#        endif
+}
+#    endif
+
+cep::SPI::Status SpiModule::Transmit(const std::vector<uint8_t>& pkt)
 {
     return Transmit(pkt.data(), pkt.size());
 }
 
-CEP_SPI::Status SpiModule::Transmit(const uint8_t* data, size_t len)
+cep::SPI::Status SpiModule::Transmit(const uint8_t* data, size_t len)
 {
     CEP_ASSERT(data != nullptr, "SPI Data pointer in null in SpiModule::Transmit");
     CEP_ASSERT(len != 0, "SPI Transmit data length is 0 in SpiModule::Transmit");
@@ -84,21 +98,21 @@ CEP_SPI::Status SpiModule::Transmit(const uint8_t* data, size_t len)
     // Wait for peripheral to be free.
     if (!WaitUntilNotBusy())
     {
-        return CEP_SPI::Status::TIMEOUT;
+        return cep::SPI::Status::TIMEOUT;
     }
 
     if (HAL_SPI_Transmit(m_handle, const_cast<uint8_t*>(data), (uint16_t)len, SpiModule::TIMEOUT) !=
         HAL_OK)
     {
-        m_status |= (CEP_SPI::Status)m_handle->ErrorCode;
+        m_status |= (cep::SPI::Status)m_handle->ErrorCode;
         ErrorHandler();
         return m_status;
     }
 
-    return CEP_SPI::Status::NONE;
+    return cep::SPI::Status::NONE;
 }
 
-CEP_SPI::Status SpiModule::Receive(uint8_t* ouptutData, size_t len)
+cep::SPI::Status SpiModule::Receive(uint8_t* ouptutData, size_t len)
 {
     CEP_ASSERT(ouptutData != nullptr, "Pointer is NULL in SpiModule::Receive");
     CEP_ASSERT(len > 0, "Length is 0 in SpiModule::Receive");
@@ -106,23 +120,23 @@ CEP_SPI::Status SpiModule::Receive(uint8_t* ouptutData, size_t len)
     // Wait for SPI peripheral to be ready.
     if (!WaitUntilNotBusy())
     {
-        return CEP_SPI::Status::TIMEOUT;
+        return cep::SPI::Status::TIMEOUT;
     }
 
     if (HAL_SPI_Receive(m_handle, ouptutData, (uint16_t)len, SpiModule::TIMEOUT) != HAL_OK)
     {
-        m_status |= (CEP_SPI::Status)m_handle->ErrorCode;
+        m_status |= (cep::SPI::Status)m_handle->ErrorCode;
         ErrorHandler();
         return m_status;
     }
 
-    return CEP_SPI::Status::NONE;
+    return cep::SPI::Status::NONE;
 }
 
-CEP_SPI::Status SpiModule::Transaction(const uint8_t* txData,
-                                       size_t         txLen,
-                                       uint8_t*       rxData,
-                                       size_t         rxLen)
+cep::SPI::Status SpiModule::Transaction(const uint8_t* txData,
+                                        size_t         txLen,
+                                        uint8_t*       rxData,
+                                        size_t         rxLen)
 {
     CEP_ASSERT(txData != nullptr, "TxData is NULL in SpiModule::Transaction");
     CEP_ASSERT(rxData != nullptr, "RxData is NULL in SpiModule::Transaction");
@@ -132,23 +146,23 @@ CEP_SPI::Status SpiModule::Transaction(const uint8_t* txData,
     // Wait for SPI peripheral to be ready.
     if (!WaitUntilNotBusy())
     {
-        return CEP_SPI::Status::TIMEOUT;
+        return cep::SPI::Status::TIMEOUT;
     }
 
     if (HAL_SPI_TransmitReceive(
           m_handle, const_cast<uint8_t*>(txData), rxData, (uint16_t)txLen, SpiModule::TIMEOUT) !=
         HAL_OK)
     {
-        m_status |= (CEP_SPI::Status)m_handle->ErrorCode;
+        m_status |= (cep::SPI::Status)m_handle->ErrorCode;
         ErrorHandler();
         return m_status;
     }
 
-    return CEP_SPI::Status::NONE;
+    return cep::SPI::Status::NONE;
 }
 
-CEP_SPI::Status SpiModule::Transaction(const std::vector<uint8_t>& txData,
-                                       std::vector<uint8_t>&       rxData)
+cep::SPI::Status SpiModule::Transaction(const std::vector<uint8_t>& txData,
+                                        std::vector<uint8_t>&       rxData)
 {
     // Make sure we got enough space in rxData.
     rxData.resize(txData.size());
@@ -161,41 +175,42 @@ CEP_SPI::Status SpiModule::Transaction(const std::vector<uint8_t>& txData,
  * --------------------------------------------------------------- */
 void SpiModule::ErrorHandler()
 {
-    if ((m_status & CEP_SPI::Status::MODF) != CEP_SPI::Status::NONE)
+    // TODO: Not this.
+    if ((m_status & cep::SPI::Status::MODF) != cep::SPI::Status::NONE)
     {
-        LOG_ERROR("SPI MODF error");
+        SPI_ERROR("SPI MODF error");
     }
-    if ((m_status & CEP_SPI::Status::CRC_ERROR) != CEP_SPI::Status::NONE)
+    if ((m_status & cep::SPI::Status::CRC_ERROR) != cep::SPI::Status::NONE)
     {
-        LOG_ERROR("SPI CRC error");
+        SPI_ERROR("SPI CRC error");
     }
-    if ((m_status & CEP_SPI::Status::OVR) != CEP_SPI::Status::NONE)
+    if ((m_status & cep::SPI::Status::OVR) != cep::SPI::Status::NONE)
     {
-        LOG_ERROR("SPI OVR error");
+        SPI_ERROR("SPI OVR error");
     }
-    if ((m_status & CEP_SPI::Status::DMA) != CEP_SPI::Status::NONE)
+    if ((m_status & cep::SPI::Status::DMA) != cep::SPI::Status::NONE)
     {
-        LOG_ERROR("SPI FRE error");
+        SPI_ERROR("SPI FRE error");
     }
-    if ((m_status & CEP_SPI::Status::FLAG) != CEP_SPI::Status::NONE)
+    if ((m_status & cep::SPI::Status::FLAG) != cep::SPI::Status::NONE)
     {
-        LOG_ERROR("SPI FLAG error");
+        SPI_ERROR("SPI FLAG error");
     }
-    if ((m_status & CEP_SPI::Status::ABORT) != CEP_SPI::Status::NONE)
+    if ((m_status & cep::SPI::Status::ABORT) != cep::SPI::Status::NONE)
     {
-        LOG_ERROR("SPI ABORT state");
-    }
-
-    if ((m_status & CEP_SPI::Status::NOT_INIT) != CEP_SPI::Status::NONE)
-    {
-        LOG_ERROR("SPI module is not initialized");
-    }
-    if ((m_status & CEP_SPI::Status::TIMEOUT) != CEP_SPI::Status::NONE)
-    {
-        LOG_ERROR("SPI timeout error");
+        SPI_ERROR("SPI ABORT state");
     }
 
-    m_status = CEP_SPI::Status::NONE;
+    if ((m_status & cep::SPI::Status::NOT_INIT) != cep::SPI::Status::NONE)
+    {
+        SPI_ERROR("SPI module is not initialized");
+    }
+    if ((m_status & cep::SPI::Status::TIMEOUT) != cep::SPI::Status::NONE)
+    {
+        SPI_ERROR("SPI timeout error");
+    }
+
+    m_status = cep::SPI::Status::NONE;
 }
 
 bool SpiModule::WaitUntilNotBusy()
@@ -215,6 +230,7 @@ bool SpiModule::WaitUntilNotBusy()
 
     return false;
 }
+
 #endif
 /**
  * @}

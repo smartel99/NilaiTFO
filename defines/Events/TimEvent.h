@@ -27,8 +27,8 @@ namespace cep::Events
 {
 struct TimEvent : public Event
 {
-    TimEvent() = default;
-    TimEvent(TIM_HandleTypeDef* tim) : Tim(tim) {}
+    TimEvent() : Event(EventTypes::Tim_Generic, EventCategories::Timer) {}
+    TimEvent(TIM_HandleTypeDef* tim, EventTypes t) : Event(t, EventCategories::Timer), Tim(tim) {}
 
     TIM_HandleTypeDef* Tim = nullptr;
 };

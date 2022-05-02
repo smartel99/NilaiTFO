@@ -32,13 +32,13 @@ struct DataEvent : public Event
     size_t Len  = 0;
 
     template<typename T>
-    DataEvent(const T& data)
+    DataEvent(const T& data) : Event(EventTypes::DataEvent, EventCategories::Data)
     {
         Len  = sizeof(T);
         Data = malloc(Len);
         memcpy(Data, reinterpret_cast<void*>(const_cast<T*>(&data)), Len);
     }
-    virtual ~DataEvent() { free(Data); }
+    ~DataEvent() override { free(Data); }
 
     template<typename T>
     const T& As() const

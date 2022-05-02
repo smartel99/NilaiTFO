@@ -1,7 +1,7 @@
 /**
- * @file    GenericEvent.h
+ * @file    Enums.h
  * @author  Samuel Martel
- * @date    2022-03-03
+ * @date    2022-05-02
  * @brief
  *
  * @copyright
@@ -14,32 +14,28 @@
  * You should have received a copy of the GNU General Public License along with this program. If
  * not, see <a href=https://www.gnu.org/licenses/>https://www.gnu.org/licenses/<a/>.
  */
-#ifndef NILAI_EVENTS_GENERICEVENT_H
-#define NILAI_EVENTS_GENERICEVENT_H
+#ifndef NILAI_I2S_ENUMS_H
+#define NILAI_I2S_ENUMS_H
 
-#if defined(NILAI_USE_EVENTS)
+#if defined(NILAI_USE_I2S)
+#    include "Core/Inc/i2s.h"
 
-#    include "../../defines/internalConfig.h"
-#    include "../../services/Time.h"
-#    include "Types.h"
-
-#    include <cstdint>
-
-namespace cep::Events
+namespace cep::I2S
 {
-/**
- * @brief Generic event structure.
- */
-struct Event
+enum class AudioFreqs
 {
-    Event(EventTypes t, EventCategories c) : Timestamp(cep::GetTime()), Type(t), Category(c) {}
-    virtual ~Event() = default;
-
-    uint32_t        Timestamp = 0;
-    EventTypes      Type;
-    EventCategories Category;
+    f192k   = I2S_AUDIOFREQ_192K,
+    f96k    = I2S_AUDIOFREQ_96K,
+    f48k    = I2S_AUDIOFREQ_48K,
+    f44k1   = I2S_AUDIOFREQ_44K,
+    f32k    = I2S_AUDIOFREQ_32K,
+    f22k05  = I2S_AUDIOFREQ_22K,
+    f16k    = I2S_AUDIOFREQ_16K,
+    f11k025 = I2S_AUDIOFREQ_11K,
+    f8k     = I2S_AUDIOFREQ_8K,
 };
-}    // namespace cep::Events
+}
+
 #endif
 
-#endif    // NILAI_EVENTS_GENERICEVENT_H
+#endif    // NILAI_I2S_ENUMS_H

@@ -51,7 +51,7 @@ public:
 
     [[nodiscard]] bool               DoPost() override;
     void                             Run() override;
-    [[nodiscard]] const std::string& GetLabel() const override { return m_label; }
+    [[nodiscard]] const std::string& GetLabel() const { return m_label; }
 
     void Reset();
 

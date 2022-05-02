@@ -15,6 +15,10 @@
 /* File includes ------------------------------------------------------------------------------- */
 #    include <string>
 
+#    if defined(NILAI_USE_EVENTS)
+#        include "Events/Events.h"
+#    endif
+
 namespace cep
 {
 /*************************************************************************************************/
@@ -22,6 +26,7 @@ namespace cep
 
 /*************************************************************************************************/
 /* Classes ------------------------------------------------------------------------------------- */
+class Application;
 
 /**
  * @class   Module
@@ -30,18 +35,56 @@ namespace cep
 class Module
 {
 public:
+    Module()          = default;
     virtual ~Module() = default;
 
-    virtual bool                             DoPost() { return false; }
-    virtual void                             Run() {}
-    [[nodiscard]] virtual const std::string& GetLabel() const
-    {
-        // This is UB, yes. However, this function should always be overridden.
-        // It must not be pure virtual to avoid adding excessive bloat to the binary file.
-        DISABLE_WARNING("-Wreturn-local-addr")
-        return {};
-        DISABLE_WARNING_POP
-    }
+    /**
+     * @brief Called when the module is being attached to the application.
+     */
+    virtual void OnAttach() {}
+
+    /**
+     * @brief Called when the module is being detached from the application.
+     */
+    virtual void OnDetach() {}
+
+#    if defined(NILAI_USE_EVENTS)
+    /**
+     * @brief Called whenever an event happens.
+     * @param type The type of event
+     * @param event The event data object.
+     * @returns True if the event was handled and shouldn't be propagated further.
+     * @returns False if the event was not handled and/or should be propagated to the other modules.
+     */
+    virtual bool OnEvent([[maybe_unused]] Events::Event* event) { return false; }
+#    endif
+
+    /**
+     * @brief Called during the application startup.
+     *
+     * Use this function to verify the functionalities of the module and to check for problems.
+     *
+     * Returning false from this function causes the POST to fail, the application blocking.
+     *
+     * @return True if the POST passed, false otherwise.
+     */
+    virtual bool DoPost() { return true; }
+
+    /**
+     * @brief Called once every frame.
+     */
+    virtual void Run() {}
+
+    /**
+     * @brief Gets the ID of the module.
+     * @return the ID of the module
+     */
+    [[nodiscard]] size_t GetId() const { return m_id; }
+
+protected:
+    friend Application;
+
+    size_t m_id = 0;
 };
 
 }    // namespace cep

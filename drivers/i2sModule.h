@@ -22,27 +22,14 @@
 #    include NILAI_HAL_HEADER
 #    if defined(HAL_I2S_MODULE_ENABLED)
 #        include "../defines/module.hpp"
-#        include "Core/Inc/i2s.h"
+#        include "I2S/Enums.h"
 
 #        include <functional>
 #        include <map>
 
-namespace cep::I2S
-{
-enum class AudioFreqs
-{
-    f192k   = I2S_AUDIOFREQ_192K,
-    f96k    = I2S_AUDIOFREQ_96K,
-    f48k    = I2S_AUDIOFREQ_48K,
-    f44k1   = I2S_AUDIOFREQ_44K,
-    f32k    = I2S_AUDIOFREQ_32K,
-    f22k05  = I2S_AUDIOFREQ_22K,
-    f16k    = I2S_AUDIOFREQ_16K,
-    f11k025 = I2S_AUDIOFREQ_11K,
-    f8k     = I2S_AUDIOFREQ_8K,
-};
-
-}
+#        if defined(NILAI_USE_EVENTS)
+#            include "../defines/Events/Events.h"
+#        endif
 
 class I2sModule : public cep::Module
 {
@@ -52,7 +39,11 @@ public:
 
     bool                             DoPost() override;
     void                             Run() override;
-    [[nodiscard]] const std::string& GetLabel() const override { return m_label; }
+    [[nodiscard]] const std::string& GetLabel() const { return m_label; }
+
+#        if defined(NILAI_USE_EVENTS)
+    bool OnEvent(cep::Events::Event* event) override;
+#        endif
 
     [[nodiscard]] cep::I2S::AudioFreqs GetAudioFreq() const;
     void                               SetAudioFreq(cep::I2S::AudioFreqs f);

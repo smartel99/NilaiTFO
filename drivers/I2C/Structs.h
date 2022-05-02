@@ -1,7 +1,7 @@
 /**
- * @file    GenericEvent.h
+ * @file    Structs.h
  * @author  Samuel Martel
- * @date    2022-03-03
+ * @date    2022-05-02
  * @brief
  *
  * @copyright
@@ -14,32 +14,33 @@
  * You should have received a copy of the GNU General Public License along with this program. If
  * not, see <a href=https://www.gnu.org/licenses/>https://www.gnu.org/licenses/<a/>.
  */
-#ifndef NILAI_EVENTS_GENERICEVENT_H
-#define NILAI_EVENTS_GENERICEVENT_H
+#ifndef NILAI_STRUCTS_H
+#define NILAI_STRUCTS_H
 
-#if defined(NILAI_USE_EVENTS)
-
-#    include "../../defines/internalConfig.h"
-#    include "../../services/Time.h"
-#    include "Types.h"
+#if defined(NILAI_USE_I2C)
 
 #    include <cstdint>
+#    include <vector>
 
-namespace cep::Events
+namespace cep::I2C
 {
-/**
- * @brief Generic event structure.
- */
-struct Event
+struct Frame
 {
-    Event(EventTypes t, EventCategories c) : Timestamp(cep::GetTime()), Type(t), Category(c) {}
-    virtual ~Event() = default;
+    uint8_t              deviceAddress   = 0;
+    uint8_t              registerAddress = 0;
+    std::vector<uint8_t> data            = {};
 
-    uint32_t        Timestamp = 0;
-    EventTypes      Type;
-    EventCategories Category;
+    Frame() = default;
+    Frame(uint8_t devAddr, std::vector<uint8_t> pData = std::vector<uint8_t>())
+    : deviceAddress(devAddr), data(std::move(pData))
+    {
+    }
+    Frame(uint8_t devAddr, uint8_t regAddr, std::vector<uint8_t> pData = std::vector<uint8_t>())
+    : deviceAddress(devAddr), registerAddress(regAddr), data(std::move(pData))
+    {
+    }
 };
-}    // namespace cep::Events
+}    // namespace cep::I2C
 #endif
 
-#endif    // NILAI_EVENTS_GENERICEVENT_H
+#endif    // NILAI_STRUCTS_H
