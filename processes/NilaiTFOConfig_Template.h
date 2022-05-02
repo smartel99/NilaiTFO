@@ -87,10 +87,11 @@
 //#define NILAI_USE_CAN
 //#define NILAI_USE_I2C
 //#define NILAI_USE_I2S
-//#define NILAI_USE_SPI
-//#define NILAI_USE_UART
 //#define NILAI_USE_PWM
 //#define NILAI_USE_RTC
+//#define NILAI_USE_SAI
+//#define NILAI_USE_SPI
+//#define NILAI_USE_UART
 
 // Interfaces
 //#define NILAI_USE_ADS

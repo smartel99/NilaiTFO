@@ -14,11 +14,9 @@
  * You should have received a copy of the GNU General Public License along with this program. If
  * not, see <a href=https://www.gnu.org/licenses/>https://www.gnu.org/licenses/<a/>.
  */
+#if defined(NILAI_USE_TAS5707)
 #include "Tas5707Module.h"
-#if defined(NILAI_USE_TAS5707)
-#    include "Enums.h"
 
-#if defined(NILAI_USE_TAS5707)
 
 #    include "Enums.h"
 

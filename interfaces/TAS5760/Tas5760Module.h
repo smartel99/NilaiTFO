@@ -31,12 +31,17 @@ class Tas5760Module : public I2sModule
 {
 public:
     Tas5760Module(I2S_HandleTypeDef* i2s, const std::string& label) : I2sModule(i2s, label) {}
+    //
+    //    virtual void               ToggleSleep(bool s) = 0;
+    //    [[nodiscard]] virtual bool IsAsleep() const    = 0;
+    //
+    //    virtual void               ToggleShutdown(bool s) = 0;
+    //    [[nodiscard]] virtual bool IsShutdown() const     = 0;
+    virtual void               ToggleSleep(bool s) {}
+    [[nodiscard]] virtual bool IsAsleep() const {}
 
-    virtual void               ToggleSleep(bool s) = 0;
-    [[nodiscard]] virtual bool IsAsleep() const    = 0;
-
-    virtual void               ToggleShutdown(bool s) = 0;
-    [[nodiscard]] virtual bool IsShutdown() const     = 0;
+    virtual void               ToggleShutdown(bool s) {}
+    [[nodiscard]] virtual bool IsShutdown() const {}
 };
 
 #endif

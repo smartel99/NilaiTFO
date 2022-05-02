@@ -42,10 +42,10 @@ UartModule::UartModule(UART_HandleTypeDef* uart, const std::string& label)
 
     s_dataBuffers.emplace_back(515, uart);
     m_dataBufferIdx = s_dataBuffers.size() - 1;
-    __HAL_UART_ENABLE_IT(m_handle, UART_IT_RXNE);
 
     HAL_UART_Receive_DMA(
       m_handle, s_dataBuffers.back().rxDmaData.data(), s_dataBuffers.back().rxDmaData.size());
+    __HAL_UART_ENABLE_IT(m_handle, UART_IT_RXNE);
     LOG_INFO("[%s]: Initialized", label.c_str());
 }
 
