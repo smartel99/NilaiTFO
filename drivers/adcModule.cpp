@@ -39,6 +39,11 @@ AdcModule::AdcModule(ADC_HandleTypeDef* adc, std::string label)
                "[%s]: Unable to allocate memory for channel data buffer!",
                m_label.c_str());
 
+    for (size_t i = 0; i < m_channelCount; i++)
+    {
+        m_channelBuff[i] = 0;
+    }
+
     s_modules[adc] = this;
 #        if defined(NILAI_USE_EVENTS) && defined(NILAI_USE_ADC_EVENTS)
 
@@ -90,6 +95,10 @@ bool AdcModule::DoPost()
             {
                 ADC_ERROR("Channel %i is reading 0 counts!", i);
                 isAllChannelsOk = false;
+            }
+            else
+            {
+                ADC_INFO("Channel %i is reading: %0.6fV", i, ConvertToVolt(m_channelBuff[i]));
             }
         }
 

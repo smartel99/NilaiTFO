@@ -40,7 +40,7 @@ void PwmModule::Run()
 }
 
 #    if defined(NILAI_USE_EVENTS)
-bool PwmModule::OnEvent(cep::Events::Event* event)
+bool PwmModule::OnEvent([[maybe_unused]] cep::Events::Event* event)
 {
 #        if defined(NILAI_USE_TIM_EVENTS)
     return Module::OnEvent(event);
