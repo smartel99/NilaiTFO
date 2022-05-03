@@ -13,7 +13,6 @@
 
 #if defined(NILAI_USE_RTC) && defined(HAL_RTC_MODULE_ENABLED)
 #    include "services/logger.hpp"
-#    include <utility>
 
 #    define RTC_INFO(msg, ...)  LOG_INFO("[RTC]: " msg, ##__VA_ARGS__)
 #    define RTC_ERROR(msg, ...) LOG_ERROR("[RTC]: " msg, ##__VA_ARGS__)
@@ -42,18 +41,20 @@ RtcModule::RtcModule(RTC_HandleTypeDef* handle) : m_handle(handle)
  */
 bool RtcModule::DoPost()
 {
-    size_t firstTime = GetEpoch();
+    cep::Rtc::Time firstTime = GetTime();
     HAL_Delay(2000);
-    size_t secondTime = GetEpoch();
+    cep::Rtc::Time secondTime = GetTime();
 
-    if ((secondTime >= firstTime + 1) && (secondTime <= firstTime + 3))
+    size_t ftSec = firstTime.ToSeconds();
+    size_t stSec = secondTime.ToSeconds();
+    if ((stSec >= ftSec + 1) && (stSec <= ftSec + 3))
     {
-        LOG_INFO("[RTC]: POST OK");
+        RTC_INFO("POST OK");
         return true;
     }
     else
     {
-        LOG_ERROR("[RTC]: POST ERROR! (first: %i, second: %i)", firstTime, secondTime);
+        RTC_ERROR("POST ERROR! (first: %i, second: %i)", ftSec, stSec);
         return false;
     }
 }
@@ -130,6 +131,7 @@ cep::Rtc::Timestamp RtcModule::GetTimestamp()
     return {GetDate(), GetTime()};
 }
 
+#    if defined(NILAI_RTC_USE_STL)
 size_t RtcModule::GetEpoch()
 {
     return GetEpoch(GetDate(), GetTime());
@@ -150,6 +152,7 @@ size_t RtcModule::GetEpoch(const cep::Rtc::Date& date, const cep::Rtc::Time& tim
     epoch = mktime(&tim);
     return (size_t)epoch;
 }
+#    endif
 
 
 #endif

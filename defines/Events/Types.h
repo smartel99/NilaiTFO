@@ -119,6 +119,32 @@ enum class EventTypes
     ADC_Error,               //! An error occurred.
 #    endif
 
+#    if defined(NILAI_USE_CAN_EVENTS)
+    CAN_Generic,                //! Generic CAN event.
+    CAN_TxMailbox0Cplt,         //! Transmit operation in mailbox 0 complete.
+    CAN_TxMailbox1Cplt,         //! Transmit operation in mailbox 1 complete.
+    CAN_TxMailbox2Cplt,         //! Transmit operation in mailbox 2 complete.
+    CAN_TxMailbox0AbortCplt,    //! Abortion request complete in mailbox 0.
+    CAN_TxMailbox1AbortCplt,    //! Abortion request complete in mailbox 1.
+    CAN_TxMailbox2AbortCplt,    //! Abortion request complete in mailbox 2.
+    CAN_RxFifo0MsgPending,      //! A CAN packet has been received in FIFO 0.
+    CAN_RxFifo0Full,            //! No more packets can be received in FIFO 0.
+    CAN_RxFifo1MsgPending,      //! A CAN packet has been received in FIFO 1.
+    CAN_RxFifo1Full,            //! No more packets can be received in FIFO 1.
+    CAN_Sleep,                  //! The CAN peripheral successfully went to sleep.
+    CAN_WakeUpFromRx,           //! The CAN peripheral has been awaken by the reception of a packet.
+    CAN_Error,                  //! An error occurred.
+#    endif
+
+#    if defined(NILAI_USE_SAI_EVENTS)
+    SAI_Generic,       //! Generic SAI event.
+    SAI_TxHalfCplt,    //! Transmission half complete.
+    SAI_TxCplt,        //! Transmission complete.
+    SAI_RxHalfCplt,    //! Reception half complete.
+    SAI_RxCplt,        //! Reception complete.
+    SAI_Error,         //! An error occurred.
+#    endif
+
     //! Number of events, should always be last.
     Count
 };
@@ -146,7 +172,13 @@ enum class EventCategories
     Uart,    //! UART Event.
 #    endif
 #    if defined(NILAI_USE_ADC_EVENTS)
-    Adc,    //! ADC event.
+    Adc,    //! ADC Event.
+#    endif
+#    if defined(NILAI_USE_CAN_EVENTS)
+    Can,    //! CAN Event.
+#    endif
+#    if defined(NILAI_USE_SAI_EVENTS)
+    Sai,    //! SAI Event.
 #    endif
 };
 

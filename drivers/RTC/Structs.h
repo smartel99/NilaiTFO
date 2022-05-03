@@ -47,6 +47,7 @@ struct Time
     Time() = default;
     Time(const RTC_TimeTypeDef& time);
 
+    [[nodiscard]] size_t          ToSeconds() const;
     [[nodiscard]] RTC_TimeTypeDef ToHal() const;
     [[nodiscard]] std::string     ToStr() const;
 };
@@ -76,9 +77,11 @@ struct Timestamp
 
     Timestamp() = default;
     Timestamp(const Date& d, const Time& t) : date(d), time(t) {}
+#    if defined(NILAI_RTC_USE_STL)
     Timestamp(size_t epoch);
 
     [[nodiscard]] size_t ToEpoch() const;
+#    endif
 };
 }    // namespace cep::Rtc
 #endif

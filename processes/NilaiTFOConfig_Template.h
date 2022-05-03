@@ -10,8 +10,8 @@
  *******************************************************************************
  */
 
-#ifndef GUARD_NILAITFOCONFIG_H
-#define GUARD_NILAITFOCONFIG_H
+#ifndef NILAI_NILAITFOCONFIG_H
+#define NILAI_NILAITFOCONFIG_H
 
 // Path of the main application header file.
 #define APPLICATION_HEADER "processes/MasterApplication.h"
@@ -79,13 +79,15 @@
  */
 #    define NILAI_EVENTS_MAX_CALLBACKS 1
 
-#    define NILAI_USE_TIMER_EVENTS
+#    define NILAI_USE_ADC_EVENTS
+//#    define NILAI_USE_CAN_EVENTS
 #    define NILAI_USE_I2C_EVENTS
 #    define NILAI_USE_I2S_EVENTS
 #    define NILAI_USE_RTC_EVENTS
+#    define NILAI_USE_SAI_EVENTS
 #    define NILAI_USE_SPI_EVENTS
+#    define NILAI_USE_TIMER_EVENTS
 #    define NILAI_USE_UART_EVENTS
-#    define NILAI_USE_ADC_EVENTS
 #endif
 
 /******************************************************************************/
@@ -95,15 +97,15 @@
  * Uncomment a define to use that module, or comment it to disable it
  */
 // Drivers
-//#define NILAI_USE_ADC
-//#define NILAI_USE_CAN
-//#define NILAI_USE_I2C
-//#define NILAI_USE_I2S
-//#define NILAI_USE_PWM
-//#define NILAI_USE_RTC
-//#define NILAI_USE_SAI
-//#define NILAI_USE_SPI
-//#define NILAI_USE_UART
+//#define NILAI_USE_ADC     //! Enables the Analog-to-Digital Converter module.
+//#define NILAI_USE_CAN     //! Enables the Controller Area Network module.
+//#define NILAI_USE_I2C     //! Enables the Inter-Integrated Circuit module.
+//#define NILAI_USE_I2S     //! Enables the Inter-IC Sound module.
+//#define NILAI_USE_PWM     //! Enables the Pulse-Width Modulation module.
+//#define NILAI_USE_RTC     //! Enables the Real-Time Clock module.
+//#define NILAI_USE_SAI     //! Enables the Serial Audio Interface module.
+//#define NILAI_USE_SPI     //! Enables the Serial Peripheral Interface module.
+//#define NILAI_USE_UART    //! Enables the Universal Asynchronous Receiver-Transmitter module.
 
 // Interfaces
 //#define NILAI_USE_ADS
@@ -151,9 +153,19 @@
 #    define NILAI_TAS5760_VERIFY_WRITE
 #endif
 
+#if defined(NILAI_USE_RTC)
+//--- Real-Time Clock settings.
+
+/**
+ * @brief Enables the use of the standard library to convert epoch time to timestamps and
+ * vice-versa.
+ * @note This adds significant bloat to the binary file (mktime taking 820 bytes just by itself).
+ */
+//#define NILAI_RTC_USE_STL
+#endif
 
 /**
  * @}
  */
 /* END OF FILE */
-#endif /* GUARD_NILAITFOCONFIG_H */
+#endif /* NILAI_NILAITFOCONFIG_H */

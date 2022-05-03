@@ -66,6 +66,17 @@ void CanModule::Run()
 {
 }
 
+#    if defined(NILAI_USE_EVENTS)
+bool CanModule::OnEvent(cep::Events::Event* event)
+{
+#        if defined(NILAI_USE_CAN_EVENTS)
+    static_assert(false, "CAN events not implemented yet!");
+#        else
+    return false;
+#        endif
+}
+#    endif
+
 void CanModule::Reset()
 {
     // Copy the initialization parameters, so we can use them again.
@@ -621,6 +632,7 @@ bool CanModule::WaitForFreeMailbox()
 
     return false;
 }
+
 
 
 #endif

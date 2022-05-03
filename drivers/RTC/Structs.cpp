@@ -65,6 +65,11 @@ std::string Time::ToStr() const
     return std::string {t};
 }
 
+size_t Time::ToSeconds() const
+{
+    return (hours * 3600) + (minutes * 60) + seconds;
+}
+
 Date::Date(const RTC_DateTypeDef& date)
 : year((uint16_t)(date.Year + 2000)), month(date.Month), day(date.Date), dotw(date.WeekDay)
 {
@@ -126,6 +131,7 @@ std::string Date::ToStr() const
     return std::string {d};
 }
 
+#    if defined(NILAI_RTC_USE_STL)
 cep::Rtc::Timestamp::Timestamp(size_t epoch)
 {
     time_t     e = epoch;
@@ -155,6 +161,7 @@ size_t cep::Rtc::Timestamp::ToEpoch() const
     epoch = mktime(&tim);
     return (size_t)epoch;
 }
+#    endif
 }    // namespace cep::Rtc
 
 #endif

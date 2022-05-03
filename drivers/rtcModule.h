@@ -59,8 +59,10 @@ public:
 
     cep::Rtc::Timestamp GetTimestamp();
 
+#            if defined(NILAI_RTC_USE_STL)
     size_t        GetEpoch();
     static size_t GetEpoch(const cep::Rtc::Date& date, const cep::Rtc::Time& time);
+#            endif
 
     static RtcModule* Get() { return s_instance; }
 

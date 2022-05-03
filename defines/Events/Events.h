@@ -52,6 +52,14 @@
 #        include "UartEvent.h"
 #    endif
 
+#    if defined(NILAI_USE_CAN_EVENTS)
+#        include "CanEvent.h"
+#    endif
+
+#    if defined(NILAI_USE_SAI_EVENTS)
+#        include "SaiEvent.h"
+#    endif
+
 #    include "../pin.h"
 
 

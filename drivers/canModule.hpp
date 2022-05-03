@@ -18,15 +18,19 @@
  */
 #    if !defined(NILAI_TEST)
 #        if defined(NILAI_USE_CAN)
-#            include "defines/internalConfig.h"
+#            include "../defines/internalConfig.h"
 #            include NILAI_HAL_HEADER
 #            if defined(HAL_CAN_MODULE_ENABLED)
-#                include "defines/macros.hpp"
-#                include "defines/misc.hpp"
-#                include "defines/module.hpp"
+#                include "../defines/macros.hpp"
+#                include "../defines/misc.hpp"
+#                include "../defines/module.hpp"
 
 #                include "CAN/Enums.h"
 #                include "CAN/Structs.h"
+
+#                if defined(NILAI_USE_EVENTS)
+#                    include "../defines/Events/Events.h"
+#                endif
 
 #                include <array>
 #                include <cstdint>
@@ -53,6 +57,9 @@ public:
     void                             Run() override;
     [[nodiscard]] const std::string& GetLabel() const { return m_label; }
 
+#                if defined(NILAI_USE_EVENTS)
+    bool OnEvent(cep::Events::Event* event) override;
+#                endif
     void Reset();
 
     void ConfigureFilter(const CEP_CAN::FilterConfiguration& config);
