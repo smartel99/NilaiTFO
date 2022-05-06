@@ -14,8 +14,8 @@
 #    include "file.h"
 #    include "filesystem.h"
 
-#    include "../defines/macros.hpp"
-#    include "../services/logger.hpp"
+#    include "../defines/macros.h"
+#    include "../services/logger.h"
 
 #    define FS_DEBUG(msg, ...)    LOG_DEBUG("[FS]: " msg, ##__VA_ARGS__)
 #    define FS_INFO(msg, ...)     LOG_INFO("[FS]: " msg, ##__VA_ARGS__)
@@ -26,12 +26,10 @@
 #    define ASSERT_FILE_IS_OK()                                                                    \
         do                                                                                         \
         {                                                                                          \
-            CEP_ASSERT(m_isOpen == true, "File is not open!");                                     \
+            NILAI_ASSERT(m_isOpen == true, "File is not open!");                                     \
         } while (0)
 
-namespace cep
-{
-namespace Filesystem
+namespace Nilai::Filesystem
 {
 File::File(const std::string& path, FileModes mode) : m_path(path), m_mode(mode)
 {
@@ -50,7 +48,7 @@ File::~File()
 Result File::Open(const std::string& path, FileModes mode)
 {
     // If path is empty, just reopen the file.
-    if (path.empty() == false)
+    if (!path.empty())
     {
         m_path = path;
     }
@@ -60,7 +58,7 @@ Result File::Open(const std::string& path, FileModes mode)
 
     if (m_status != Result::Ok)
     {
-        FS_ERROR("Unable to open file '%s': %s", m_path.c_str(), ResultToStr(m_status).c_str());
+        FS_ERROR("Unable to open file '%s': %s", m_path.c_str(), ResultToStr(m_status));
         m_isOpen = false;
     }
     else
@@ -79,7 +77,7 @@ Result File::Close()
 
     if (m_status != Result::Ok)
     {
-        FS_ERROR("Unable to close file '%s': %s", m_path.c_str(), ResultToStr(m_status).c_str());
+        FS_ERROR("Unable to close file '%s': %s", m_path.c_str(), ResultToStr(m_status));
     }
     else
     {
@@ -92,7 +90,7 @@ Result File::Close()
 Result File::Read(void* outData, size_t lenDesired, size_t* lenRead)
 {
     ASSERT_FILE_IS_OK();
-    CEP_ASSERT(outData != nullptr, "Pointer is null!");
+    NILAI_ASSERT(outData != nullptr, "Pointer is null!");
     size_t br = 0;
     Result r  = (Result)f_read(&m_file, outData, lenDesired, &br);
 
@@ -106,7 +104,7 @@ Result File::Read(void* outData, size_t lenDesired, size_t* lenRead)
 Result File::Write(const void* data, size_t dataLen, size_t* dataWritten)
 {
     ASSERT_FILE_IS_OK();
-    CEP_ASSERT(data != nullptr, "Pointer is null!");
+    NILAI_ASSERT(data != nullptr, "Pointer is null!");
 
     size_t bw = 0;
 
@@ -177,7 +175,7 @@ Result File::Forward(const std::function<size_t(const uint8_t*, size_t)>& func,
     UNUSED(func);
     UNUSED(cntToFwd);
     UNUSED(forwarded);
-    CEP_ASSERT(false, "This function is not enabled");
+    NILAI_ASSERT(false, "This function is not enabled");
     return Result::Ok;
 #    endif
 }
@@ -190,7 +188,7 @@ Result File::Expand(fsize_t newSize, AllocModes mode)
 #    else
     UNUSED(newSize);
     UNUSED(mode);
-    CEP_ASSERT(false, "This function is not enabled");
+    NILAI_ASSERT(false, "This function is not enabled");
     return Result::Ok;
 #    endif
 }
@@ -201,7 +199,7 @@ Result File::GetString(std::string& outStr, size_t maxLen)
     ASSERT_FILE_IS_OK();
 
     char* buff = new char[maxLen];
-    CEP_ASSERT(buff != nullptr, "Unable to allocate memory!");
+    NILAI_ASSERT(buff != nullptr, "Unable to allocate memory!");
 
     if (f_gets(buff, maxLen, &m_file) == nullptr)
     {
@@ -291,7 +289,6 @@ bool File::HasError()
     return !((Result)f_error(&m_file) == Result::Ok);
 }
 
-}    // namespace Filesystem
-}    // namespace cep
+}    // namespace Nilai::Filesystem
 
 #endif

@@ -15,21 +15,21 @@
  * not, see <a href=https://www.gnu.org/licenses/>https://www.gnu.org/licenses/<a/>.
  */
 #if defined(NILAI_USE_RTC)
-#    include "Structs.h"
+#    include "structs.h"
 
 #    include <ctime>
 
-namespace cep::Rtc
+namespace Nilai::Rtc
 {
 Time::Time(const RTC_TimeTypeDef& time)
 : hours(time.Hours), minutes(time.Minutes), seconds(time.Seconds)
 {
     switch (time.DayLightSaving)
     {
-        case RTC_DAYLIGHTSAVING_SUB1H: dayLightSaving = cep::Rtc::DayLightSaving::SubOne; break;
-        case RTC_DAYLIGHTSAVING_ADD1H: dayLightSaving = cep::Rtc::DayLightSaving::AddOne; break;
+        case RTC_DAYLIGHTSAVING_SUB1H: dayLightSaving = Nilai::Rtc::DayLightSaving::SubOne; break;
+        case RTC_DAYLIGHTSAVING_ADD1H: dayLightSaving = Nilai::Rtc::DayLightSaving::AddOne; break;
         case RTC_DAYLIGHTSAVING_NONE: [[fallthrough]];
-        default: dayLightSaving = cep::Rtc::DayLightSaving::None; break;
+        default: dayLightSaving = Nilai::Rtc::DayLightSaving::None; break;
     }
 }
 
@@ -43,13 +43,13 @@ RTC_TimeTypeDef Time::ToHal() const
     time.StoreOperation = RTC_STOREOPERATION_SET;
     switch (dayLightSaving)
     {
-        case cep::Rtc::DayLightSaving::SubOne:
+        case Nilai::Rtc::DayLightSaving::SubOne:
             time.DayLightSaving = RTC_DAYLIGHTSAVING_SUB1H;
             break;
-        case cep::Rtc::DayLightSaving::AddOne:
+        case Nilai::Rtc::DayLightSaving::AddOne:
             time.DayLightSaving = RTC_DAYLIGHTSAVING_ADD1H;
             break;
-        case cep::Rtc::DayLightSaving::None: [[fallthrough]];
+        case Nilai::Rtc::DayLightSaving::None: [[fallthrough]];
         default: time.DayLightSaving = RTC_DAYLIGHTSAVING_NONE; break;
     }
 
@@ -132,7 +132,7 @@ std::string Date::ToStr() const
 }
 
 #    if defined(NILAI_RTC_USE_STL)
-cep::Rtc::Timestamp::Timestamp(size_t epoch)
+Nilai::Rtc::Timestamp::Timestamp(size_t epoch)
 {
     time_t     e = epoch;
     struct tm* tim;
@@ -146,7 +146,7 @@ cep::Rtc::Timestamp::Timestamp(size_t epoch)
     time.seconds = (uint8_t)(tim->tm_sec);
 }
 
-size_t cep::Rtc::Timestamp::ToEpoch() const
+size_t Nilai::Rtc::Timestamp::ToEpoch() const
 {
     time_t    epoch = {0};
     struct tm tim   = {};
@@ -162,6 +162,6 @@ size_t cep::Rtc::Timestamp::ToEpoch() const
     return (size_t)epoch;
 }
 #    endif
-}    // namespace cep::Rtc
+}    // namespace Nilai::Rtc
 
 #endif

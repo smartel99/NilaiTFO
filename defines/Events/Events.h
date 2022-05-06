@@ -19,55 +19,55 @@
 
 #if defined(NILAI_USE_EVENTS)
 
-#    include "DataEvent.h"
-#    include "ExtEvent.h"
-#    include "GenericEvent.h"
-#    include "Types.h"
+#    include "data_event.h"
+#    include "ext_event.h"
+#    include "generic_event.h"
+#    include "types.h"
 
 #    if defined(NILAI_USE_ADC_EVENTS)
-#        include "AdcEvent.h"
+#        include "adc_event.h"
 #    endif
 
 #    if defined(NILAI_USE_TIMER_EVENTS)
-#        include "TimEvent.h"
+#        include "tim_event.h"
 #    endif
 
 #    if defined(NILAI_USE_I2C_EVENTS)
-#        include "I2cEvent.h"
+#        include "i2c_event.h"
 #    endif
 
 #    if defined(NILAI_USE_I2S_EVENTS)
-#        include "I2sEvents.h"
+#        include "i2s_event.h"
 #    endif
 
 #    if defined(NILAI_USE_RTC_EVENTS)
-#        include "RtcEvent.h"
+#        include "rtc_event.h"
 #    endif
 
 #    if defined(NILAI_USE_SPI_EVENTS)
-#        include "SpiEvent.h"
+#        include "spi_event.h"
 #    endif
 
 #    if defined(NILAI_USE_UART_EVENTS)
-#        include "UartEvent.h"
+#        include "uart_event.h"
 #    endif
 
 #    if defined(NILAI_USE_CAN_EVENTS)
-#        include "CanEvent.h"
+#        include "can_event.h"
 #    endif
 
 #    if defined(NILAI_USE_SAI_EVENTS)
-#        include "SaiEvent.h"
+#        include "sai_event.h"
 #    endif
 
 #    include "../pin.h"
 
 
-namespace cep::Events
+namespace Nilai::Events
 {
-EventTypes PinToEvent(const cep::Pin& p);
+EventTypes PinToEvent(const Nilai::Pin& p);
 
-}    // namespace cep::Events
+}    // namespace Nilai::Events
 #endif
 
 #endif    // NILAI_EVENTS_H

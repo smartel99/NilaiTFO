@@ -18,7 +18,7 @@
 #define NILAI_PWM_ENUMS_H
 
 #if defined(NILAI_USE_PWM)
-namespace cep::PWM
+namespace Nilai::PWM
 {
 enum class Channels
 {

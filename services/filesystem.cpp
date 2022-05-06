@@ -11,11 +11,11 @@
 #if defined(NILAI_USE_FILESYSTEM)
 #    include "filesystem.h"
 
-#    include "../defines/macros.hpp"
+#    include "../defines/macros.h"
 #    include "ff_gen_drv.h"
 #    include "user_diskio.h"
 
-#    define ASSERT_FS() CEP_ASSERT(s_data.fs != nullptr, "File system is not ready!");
+#    define ASSERT_FS() NILAI_ASSERT(s_data.fs != nullptr, "File system is not ready!");
 #    define CHECK_IF_READY()                                                                       \
         do                                                                                         \
         {                                                                                          \
@@ -24,24 +24,22 @@
 
 struct FsData
 {
-    cep::Pin sdPin;
-    char     sdPath[4] = {0};    //!< SD logical drive path.
-    FATFS*   fs        = nullptr;
-    bool     isInit    = false;
-    bool     isMounted = false;
+    Nilai::Pin sdPin;
+    char       sdPath[4] = {0};    //!< SD logical drive path.
+    FATFS*     fs        = nullptr;
+    bool       isInit    = false;
+    bool       isMounted = false;
 };
 
 static FsData s_data;
 
-namespace cep
+namespace Nilai::Filesystem
 {
-namespace Filesystem
-{
-bool Init(const cep::Pin& pin)
+bool Init(const Nilai::Pin& pin)
 {
     s_data.sdPin = pin;
     s_data.fs    = new FATFS;
-    CEP_ASSERT(s_data.fs != nullptr, "Unable to allocate memory for file system!");
+    NILAI_ASSERT(s_data.fs != nullptr, "Unable to allocate memory for file system!");
 
     s_data.isInit = FATFS_LinkDriver(&USER_Driver, s_data.sdPath) == 0;
 
@@ -65,16 +63,16 @@ Result Mount(const std::string& drive, bool forceMount)
     if (s_data.fs == nullptr)
     {
         s_data.fs = new FATFS;
-        CEP_ASSERT(s_data.fs != nullptr, "Unable to allocate memory for file system!");
+        NILAI_ASSERT(s_data.fs != nullptr, "Unable to allocate memory for file system!");
     }
 
     // Wait a tiny bit to make sure that the SD card is properly powered.
     HAL_Delay(5);
-    Result r = (Result)f_mount(s_data.fs, drive.c_str(), (BYTE)forceMount);
+    Result r         = (Result)f_mount(s_data.fs, drive.c_str(), (BYTE)forceMount);
     s_data.isMounted = r == Result::Ok;
     if (r != Result::Ok)
     {
-        LOG_ERROR("Unable to mount drive '%s': (%d) %s", drive.c_str(), (int)r, ResultToStr(r).c_str());
+        LOG_ERROR("Unable to mount drive '%s': (%d) %s", drive.c_str(), (int)r, ResultToStr(r));
     }
 
     return r;
@@ -293,13 +291,14 @@ Result Utime(const std::string& path, const fileInfo_t* fno)
 #    else
     UNUSED(path);
     UNUSED(fno);
-    CEP_ASSERT(false, "Function not enabled!");
+    NILAI_ASSERT(false, "Function not enabled!");
     return Result::NotEnabled;
 #    endif
 }
 
-std::string ResultToStr(Result res)
+const char* ResultToStr(Result res)
 {
+#    if defined(NILAI_FS_STATUS_STRING)
     switch (res)
     {
         case Result::Ok: return "OK";
@@ -324,10 +323,13 @@ std::string ResultToStr(Result res)
         case Result::InvalidParameter: return "Invalid Parameter";
         default: return "Unknown error";
     }
+#    else
+    NILAI_UNUSED(res);
+    return "";
+#    endif
 }
 
-}    // namespace Filesystem
-}    // namespace cep
+}    // namespace Nilai::Filesystem
 
 
 #endif

@@ -23,10 +23,10 @@ include_directories(${ROOT_DIR})
 
 add_compile_options(-DNILAI_TEST)
 
-add_subdirectory(BitManipulations)
-add_subdirectory(Pin)
-add_subdirectory(Processes)
-add_subdirectory(Interfaces/TAS5707)
-add_subdirectory(Interfaces/TAS5760)
+add_subdirectory(bit_manipulations)
+add_subdirectory(pin)
+add_subdirectory(processes)
+add_subdirectory(interfaces/TAS5707)
+add_subdirectory(interfaces/TAS5760)
 
 

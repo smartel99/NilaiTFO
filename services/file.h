@@ -9,24 +9,21 @@
  *******************************************************************************
  */
 
-#ifndef FILE_H_
-#define FILE_H_
+#ifndef NILAI_FILE_H_
+#define NILAI_FILE_H_
 
 /***********************************************/
 /* Includes */
 #if defined(NILAI_USE_FILESYSTEM)
 
-#    include "../defines/Core.h"
-#    include "../defines/Filesystem/ErrorCodes.h"
+#    include "../defines/filesystem/error_codes.h"
 
 #    include "ff.h"
 
 #    include <functional>
 #    include <string>
 
-namespace cep
-{
-namespace Filesystem
+namespace Nilai::Filesystem
 {
 using file_t  = FIL;
 using fsize_t = FSIZE_t;
@@ -146,12 +143,11 @@ private:
     bool        m_isOpen = false;
     Result      m_status = {};
 };
-}    // namespace Filesystem
-}    // namespace cep
+}  // namespace Nilai::Filesystem
 
 /**
  * @}
  */
 #endif
 /* END OF FILE */
-#endif /* FILE_H_ */
+#endif /* NILAI_FILE_H_ */

@@ -16,9 +16,9 @@
  */
 #include "pin.h"
 
-#include "internalConfig.h"
+#include "internal_config.h"
 
-namespace cep
+namespace Nilai
 {
 
 void Pin::Set(bool state) const
@@ -43,4 +43,10 @@ bool Pin::Get() const
 {
     return (port->NILAI_GPIO_IDR_REG & pin) != 0;
 }
-}    // namespace cep
+
+void Pin::Toggle() const
+{
+    Set(!Get());
+}
+
+}    // namespace Nilai

@@ -14,11 +14,11 @@
  * You should have received a copy of the GNU General Public License along with this program. If
  * not, see <a href=https://www.gnu.org/licenses/>https://www.gnu.org/licenses/<a/>.
  */
-#ifndef NILAI_ENUMS_H
-#define NILAI_ENUMS_H
+#ifndef NILAI_SAI_ENUMS_H
+#define NILAI_SAI_ENUMS_H
 
 #if defined(NILAI_USE_SAI)
-#    include "../../defines/internalConfig.h"
+#    include "../../defines/internal_config.h"
 #    include NILAI_HAL_HEADER
 
 namespace Nilai::Sai

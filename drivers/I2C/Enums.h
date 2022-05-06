@@ -18,7 +18,7 @@
 #define NILAI_ENUMS_H
 
 #if defined(NILAI_USE_I2C)
-namespace cep::I2C
+namespace Nilai::I2C
 {
 /**
  ** @enum   Status
@@ -63,7 +63,7 @@ enum class Status
     NotInit          = 0x00000400,
     BadInit          = 0x00000800,
 };
-}    // namespace cep::I2C
+}    // namespace Nilai::I2C
 #endif
 
 #endif    // NILAI_ENUMS_H

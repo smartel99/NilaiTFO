@@ -13,7 +13,7 @@
  */
 /*************************************************************************************************/
 /* File includes ------------------------------------------------------------------------------- */
-#include "misc.hpp"
+#include "misc.h"
 
 #include <algorithm>
 #include <cmath>
@@ -31,7 +31,7 @@
  * @param   size: The size in characters of the char array
  * @retval  None
  */
-void cep::forceNullTerminationCharacter(char* string, size_t size)
+void Nilai::forceNullTerminationCharacter(char* string, size_t size)
 {
     /* Access last element of the array and clear it */
     string[size - 1] = '\0';
@@ -43,7 +43,7 @@ void cep::forceNullTerminationCharacter(char* string, size_t size)
  * @param   length: the number of bytes to clear
  * @retval  None
  */
-void cep::clearArray(void* array, size_t length)
+void Nilai::clearArray(void* array, size_t length)
 {
     memset(array, 0x00U, length);
 }
@@ -54,7 +54,7 @@ void cep::clearArray(void* array, size_t length)
  * @param   len:   The number of bytes to check
  * @retval  The number of 1s
  */
-size_t cep::countOfOnesInBytesInator(const uint8_t* bytes, uint8_t len)
+size_t Nilai::countOfOnesInBytesInator(const uint8_t* bytes, uint8_t len)
 {
     size_t count = 0;
 #if defined(__GCC__)
@@ -93,7 +93,7 @@ size_t cep::countOfOnesInBytesInator(const uint8_t* bytes, uint8_t len)
  *                second value.
  *          false: If the two values are too far apart from each other
  */
-bool cep::plus_minus(int32_t value, int32_t compare, int32_t margin)
+bool Nilai::plus_minus(int32_t value, int32_t compare, int32_t margin)
 {
     /* Take the absolute values */
     value   = std::abs(value);
@@ -131,7 +131,7 @@ bool cep::plus_minus(int32_t value, int32_t compare, int32_t margin)
  *                second value.
  *          false: If the two values are too far apart from each other
  */
-bool cep::plus_minus(double value, double compare, double margin)
+bool Nilai::plus_minus(double value, double compare, double margin)
 {
     if ((value <= (compare + margin)) && (value > (compare - margin)))
     {
@@ -143,7 +143,7 @@ bool cep::plus_minus(double value, double compare, double margin)
     }
 }
 
-size_t cep::FindStringInVector(const std::string& str, const std::vector<uint8_t>& vec)
+size_t Nilai::FindStringInVector(const std::string& str, const std::vector<uint8_t>& vec)
 {
 #if __cplusplus >= 201703L
     auto it = std::search(vec.begin(), vec.end(), str.begin(), str.end());
@@ -182,7 +182,7 @@ size_t cep::FindStringInVector(const std::string& str, const std::vector<uint8_t
 #endif
 }
 
-std::vector<uint8_t> cep::StrToVec(const std::string& str)
+std::vector<uint8_t> Nilai::StrToVec(const std::string& str)
 {
     std::vector<uint8_t> v;
     v.reserve(str.size());
@@ -195,7 +195,7 @@ std::vector<uint8_t> cep::StrToVec(const std::string& str)
     return v;
 }
 
-std::string cep::IntToHex(size_t i)
+std::string Nilai::IntToHex(size_t i)
 {
     char msg[9] = {0};
 
@@ -204,7 +204,7 @@ std::string cep::IntToHex(size_t i)
     return std::string(msg);
 }
 
-std::vector<uint8_t> cep::StrToVec(const std::string& str, size_t maxSize)
+std::vector<uint8_t> Nilai::StrToVec(const std::string& str, size_t maxSize)
 {
     std::vector<uint8_t> v;
     v.reserve(maxSize);

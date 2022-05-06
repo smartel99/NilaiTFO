@@ -17,8 +17,8 @@
 #ifndef NILAI_TIME_H
 #define NILAI_TIME_H
 
-#ifndef NILAI_TEST
-#    include "defines/internalConfig.h"
+#if !defined(NILAI_TEST)
+#    include "../defines/internal_config.h"
 #    include NILAI_HAL_HEADER
 #else
 #    if defined(_WIN32) || defined(_WIN64) || defined(__CYGWIN__)
@@ -34,7 +34,7 @@
 #    include <thread>
 #endif
 
-namespace cep
+namespace Nilai
 {
 inline static uint32_t GetTime()
 {
@@ -69,5 +69,5 @@ inline static void Delay(uint32_t ms)
 #    endif
 #endif
 }
-}    // namespace cep
+}    // namespace Nilai
 #endif    // NILAI_TIME_H

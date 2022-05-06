@@ -10,33 +10,41 @@
  */
 
 #if defined(NILAI_USE_LOGGER)
-#    include "logger.hpp"
-#    include "../defines/macros.hpp"
+#    include "logger.h"
+#    include "../defines/macros.h"
 #    if defined(NILAI_USE_UART)
-#        include "../drivers/uartModule.hpp"
+#        include "../drivers/uart_module.h"
 #    endif
 
 #    include <cstdarg>
 #    include <cstdio>
-#include <utility>
+#    include <utility>
 
+namespace Nilai::Services
+{
 Logger* Logger::s_instance = nullptr;
 
 #    if defined(NILAI_USE_UART)
-Logger::Logger(cep::Ref<UartModule> uart, const LogFunc& logFunc)
+Logger::Logger(Ref<Drivers::UartModule> uart, const LogFunc& logFunc)
 {
-    CEP_ASSERT(s_instance == nullptr, "Can only have one instance of Logger!");
+    NILAI_ASSERT(s_instance == nullptr, "Can only have one instance of Logger!");
+    NILAI_ASSERT(uart != nullptr, "Uart handle is null!");
     s_instance = this;
     m_uart     = std::move(uart);
-    m_logFunc  = logFunc;
+    if (logFunc)
+    {
+        m_logFunc = logFunc;
+    }
 }
 #    else
-
 Logger::Logger(const LogFunc& logFunc)
 {
     CEP_ASSERT(s_instance == nullptr, "Can only have one instance of Logger!");
     s_instance = this;
-    m_logFunc  = logFunc;
+    if (logFunc)
+    {
+        m_logFunc = logFunc;
+    }
 }
 #    endif
 
@@ -57,20 +65,23 @@ void Logger::Log(const char* fmt, ...)
 
 void Logger::VLog(const char* fmt, va_list args)
 {
-    static char buff[1024] = {0};
+    static char buff[1024] = {};
 
-    size_t s = vsnprintf(buff, sizeof_array(buff), fmt, args);
+    size_t s = vsnprintf(buff, SIZEOF_ARRAY(buff), fmt, args);
 
-    CEP_ASSERT(s < sizeof_array(buff), "vsnprintf error!");
+    NILAI_ASSERT(s < SIZEOF_ARRAY(buff), "vsnprintf error!");
 #    if defined(NILAI_USE_UART)
-    if (m_uart != nullptr)
-    {
-        m_uart->Transmit(buff, s);
-    }
+    m_uart->Transmit(buff, s);
 #    endif
-    if (m_logFunc)
+    m_logFunc(buff, s);
+}
+
+void Logger::SetLogFunc(const LogFunc& logFunc)
+{
+    if (logFunc)
     {
-        m_logFunc(buff, s);
+        m_logFunc = logFunc;
     }
 }
+}    // namespace Nilai::Services
 #endif

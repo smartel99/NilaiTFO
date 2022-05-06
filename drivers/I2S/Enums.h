@@ -20,7 +20,7 @@
 #if defined(NILAI_USE_I2S)
 #    include "Core/Inc/i2s.h"
 
-namespace cep::I2S
+namespace Nilai::I2S
 {
 enum class AudioFreqs
 {

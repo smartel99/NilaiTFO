@@ -14,11 +14,11 @@
  * You should have received a copy of the GNU General Public License along with this program. If
  * not, see <a href=https://www.gnu.org/licenses/>https://www.gnu.org/licenses/<a/>.
  */
-#include "Misc.h"
+#include "misc.h"
 
 #if defined(NILAI_USE_TAS5707)
 
-namespace cep::Tas5707
+namespace Nilai::Tas5707
 {
 std::array<uint8_t, 20> BiquadFilter::Serialize() const
 {
@@ -47,6 +47,6 @@ std::array<uint8_t, 8> DynRangeCtrlCoeffs::Serialize() const
       (uint8_t)(oa),
     };
 }
-}    // namespace cep::Tas5707
+}    // namespace Nilai::Tas5707
 
 #endif

@@ -10,8 +10,8 @@
  *
  ******************************************************************************
  */
-#ifndef GUARD_PIN_H
-#    define GUARD_PIN_H
+#ifndef NILAI_PIN_H
+#    define NILAI_PIN_H
 
 /*****************************************************************************/
 /* Includes */
@@ -23,7 +23,7 @@
 
 #    include <cstdint>
 
-namespace cep
+namespace Nilai
 {
 /*****************************************************************************/
 /* Exported types */
@@ -47,6 +47,7 @@ struct Pin
      * @note The pin must be configured in output mode for this to do anything.
      */
     void Set(bool state) const;
+    void Toggle() const;
 
     /**
      * @brief Gets the current state of the pin.
@@ -74,9 +75,9 @@ struct Pin
     [[nodiscard]] bool IsDefault() const { return pin == s_defaultPin; }
 };
 
-}    // namespace cep
+}    // namespace Nilai
 /* Have a wonderful day :) */
-#endif /* GUARD_PIN_H */
+#endif /* NILAI_PIN_H */
 /**
  * @}
  */

@@ -18,7 +18,7 @@
 #define NILAI_UART_STRUCTS_H
 
 #if defined(NILAI_USE_UART)
-#    include "../../defines/internalConfig.h"
+#    include "../../defines/internal_config.h"
 #    include NILAI_HAL_HEADER
 
 
@@ -26,7 +26,7 @@
 #    include <string>
 #    include <vector>
 
-namespace cep::Uart
+namespace Nilai::Uart
 {
 
 struct Frame
@@ -59,7 +59,7 @@ struct UartDataBuffer
 
     UartDataBuffer(size_t len, UART_HandleTypeDef* ins) : instance(ins) { rxDmaData.resize(len); }
 };
-}    // namespace cep::Uart
+}    // namespace Nilai::Uart
 
 #endif
 

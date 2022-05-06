@@ -21,7 +21,7 @@
 
 #    include <cstdint>
 
-namespace cep::Tas5707
+namespace Nilai::Tas5707
 {
 enum class Registers : uint8_t
 {
@@ -1004,7 +1004,7 @@ namespace BankSampleRates
 /**
  * @}
  */
-}    // namespace cep::Tas5707
+}    // namespace Nilai::Tas5707
 #endif
 
 #endif    // NILAI_TAS5707_ENUMS_H

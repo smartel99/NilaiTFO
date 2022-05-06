@@ -18,15 +18,15 @@
 #define NILAI_RTC_STRUCTS_H
 
 #if defined(NILAI_USE_RTC)
-#    include "../../defines/internalConfig.h"
+#    include "../../defines/internal_config.h"
 #    include NILAI_HAL_HEADER
 
-#    include "Enums.h"
+#    include "enums.h"
 
 #    include <cstdint>
 #    include <string>
 
-namespace cep::Rtc
+namespace Nilai::Rtc
 {
 /**
  * @brief   Contains the time information.
@@ -83,7 +83,7 @@ struct Timestamp
     [[nodiscard]] size_t ToEpoch() const;
 #    endif
 };
-}    // namespace cep::Rtc
+}    // namespace Nilai::Rtc
 #endif
 
 #endif    // NILAI_RTC_STRUCTS_H

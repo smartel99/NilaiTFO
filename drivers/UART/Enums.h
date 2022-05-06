@@ -18,12 +18,12 @@
 #define NILAI_UART_ENUMS_H
 
 #if defined(NILAI_USE_UART)
-#    include "../../defines/internalConfig.h"
+#    include "../../defines/internal_config.h"
 #    include NILAI_HAL_HEADER
 
 #    include <type_traits>
 
-namespace cep::Uart
+namespace Nilai::Uart
 {
 /**
  * @addtogroup  UART_Status
@@ -72,7 +72,7 @@ enum class SectionState
     NotComplete,
     Complete,
 };
-}    // namespace cep::Uart
+}    // namespace Nilai::Uart
 
 #endif
 

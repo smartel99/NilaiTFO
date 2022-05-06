@@ -22,7 +22,7 @@
 #    include <array>
 #    include <cstdint>
 
-namespace cep::Tas5707
+namespace Nilai::Tas5707
 {
 /**
  * @brief Structure representing a biquad filter under the 3.23 floating point number
@@ -91,6 +91,6 @@ struct DynamicRangeControl
     uint32_t O = 0x00084210;
 };
 
-}    // namespace cep::Tas5707
+}    // namespace Nilai::Tas5707
 #endif
 #endif    // NILAI_TAS5707_MISCSTRUCTS_H

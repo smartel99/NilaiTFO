@@ -18,7 +18,7 @@
 #define NILAI_RTC_ENUMS_H
 
 #if defined(NILAI_USE_RTC)
-namespace cep::Rtc
+namespace Nilai::Rtc
 {
 enum class DayLightSaving
 {

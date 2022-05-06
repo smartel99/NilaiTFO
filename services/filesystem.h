@@ -16,7 +16,7 @@
 /* Includes */
 #if defined(NILAI_USE_FILESYSTEM)
 
-#    include "../defines/Filesystem/ErrorCodes.h"
+#    include "../defines/Filesystem/error_codes.h"
 #    include "../defines/pin.h"
 #    include "ff.h"
 #    include "file.h"
@@ -24,7 +24,7 @@
 #    include <string>
 
 
-namespace cep
+namespace Nilai
 {
 // TODO Make the file system an object-oriented class that actually represents a file system.
 namespace Filesystem
@@ -47,7 +47,7 @@ struct MakeVolumeParams
 };
 
 
-bool   Init(const cep::Pin& detect = {});
+bool   Init(const Nilai::Pin& detect = {});
 void   Deinit();
 Result Mount(const std::string& drive = "", bool forceMount = false);
 Result Unmount();
@@ -78,9 +78,9 @@ Result Unlink(const std::string& path);
 
 Result Utime(const std::string& path, const fileInfo_t* fno);
 
-std::string ResultToStr(Result res);
+const char* ResultToStr(Result res);
 };    // namespace Filesystem
-}    // namespace cep
+}    // namespace Nilai
 
 
 /**

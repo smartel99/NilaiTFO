@@ -18,7 +18,7 @@
 #define NILAI_EVENT_TYPES_H
 
 #if defined(NILAI_USE_EVENTS)
-namespace cep::Events
+namespace Nilai::Events
 {
 /**
  * @brief List of the possible events.
@@ -200,7 +200,7 @@ enum class SoftwareEvents
     Event13 = (int)EventTypes::Exti13,
     Event14 = (int)EventTypes::Exti14,
 };
-}    // namespace cep::Events
+}    // namespace Nilai::Events
 #endif
 
 #endif    // NILAI_EVENT_TYPES_H

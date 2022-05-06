@@ -20,7 +20,7 @@
 #if defined(NILAI_USE_CAN)
 #    include <type_traits>
 
-namespace CEP_CAN
+namespace Nilai::Can
 {
 /**
  * @addtogroup  CAN_Status
@@ -118,6 +118,7 @@ constexpr inline Status operator|=(Status& a, const Status& b)
 
 [[maybe_unused]] static constexpr const char* StatusToStr(Status s)
 {
+#    if defined(NILAI_CAN_STATUS_STRING)
     switch (s)
     {
         case Status::ERROR_NONE: return "No error";
@@ -152,6 +153,10 @@ constexpr inline Status operator|=(Status& a, const Status& b)
         case Status::TX_ERROR: return "An error occurred during transmission";
         default: return "UNKNOWN";
     }
+#    else
+    NILAI_UNUSED(s);
+    return "";
+#    endif
 }
 /**
  * @}
@@ -232,6 +237,6 @@ enum class Irq
     LastErrorCode       = CAN_IT_LAST_ERROR_CODE,
     ErrorStatus         = CAN_IT_ERROR,
 };
-}    // namespace CEP_CAN
+}    // namespace Nilai::Can
 #endif
 #endif    // NILAI_CAN_ENUMS_H

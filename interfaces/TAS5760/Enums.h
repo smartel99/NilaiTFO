@@ -21,7 +21,7 @@
 #if defined(NILAI_USE_SW_TAS5760)
 #    include <cstdint>
 
-namespace cep::Tas5760
+namespace Nilai::Tas5760
 {
 //! List of the registers of the TAS5760.
 enum class Registers : uint8_t
@@ -446,7 +446,7 @@ enum class I2cAddresses
     //! When ADDR pin is HIGH.
     Addr1 = 0xDA
 };
-}    // namespace cep::Tas5760
+}    // namespace Nilai::Tas5760
 #endif
 
 #endif    // NILAI_TAS5760_ENUMS_H

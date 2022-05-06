@@ -15,7 +15,7 @@
  * not, see <a href=https://www.gnu.org/licenses/>https://www.gnu.org/licenses/<a/>.
  */
 
-#include "../TestApp.h"
+#include "../test_app.h"
 #include <gtest/gtest.h>
 
 using namespace cep;

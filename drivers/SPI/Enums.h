@@ -18,12 +18,12 @@
 #define NILAI_SPI_ENUMS_H
 
 #if defined(NILAI_USE_SPI)
-#    include "../../defines/internalConfig.h"
+#    include "../../defines/internal_config.h"
 #    include NILAI_HAL_HEADER
 
 #    include <type_traits>
 
-namespace cep::SPI
+namespace Nilai::SPI
 {
 /**
  * @addtogroup  SPI_Status
@@ -103,7 +103,7 @@ enum class SectionState
     NOT_COMPLETE,
     COMPLETE,
 };
-}    // namespace cep::SPI
+}    // namespace Nilai::SPI
 #endif
 
 #endif    // NILAI_SPI_ENUMS_H

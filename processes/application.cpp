@@ -8,16 +8,16 @@
  * Created on: May 19, 2021
  *******************************************************************************
  */
-#include "application.hpp"
+#include "application.h"
 
 #if defined(NILAI_USE_EVENTS)
-#    include "../defines/macros.hpp"
+#    include "../defines/macros.h"
 #endif
 
 static void AtExitForwarder();
 
 
-namespace cep
+namespace Nilai
 {
 Application* Application::s_instance = nullptr;
 
@@ -35,28 +35,79 @@ Application::Application()
 }
 
 #if defined(NILAI_USE_EVENTS)
+size_t Application::RegisterEventCallback(Events::EventTypes               event,
+                                          const Application::CallbackFunc& cb)
+{
+    NILAI_ASSERT(cb, "Callback is not valid!");
+
+    return InsertCallback(m_callbacks[(size_t)event], cb);
+}
+
+void Application::UnregisterEventCallback(Events::EventTypes event, size_t id)
+{
+    NILAI_ASSERT(id < s_maxEventCbCount, "Invalid callback ID!");
+
+    auto& events = m_callbacks[(size_t)event];
+
+    events[id] = {};
+}
+
 void Application::TriggerSoftEvent(Events::SoftwareEvents ch)
 {
-    Events::ExtEvent e(true, (uint8_t)ch, Events::EventTypes(ch));
+    Events::ExtEvent e(true, static_cast<uint8_t>(ch), static_cast<Events::EventTypes>(ch));
 
     DispatchEvent(&e);
 }
 
+size_t Application::InsertCallback(Application::EventCallbacks&     events,
+                                   const Application::CallbackFunc& cb)
+{
+    // Find the first free slot in the array.
+    EventCallbacks::iterator it =
+      std::find_if(events.begin(), events.end(), [](const CallbackSlot& f) { return !f.Used; });
+
+    // If a slot is found:
+    if (it != events.end())
+    {
+        // Place the callback there.
+        *it = {cb, true};
+        // Return the ID of the callback.
+        return std::distance(events.begin(), it);
+    }
+
+    // No slot found.
+    return -1;
+}
+
 void Application::DispatchEvent(Events::Event* data)
 {
-    for (auto& module : m_modules)
+    const auto& events = m_callbacks[(size_t)data->Type];
+    for (const auto& [cb, used] : events)
     {
-        if (module.Mod->OnEvent(data))
+        if (cb(data))
         {
-            // Event was handled, stop propagating it.
-            break;
+            return;
         }
     }
 }
+
 #endif
 
 void Application::Run()
 {
+    while (true)
+    {
+        OnRun();
+    }
+}
+
+void Application::OnRun()
+{
+    for (auto& module : m_modules)
+    {
+        module.Mod->Run();
+    }
+
     if (!m_modulesPendingDeletion)
     {
         return;
@@ -88,7 +139,7 @@ void Application::RemoveModule(size_t id)
     m_modulesPendingDeletion = true;
 }
 
-cep::Ref<cep::Module> Application::GetModule(size_t id)
+Nilai::Ref<Nilai::Module> Application::GetModule(size_t id)
 {
     for (auto& module : m_modules)
     {
@@ -111,9 +162,9 @@ cep::Ref<cep::Module> Application::GetModule(size_t id)
     {
     }
 }
-}    // namespace cep
+}    // namespace Nilai
 
 void AtExitForwarder()
 {
-    cep::AbortionHandler(0);
+    Nilai::AbortionHandler(0);
 }

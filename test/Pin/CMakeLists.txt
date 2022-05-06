@@ -6,8 +6,8 @@ add_compile_definitions(NILAI_USE_STM32F4xx)
 add_executable(
         Pin_test
         ../../defines/pin.cpp
-        ../Mocks/GPIO/gpio.cpp
-        Test.cpp
+        ../mocks/GPIO/gpio.cpp
+        test.cpp
 )
 
 target_link_libraries(

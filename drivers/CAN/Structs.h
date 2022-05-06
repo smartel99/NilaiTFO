@@ -79,7 +79,7 @@ struct CAN_RxHeaderTypeDef
     uint32_t FilterMatchIndex = 0;
 };
 #    endif
-namespace CEP_CAN
+namespace Nilai::Can
 {
 enum class FilterMode
 {
@@ -248,6 +248,6 @@ struct Frame
 
     bool operator!=(const Frame& other) { return !(*this == other); }
 };
-}    // namespace CEP_CAN
+}    // namespace Nilai::Can
 #endif
 #endif    // NILAI_CAN_STRUCTS_H

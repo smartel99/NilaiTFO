@@ -9,8 +9,8 @@
  *******************************************************************************
  */
 
-#ifndef GUARD_ASSERTION_H
-#define GUARD_ASSERTION_H
+#ifndef NILAI_ASSERTION_H
+#define NILAI_ASSERTION_H
 
 #include <cstdint>
 
@@ -24,4 +24,4 @@ extern "C"
  * @}
  */
 /* END OF FILE */
-#endif /* GUARD_ASSERTION_H */
+#endif /* NILAI_ASSERTION_H */

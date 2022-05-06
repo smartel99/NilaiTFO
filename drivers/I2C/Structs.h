@@ -22,7 +22,7 @@
 #    include <cstdint>
 #    include <vector>
 
-namespace cep::I2C
+namespace Nilai::I2C
 {
 struct Frame
 {
@@ -40,7 +40,7 @@ struct Frame
     {
     }
 };
-}    // namespace cep::I2C
+}    // namespace Nilai::I2C
 #endif
 
 #endif    // NILAI_STRUCTS_H

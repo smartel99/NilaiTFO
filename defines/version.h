@@ -22,7 +22,7 @@
 /***********************************************/
 /* Function declarations */
 
-namespace cep
+namespace Nilai
 {
 static constexpr size_t GetMonthFromDate()
 {
@@ -63,7 +63,7 @@ static constexpr size_t GetVersion()
 
     return ver;
 }
-}    // namespace cep
+}    // namespace Nilai
 
 /**
  * @}

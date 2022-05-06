@@ -14,10 +14,10 @@
  * You should have received a copy of the GNU General Public License along with this program. If
  * not, see <a href=https://www.gnu.org/licenses/>https://www.gnu.org/licenses/<a/>.
  */
-#include "Events.h"
+#include "events.h"
 
 #if defined(NILAI_USE_EVENTS)
-namespace cep::Events
+namespace Nilai::Events
 {
 static constexpr size_t PinIdToNum(uint16_t pin);
 
@@ -58,5 +58,5 @@ constexpr size_t PinIdToNum(uint16_t pin)
 
     return pos;
 }
-}    // namespace cep::Events
+}    // namespace Nilai::Events
 #endif

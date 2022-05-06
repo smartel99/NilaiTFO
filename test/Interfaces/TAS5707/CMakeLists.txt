@@ -2,7 +2,7 @@ add_compile_definitions(NILAI_USE_TAS5707)
 
 add_executable(
         TAS5707_test
-        EnumTests.cpp
+        enum_tests.cpp
 )
 
 target_link_libraries(
