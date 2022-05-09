@@ -282,8 +282,8 @@ void SaiModule::SetClockCallbacks()
 
 void SaiModule::HalRestartClock(SAI_HandleTypeDef* sai)
 {
-    static uint32_t v = 0;
-    HAL_SAI_Transmit_DMA(sai, reinterpret_cast<uint8_t*>(&v), 2);
+    static uint32_t v[2] = {0, 0};
+    HAL_SAI_Transmit_DMA(sai, reinterpret_cast<uint8_t*>(&v), 4);
 }
 
 #    if defined(NILAI_SAI_REGISTER_EVENTS)
@@ -379,7 +379,10 @@ void PrintStatus(uint32_t code)
     // Check only the bits that can be errors.
     for (uint32_t i = 1; (i & errorMask) != 0; i <<= 1)
     {
-        LOG_ERROR("\t\t- %s", ErrorCodeToStr(code & i).data());
+        if ((code & i) != 0)
+        {
+            LOG_ERROR("\t\t- %s", ErrorCodeToStr(code & i).data());
+        }
     }
 #    endif
 }

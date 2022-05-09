@@ -97,6 +97,8 @@ void SwTas5760<Device>::Run()
 {
     m_faultFunction();
     m_hpChangeFunction();
+
+    Device::Run();
 }
 
 template<typename Device>
@@ -187,14 +189,7 @@ bool SwTas5760<Device>::SetDigitalClipLevel(uint32_t lvl)
 template<typename Device>
 bool SwTas5760<Device>::Stream(const void* samples, size_t cnt)
 {
-    //    if (Init())
-    //    {
     return Device::Stream(samples, cnt);
-    //    }
-    //    else
-    //    {
-    //        return false;
-    //    }
 }
 
 template<typename Device>
@@ -269,9 +264,9 @@ bool SwTas5760<Device>::Init()
     if (isConfigGood)
     {
         // Bring the chip out of shutdown.
-        m_cfg.SpkShutdown.Set(true);
+        //        m_cfg.SpkShutdown.Set(true);
         // Unmute the 2 channels.
-//        ToggleMute(false);
+        //        ToggleMute(false);
     }
 
     return isConfigGood;
