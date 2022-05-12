@@ -18,8 +18,8 @@
 #define NILAI_TAS5760_SWCONFIG_H
 
 #if defined(NILAI_USE_SW_TAS5760)
-
 #    include "../../defines/pin.h"
+#    include "../../defines/smart_pointers.h"
 #    include "../../drivers/i2c_module.h"
 #    include "enums.h"
 #    include "register_structs.h"

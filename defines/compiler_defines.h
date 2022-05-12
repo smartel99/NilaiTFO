@@ -67,6 +67,26 @@
 #    error Unsuported Compiler!
 #endif
 
+// Define the function signature macro for the compiler being used.
+#if defined(_MSC_VER)
+// Visual Studio
+#    define FUNCSIG __FUNCSIG__
+#elif defined(__GNUC__)
+// GCC
+#    define FUNCSIG __PRETTY_FUNCTION__
+#elif defined(__clang__)
+// clang
+#    define FUNCSIG __PRETTY_FUNCTION__
+#elif defined(__MINGW32__)
+// MinGW 32/MinGW-w64 32 bits
+#    define FUNCSIG __PRETTY_FUNCTION__
+#elif defined(__MINGW64__)
+// MinGW-w64 64 bits
+#    define FUNCSIG __PRETTY_FUNCTION__
+#else
+#    error Unsupported Compiler
+#endif
+
 /*************************************************************************************************/
 /**
  * @}

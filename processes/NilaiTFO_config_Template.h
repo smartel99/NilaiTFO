@@ -22,6 +22,15 @@
 /******************************************************************************/
 /* [SECTION]: Configuration                                                   */
 /******************************************************************************/
+/**
+ * @brief Toggles the profiling of code and output on SWO.
+ */
+#define NILAI_ENABLE_PROFILING
+
+/**
+ * @brief Sets the maximum number of events that can be profiled simultaneously.
+ */
+#define NILAI_MAX_PROFILE_EVENTS 20
 
 /**
  * Warn if a module is included but the STM32 drivers are missing.

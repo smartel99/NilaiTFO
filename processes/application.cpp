@@ -14,12 +14,15 @@
 #    include "../defines/macros.h"
 #endif
 
+#include "../services/profiler/profiler.h"
+
 static void AtExitForwarder();
 
 
 namespace Nilai
 {
 Application* Application::s_instance = nullptr;
+
 
 Application::Application()
 {
@@ -34,34 +37,39 @@ Application::Application()
     s_instance = this;
 }
 
-#if defined(NILAI_USE_EVENTS)
+#    if defined(NILAI_USE_EVENTS)
 size_t Application::RegisterEventCallback(Events::EventTypes               event,
                                           const Application::CallbackFunc& cb)
 {
     NILAI_ASSERT(cb, "Callback is not valid!");
 
-    return InsertCallback(m_callbacks[(size_t)event], cb);
+    return InsertCallback(m_callbacks[static_cast<size_t>(event)], cb);
 }
 
-void Application::UnregisterEventCallback(Events::EventTypes event, size_t id)
+void Application::UnregisterEventCallback(Events::EventTypes event, [[maybe_unused]] size_t id)
 {
+
+    auto& events = m_callbacks[static_cast<size_t>(event)];
+
+#        if NILAI_EVENTS_MAX_CALLBACKS == 1
+    events = {};
+#        else
     NILAI_ASSERT(id < s_maxEventCbCount, "Invalid callback ID!");
-
-    auto& events = m_callbacks[(size_t)event];
-
     events[id] = {};
-}
-
-void Application::TriggerSoftEvent(Events::SoftwareEvents ch)
-{
-    Events::ExtEvent e(true, static_cast<uint8_t>(ch), static_cast<Events::EventTypes>(ch));
-
-    DispatchEvent(&e);
+#        endif
 }
 
 size_t Application::InsertCallback(Application::EventCallbacks&     events,
                                    const Application::CallbackFunc& cb)
 {
+#        if NILAI_EVENTS_MAX_CALLBACKS == 1
+    if (!events.Used)
+    {
+        events = {cb, true};
+        return 0;
+    }
+    return -1;
+#        else
     // Find the first free slot in the array.
     EventCallbacks::iterator it =
       std::find_if(events.begin(), events.end(), [](const CallbackSlot& f) { return !f.Used; });
@@ -77,11 +85,15 @@ size_t Application::InsertCallback(Application::EventCallbacks&     events,
 
     // No slot found.
     return -1;
+#        endif
 }
 
 void Application::DispatchEvent(Events::Event* data)
 {
-    const auto& events = m_callbacks[(size_t)data->Type];
+    const auto& events = m_callbacks[static_cast<size_t>(data->Type)];
+#        if NILAI_EVENTS_MAX_CALLBACKS == 1
+    events.F(data);
+#        else
     for (const auto& [cb, used] : events)
     {
         if (cb(data))
@@ -89,11 +101,12 @@ void Application::DispatchEvent(Events::Event* data)
             return;
         }
     }
+#        endif
 }
 
-#endif
+#    endif
 
-void Application::Run()
+[[noreturn]] void Application::Run()
 {
     while (true)
     {
@@ -108,29 +121,31 @@ void Application::OnRun()
         module.Mod->Run();
     }
 
-    if (!m_modulesPendingDeletion)
+    if (m_modulesPendingDeletion)
     {
-        return;
+        m_modulesPendingDeletion = false;
+        for (size_t id : m_deletionQueue)
+        {
+            Ref<Module> module = GetModule(id);
+            module->OnDetach();
+        }
+
+        // Remove the modules to be removed from the list.
+        m_modules.erase(std::remove_if(m_modules.begin(),
+                                       m_modules.end(),
+                                       [&, this](const auto& m)
+                                       {
+                                           return std::find(m_deletionQueue.begin(),
+                                                            m_deletionQueue.end(),
+                                                            m.Id) != m_deletionQueue.end();
+                                       }),
+                        m_modules.end());
+        m_deletionQueue.clear();
     }
 
-    m_modulesPendingDeletion = false;
-    for (size_t id : m_deletionQueue)
-    {
-        Ref<Module> module = GetModule(id);
-        module->OnDetach();
-    }
-
-    // Remove the modules to be removed from the list.
-    m_modules.erase(std::remove_if(m_modules.begin(),
-                                   m_modules.end(),
-                                   [&, this](const auto& m)
-                                   {
-                                       return std::find(m_deletionQueue.begin(),
-                                                        m_deletionQueue.end(),
-                                                        m.Id) != m_deletionQueue.end();
-                                   }),
-                    m_modules.end());
-    m_deletionQueue.clear();
+#    if defined(NILAI_ENABLE_PROFILING)
+    Profiler::Report();
+#    endif
 }
 
 void Application::RemoveModule(size_t id)

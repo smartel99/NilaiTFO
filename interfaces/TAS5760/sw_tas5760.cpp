@@ -17,7 +17,7 @@
 #include "sw_tas5760.h"
 
 #if defined(NILAI_USE_TAS5760)
-
+#    include "../../defines/smart_pointers.h"
 #    include "../../processes/application.h"
 #    include "../../services/logger.h"
 

@@ -51,6 +51,7 @@ concept CommunicationDevice = requires(T t) {
                                       } -> std::same_as<bool>;
                               };
 
+
 template<CommunicationDevice Device>
 class Tas5760Module : public Device
 {

@@ -22,12 +22,12 @@
 // Include the cpp file on purpose.
 #    include "sw_tas5760.cpp"
 
-#if defined(NILAI_USE_I2S)
-#    include "../../drivers/i2s_module.h"
-#endif
-#if defined(NILAI_USE_SAI)
-#    include "../../drivers/sai_module.h"
-#endif
+#    if defined(NILAI_USE_I2S)
+#        include "../../drivers/i2s_module.h"
+#    endif
+#    if defined(NILAI_USE_SAI)
+#        include "../../drivers/sai_module.h"
+#    endif
 
 namespace Nilai::Interfaces
 {

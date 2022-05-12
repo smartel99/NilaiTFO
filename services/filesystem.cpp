@@ -12,6 +12,8 @@
 #    include "filesystem.h"
 
 #    include "../defines/macros.h"
+#    include "../services/logger.h"
+
 #    include "ff_gen_drv.h"
 #    include "user_diskio.h"
 

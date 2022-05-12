@@ -33,7 +33,7 @@ static bool s_restartClock = false;
 I2sModule::I2sModule(I2S_HandleTypeDef* handle, std::string label)
 : m_handle(handle), m_label(std::move(label)), m_txHalfCpltCb([]() {}), m_txCpltCb([]() {})
 {
-    CEP_ASSERT(m_handle != nullptr, "Handle is null!");
+    NILAI_ASSERT(m_handle != nullptr, "Handle is null!");
     s_modules[handle] = this;
 
     SetStreamingCallbacks();
@@ -245,7 +245,7 @@ void I2sModule::SetAudioFreq(I2S::AudioFreqs f)
     HAL_I2S_DeInit(m_handle);    // De-init the I2S peripheral.
 
     m_handle->Init.AudioFreq = (uint32_t)f;
-    CEP_ASSERT(HAL_I2S_Init(m_handle) == HAL_OK, "Unable to re-init I2S!");
+    NILAI_ASSERT(HAL_I2S_Init(m_handle) == HAL_OK, "Unable to re-init I2S!");
 }
 
 #    if !defined(NILAI_I2S_REGISTER_CALLBACKS)

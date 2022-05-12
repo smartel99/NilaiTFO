@@ -19,6 +19,7 @@
 #if defined(NILAI_USE_SPI) && defined(HAL_SPI_MODULE_ENABLED)
 #    include "../defines/macros.h"
 #    include "../processes/application.h"
+#    include "../services/logger.h"
 
 #    include <algorithm>
 #    include <array>

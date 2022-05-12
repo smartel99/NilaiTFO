@@ -14,7 +14,7 @@
 /* Includes ------------------------------------------------------------------------------------ */
 #include "uart_module.h"
 #if defined(NILAI_USE_UART) && defined(HAL_UART_MODULE_ENABLED)
-#    include "main.h"
+#    include "../services/logger.h"
 
 #    include <cstdarg>    // For va_list.
 #    include <cstdio>

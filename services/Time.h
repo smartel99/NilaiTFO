@@ -36,6 +36,11 @@
 
 namespace Nilai
 {
+inline static uint32_t GetTicks()
+{
+    return DWT->CYCCNT;
+}
+
 inline static uint32_t GetTime()
 {
 #ifndef NILAI_TEST

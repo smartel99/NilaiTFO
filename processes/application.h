@@ -59,9 +59,9 @@ public:
     Application();
     virtual ~Application() = default;
 
-    virtual void OnInit() {}
-    virtual bool OnPost() { return false; }
-    virtual void Run();
+    virtual void              OnInit() {}
+    virtual bool              OnPost() { return false; }
+    [[noreturn]] virtual void Run();
 
     virtual void OnRun();
 
@@ -106,12 +106,6 @@ public:
      */
     void UnregisterEventCallback(Events::EventTypes event, size_t id);
 
-    /**
-     * @brief Dispatches a software event to the callbacks bound to the specified channel.
-     * @param ch The event channel to dispatch the event on.
-     */
-    void TriggerSoftEvent(Events::SoftwareEvents ch);
-
     template<typename T>
     void TriggerDataEvent(const T& data)
     {
@@ -137,15 +131,19 @@ private:
 
 #    if defined(NILAI_USE_EVENTS)
 protected:
-    static constexpr size_t s_maxEventCbCount = NILAI_EVENTS_MAX_CALLBACKS;
-    static constexpr size_t s_numOfEvents     = (size_t)Events::EventTypes::Count;
-
     struct CallbackSlot
     {
         CallbackFunc F    = [](Events::Event*) { return false; };
         bool         Used = false;
     };
-    using EventCallbacks = std::array<CallbackSlot, s_maxEventCbCount>;
+#        if NILAI_EVENTS_MAX_CALLBACKS == 1
+    using EventCallbacks = CallbackSlot;
+#        else
+    static constexpr size_t s_maxEventCbCount = NILAI_EVENTS_MAX_CALLBACKS;
+    using EventCallbacks                      = std::array<CallbackSlot, s_maxEventCbCount>;
+#        endif
+
+    static constexpr size_t s_numOfEvents = static_cast<size_t>(Events::EventTypes::Count);
     std::array<EventCallbacks, s_numOfEvents> m_callbacks = {};
 
 private:

@@ -22,6 +22,7 @@ namespace Nilai
 
 /*************************************************************************************************/
 /* Classes ------------------------------------------------------------------------------------- */
+
 class Application;
 
 /**
@@ -67,7 +68,7 @@ public:
     [[nodiscard]] size_t GetId() const { return m_id; }
 
 protected:
-    friend Application;
+    friend class Application;
 
     size_t m_id = 0;
 };
