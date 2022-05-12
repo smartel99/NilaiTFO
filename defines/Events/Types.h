@@ -45,6 +45,17 @@ enum class EventTypes
 
     DataEvent,    //! A software event carrying data.
 
+    UserEvent1,
+    UserEvent2,
+    UserEvent3,
+    UserEvent4,
+    UserEvent5,
+    UserEvent6,
+    UserEvent7,
+    UserEvent8,
+    UserEvent9,
+    UserEvent10,
+
 #    if defined(NILAI_USE_TIMER_EVENTS)
     //----------------------------------------------------------------------------------------------
     // Timer Events.
@@ -152,7 +163,8 @@ enum class EventTypes
 enum class EventCategories
 {
     External = 0,    //! External Event.
-    Data,            //! Data Event.
+    UserEvent,
+    Data,    //! Data Event.
 #    if defined(NILAI_USE_TIMER_EVENTS)
     Timer,    //! Timer Event.
 #    endif
@@ -180,25 +192,6 @@ enum class EventCategories
 #    if defined(NILAI_USE_SAI_EVENTS)
     Sai,    //! SAI Event.
 #    endif
-};
-
-enum class SoftwareEvents
-{
-    Event0  = (int)EventTypes::Exti0,
-    Event1  = (int)EventTypes::Exti1,
-    Event2  = (int)EventTypes::Exti2,
-    Event3  = (int)EventTypes::Exti3,
-    Event4  = (int)EventTypes::Exti4,
-    Event5  = (int)EventTypes::Exti5,
-    Event6  = (int)EventTypes::Exti6,
-    Event7  = (int)EventTypes::Exti7,
-    Event8  = (int)EventTypes::Exti8,
-    Event9  = (int)EventTypes::Exti9,
-    Event10 = (int)EventTypes::Exti10,
-    Event11 = (int)EventTypes::Exti11,
-    Event12 = (int)EventTypes::Exti12,
-    Event13 = (int)EventTypes::Exti13,
-    Event14 = (int)EventTypes::Exti14,
 };
 }    // namespace Nilai::Events
 #endif

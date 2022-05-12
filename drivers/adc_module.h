@@ -89,8 +89,8 @@ public:
      */
     [[nodiscard]] float GetChannelReading(size_t channel) const;
 
-    void ConvCpltCallback();
-    void ErrorCallback();
+    virtual void ConvCpltCallback();
+    virtual void ErrorCallback();
 
 private:
 #        if defined(NILAI_ADC_REGISTER_CALLBACKS)
