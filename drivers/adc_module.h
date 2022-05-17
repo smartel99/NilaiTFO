@@ -1,13 +1,19 @@
 ﻿/**
-******************************************************************************
-* @file    adcModule.hpp
-* @author  Samuel Martel
-* @brief   Header for the on-board ADC module.
-*
-* @date 2021/10/27
-*
-******************************************************************************
-*/
+ * @file    adc_module.h
+ * @author  Samuel Martel
+ * @date    2021/10/27
+ * @brief
+ *
+ * @copyright
+ * This program is free software: you can redistribute it and/or modify it under the
+ * terms of the GNU General Public License as published by the Free Software Foundation, either
+ * version 3 of the License, or (at your option) any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * General Public License for more details.
+ * You should have received a copy of the GNU General Public License along with this program. If
+ * not, see <a href=https://www.gnu.org/licenses/>https://www.gnu.org/licenses/<a/>.
+ */
 #ifndef NILAI_ADCMODULE_HPP
 #define NILAI_ADCMODULE_HPP
 
@@ -43,29 +49,15 @@ public:
     /**
      * @brief Adds a callback that willed be invoked whenever the conversion of all channel is
      * completed.
-     * @param name The name to assign to the callback. This name is used to keep track of the
-     * callback.
      * @param cb The callback function. It must take an @c AdcModule* as input, and return nothing.
      */
-    [[maybe_unused]] void AddConvCpltCallback(const std::string&                     name,
-                                              const std::function<void(AdcModule*)>& cb);
+    [[maybe_unused]] size_t AddConvCpltCallback(const std::function<void(AdcModule*)>& cb);
 
     /**
      * @brief Adds a callback that willed be invoked whenever an error is detected by the ADC.
-     * @param name The name to assign to the callback. This name is used to keep track of the
-     * callback.
      * @param cb The callback function. It must take an @c AdcModule* as input, and return nothing.
      */
-    [[maybe_unused]] void AddErrorCallback(const std::string&                     name,
-                                           const std::function<void(AdcModule*)>& cb);
-
-    /**
-     * @brief Removes a callback called @c name from the module.
-     * @param name The name of the callback to remove.
-     *
-     * @attention Do not remove a callback from within a callback!
-     */
-    [[maybe_unused]] void RemoveCallback(const std::string& name);
+    [[maybe_unused]] size_t AddErrorCallback(const std::function<void(AdcModule*)>& cb);
 
     /**
      * @brief Starts the continuous conversion on all channels.
@@ -87,7 +79,8 @@ public:
      * @attention The range of @b channel must be within 0 and the number of channels of the ADC.
      * Specifying a @b channel over the number of channels will result undefined behavior.
      */
-    [[nodiscard]] float GetChannelReading(size_t channel) const;
+    [[nodiscard]] float    GetChannelReading(size_t channel) const;
+    [[nodiscard]] uint32_t GetRawChannelReading(size_t channel) const;
 
     virtual void ConvCpltCallback();
     virtual void ErrorCallback();
@@ -98,15 +91,16 @@ private:
     static void AdcModuleErrorCallback(ADC_HandleTypeDef* adc);
 #        endif
 
-private:
-    ADC_HandleTypeDef* m_adc          = nullptr;
-    uint32_t*          m_channelBuff  = nullptr;
-    size_t             m_channelCount = 0;
-    std::string        m_label;
-    bool               m_isRunning = false;
+protected:
+    ADC_HandleTypeDef*    m_adc         = nullptr;
+    std::vector<uint32_t> m_channelBuff = {};
+    std::string           m_label;
+    bool                  m_isRunning = false;
 
-    std::map<std::string, std::function<void(AdcModule*)>> m_convCpltCallbacks;
-    std::map<std::string, std::function<void(AdcModule*)>> m_errorCallbacks;
+    uint32_t m_lastError = 0;
+
+    std::vector<std::function<void(AdcModule*)>> m_convCpltCallbacks;
+    std::vector<std::function<void(AdcModule*)>> m_errorCallbacks;
 };
 }    // namespace Nilai::Drivers
 #    else

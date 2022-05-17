@@ -14,6 +14,8 @@
 #    include "../services/logger.h"
 #endif
 
+#include "system.h"
+
 // For our C friends:
 #if defined(__cplusplus)
 extern "C"
@@ -31,6 +33,12 @@ extern "C"
     NILAI_UNUSED(line);
     NILAI_UNUSED(shouldPrint);
 #endif
+
+        if (Nilai::System::IsDebuggerConnected())
+        {
+            NILAI_BREAKPOINT;
+        }
+
         while (true)
         {
         }

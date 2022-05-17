@@ -1,7 +1,24 @@
-﻿#include "adc_module.h"
+﻿/**
+ * @file    adc_module.cpp
+ * @author  Samuel Martel
+ * @date    2021/10/27
+ * @brief
+ *
+ * @copyright
+ * This program is free software: you can redistribute it and/or modify it under the
+ * terms of the GNU General Public License as published by the Free Software Foundation, either
+ * version 3 of the License, or (at your option) any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * General Public License for more details.
+ * You should have received a copy of the GNU General Public License along with this program. If
+ * not, see <a href=https://www.gnu.org/licenses/>https://www.gnu.org/licenses/<a/>.
+ */
+#include "adc_module.h"
 
 #if defined(NILAI_USE_ADC) && defined(HAL_ADC_MODULE_ENABLED)
 #    include "defines/macros.h"
+#    include "defines/system.h"
 #    include "services/logger.h"
 
 #    define ADC_DEBUG(msg, ...)   LOG_DEBUG("[%s]: " msg, m_label.c_str(), ##__VA_ARGS__)
@@ -19,35 +36,55 @@
                     ADC_ERROR("Unable to register callback '%s': %i", #cb, s);                     \
                 }                                                                                  \
             } while (0)
+#    else
+#        define REGISTER_CALLBACK(cbId, cb)
 #    endif
+
 
 namespace Nilai::Drivers
 {
-static constexpr float ConvertToVolt(uint32_t val)
+struct AdcPair
 {
-    return ((static_cast<float>(val) / 4095.0f) * 3.3f);
+    ADC_TypeDef* Adc    = nullptr;
+    AdcModule*   Module = nullptr;
+
+    AdcPair(ADC_TypeDef* adc, AdcModule* module) : Adc(adc), Module(module) {}
+};
+
+static std::vector<AdcPair> s_modules = {};
+static inline AdcModule*    FindModule(ADC_HandleTypeDef* adc)
+{
+    for (auto& [handle, module] : s_modules)
+    {
+        if (handle == adc->Instance)
+        {
+            return module;
+        }
+    }
+
+    return nullptr;
 }
 
-static std::map<ADC_HandleTypeDef*, AdcModule*> s_modules = {};
+static constexpr float ConvertToVolt(uint32_t val)
+{
+    //! Full scale = Resolution - 1 = 2^12 -1 = 4095.
+    constexpr float FULL_SCALE = 4095.0f;
+    //! VDDa = 3.3V (normally)
+    constexpr float VDDA = 3.3f;
+    return ((static_cast<float>(val) / FULL_SCALE) * VDDA);
+}
+
+// static std::map<ADC_HandleTypeDef*, AdcModule*> s_modules = {};
 
 AdcModule::AdcModule(ADC_HandleTypeDef* adc, std::string label)
 : m_adc(adc), m_label(std::move(label))
 {
 #    if !defined(NILAI_TEST)
     NILAI_ASSERT(adc != nullptr, "[%s]: ADC handle is null!", m_label.c_str());
-    m_channelCount = adc->Init.NbrOfConversion;
-    m_channelBuff  = new uint32_t[m_channelCount];
+    m_channelBuff.resize(adc->Init.NbrOfConversion);
 
-    NILAI_ASSERT(m_channelBuff != nullptr,
-               "[%s]: Unable to allocate memory for channel data buffer!",
-               m_label.c_str());
+    s_modules.emplace_back(m_adc->Instance, this);
 
-    for (size_t i = 0; i < m_channelCount; i++)
-    {
-        m_channelBuff[i] = 0;
-    }
-
-    s_modules[adc] = this;
 #        if defined(NILAI_ADC_REGISTER_CALLBACKS)
     // Register conversion complete and error callbacks.
     REGISTER_CALLBACK(HAL_ADC_CONVERSION_COMPLETE_CB_ID, &AdcModule::AdcModuleConvCpltCallback);
@@ -63,8 +100,6 @@ AdcModule::AdcModule(ADC_HandleTypeDef* adc, std::string label)
 AdcModule::~AdcModule()
 {
     Stop();
-    delete[] m_channelBuff;
-    m_channelBuff = nullptr;
 }
 
 /**
@@ -75,30 +110,27 @@ AdcModule::~AdcModule()
  */
 bool AdcModule::DoPost()
 {
-    if (m_channelBuff == nullptr)
-    {
-        ADC_ERROR("Error in POST: m_channelBuff is null!");
-        return false;
-    }
-
     for (uint8_t attempt = 0; attempt < 5; attempt++)
     {
         bool isAllChannelsOk = true;
         Start();
         Delay(5);
-        for (size_t i = 0; i < m_channelCount; i++)
+
+        size_t ch = 1;
+        for (const auto& value : m_channelBuff)
         {
             // A value of 0 (0 LSB counts) is assumed to be erroneous given its
             // unlikeliness.
-            if (m_channelBuff[i] == 0)
+            if (value == 0)
             {
-                ADC_ERROR("Channel %i is reading 0 counts!", i);
+                ADC_ERROR("Channel %i is reading 0 counts!", ch);
                 isAllChannelsOk = false;
             }
             else
             {
-                ADC_INFO("Channel %i is reading: %i", i, m_channelBuff[i]);
+                ADC_INFO("Channel %i is reading: %i", ch, value);
             }
+            ++ch;
         }
 
         Stop();
@@ -118,16 +150,26 @@ bool AdcModule::DoPost()
 
 void AdcModule::Run()
 {
+    if (m_lastError != 0)
+    {
+        ADC_ERROR("An error occurred: %#08x", m_lastError);
+        m_lastError = 0;
+        Start();
+    }
 }
 
 float AdcModule::GetChannelReading(size_t channel) const
 {
-    NILAI_ASSERT(channel < m_channelCount,
-               "[%s] Channel %i is not a valid channel!",
-               m_label.c_str(),
-               channel);
+    return ConvertToVolt(GetRawChannelReading(channel));
+}
 
-    return ConvertToVolt(m_channelBuff[channel]);
+uint32_t AdcModule::GetRawChannelReading(size_t channel) const
+{
+    NILAI_ASSERT(channel < m_channelBuff.size(),
+                 "[%s] Channel %i is not a valid channel!",
+                 m_label.c_str(),
+                 channel);
+    return m_channelBuff[channel];
 }
 
 /**
@@ -136,19 +178,17 @@ float AdcModule::GetChannelReading(size_t channel) const
  * a later point.
  * @param cb The callback function.
  */
-[[maybe_unused]] void AdcModule::AddConvCpltCallback(const std::string&                     name,
-                                                     const std::function<void(AdcModule*)>& cb)
+[[maybe_unused]] size_t AdcModule::AddConvCpltCallback(const std::function<void(AdcModule*)>& cb)
 {
     NILAI_ASSERT(cb, "Callback function must be callable!");
     if (cb)
     {
-
         bool isRunning = m_isRunning;
         if (isRunning)
         {
             Stop();
         }
-        m_convCpltCallbacks[name] = cb;
+        m_convCpltCallbacks.push_back(cb);
 
         if (isRunning)
         {
@@ -158,7 +198,11 @@ float AdcModule::GetChannelReading(size_t channel) const
         // For unit tests, instantly call it back.
         cb(this);
 #    endif
+
+        return m_convCpltCallbacks.size() - 1;
     }
+
+    return -1;
 }
 
 /**
@@ -167,70 +211,31 @@ float AdcModule::GetChannelReading(size_t channel) const
  * a later point.
  * @param cb The callback function.
  */
-[[maybe_unused]] void AdcModule::AddErrorCallback(const std::string&                     name,
-                                                  const std::function<void(AdcModule*)>& cb)
+[[maybe_unused]] size_t AdcModule::AddErrorCallback(const std::function<void(AdcModule*)>& cb)
 {
     NILAI_ASSERT(cb, "Callback function must be callable!");
-    //    ADC_DEBUG("Adding error callback '%s'", name.c_str());
 
-    bool isRunning = m_isRunning;
-    if (isRunning)
+    if (cb)
     {
-        Stop();
-    }
-    m_errorCallbacks[name] = cb;
-    if (isRunning)
-    {
-        Start();
-    }
-}
-
-/**
- * @brief Removes a callback that was previously assigned to the module.
- * @param name The name of the callback to remove.
- *
- * @note If the callback @ref name isn't found in the module, nothing happens.
- */
-[[maybe_unused]] void AdcModule::RemoveCallback(const std::string& name)
-{
-    bool isRunning = m_isRunning;
-    if (isRunning)
-    {
-        Stop();
-    }
-
-    //    ADC_DEBUG("Removing callback '%s'", name.c_str());
-
-    // Search in the list of callbacks for the desired one.
-    auto it = m_convCpltCallbacks.find(name);
-    if (it != m_convCpltCallbacks.end())
-    {
-        // Found it in conversion complete!
-        m_convCpltCallbacks.erase(it);
-    }
-    else
-    {
-        it = m_errorCallbacks.find(name);
-        if (it != m_errorCallbacks.end())
+        bool isRunning = m_isRunning;
+        if (isRunning)
         {
-            // Found it in error callbacks!
-            m_errorCallbacks.erase(it);
+            Stop();
         }
-        else
+        m_errorCallbacks.push_back(cb);
+        if (isRunning)
         {
-            ADC_WARNING("Unable to find a callback called '%s'!", name.c_str());
+            Start();
         }
-    }
 
-    if (isRunning)
-    {
-        Start();
+        return m_errorCallbacks.size() - 1;
     }
+    return -1;
 }
 
 void AdcModule::Start()
 {
-    HAL_ADC_Start_DMA(m_adc, &m_channelBuff[0], m_channelCount);
+    HAL_ADC_Start_DMA(m_adc, m_channelBuff.data(), m_channelBuff.size());
     m_isRunning = true;
 }
 
@@ -244,16 +249,17 @@ void AdcModule::ConvCpltCallback()
 {
     for (const auto& cb : m_convCpltCallbacks)
     {
-        cb.second(this);
+        cb(this);
     }
 }
 
 void AdcModule::ErrorCallback()
 {
-    // TODO Print more information than that.
+    Stop();
+    m_lastError = HAL_ADC_GetError(m_adc);
     for (const auto& cb : m_errorCallbacks)
     {
-        cb.second(this);
+        cb(this);
     }
 }
 
@@ -267,7 +273,13 @@ void AdcModule::AdcModuleConvCpltCallback(ADC_HandleTypeDef* adc)
 extern "C" void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* adc)
 #    endif
 {
-    s_modules[adc]->ConvCpltCallback();
+    AdcModule* module = FindModule(adc);
+    NILAI_ASSERT(module != nullptr, "Module is null!");
+    //    if (module->m_channelBuff.size() != 4)
+    //    {
+    //        NILAI_BREAKPOINT;
+    //    }
+    module->ConvCpltCallback();
 }
 
 /**
@@ -280,7 +292,11 @@ void AdcModule::AdcModuleErrorCallback(ADC_HandleTypeDef* adc)
 extern "C" void HAL_ADC_ErrorCallback(ADC_HandleTypeDef* adc)
 #    endif
 {
-    s_modules[adc]->ErrorCallback();
+    AdcModule* module = FindModule(adc);
+    if (module != nullptr)
+    {
+        module->ErrorCallback();
+    }
 }
 }    // namespace Nilai::Drivers
 #endif
