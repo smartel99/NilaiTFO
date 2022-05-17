@@ -16,7 +16,7 @@
  */
 #if defined(NILAI_USE_EXPERIMENTAL)
 #    if defined(NILAI_USE_EVENTS) && defined(NILAI_USE_TIMER_EVENTS)
-#        include "../../defines/Events/events.h"
+#        include "../../defines/events/events.h"
 #        include "../../processes/application.h"
 
 extern "C" void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim)

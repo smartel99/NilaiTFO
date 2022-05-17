@@ -19,7 +19,7 @@
 #        include "../../defines/internal_config.h"
 #        include NILAI_HAL_HEADER
 
-#        include "../../defines/Events/events.h"
+#        include "../../defines/events/events.h"
 #        include "../../processes/application.h"
 
 extern "C"

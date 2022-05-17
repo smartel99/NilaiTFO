@@ -16,7 +16,7 @@
  */
 #if defined(NILAI_USE_EXPERIMENTAL)
 #    if defined(NILAI_USE_EVENTS) && defined(NILAI_USE_CAN_EVENTS)
-#        include "../../defines/Events/Events.h"
+#        include "../../defines/events/Events.h"
 #        include "../../processes/application.hpp"
 
 extern "C"

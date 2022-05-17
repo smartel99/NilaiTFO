@@ -20,7 +20,7 @@
 #        include NILAI_HAL_HEADER
 #        include "../../processes/application.h"
 
-#        include "../../defines/Events/events.h"
+#        include "../../defines/events/events.h"
 
 extern "C"
 {

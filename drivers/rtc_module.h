@@ -27,7 +27,7 @@
 #            include "RTC/structs.h"
 
 #            if defined(NILAI_USE_EVENTS)
-#                include "../defines/Events/events.h"
+#                include "../defines/events/events.h"
 #            endif
 
 /*************************************************************************************************/
