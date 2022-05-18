@@ -16,7 +16,7 @@
 /* Includes */
 #if defined(NILAI_USE_FILESYSTEM)
 
-#    include "../defines/Filesystem/error_codes.h"
+#    include "../defines/filesystem/error_codes.h"
 #    include "../defines/pin.h"
 #    include "ff.h"
 #    include "file.h"
