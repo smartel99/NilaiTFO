@@ -109,6 +109,6 @@ protected:
 #        endif
 #    endif
 #elif defined(NILAI_TEST)
-#    include "test/Mocks/AdcModule.h"
+#    include "../test/Mocks/drivers/adc_module.h"
 #endif
 #endif

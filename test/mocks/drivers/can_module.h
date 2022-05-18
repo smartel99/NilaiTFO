@@ -17,35 +17,20 @@
 #ifndef NILAI_CANMODULE_HPP
 #define NILAI_CANMODULE_HPP
 
-#include "defines/module.h"
+#if defined(NILAI_USE_CAN)
+#    include "defines/module.h"
 
-#include "../../../drivers/CAN/enums.h"
-#include "../../../drivers/CAN/structs.h"
+#    include "../../../drivers/CAN/enums.h"
+#    include "../../../drivers/CAN/structs.h"
 
-#include <functional>
-#include <map>
-#include <vector>
+#    include <functional>
+#    include <map>
+#    include <vector>
 
-
-namespace CEP_CAN
-{
-struct TxFrame
-{
-    uint32_t             Addr = 0;
-    std::vector<uint8_t> Data {};
-    bool                 ForceExtended = false;
-
-    TxFrame(uint32_t addr, const std::vector<uint8_t>& data, bool f)
-    : Addr(addr), Data(data), ForceExtended(f)
-    {
-    }
-};
-}    // namespace CEP_CAN
-
-class CanModule : cep::Module
+class CanModule : Nilai::Module
 {
 public:
-    using Callbacks = std::map<CEP_CAN::Irq, std::function<void()>>;
+    using Callbacks = std::map<Nilai::Can::Irq, std::function<void()>>;
 
     CanModule(void*, std::string label);
 
@@ -55,57 +40,57 @@ public:
 
     void Reset() { m_hasReset = true; }
 
-    void ConfigureFilter(const CEP_CAN::FilterConfiguration& cfg) { m_filters.push_back(cfg); }
+    void ConfigureFilter(const Nilai::Can::FilterConfiguration& cfg) { m_filters.push_back(cfg); }
 
-    [[nodiscard]] size_t         GetNumberOfAvailableFrames() const { return m_rxQueue.size(); }
-    [[nodiscard]] CEP_CAN::Frame ReceiveFrame();
+    [[nodiscard]] size_t            GetNumberOfAvailableFrames() const { return m_rxQueue.size(); }
+    [[nodiscard]] Nilai::Can::Frame ReceiveFrame();
 
-    CEP_CAN::Status TransmitFrame(uint32_t                    addr,
-                                  const std::vector<uint8_t>& data = std::vector<uint8_t>(),
-                                  bool                        forceExtended = false);
-    CEP_CAN::Status TransmitFrame(uint32_t       addr,
-                                  const uint8_t* data          = nullptr,
-                                  size_t         len           = 0,
-                                  bool           forceExtended = false);
+    Nilai::Can::Status TransmitFrame(uint32_t                    addr,
+                                     const std::vector<uint8_t>& data = std::vector<uint8_t>(),
+                                     bool                        forceExtended = false);
+    Nilai::Can::Status TransmitFrame(uint32_t       addr,
+                                     const uint8_t* data          = nullptr,
+                                     size_t         len           = 0,
+                                     bool           forceExtended = false);
 
-    void SetCallback(CEP_CAN::Irq irq, const std::function<void()>& cb);
-    void ClearCallback(CEP_CAN::Irq irq);
+    void SetCallback(Nilai::Can::Irq irq, const std::function<void()>& cb);
+    void ClearCallback(Nilai::Can::Irq irq);
 
-    void EnableInterrupt(CEP_CAN::Irq irq);
-    void EnableInterrupts(const std::vector<CEP_CAN::Irq>& irqs);
+    void EnableInterrupt(Nilai::Can::Irq irq);
+    void EnableInterrupts(const std::vector<Nilai::Can::Irq>& irqs);
 
-    void DisableInterrupt(CEP_CAN::Irq irq);
-    void DisableInterrupts(const std::vector<CEP_CAN::Irq>& irqs);
+    void DisableInterrupt(Nilai::Can::Irq irq);
+    void DisableInterrupts(const std::vector<Nilai::Can::Irq>& irqs);
 
     ///////////////////////////////////////////////////////////////////////////
     // Methods to be used by the tests.
     bool& GetHasReset() { return m_hasReset; }
 
-    std::vector<CEP_CAN::FilterConfiguration>& GetFilters() { return m_filters; }
+    std::vector<Nilai::Can::FilterConfiguration>& GetFilters() { return m_filters; }
 
-    std::vector<CEP_CAN::Frame>&   GetRxQueue() { return m_rxQueue; }
-    std::vector<CEP_CAN::TxFrame>& GetTxQueue() { return m_txQueue; }
+    std::vector<Nilai::Can::Frame>&   GetRxQueue() { return m_rxQueue; }
+    std::vector<Nilai::Can::TxFrame>& GetTxQueue() { return m_txQueue; }
 
     Callbacks& GetCallbacks() { return m_callbacks; }
-    void       CallCallback(CEP_CAN::Irq irq) { m_callbacks[irq](); }
+    void       CallCallback(Nilai::Can::Irq irq) { m_callbacks[irq](); }
 
-    std::vector<CEP_CAN::Irq>& GetIrqs() { return m_irqs; }
+    std::vector<Nilai::Can::Irq>& GetIrqs() { return m_irqs; }
 
-    void SetTransmitStatus(CEP_CAN::Status s) { m_txStatus = s; }
+    void SetTransmitStatus(Nilai::Can::Status s) { m_txStatus = s; }
 
 private:
     std::string m_label;
 
-    bool                                      m_hasReset = false;
-    std::vector<CEP_CAN::FilterConfiguration> m_filters {};
+    bool                                         m_hasReset = false;
+    std::vector<Nilai::Can::FilterConfiguration> m_filters {};
 
-    std::vector<CEP_CAN::Frame>   m_rxQueue {};
-    std::vector<CEP_CAN::TxFrame> m_txQueue {};
-    CEP_CAN::Status               m_txStatus = CEP_CAN::Status::ERROR_NONE;
+    std::vector<Nilai::Can::Frame>   m_rxQueue {};
+    std::vector<Nilai::Can::TxFrame> m_txQueue {};
+    Nilai::Can::Status               m_txStatus = Nilai::Can::Status::ERROR_NONE;
 
     Callbacks m_callbacks {};
 
-    std::vector<CEP_CAN::Irq> m_irqs {};
+    std::vector<Nilai::Can::Irq> m_irqs {};
 };
-
+#endif
 #endif    // NILAI_CANMODULE_HPP

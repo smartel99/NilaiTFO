@@ -36,11 +36,6 @@
 
 namespace Nilai
 {
-inline static uint32_t GetTicks()
-{
-    return DWT->CYCCNT;
-}
-
 inline static uint32_t GetTime()
 {
 #ifndef NILAI_TEST
@@ -59,6 +54,15 @@ inline static uint32_t GetTime()
 #    else
     return 0;
 #    endif
+#endif
+}
+
+inline static uint32_t GetTicks()
+{
+#if !defined(NILAI_TEST)
+    return DWT->CYCCNT;
+#else
+    return GetTime();
 #endif
 }
 

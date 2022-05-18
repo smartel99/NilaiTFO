@@ -146,6 +146,6 @@ protected:
 #        endif
 #    endif
 #elif defined(NILAI_TEST)
-#    include "../test/Mocks/drivers/SaiModule.h"
+#    include "../test/Mocks/drivers/sai_module.h"
 #endif
 #endif    // NILAI_SAIMODULE_H

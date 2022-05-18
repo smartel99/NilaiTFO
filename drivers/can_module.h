@@ -138,7 +138,7 @@ private:
 #            endif
 #        endif
 #    else
-#        include "../test/Mocks/drivers/canModule.hpp"
+#        include "../test/Mocks/drivers/can_module.h"
 #    endif
 #endif
 /**

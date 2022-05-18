@@ -17,16 +17,14 @@
 
 #include "defines/module.h"
 
-
-
-class AdcModule : cep::Module
+class AdcModule : Nilai::Module
 {
 public:
     AdcModule(void* adc, std::string label) : m_label(std::move(label)) {}
 
     bool                             DoPost() override { return true; }
     void                             Run() override {}
-    [[nodiscard]] const std::string& GetLabel() const override { return m_label; }
+    [[nodiscard]] const std::string& GetLabel() const { return m_label; }
 
     void AddConvCpltCallback(const std::string& name, const std::function<void(AdcModule*)>& cb)
     {
@@ -37,18 +35,17 @@ public:
     {
         cb(this);
     }
-    [[maybe_unused]] void RemoveCallback(const std::string& name) {}
 
     void Start() { m_started = true; }
 
     void Stop() { m_started = false; }
 
-    void                SetChannelCount(size_t cnt) { m_buf.resize(cnt); }
+    void                SetChannelCount(size_t cnt) { m_channelBuff.resize(cnt); }
     [[nodiscard]] float GetChannelReading(size_t channel) const
     {
         if (m_started)
         {
-            return m_buf.at(channel);
+            return m_channelBuff.at(channel);
         }
         else
         {
@@ -56,13 +53,13 @@ public:
         }
     }
 
-    void SetChannelReading(size_t channel, float v) { m_buf.at(channel) = v; }
+    void SetChannelReading(size_t channel, float v) { m_channelBuff.at(channel) = v; }
 
 private:
     std::string m_label;
 
-    bool               m_started = false;
-    std::vector<float> m_buf     = {};
+    bool               m_started     = false;
+    std::vector<float> m_channelBuff = {};
 };
 
 
