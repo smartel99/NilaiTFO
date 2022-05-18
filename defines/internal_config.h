@@ -75,17 +75,6 @@
 #    define NILAI_USE_TAS5760
 #endif
 
-
-#define NILAI_USE_ADC    //! Enables the Analog-to-Digital Converter module.
-//#define NILAI_USE_CAN    //! Enables the Controller Area Network module.
-#define NILAI_USE_I2C    //! Enables the Inter-Integrated Circuit module.
-//#define NILAI_USE_I2S    //! Enables the Inter-IC Sound module.
-#define NILAI_USE_PWM     //! Enables the Pulse-Width Modulation module.
-#define NILAI_USE_RTC     //! Enables the Real-Time Clock module.
-#define NILAI_USE_SAI     //! Enables the Serial Audio Interface module.
-#define NILAI_USE_SPI     //! Enables the Serial Peripheral Interface module.
-#define NILAI_USE_UART    //! Enables the Universal Asynchronous Receiver-Transmitter module.
-
 /***********************************************/
 /* Function declarations */
 
