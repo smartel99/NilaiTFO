@@ -52,18 +52,6 @@ void I2sModule::Run()
 {
 }
 
-#    if defined(NILAI_USE_EVENTS)
-bool I2sModule::OnEvent(Nilai::Events::Event* event)
-{
-#        if defined(NILAI_USE_I2S_EVENTS)
-    // TODO Handle events.
-    return Module::OnEvent(event);
-#        else
-    return false;
-#        endif
-}
-#    endif
-
 void I2sModule::SetTxHalfCpltCb(const std::function<void()>& cb)
 {
     if (cb)
