@@ -18,19 +18,21 @@
 #define NILAI_I2SMODULE_H
 
 #if defined(NILAI_USE_I2S)
-#    include "../defines/internal_config.h"
-#    include NILAI_HAL_HEADER
-#    if defined(HAL_I2S_MODULE_ENABLED)
-#        include "audio_device.h"
-#        include "I2S/enums.h"
+#    if defined(NILAI_TEST)
+#    else
+#        include "../defines/internal_config.h"
+#        include NILAI_HAL_HEADER
+#        if defined(HAL_I2S_MODULE_ENABLED)
+#            include "audio_device.h"
+#            include "I2S/enums.h"
 
-#        include <functional>
-#        include <map>
-#        include <string>
+#            include <functional>
+#            include <map>
+#            include <string>
 
-#        if USE_HAL_I2S_REGISTER_CALLBACKS == 1
-#            define NILAI_I2S_REGISTER_CALLBACKS
-#        endif
+#            if USE_HAL_I2S_REGISTER_CALLBACKS == 1
+#                define NILAI_I2S_REGISTER_CALLBACKS
+#            endif
 
 namespace Nilai::Drivers
 {
@@ -108,9 +110,10 @@ protected:
     bool m_isClockActive = false;
 };
 }    // namespace Nilai::Drivers
-#    else
-#        if WARN_MISSING_STM_DRIVERS
-#            warning NilaiTFO I2S module is enabled, but HAL_I2S_MODULE_ENABLED is undefined!
+#        else
+#            if WARN_MISSING_STM_DRIVERS
+#                warning NilaiTFO I2S module is enabled, but HAL_I2S_MODULE_ENABLED is undefined!
+#            endif
 #        endif
 #    endif
 #endif

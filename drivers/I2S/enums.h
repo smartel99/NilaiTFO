@@ -18,7 +18,9 @@
 #define NILAI_I2S_ENUMS_H
 
 #if defined(NILAI_USE_I2S)
-#    include "Core/Inc/i2s.h"
+#    if defined(NILAI_TEST)
+#    else
+#        include "Core/Inc/i2s.h"
 
 namespace Nilai::I2S
 {
@@ -36,6 +38,7 @@ enum class AudioFreqs
 };
 }
 
-#endif
+#    endif
 
+#endif
 #endif    // NILAI_I2S_ENUMS_H

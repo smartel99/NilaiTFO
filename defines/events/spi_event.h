@@ -18,10 +18,12 @@
 #define NILAI_EVENTS_SPIEVENT_H
 
 #if defined(NILAI_USE_EVENTS) && defined(NILAI_USE_SPI_EVENTS)
-#    include "generic_event.h"
+#    if defined(NILAI_TEST)
+#    else
+#        include "generic_event.h"
 
-#    include "../internal_config.h"
-#    include NILAI_HAL_HEADER
+#        include "../internal_config.h"
+#        include NILAI_HAL_HEADER
 
 namespace Nilai::Events
 {
@@ -33,6 +35,7 @@ struct SpiEvent : public Event
     SPI_HandleTypeDef* Spi = nullptr;
 };
 }    // namespace Nilai::Events
+#    endif
 #endif
 
 #endif    // NILAI_EVENTS_SPIEVENT_H

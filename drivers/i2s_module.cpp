@@ -16,7 +16,7 @@
  */
 #include "i2s_module.h"
 
-#if defined(NILAI_USE_I2S)
+#if defined(NILAI_USE_I2S) && !defined(NILAI_TEST)
 #    include "../defines/macros.h"
 
 #    define I2S_INFO(msg, ...)  LOG_INFO("[%s]: " msg, m_label.c_str(), ##__VA_ARGS__)

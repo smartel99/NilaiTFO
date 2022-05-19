@@ -18,10 +18,12 @@
 #define NILAI_EVENTS_UARTEVENT_H
 
 #if defined(NILAI_USE_EVENTS) && defined(NILAI_USE_UART_EVENTS)
-#    include "generic_event.h"
+#    if defined(NILAI_TEST)
+#    else
+#        include "generic_event.h"
 
-#    include "../../defines/internal_config.h"
-#    include NILAI_HAL_HEADER
+#        include "../../defines/internal_config.h"
+#        include NILAI_HAL_HEADER
 
 namespace Nilai::Events
 {
@@ -46,6 +48,7 @@ struct UartRxEvent : public UartEvent
 };
 }    // namespace Nilai::Events
 
+#    endif
 #endif
 
 #endif    // NILAI_EVENTS_UARTEVENT_H

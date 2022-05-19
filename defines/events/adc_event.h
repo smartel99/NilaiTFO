@@ -18,10 +18,12 @@
 #define NILAI_EVENTS_ADCEVENT_H
 
 #if defined(NILAI_USE_EVENTS) && defined(NILAI_USE_ADC_EVENTS)
-#    include "events.h"
-#    include NILAI_HAL_HEADER
+#    if defined(NILAI_TEST)
+#    else
+#        include "events.h"
+#        include NILAI_HAL_HEADER
 
-#    include "generic_event.h"
+#        include "generic_event.h"
 
 namespace Nilai::Events
 {
@@ -33,6 +35,7 @@ struct AdcEvent : public Event
     ADC_HandleTypeDef* Adc = nullptr;
 };
 }    // namespace Nilai::Events
+#    endif
 #endif
 
 #endif    // NILAI_EVENTS_ADCEVENT_H

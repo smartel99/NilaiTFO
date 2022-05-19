@@ -23,6 +23,7 @@
 #    include NILAI_HAL_HEADER
 
 #    include <functional>
+#    include <limits>
 #    include <string_view>
 #    include <vector>
 
@@ -126,12 +127,8 @@ private:
 class ProfilingTimer
 {
 public:
-    ProfilingTimer(size_t id) : m_id(id), m_startTime(DWT->CYCCNT) {}
-    ~ProfilingTimer()
-    {
-        uint32_t end = DWT->CYCCNT;
-        Profiler::UpdateEvent(m_id, end - m_startTime);
-    }
+    ProfilingTimer(size_t id);
+    ~ProfilingTimer();
 
 private:
     size_t   m_id        = 0;
@@ -147,6 +144,5 @@ private:
 #    define NILAI_PROFILE_SCOPE(name)
 #    define NILAI_PROFILE_FUNCTION()
 #endif
-
 
 #endif    // NILAI_PROFILER_H

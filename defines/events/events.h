@@ -19,6 +19,7 @@
 
 #if defined(NILAI_USE_EVENTS)
 
+#    include "../internal_config.h"
 #    include "data_event.h"
 #    include "ext_event.h"
 #    include "generic_event.h"

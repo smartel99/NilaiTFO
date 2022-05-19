@@ -45,11 +45,13 @@ Profiler* Profiler::s_instance = nullptr;
 Profiler::Profiler(const std::function<void(const char*, size_t)>& printStr, size_t reportFreq)
 : m_reportFreq(reportFreq)
 {
+#    if !defined(NILAI_TEST)
     // These flags can only be set by a debugger.
     static constexpr uint32_t dbgFlags = SCB_DFSR_EXTERNAL_Msk | SCB_DFSR_VCATCH_Msk |
                                          SCB_DFSR_DWTTRAP_Msk | SCB_DFSR_BKPT_Msk |
                                          SCB_DFSR_HALTED_Msk;
     if (/*(ITM->TER & 1) == 1 &&*/ (SCB->DFSR & dbgFlags) != 0)
+#    endif
     {
         // If ITM is enabled and one of the bits in the Debug Fault Status Register are set,
         // a debugger is connected.
@@ -85,8 +87,10 @@ void Profiler::StartImpl(const std::string_view& name)
     m_profName = name;
     m_events.clear();
 
+#    if !defined(NILAI_TEST)
     CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
     DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;    // Enable counter.
+#    endif
 }
 
 size_t Profiler::CreateImpl(const std::string_view& name)
@@ -150,5 +154,25 @@ void Profiler::Print(const char* fmt, ...)
 
     va_end(args);
 }
+
+#    if defined(NILAI_TEST)
+ProfilingTimer::ProfilingTimer(size_t id) : m_id(id), m_startTime(GetTime())
+{
+}
+ProfilingTimer::~ProfilingTimer()
+{
+    uint32_t end = GetTime();
+    Profiler::UpdateEvent(m_id, end - m_startTime);
+}
+#    else
+ProfilingTimer::ProfilingTimer(size_t id) : m_id(id), m_startTime(DWT->CYCCNT)
+{
+}
+ProfilingTimer::~ProfilingTimer()
+{
+    uint32_t end = DWT->CYCCNT;
+    Profiler::UpdateEvent(m_id, end - m_startTime);
+}
+#    endif
 }    // namespace Nilai
 #endif
