@@ -15,17 +15,19 @@
 /***********************************************/
 /* Includes */
 #if defined(NILAI_USE_PWM)
-#    include "../defines/internal_config.h"
-#    include NILAI_HAL_HEADER
-#    if defined(HAL_TIM_MODULE_ENABLED)
-#        include "../defines/macros.h"
-#        include "../defines/misc.h"
-#        include "../defines/module.h"
+#    if defined(NILAI_TEST)
+#    else
+#        include "../defines/internal_config.h"
+#        include NILAI_HAL_HEADER
+#        if defined(HAL_TIM_MODULE_ENABLED)
+#            include "../defines/macros.h"
+#            include "../defines/misc.h"
+#            include "../defines/module.h"
 
-#        include "PWM/enums.h"
+#            include "PWM/enums.h"
 
-#        include <string>
-#        include <vector>
+#            include <string>
+#            include <vector>
 
 namespace Nilai::Drivers
 {
@@ -58,12 +60,12 @@ private:
     bool     m_isActive        = false;
 };
 }    // namespace Nilai::Drivers
-#    else
-#        if WARN_MISSING_STM_DRIVERS
-#            warning NilaiTFO PWM Module enabled, but HAL_TIM_MODULE_ENABLED is not defined!
+#        else
+#            if WARN_MISSING_STM_DRIVERS
+#                warning NilaiTFO PWM Module enabled, but HAL_TIM_MODULE_ENABLED is not defined!
+#            endif
 #        endif
 #    endif
-#endif
 
 /***********************************************/
 /* Defines */
@@ -74,5 +76,6 @@ private:
 /**
  * @}
  */
+#endif
 /* END OF FILE */
 #endif /* NILAI_PWMMODULE_H_ */

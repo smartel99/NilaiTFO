@@ -18,7 +18,7 @@
 #if __INCLUDE_LEVEL__
 #    error "Do not include this file!"
 #endif
-#if defined(NILAI_USE_SW_TAS5760)
+#if defined(NILAI_USE_SW_TAS5760) && !defined(NILAI_TEST)
 // Include the cpp file on purpose.
 #    include "sw_tas5760.cpp"
 

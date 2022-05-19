@@ -15,13 +15,16 @@
 /***********************************************/
 /* Includes */
 #if defined(NILAI_USE_FILESYSTEM)
+#    if defined(NILAI_TEST)
 
-#    include "../defines/filesystem/error_codes.h"
+#    else
 
-#    include "ff.h"
+#        include "../defines/filesystem/error_codes.h"
 
-#    include <functional>
-#    include <string>
+#        include "ff.h"
+
+#        include <functional>
+#        include <string>
 
 namespace Nilai::Filesystem
 {
@@ -102,14 +105,14 @@ public:
     template<typename... Ts>
     Result WriteFmtString(const char* fmt, Ts... args)
     {
-#    if _FS_READONLY == 0 && _USE_STRFUNC >= 1
-#        if defined(DEBUG)
+#        if _FS_READONLY == 0 && _USE_STRFUNC >= 1
+#            if defined(DEBUG)
         if (!m_isOpen)
         {
             // File must be open and valid!
             return Result::NoFile;
         }
-#        endif
+#            endif
         if (f_printf(&m_file, fmt, args...) <= 0)
         {
             m_status = (Result)f_error(&m_file);
@@ -121,10 +124,10 @@ public:
 
         return m_status;
 
-#    else
-        CEP_ASSERT(false, "This function is not enabled");
+#        else
+        NILAI_ASSERT(false, "This function is not enabled");
         return 0;
-#    endif
+#        endif
     }
 
     fsize_t              Tell();
@@ -143,11 +146,12 @@ private:
     bool        m_isOpen = false;
     Result      m_status = {};
 };
-}  // namespace Nilai::Filesystem
+}    // namespace Nilai::Filesystem
 
 /**
  * @}
  */
+#    endif
 #endif
 /* END OF FILE */
 #endif /* NILAI_FILE_H_ */

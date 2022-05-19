@@ -9,7 +9,7 @@
  *******************************************************************************
  */
 
-#if defined(NILAI_USE_LOGGER)
+#if defined(NILAI_USE_LOGGER) && !defined(NILAI_TEST)
 #    include "logger.h"
 #    include "../defines/macros.h"
 #    if defined(NILAI_USE_UART)

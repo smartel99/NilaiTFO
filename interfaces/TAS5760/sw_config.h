@@ -18,15 +18,17 @@
 #define NILAI_TAS5760_SWCONFIG_H
 
 #if defined(NILAI_USE_SW_TAS5760)
-#    include "../../defines/pin.h"
-#    include "../../defines/smart_pointers.h"
-#    include "../../drivers/i2c_module.h"
-#    include "enums.h"
-#    include "register_structs.h"
+#    if defined(NILAI_TEST)
+#    else
+#        include "../../defines/pin.h"
+#        include "../../defines/smart_pointers.h"
+#        include "../../drivers/i2c_module.h"
+#        include "enums.h"
+#        include "register_structs.h"
 
-#    if NILAI_TAS5760_PWM_MODE > NILAI_TAS5760_PWM_NONE
-#        include "../../drivers/pwmModule.h"
-#    endif
+#        if NILAI_TAS5760_PWM_MODE > NILAI_TAS5760_PWM_NONE
+#            include "../../drivers/pwmModule.h"
+#        endif
 
 namespace Nilai::Tas5760
 {
@@ -39,12 +41,12 @@ struct SwConfig
     Ref<Drivers::I2cModule> I2c = nullptr;
     //! I2C address of the chip.
     I2cAddresses Address = I2cAddresses::Addr0;
-#    if NILAI_TAS5760_PWM_MODE > NILAI_TAS5760_PWM_NONE
+#        if NILAI_TAS5760_PWM_MODE > NILAI_TAS5760_PWM_NONE
     //! PWM output for channel 1 (left).
     PwmModule* PwmA = nullptr;
     //! PWM output for channel 2 (right).
     PwmModule* PwmB = nullptr;
-#    endif
+#        endif
 
     //! Headphone mute, active low.
     Nilai::Pin HpMute = {};
@@ -67,7 +69,7 @@ struct SwConfig
     uint8_t DigClipLev5_0  = 0xFC;
 };
 }    // namespace Nilai::Tas5760
-
+#    endif
 #endif
 
 #endif    // NILAI_TAS5760_SWCONFIG_H

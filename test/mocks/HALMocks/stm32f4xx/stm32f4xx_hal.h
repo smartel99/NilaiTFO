@@ -10,7 +10,6 @@
  */
 #ifndef GUARD_STM32F4XX_HAL_H
 #define GUARD_STM32F4XX_HAL_H
-#include "stm32f4xx_hal_conf.h"
 #include "stm32f4xx_hal_gpio.h"
 #include <cstdint>
 
@@ -22,7 +21,7 @@ extern "C"
     uint32_t HAL_GetTick(void);
 
 #ifdef __cplusplus
-};
+}
 #endif
 
 

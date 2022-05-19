@@ -37,7 +37,7 @@ Application::Application()
     s_instance = this;
 }
 
-#    if defined(NILAI_USE_EVENTS)
+#if defined(NILAI_USE_EVENTS)
 size_t Application::RegisterEventCallback(Events::EventTypes               event,
                                           const Application::CallbackFunc& cb)
 {
@@ -51,25 +51,25 @@ void Application::UnregisterEventCallback(Events::EventTypes event, [[maybe_unus
 
     auto& events = m_callbacks[static_cast<size_t>(event)];
 
-#        if NILAI_EVENTS_MAX_CALLBACKS == 1
+#    if NILAI_EVENTS_MAX_CALLBACKS == 1
     events = {};
-#        else
+#    else
     NILAI_ASSERT(id < s_maxEventCbCount, "Invalid callback ID!");
     events[id] = {};
-#        endif
+#    endif
 }
 
 size_t Application::InsertCallback(Application::EventCallbacks&     events,
                                    const Application::CallbackFunc& cb)
 {
-#        if NILAI_EVENTS_MAX_CALLBACKS == 1
+#    if NILAI_EVENTS_MAX_CALLBACKS == 1
     if (!events.Used)
     {
         events = {cb, true};
         return 0;
     }
     return -1;
-#        else
+#    else
     // Find the first free slot in the array.
     EventCallbacks::iterator it =
       std::find_if(events.begin(), events.end(), [](const CallbackSlot& f) { return !f.Used; });
@@ -85,15 +85,15 @@ size_t Application::InsertCallback(Application::EventCallbacks&     events,
 
     // No slot found.
     return -1;
-#        endif
+#    endif
 }
 
 void Application::DispatchEvent(Events::Event* data)
 {
     const auto& events = m_callbacks[static_cast<size_t>(data->Type)];
-#        if NILAI_EVENTS_MAX_CALLBACKS == 1
+#    if NILAI_EVENTS_MAX_CALLBACKS == 1
     events.F(data);
-#        else
+#    else
     for (const auto& [cb, used] : events)
     {
         if (cb(data))
@@ -101,10 +101,10 @@ void Application::DispatchEvent(Events::Event* data)
             return;
         }
     }
-#        endif
+#    endif
 }
 
-#    endif
+#endif
 
 [[noreturn]] void Application::Run()
 {
@@ -143,9 +143,9 @@ void Application::OnRun()
         m_deletionQueue.clear();
     }
 
-#    if defined(NILAI_ENABLE_PROFILING)
+#if defined(NILAI_ENABLE_PROFILING)
     Profiler::Report();
-#    endif
+#endif
 }
 
 void Application::RemoveModule(size_t id)
@@ -154,7 +154,7 @@ void Application::RemoveModule(size_t id)
     m_modulesPendingDeletion = true;
 }
 
-Nilai::Ref<Nilai::Module> Application::GetModule(size_t id)
+Ref<Module> Application::GetModule(size_t id)
 {
     for (auto& module : m_modules)
     {
@@ -168,9 +168,8 @@ Nilai::Ref<Nilai::Module> Application::GetModule(size_t id)
     AssertFailed((const uint8_t*)__FILE__, __LINE__, 1);
 }
 
-[[noreturn]] void AbortionHandler(int signal)
+[[noreturn]] void AbortionHandler([[maybe_unused]] int signal)
 {
-    (void)signal;
     // This function will in most cases be called by the STL, in place of the standard _exit().
     AssertFailed((const uint8_t*)__FILE__, __LINE__, 1);
     while (true)

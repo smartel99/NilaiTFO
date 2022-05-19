@@ -18,7 +18,8 @@
 #    if !defined(NILAI_TEST)
 #        include "Core/Inc/gpio.h"
 #    else
-#        include "test/Mocks/GPIO/gpio.h"
+#        include "../test/Mocks/GPIO/gpio.h"
+#        include "../test/Mocks/HALMocks/stm32_mock_hal.h"
 #    endif
 
 #    include <cstdint>

@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License along with this program. If
  * not, see <a href=https://www.gnu.org/licenses/>https://www.gnu.org/licenses/<a/>.
  */
-#if defined(NILAI_USE_RTC)
+#if defined(NILAI_USE_RTC) && !defined(NILAI_TEST)
 #    include "structs.h"
 
 #    include <ctime>

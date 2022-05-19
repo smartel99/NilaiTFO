@@ -18,27 +18,30 @@
 #define NILAI_SAIMODULE_H
 
 #if defined(NILAI_USE_SAI)
-#    include "../defines/internal_config.h"
-#    include NILAI_HAL_HEADER
-#    if defined(HAL_SAI_MODULE_ENABLED)
+#    if defined(NILAI_TEST)
+#        include "../test/Mocks/drivers/sai_module.h"
+#    else
+#        include "../defines/internal_config.h"
+#        include NILAI_HAL_HEADER
+#        if defined(HAL_SAI_MODULE_ENABLED)
 
-#        include "audio_device.h"
-#        include "SAI/enums.h"
+#            include "audio_device.h"
+#            include "SAI/enums.h"
 
-#        include <functional>
-#        include <string>
+#            include <functional>
+#            include <string>
 
-#        include <map>
+#            include <map>
 
 namespace Nilai::Drivers
 {
-#        if defined(NILAI_USE_EVENTS) && defined(NILAI_USE_SAI_EVENTS)
-#            define NILAI_SAI_REGISTER_EVENTS
-#        elif USE_HAL_SAI_REGISTER_CALLBACKS == 1
-#            define NILAI_SAI_REGISTER_CALLBACKS
-#        else
-#            define NILAI_SAI_OVERRIDE_HAL
-#        endif
+#            if defined(NILAI_USE_EVENTS) && defined(NILAI_USE_SAI_EVENTS)
+#                define NILAI_SAI_REGISTER_EVENTS
+#            elif USE_HAL_SAI_REGISTER_CALLBACKS == 1
+#                define NILAI_SAI_REGISTER_CALLBACKS
+#            else
+#                define NILAI_SAI_OVERRIDE_HAL
+#            endif
 
 class SaiModule : public AudioDevice
 {
@@ -105,17 +108,17 @@ public:
 protected:
     void SetStreamingCallbacks();
     void SetClockCallbacks();
-#        if defined(NILAI_SAI_REGISTER_EVENTS)
+#            if defined(NILAI_SAI_REGISTER_EVENTS)
     void UnregisterEvents();
-#        endif
+#            endif
 
     static void HalRestartClock(SAI_HandleTypeDef* sai);
 
-#        if defined(NILAI_SAI_REGISTER_CALLBACKS)
+#            if defined(NILAI_SAI_REGISTER_CALLBACKS)
     static void HalTxHalfCplt(SAI_HandleTypeDef* sai);
     static void HalTxCplt(SAI_HandleTypeDef* sai);
     static void HalError(SAI_HandleTypeDef* sai);
-#        endif
+#            endif
 
 protected:
     SAI_HandleTypeDef* m_handle = nullptr;
@@ -131,21 +134,20 @@ protected:
     Sai::DataSize m_dataSize = {};
     uint8_t       m_numSlot  = 2;
 
-    uint32_t m_lastError = 0;
+    uint32_t m_lastError      = 0;
 
-#        if defined(NILAI_SAI_REGISTER_EVENTS)
-    size_t m_txHalfCpltCbId = std::numeric_limits<size_t>::max();
-    size_t m_txCpltCbId     = std::numeric_limits<size_t>::max();
-#        endif
+#            if defined(NILAI_SAI_REGISTER_EVENTS)
+    size_t   m_txHalfCpltCbId = std::numeric_limits<size_t>::max();
+    size_t   m_txCpltCbId     = std::numeric_limits<size_t>::max();
+#            endif
 };
 }    // namespace Nilai::Drivers
 
-#    else
-#        if defined(WARM_MISSING_STM_DRIVERS)
-#            warning NilaiTFO SAI module is enabled, but HAL_SAI_MODULE_ENABLED is undefined!
+#        else
+#            if defined(WARM_MISSING_STM_DRIVERS)
+#                warning NilaiTFO SAI module is enabled, but HAL_SAI_MODULE_ENABLED is undefined!
+#            endif
 #        endif
 #    endif
-#elif defined(NILAI_TEST)
-#    include "../test/Mocks/drivers/sai_module.h"
 #endif
 #endif    // NILAI_SAIMODULE_H

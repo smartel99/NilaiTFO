@@ -16,7 +16,8 @@
  */
 #include "can_module.h"
 
-#include <algorithm>
+#if defined(NILAI_USE_CAN)
+#    include <algorithm>
 
 CanModule::CanModule(void*, std::string label) : m_label(std::move(label))
 {
@@ -107,3 +108,4 @@ void CanModule::DisableInterrupts(const std::vector<CEP_CAN::Irq>& irqs)
         DisableInterrupt(irq);
     }
 }
+#endif

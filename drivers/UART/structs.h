@@ -18,13 +18,15 @@
 #define NILAI_UART_STRUCTS_H
 
 #if defined(NILAI_USE_UART)
-#    include "../../defines/internal_config.h"
-#    include NILAI_HAL_HEADER
+#    if defined(NILAI_TEST)
+#    else
+#        include "../../defines/internal_config.h"
+#        include NILAI_HAL_HEADER
 
 
-#    include <cstdint>
-#    include <string>
-#    include <vector>
+#        include <cstdint>
+#        include <string>
+#        include <vector>
 
 namespace Nilai::Uart
 {
@@ -61,6 +63,7 @@ struct UartDataBuffer
 };
 }    // namespace Nilai::Uart
 
+#    endif
 #endif
 
 #endif    // NILAI_UART_STRUCTS_H

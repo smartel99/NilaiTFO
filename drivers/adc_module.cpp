@@ -17,9 +17,10 @@
 #include "adc_module.h"
 
 #if defined(NILAI_USE_ADC) && defined(HAL_ADC_MODULE_ENABLED)
-#    include "defines/macros.h"
-#    include "defines/system.h"
-#    include "services/logger.h"
+#    include "../defines/macros.h"
+#    include "../defines/system.h"
+#    include "../services/logger.h"
+#    include "../services/time.h"
 
 #    define ADC_DEBUG(msg, ...)   LOG_DEBUG("[%s]: " msg, m_label.c_str(), ##__VA_ARGS__)
 #    define ADC_INFO(msg, ...)    LOG_INFO("[%s]: " msg, m_label.c_str(), ##__VA_ARGS__)

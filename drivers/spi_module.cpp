@@ -125,10 +125,10 @@ SPI::Status SpiModule::Receive(uint8_t* ouptutData, size_t len)
     return SPI::Status::NONE;
 }
 
-SPI::Status SpiModule::Transaction(const uint8_t* txData,
-                                   size_t         txLen,
-                                   uint8_t*       rxData,
-                                   size_t         rxLen)
+SPI::Status SpiModule::Transaction(const uint8_t*          txData,
+                                   size_t                  txLen,
+                                   uint8_t*                rxData,
+                                   [[maybe_unused]] size_t rxLen)
 {
     NILAI_ASSERT(txData != nullptr, "TxData is NULL in SpiModule::Transaction");
     NILAI_ASSERT(rxData != nullptr, "RxData is NULL in SpiModule::Transaction");

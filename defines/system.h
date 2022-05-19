@@ -18,7 +18,11 @@
 #ifndef NILAI_DEFINES_SYSTEM_H
 #define NILAI_DEFINES_SYSTEM_H
 
-#define NILAI_BREAKPOINT __asm("bkpt 1")
+#if defined(NILAI_TEST)
+#    define NILAI_BREAKPOINT __asm("INT3")
+#else
+#    define NILAI_BREAKPOINT __asm("bkpt 1")
+#endif
 
 namespace Nilai::System
 {

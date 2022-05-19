@@ -18,21 +18,24 @@
  * ------------------------------------------------------------------------------------
  */
 #    if defined(NILAI_USE_I2C)
-#        include "../defines/internal_config.h"
-#        include NILAI_HAL_HEADER
-#        if defined(HAL_I2C_MODULE_ENABLED)
-#            include "../defines/macros.h"
-#            include "../defines/misc.h"
-#            include "../defines/module.h"
+#        if defined(NILAI_TEST)
+#            include "../test/Mocks/drivers/i2c_module.h"
+#        else
+#            include "../defines/internal_config.h"
+#            include NILAI_HAL_HEADER
+#            if defined(HAL_I2C_MODULE_ENABLED)
+#                include "../defines/macros.h"
+#                include "../defines/misc.h"
+#                include "../defines/module.h"
 
-#            include "I2C/enums.h"
-#            include "I2C/structs.h"
+#                include "I2C/enums.h"
+#                include "I2C/structs.h"
 
-#            include <string>
-#            include <utility>
-#            include <vector>
+#                include <string>
+#                include <utility>
+#                include <vector>
 
-//TODO Events for I2cModule
+// TODO Events for I2cModule
 namespace Nilai::Drivers
 {
 class I2cModule : public Module
@@ -87,15 +90,16 @@ protected:
     static constexpr uint16_t TIMEOUT = 200;
 };
 }    // namespace Nilai::Drivers
-#        else
-#            if WARN_MISSING_STM_DRIVERS
-#                warning NilaiTFO I2C Module enabled, but HAL_I2C_MODULE_ENABLED is not defined!
+#            else
+#                if WARN_MISSING_STM_DRIVERS
+#                    warning NilaiTFO I2C Module enabled, but HAL_I2C_MODULE_ENABLED is not defined!
+#                endif
 #            endif
 #        endif
-#    endif
 /**
  * @}
  * @}
  */
+#    endif
 #endif
 /* ----- END OF FILE ----- */

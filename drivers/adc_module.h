@@ -18,20 +18,23 @@
 #define NILAI_ADCMODULE_HPP
 
 #if defined(NILAI_USE_ADC)
-#    include "../defines/internal_config.h"
-#    include NILAI_HAL_HEADER
-#    if defined(HAL_ADC_MODULE_ENABLED)
-#        include "../defines/module.h"
+#    if defined(NILAI_TEST)
+#        include "../test/Mocks/drivers/adc_module.h"
+#    else
+#        include "../defines/internal_config.h"
+#        include NILAI_HAL_HEADER
+#        if defined(HAL_ADC_MODULE_ENABLED)
+#            include "../defines/module.h"
 
-#        include <functional>
-#        include <map>
-#        include <string>
+#            include <functional>
+#            include <map>
+#            include <string>
 
 namespace Nilai::Drivers
 {
-#        if USE_HAL_ADC_REGISTER_CALLBACKS == 1
-#            define NILAI_ADC_REGISTER_CALLBACKS
-#        endif
+#            if USE_HAL_ADC_REGISTER_CALLBACKS == 1
+#                define NILAI_ADC_REGISTER_CALLBACKS
+#            endif
 
 /**
  * @brief Controls a hardware ADC on the STM32.
@@ -86,10 +89,10 @@ public:
     virtual void ErrorCallback();
 
 private:
-#        if defined(NILAI_ADC_REGISTER_CALLBACKS)
+#            if defined(NILAI_ADC_REGISTER_CALLBACKS)
     static void AdcModuleConvCpltCallback(ADC_HandleTypeDef* adc);
     static void AdcModuleErrorCallback(ADC_HandleTypeDef* adc);
-#        endif
+#            endif
 
 protected:
     ADC_HandleTypeDef*    m_adc         = nullptr;
@@ -103,12 +106,12 @@ protected:
     std::vector<std::function<void(AdcModule*)>> m_errorCallbacks;
 };
 }    // namespace Nilai::Drivers
-#    else
-#        if WARN_MISSING_STM_DRIVERS
-#            warning NilaiTFO ADC module is enabled, but HAL_ADC_MODULE_ENABLED is undefined!
+#        else
+#            if WARN_MISSING_STM_DRIVERS
+#                warning NilaiTFO ADC module is enabled, but HAL_ADC_MODULE_ENABLED is undefined!
+#            endif
 #        endif
+
 #    endif
-#elif defined(NILAI_TEST)
-#    include "../test/Mocks/drivers/adc_module.h"
 #endif
 #endif

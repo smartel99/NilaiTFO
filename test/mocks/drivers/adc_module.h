@@ -12,28 +12,36 @@
 #define GUARD_ADCMODULE_H
 
 #include <functional>
+#include <string>
 #include <utility>
 #include <vector>
 
 #include "defines/module.h"
 
-class AdcModule : Nilai::Module
+struct ADC_HandleTypeDef
+{
+};
+
+namespace Nilai::Drivers
+{
+class AdcModule : public Module
 {
 public:
-    AdcModule(void* adc, std::string label) : m_label(std::move(label)) {}
+    AdcModule([[maybe_unused]] void* adc, std::string label) : m_label(std::move(label)) {}
 
     bool                             DoPost() override { return true; }
     void                             Run() override {}
     [[nodiscard]] const std::string& GetLabel() const { return m_label; }
 
-    void AddConvCpltCallback(const std::string& name, const std::function<void(AdcModule*)>& cb)
+    [[maybe_unused]] size_t AddConvCpltCallback(const std::function<void(AdcModule*)>& cb)
     {
         cb(this);
+        return 0;
     }
-    [[maybe_unused]] void AddErrorCallback(const std::string&                     name,
-                                           const std::function<void(AdcModule*)>& cb)
+    [[maybe_unused]] size_t AddErrorCallback(const std::function<void(AdcModule*)>& cb)
     {
         cb(this);
+        return 0;
     }
 
     void Start() { m_started = true; }
@@ -55,13 +63,16 @@ public:
 
     void SetChannelReading(size_t channel, float v) { m_channelBuff.at(channel) = v; }
 
-private:
+    virtual void ConvCpltCallback() {}
+    virtual void ErrorCallback() {}
+
+protected:
     std::string m_label;
 
     bool               m_started     = false;
     std::vector<float> m_channelBuff = {};
 };
-
+}    // namespace Nilai::Drivers
 
 
 #endif    // GUARD_ADCMODULE_H

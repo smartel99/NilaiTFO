@@ -20,7 +20,7 @@
 #    define DISABLE_WARNING_PUSH _Pragma("GCC diagnostic push")
 #    define DISABLE_WARNING_POP  _Pragma("GCC diagnostic pop")
 #    define DISABLE_WARNING(warningName)                                                           \
-        DISABLE_WARNING_PUSH                                                                       \
+        DISABLE_WARNING_PUSH;                                                                      \
         DO_PRAGMA(GCC diagnostic ignored warningName)
 #elif defined(__clang__)
 #    define DO_PRAGMA(X)         _Pragma(#    X)

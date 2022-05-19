@@ -45,7 +45,11 @@ using LogFunc = std::function<void(const char*, size_t)>;
 class Logger
 {
 public:
-    explicit Logger(void* uart = nullptr, const LogFunc& logFunc = {}) { s_instance = this; }
+    explicit Logger([[maybe_unused]] void*          uart    = nullptr,
+                    [[maybe_unused]] const LogFunc& logFunc = {})
+    {
+        s_instance = this;
+    }
 
     void Log(const char* fmt, ...)
     {
@@ -61,7 +65,7 @@ public:
     void*          GetUart() { return nullptr; }
     static Logger* Get() { return s_instance; }
 
-    void SetLogFunc(const LogFunc& logFunc) {}
+    void SetLogFunc([[maybe_unused]] const LogFunc& logFunc) {}
 
 private:
     static Logger* s_instance;

@@ -17,7 +17,7 @@
  */
 #include "i2c_module.h"
 
-#if defined(NILAI_USE_I2C) && defined(HAL_I2C_MODULE_ENABLED)
+#if defined(NILAI_USE_I2C) && !defined(NILAI_TEST)
 #    include "../services/logger.h"
 #    include <utility>
 

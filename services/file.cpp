@@ -10,7 +10,7 @@
  */
 
 
-#if defined(NILAI_USE_FILESYSTEM)
+#if defined(NILAI_USE_FILESYSTEM) && !defined(NILAI_TEST)
 #    include "file.h"
 #    include "filesystem.h"
 
@@ -26,7 +26,7 @@
 #    define ASSERT_FILE_IS_OK()                                                                    \
         do                                                                                         \
         {                                                                                          \
-            NILAI_ASSERT(m_isOpen == true, "File is not open!");                                     \
+            NILAI_ASSERT(m_isOpen == true, "File is not open!");                                   \
         } while (0)
 
 namespace Nilai::Filesystem

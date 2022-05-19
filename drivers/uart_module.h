@@ -15,26 +15,28 @@
 /*************************************************************************************************/
 /* Includes ------------------------------------------------------------------------------------ */
 #    if defined(NILAI_USE_UART)
-#        include "../defines/internal_config.h"
-#        include NILAI_HAL_HEADER
-#        if defined(HAL_UART_MODULE_ENABLED)
-#            include "../defines/macros.h"
-#            include "../defines/misc.h"
-#            include "../defines/module.h"
+#        if defined(NILAI_TEST)
+#        else
+#            include "../defines/internal_config.h"
+#            include NILAI_HAL_HEADER
+#            if defined(HAL_UART_MODULE_ENABLED)
+#                include "../defines/macros.h"
+#                include "../defines/misc.h"
+#                include "../defines/module.h"
 
-#            include "UART/enums.h"
-#            include "UART/structs.h"
+#                include "UART/enums.h"
+#                include "UART/structs.h"
 
-#            include <cstdint>       // For uint8_t, size_t
-#            include <functional>    // For std::function
-#            include <string>        // For std::string
-#            include <vector>        // For std::vector
+#                include <cstdint>       // For uint8_t, size_t
+#                include <functional>    // For std::function
+#                include <string>        // For std::string
+#                include <vector>        // For std::vector
 
 /*************************************************************************************************/
 /* Defines ------------------------------------------------------------------------------------- */
-#            if USE_HAL_UART_REGISTER_CALLBACKS == 1
-#                define NILAI_UART_REGISTER_CALLBACKS
-#            endif
+#                if USE_HAL_UART_REGISTER_CALLBACKS == 1
+#                    define NILAI_UART_REGISTER_CALLBACKS
+#                endif
 /*************************************************************************************************/
 /* Enumerated Types ---------------------------------------------------------------------------- */
 
@@ -79,11 +81,11 @@ public:
 private:
     bool WaitUntilTransmitionComplete();
 
-    bool ResizeDmaBuffer(size_t sofLen, size_t len, size_t eofLen);
+    bool        ResizeDmaBuffer(size_t sofLen, size_t len, size_t eofLen);
 
-#            if defined(NILAI_UART_REGISTER_CALLBACKS)
+#                if defined(NILAI_UART_REGISTER_CALLBACKS)
     static void ReceptionCompleteCb(UART_HandleTypeDef* huart);
-#            endif
+#                endif
 
 private:
     UART_HandleTypeDef* m_handle = nullptr;
@@ -110,9 +112,10 @@ private:
 };
 }    // namespace Nilai::Drivers
 
-#        else
-#            if WARN_MISSING_STM_DRIVERS
-#                warning NilaiTFO UART module enabled, but HAL_UART_MODULE_ENABLE is not defined!
+#            else
+#                if WARN_MISSING_STM_DRIVERS
+#                    warning NilaiTFO UART module enabled, but HAL_UART_MODULE_ENABLE is not defined!
+#                endif
 #            endif
 #        endif
 #    endif

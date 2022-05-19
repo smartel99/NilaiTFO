@@ -8,7 +8,7 @@
  * Created on: Apr 9, 2021
  *******************************************************************************
  */
-#if defined(NILAI_USE_FILESYSTEM)
+#if defined(NILAI_USE_FILESYSTEM) && !defined(NILAI_TEST)
 #    include "filesystem.h"
 
 #    include "../defines/macros.h"
@@ -132,7 +132,7 @@ Result GetFreeClusters(const std::string& drive, dword_t* outClst, fs_t** fatfs)
 
     return (Result)f_getfree(drive.c_str(), outClst, fatfs);
 #    else
-    CEP_ASSERT(false, "Function not enabled!");
+    NILAI_ASSERT(false, "Function not enabled!");
     return Result::NotEnabled;
 #    endif
 }
@@ -148,7 +148,7 @@ Result GetDriveInfo(const std::string& drive, std::string& label, dword_t* sn)
     label          = std::string {tmp};
     return r;
 #    else
-    CEP_ASSERT(false, "This function is not enabled!");
+    NILAI_ASSERT(false, "This function is not enabled!");
     return Result::Ok;
 #    endif
 }
@@ -179,7 +179,7 @@ Result OpenDir(const std::string& path, dir_t* outDir)
 #    else
     UNUSED(path);
     UNUSED(outDir);
-    CEP_ASSERT(false, "Function not enabled!");
+    NILAI_ASSERT(false, "Function not enabled!");
     return Result::NotEnabled;
 #    endif
 }
@@ -192,7 +192,7 @@ Result CloseDir(dir_t* dir)
     return (Result)f_closedir(dir);
 #    else
     UNUSED(dir);
-    CEP_ASSERT(false, "Function not enabled!");
+    NILAI_ASSERT(false, "Function not enabled!");
     return Result::NotEnabled;
 #    endif
 }
@@ -206,7 +206,7 @@ Result ReadDir(dir_t* dir, fileInfo_t* outInfo)
 #    else
     UNUSED(dir);
     UNUSED(outInfo);
-    CEP_ASSERT(false, "Function not enabled!");
+    NILAI_ASSERT(false, "Function not enabled!");
     return Result::NotEnabled;
 #    endif
 }
@@ -225,7 +225,7 @@ Result FindFirst(dir_t*             outDir,
     UNUSED(outInfo);
     UNUSED(dirPath);
     UNUSED(pattern);
-    CEP_ASSERT(false, "Function not enabled!");
+    NILAI_ASSERT(false, "Function not enabled!");
     return Result::NotEnabled;
 #    endif
 }
@@ -239,7 +239,7 @@ Result FindNext(dir_t* dir, fileInfo_t* outInfo)
 #    else
     UNUSED(dir);
     UNUSED(outInfo);
-    CEP_ASSERT(false, "Function not enabled!");
+    NILAI_ASSERT(false, "Function not enabled!");
     return Result::NotEnabled;
 #    endif
 }
@@ -253,7 +253,7 @@ Result GetStat(const std::string& path, fileInfo_t* outInfo)
 #    else
     UNUSED(dir);
     UNUSED(outInfo);
-    CEP_ASSERT(false, "Function not enabled!");
+    NILAI_ASSERT(false, "Function not enabled!");
     return Result::NotEnabled;
 #    endif
 }
@@ -266,7 +266,7 @@ Result Mkdir(const std::string& path)
     return (Result)f_mkdir(path.c_str());
 #    else
     UNUSED(path);
-    CEP_ASSERT(false, "Function not enabled!");
+    NILAI_ASSERT(false, "Function not enabled!");
     return Result::NotEnabled;
 #    endif
 }
@@ -279,7 +279,7 @@ Result Unlink(const std::string& path)
     return (Result)f_unlink(path.c_str());
 #    else
     UNUSED(path);
-    CEP_ASSERT(false, "Function not enabled!");
+    NILAI_ASSERT(false, "Function not enabled!");
     return Result::NotEnabled;
 #    endif
 }

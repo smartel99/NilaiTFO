@@ -17,17 +17,19 @@
  * ------------------------------------------------------------------------------------
  */
 #    if defined(NILAI_USE_SPI)
-#        include "../defines/internal_config.h"
-#        include NILAI_HAL_HEADER
-#        if defined(HAL_SPI_MODULE_ENABLED)
-#            include "../defines/macros.h"
-#            include "../defines/misc.h"
-#            include "../defines/module.h"
+#        if defined(NILAI_TEST)
+#        else
+#            include "../defines/internal_config.h"
+#            include NILAI_HAL_HEADER
+#            if defined(HAL_SPI_MODULE_ENABLED)
+#                include "../defines/macros.h"
+#                include "../defines/misc.h"
+#                include "../defines/module.h"
 
-#            include "SPI/enums.h"
+#                include "SPI/enums.h"
 
-#            include <string>
-#            include <vector>
+#                include <string>
+#                include <vector>
 
 /*************************************************************************************************/
 /* Defines
@@ -73,12 +75,8 @@ public:
         return Receive(reinterpret_cast<uint8_t*>(outputData), 2);
     }
 
-    SPI::Status Transaction(const uint8_t* txData,
-                                   size_t         txLen,
-                                   uint8_t*       rxData,
-                                   size_t         rxLen);
-    SPI::Status Transaction(const std::vector<uint8_t>& txData,
-                                   std::vector<uint8_t>&       rxData);
+    SPI::Status Transaction(const uint8_t* txData, size_t txLen, uint8_t* rxData, size_t rxLen);
+    SPI::Status Transaction(const std::vector<uint8_t>& txData, std::vector<uint8_t>& rxData);
 
     inline SPI::Status TransactionByte(uint8_t txData, uint8_t* rxData)
     {
@@ -93,7 +91,7 @@ public:
 private:
     std::string        m_label;
     SPI_HandleTypeDef* m_handle;
-    SPI::Status m_status = SPI::Status::NONE;
+    SPI::Status        m_status = SPI::Status::NONE;
 
     constexpr static uint16_t TIMEOUT = 200;
 
@@ -102,9 +100,10 @@ private:
     bool WaitUntilNotBusy();
 };
 }    // namespace Nilai::Drivers
-#        else
-#            if WARN_MISSING_STM_DRIVERS
-#                warning NilaiTFO SPI module enabled, but HAL_SPI_USE_MODULE is not defined!
+#            else
+#                if WARN_MISSING_STM_DRIVERS
+#                    warning NilaiTFO SPI module enabled, but HAL_SPI_USE_MODULE is not defined!
+#                endif
 #            endif
 #        endif
 #    endif

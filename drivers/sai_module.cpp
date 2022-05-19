@@ -16,7 +16,7 @@
  */
 #include "sai_module.h"
 
-#if defined(NILAI_USE_SAI)
+#if defined(NILAI_USE_SAI) && !defined(NILAI_TEST)
 #    include "../Nilai.h"
 
 #    define SAI_INFO(msg, ...)  LOG_INFO("[%s]: " msg, m_label.c_str(), ##__VA_ARGS__)

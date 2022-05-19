@@ -15,13 +15,15 @@
 /***********************************************/
 /* Includes */
 #if defined(NILAI_USE_FILESYSTEM)
+#    if defined(NILAI_TEST)
 
-#    include "../defines/filesystem/error_codes.h"
-#    include "../defines/pin.h"
-#    include "ff.h"
-#    include "file.h"
+#    else
+#        include "../defines/filesystem/error_codes.h"
+#        include "../defines/pin.h"
+#        include "ff.h"
+#        include "file.h"
 
-#    include <string>
+#        include <string>
 
 
 namespace Nilai
@@ -86,6 +88,7 @@ const char* ResultToStr(Result res);
 /**
  * @}
  */
+#    endif
 #endif
 /* END OF FILE */
 #endif /* FILESYSTEM_H_ */

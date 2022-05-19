@@ -18,17 +18,18 @@
 #define NILAI_TAS5760_SWTAS5760_H
 
 #if defined(NILAI_USE_SW_TAS5760)
+#    if defined(NILAI_TEST)
+#    else
+#        include "tas5760_module.h"
 
-#    include "tas5760_module.h"
+#        include "sw_config.h"
 
-#    include "sw_config.h"
+#        if defined(NILAI_USE_EVENTS)
+#            include "../../defines/events/events.h"
+#        endif
 
-#    if defined(NILAI_USE_EVENTS)
-#        include "../../defines/events/events.h"
-#    endif
-
-#    include <functional>
-#    include <string>
+#        include <functional>
+#        include <string>
 
 namespace Nilai::Interfaces
 {
@@ -84,10 +85,10 @@ private:
     std::function<void()> m_faultFunction    = []() {};
     std::function<void()> m_hpChangeFunction = []() {};
 
-#    if defined(NILAI_USE_EVENTS)
-    Events::EventTypes m_faultEvent    = Events::EventTypes::Exti_Generic;
-    Events::EventTypes m_hpChangeEvent = Events::EventTypes::Exti_Generic;
-#    endif
+#        if defined(NILAI_USE_EVENTS)
+    Events::EventTypes    m_faultEvent       = Events::EventTypes::Exti_Generic;
+    Events::EventTypes    m_hpChangeEvent    = Events::EventTypes::Exti_Generic;
+#        endif
 
     bool m_isShutdown = false;
 
@@ -121,6 +122,7 @@ private:
     static constexpr uint32_t s_minErrorTime = 2;
 };
 }    // namespace Nilai::Interfaces
+#    endif
 #endif
 
 #endif    // NILAI_TAS5760_SWTAS5760_H

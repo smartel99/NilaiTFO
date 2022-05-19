@@ -18,11 +18,15 @@
 #include "../../../defines/internal_config.h"
 #include NILAI_HAL_HEADER
 
+#include <cstdint>
+
 namespace Nilai::System
 {
 void Reset()
 {
+#if !defined(NILAI_TEST)
     HAL_NVIC_SystemReset();
+#endif
 }
 
 bool IsDebuggerConnected()

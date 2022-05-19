@@ -14,11 +14,15 @@
  * You should have received a copy of the GNU General Public License along with this program. If
  * not, see <a href=https://www.gnu.org/licenses/>https://www.gnu.org/licenses/<a/>.
  */
-#ifndef NILAI_ERRORCODES_H
-#define NILAI_ERRORCODES_H
+#ifndef NILAI_FILESYSTEM_ERRORCODES_H
+#define NILAI_FILESYSTEM_ERRORCODES_H
 
 #if defined(NILAI_USE_FILESYSTEM)
-#    include "ff.h"
+#    if defined(NILAI_TEST)
+
+#    else
+#        include "ff.h"
+
 namespace Nilai::Filesystem
 {
 
@@ -45,7 +49,8 @@ enum class Result
     TooManyOpenFiles = FR_TOO_MANY_OPEN_FILES,
     InvalidParameter = FR_INVALID_PARAMETER,
 };
-}
+}    // namespace Nilai::Filesystem
+#    endif
 #endif
 
-#endif    // NILAI_ERRORCODES_H
+#endif    // NILAI_FILESYSTEM_ERRORCODES_H

@@ -18,10 +18,12 @@
 #define NILAI_SPI_ENUMS_H
 
 #if defined(NILAI_USE_SPI)
-#    include "../../defines/internal_config.h"
-#    include NILAI_HAL_HEADER
+#    if defined(NILAI_TEST)
+#    else
+#        include "../../defines/internal_config.h"
+#        include NILAI_HAL_HEADER
 
-#    include <type_traits>
+#        include <type_traits>
 
 namespace Nilai::SPI
 {
@@ -47,10 +49,10 @@ enum class Status
     FLAG = 0x00000020U,
     /*!< Error during SPI Abort procedure */
     ABORT = 0x00000040U,
-#    if USE_HAL_SPI_REGISTER_CALLBACKS == 1
+#        if USE_HAL_SPI_REGISTER_CALLBACKS == 1
     /*!< Invalid Callback error  */
     SPI_ERROR_INVALID_CALLBACK = 0x00000080U,
-#    endif /* USE_HAL_SPI_REGISTER_CALLBACKS */
+#        endif /* USE_HAL_SPI_REGISTER_CALLBACKS */
     /*!< Module is not enabled            */
     NOT_INIT = 0x00000100U,
     /*!< Bad initialization               */
@@ -104,6 +106,7 @@ enum class SectionState
     COMPLETE,
 };
 }    // namespace Nilai::SPI
+#    endif
 #endif
 
 #endif    // NILAI_SPI_ENUMS_H

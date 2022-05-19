@@ -18,13 +18,15 @@
 #define NILAI_RTC_STRUCTS_H
 
 #if defined(NILAI_USE_RTC)
-#    include "../../defines/internal_config.h"
-#    include NILAI_HAL_HEADER
+#    if defined(NILAI_TEST)
+#    else
+#        include "../../defines/internal_config.h"
+#        include NILAI_HAL_HEADER
 
-#    include "enums.h"
+#        include "enums.h"
 
-#    include <cstdint>
-#    include <string>
+#        include <cstdint>
+#        include <string>
 
 namespace Nilai::Rtc
 {
@@ -77,13 +79,14 @@ struct Timestamp
 
     Timestamp() = default;
     Timestamp(const Date& d, const Time& t) : date(d), time(t) {}
-#    if defined(NILAI_RTC_USE_STL)
+#        if defined(NILAI_RTC_USE_STL)
     Timestamp(size_t epoch);
 
     [[nodiscard]] size_t ToEpoch() const;
-#    endif
+#        endif
 };
 }    // namespace Nilai::Rtc
+#    endif
 #endif
 
 #endif    // NILAI_RTC_STRUCTS_H
