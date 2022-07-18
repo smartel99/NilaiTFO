@@ -31,8 +31,7 @@
 #                include "I2C/enums.h"
 #                include "I2C/structs.h"
 
-#                include <string>
-#                include <utility>
+#                include <string_view>
 #                include <vector>
 
 // TODO Events for I2cModule
@@ -41,12 +40,18 @@ namespace Nilai::Drivers
 class I2cModule : public Module
 {
 public:
-    I2cModule(I2C_HandleTypeDef* handle, std::string label);
-    ~I2cModule() override = default;
+    constexpr I2cModule() noexcept = default;
+    constexpr I2cModule(I2C_HandleTypeDef* handle, std::string_view label) noexcept
+    : m_handle(handle), m_label(label)
+    {
+        NILAI_ASSERT(handle != nullptr, "In I2cModule: handle is NULL!");
+    }
 
-    bool                             DoPost() override;
-    void                             Run() override;
-    [[nodiscard]] const std::string& GetLabel() const { return m_label; }
+    constexpr ~I2cModule() override = default;
+
+    bool                                     DoPost() override;
+    void                                     Run() override;
+    [[nodiscard]] constexpr std::string_view GetLabel() const { return m_label; }
 
     void TransmitFrame(uint8_t addr, const uint8_t* data, size_t len);
     void TransmitFrame(uint8_t addr, const std::vector<uint8_t>& data)
@@ -85,7 +90,7 @@ public:
 
 protected:
     I2C_HandleTypeDef* m_handle = nullptr;
-    std::string        m_label;
+    std::string_view   m_label;
 
     static constexpr uint16_t TIMEOUT = 200;
 };

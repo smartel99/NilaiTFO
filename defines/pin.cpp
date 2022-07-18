@@ -18,11 +18,14 @@
 
 #include "internal_config.h"
 
+#include "macros.h"
+
 namespace Nilai
 {
 
 void Pin::Set(bool state) const
 {
+    NILAI_ASSERT(port != nullptr, "Port is null!");
     /**
      * The BSSR register is split into two 16-bits part:
      *  - The lower 16 bits are used to set a pin
@@ -41,6 +44,7 @@ void Pin::Set(bool state) const
 }
 bool Pin::Get() const
 {
+    NILAI_ASSERT(port != nullptr, "Port is null!");
     return (port->NILAI_GPIO_IDR_REG & pin) != 0;
 }
 

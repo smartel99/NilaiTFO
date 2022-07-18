@@ -23,6 +23,7 @@
 #    include "types.h"
 
 #    include <cstdint>
+#    include <functional>
 
 namespace Nilai::Events
 {
@@ -38,6 +39,12 @@ struct Event
     EventTypes      Type;
     EventCategories Category;
 };
+
+/**
+ * @brief A callback function should return true if the event should not be propagated further,
+ * i.e if the following callbacks in the list should not be called after this one.
+ */
+using EventFunction = std::function<bool(Event* e)>;
 }    // namespace Nilai::Events
 #endif
 

@@ -94,6 +94,10 @@ private:
     static void AdcModuleErrorCallback(ADC_HandleTypeDef* adc);
 #            endif
 
+#if defined(NILAI_ADC_STATUS_STRING)
+    static constexpr const char* StatusToStr(uint32_t code);
+#endif
+
 protected:
     ADC_HandleTypeDef*    m_adc         = nullptr;
     std::vector<uint32_t> m_channelBuff = {};

@@ -1,7 +1,7 @@
 /**
- * @file    SmartPointers.h
+ * @file    group.h
  * @author  Samuel Martel
- * @date    2022-05-04
+ * @date    2022-07-12
  * @brief
  *
  * @copyright
@@ -14,30 +14,22 @@
  * You should have received a copy of the GNU General Public License along with this program. If
  * not, see <a href=https://www.gnu.org/licenses/>https://www.gnu.org/licenses/<a/>.
  */
-#ifndef NILAI_SMARTPOINTERS_H
-#define NILAI_SMARTPOINTERS_H
 
-#include <memory>
 
-namespace Nilai
+#ifndef GUARD_AT24QT2120_REGISTERS_GROUP_H
+#define GUARD_AT24QT2120_REGISTERS_GROUP_H
+
+#if defined(NILAI_USE_AT24QT2120)
+#    include <cstdint>
+namespace Nilai::Interfaces::AT24QT2120
 {
-template<typename T>
-using Ref = std::shared_ptr<T>;
-
-template<typename T, typename... Args>
-constexpr Ref<T> CreateRef(Args&&... args)
+enum class Group
 {
-    return std::make_shared<T>(std::forward<Args>(args)...);
-}
-
-template<typename T>
-using Ptr = std::unique_ptr<T>;
-
-template<typename T, typename... Args>
-constexpr Ptr<T> CreatePtr(Args&&... args)
-{
-    return std::make_unique<T>(std::forward<Args>(args)...);
-}
-}    // namespace Nilai
-
-#endif    // NILAI_SMARTPOINTERS_H
+    Group0 = 0,
+    Group1,
+    Group2,
+    Group3
+};
+}    // namespace Nilai::Interfaces::AT24QT2120
+#endif
+#endif    // GUARD_AT24QT2120_REGISTERS_GROUP_H

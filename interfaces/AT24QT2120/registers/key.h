@@ -1,7 +1,7 @@
 /**
- * @file    SmartPointers.h
+ * @file    key.h
  * @author  Samuel Martel
- * @date    2022-05-04
+ * @date    2022-07-12
  * @brief
  *
  * @copyright
@@ -14,30 +14,29 @@
  * You should have received a copy of the GNU General Public License along with this program. If
  * not, see <a href=https://www.gnu.org/licenses/>https://www.gnu.org/licenses/<a/>.
  */
-#ifndef NILAI_SMARTPOINTERS_H
-#define NILAI_SMARTPOINTERS_H
 
-#include <memory>
+#ifndef GUARD_AT24QT2120_REGISTERS_KEY_H
+#define GUARD_AT24QT2120_REGISTERS_KEY_H
 
-namespace Nilai
+#if defined(NILAI_USE_AT24QT2120)
+#    include <cstdint>
+namespace Nilai::Interfaces::AT24QT2120
 {
-template<typename T>
-using Ref = std::shared_ptr<T>;
-
-template<typename T, typename... Args>
-constexpr Ref<T> CreateRef(Args&&... args)
+enum class Keys
 {
-    return std::make_shared<T>(std::forward<Args>(args)...);
-}
-
-template<typename T>
-using Ptr = std::unique_ptr<T>;
-
-template<typename T, typename... Args>
-constexpr Ptr<T> CreatePtr(Args&&... args)
-{
-    return std::make_unique<T>(std::forward<Args>(args)...);
-}
-}    // namespace Nilai
-
-#endif    // NILAI_SMARTPOINTERS_H
+    Key0 = 0,
+    Key1,
+    Key2,
+    Key3,
+    Key4,
+    Key5,
+    Key6,
+    Key7,
+    Key8,
+    Key9,
+    Key10,
+    Key11,
+};
+}    // namespace Nilai::Interfaces::AT24QT2120
+#endif
+#endif    // GUARD_AT24QT2120_REGISTERS_KEY_H

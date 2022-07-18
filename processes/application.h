@@ -47,14 +47,7 @@ class Application
 
         operator bool() const { return Mod != nullptr; }
     };
-#    if defined(NILAI_USE_EVENTS)
-public:
-    /**
-     * @brief A callback function should return true if the event should not be propagated further,
-     * i.e if the following callbacks in the list should not be called after this one.
-     */
-    using CallbackFunc = std::function<bool(Events::Event*)>;
-#    endif
+
 public:
     Application();
     virtual ~Application() = default;
@@ -97,7 +90,7 @@ public:
      * propagated further.
      * @return The ID of the callback. This ID is used to unregister the callback.
      */
-    size_t RegisterEventCallback(Events::EventTypes event, const CallbackFunc& cb);
+    size_t RegisterEventCallback(Events::EventTypes event, const Events::EventFunction& cb);
 
     /**
      * @brief Unregisters a callback that has previously been registered to an event.
@@ -133,8 +126,8 @@ private:
 protected:
     struct CallbackSlot
     {
-        CallbackFunc F    = [](Events::Event*) { return false; };
-        bool         Used = false;
+        Events::EventFunction F    = [](Events::Event*) { return false; };
+        bool                  Used = false;
     };
 #        if NILAI_EVENTS_MAX_CALLBACKS == 1
     using EventCallbacks = CallbackSlot;
@@ -147,7 +140,7 @@ protected:
     std::array<EventCallbacks, s_numOfEvents> m_callbacks = {};
 
 private:
-    static size_t InsertCallback(EventCallbacks& events, const CallbackFunc& cb);
+    static size_t InsertCallback(EventCallbacks& events, const Events::EventFunction& cb);
 #    endif
 
     static Application* s_instance;

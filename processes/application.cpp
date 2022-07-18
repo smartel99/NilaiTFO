@@ -38,8 +38,7 @@ Application::Application()
 }
 
 #if defined(NILAI_USE_EVENTS)
-size_t Application::RegisterEventCallback(Events::EventTypes               event,
-                                          const Application::CallbackFunc& cb)
+size_t Application::RegisterEventCallback(Events::EventTypes event, const Events::EventFunction& cb)
 {
     NILAI_ASSERT(cb, "Callback is not valid!");
 
@@ -59,8 +58,8 @@ void Application::UnregisterEventCallback(Events::EventTypes event, [[maybe_unus
 #    endif
 }
 
-size_t Application::InsertCallback(Application::EventCallbacks&     events,
-                                   const Application::CallbackFunc& cb)
+size_t Application::InsertCallback(Application::EventCallbacks& events,
+                                   const Events::EventFunction& cb)
 {
 #    if NILAI_EVENTS_MAX_CALLBACKS == 1
     if (!events.Used)
@@ -116,6 +115,7 @@ void Application::DispatchEvent(Events::Event* data)
 
 void Application::OnRun()
 {
+    NILAI_PROFILE_FUNCTION();
     for (auto& module : m_modules)
     {
         module.Mod->Run();

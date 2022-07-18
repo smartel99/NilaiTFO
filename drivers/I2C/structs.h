@@ -14,8 +14,8 @@
  * You should have received a copy of the GNU General Public License along with this program. If
  * not, see <a href=https://www.gnu.org/licenses/>https://www.gnu.org/licenses/<a/>.
  */
-#ifndef NILAI_STRUCTS_H
-#define NILAI_STRUCTS_H
+#ifndef NILAI_DRIVERS_I2C_STRUCTS_H
+#define NILAI_DRIVERS_I2C_STRUCTS_H
 
 #if defined(NILAI_USE_I2C)
 
@@ -24,11 +24,17 @@
 
 namespace Nilai::I2C
 {
+/**
+ * I2C Frame to be sent or received.
+ */
 struct Frame
 {
-    uint8_t              deviceAddress   = 0;
-    uint8_t              registerAddress = 0;
-    std::vector<uint8_t> data            = {};
+    //! 8-bit I2C Address of the device.
+    uint8_t deviceAddress = 0;
+    //! Optional, address of the register to write to/read from.
+    uint8_t registerAddress = 0;
+    //! Data that was exchanged with the device.
+    std::vector<uint8_t> data = {};
 
     Frame() = default;
     Frame(uint8_t devAddr, std::vector<uint8_t> pData = std::vector<uint8_t>())
@@ -43,4 +49,4 @@ struct Frame
 }    // namespace Nilai::I2C
 #endif
 
-#endif    // NILAI_STRUCTS_H
+#endif    // NILAI_DRIVERS_I2C_STRUCTS_H

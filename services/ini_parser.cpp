@@ -16,11 +16,13 @@
  */
 #include "ini_parser.h"
 
+#include <utility>
+
 #if defined(NILAI_USE_INI_PARSER)
 #    include "../vendor/inih/ini.h"
 
 #    include "filesystem.h"
-#    include "logger.hpp"
+#    include "logger.h"
 
 static std::string GetSectionFromKey(const std::string& k);
 static std::string GetNameFromKey(const std::string& k);
@@ -37,7 +39,7 @@ IniParser::IniParser(std::string fp) : m_fp(std::move(fp))
         LOG_ERROR("Unable to open '%s': (%i) %s",
                   m_fp.c_str(),
                   (int)f.GetError(),
-                  ResultToStr(f.GetError()).c_str());
+                  ResultToStr(f.GetError()));
         // Unable to open the file.
         m_error = -1;
         return;
@@ -69,7 +71,7 @@ void IniParser::Save()
         LOG_ERROR("Unable to open '%s': (%i) %s",
                   m_fp.c_str(),
                   (int)f.GetError(),
-                  ResultToStr(f.GetError()).c_str());
+                  ResultToStr(f.GetError()));
         return;
     }
 
@@ -79,7 +81,7 @@ void IniParser::Save()
         std::string K;
         std::string V;
 
-        Kvp(const std::string& k, const std::string& v) : K(k), V(v) {}
+        Kvp(std::string k, std::string v) : K(std::move(k)), V(std::move(v)) {}
     };
 
     std::map<std::string, std::vector<Kvp>> data;

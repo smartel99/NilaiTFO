@@ -153,7 +153,11 @@ void AdcModule::Run()
 {
     if (m_lastError != 0)
     {
+#    if defined(NILAI_ADC_STATUS_STRING)
+        ADC_ERROR("An ADC error occurred (%#08x): %s", m_lastError, StatusToStr(m_lastError));
+#    else
         ADC_ERROR("An error occurred: %#08x", m_lastError);
+#    endif
         m_lastError = 0;
         Start();
     }
@@ -276,10 +280,6 @@ extern "C" void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* adc)
 {
     AdcModule* module = FindModule(adc);
     NILAI_ASSERT(module != nullptr, "Module is null!");
-    //    if (module->m_channelBuff.size() != 4)
-    //    {
-    //        NILAI_BREAKPOINT;
-    //    }
     module->ConvCpltCallback();
 }
 
@@ -299,5 +299,22 @@ extern "C" void HAL_ADC_ErrorCallback(ADC_HandleTypeDef* adc)
         module->ErrorCallback();
     }
 }
+
+#    if defined(NILAI_ADC_STATUS_STRING)
+constexpr const char* AdcModule::StatusToStr(uint32_t code)
+{
+    switch (code)
+    {
+        case (HAL_ADC_ERROR_INTERNAL): return "Internal Error";
+        case (HAL_ADC_ERROR_OVR): return "Overrun";
+        case (HAL_ADC_ERROR_DMA): return "DMA Error";
+#        if defined(NILAI_ADC_REGISTER_CALLBACKS)
+        case (HAL_ADC_ERROR_INVALID_CALLBACK): return "Invalid callback";
+#        endif
+        default: return "Unknown";
+    }
+}
+
+#    endif
 }    // namespace Nilai::Drivers
 #endif

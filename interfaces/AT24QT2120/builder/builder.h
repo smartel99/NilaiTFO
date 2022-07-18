@@ -1,7 +1,7 @@
 /**
- * @file    SmartPointers.h
+ * @file    builder.h
  * @author  Samuel Martel
- * @date    2022-05-04
+ * @date    2022-07-12
  * @brief
  *
  * @copyright
@@ -14,30 +14,27 @@
  * You should have received a copy of the GNU General Public License along with this program. If
  * not, see <a href=https://www.gnu.org/licenses/>https://www.gnu.org/licenses/<a/>.
  */
-#ifndef NILAI_SMARTPOINTERS_H
-#define NILAI_SMARTPOINTERS_H
 
-#include <memory>
+#ifndef GUARD_AT24QT2120_BUILDER_H
+#define GUARD_AT24QT2120_BUILDER_H
 
-namespace Nilai
+#if defined(NILAI_USE_AT24QT2120)
+
+#    include "../../../defines/pin.h"
+#    include "../../../drivers/i2c_module.h"
+
+#    include "../registers/registers.h"
+
+#    include "vendor/NilaiTFO/interfaces/AT24QT2120/default_values.h"
+
+#    include "vendor/NilaiTFO/interfaces/AT24QT2120/at24qt2120.h"
+
+namespace Nilai::Interfaces
 {
-template<typename T>
-using Ref = std::shared_ptr<T>;
+class At24Qt2120;
 
-template<typename T, typename... Args>
-constexpr Ref<T> CreateRef(Args&&... args)
-{
-    return std::make_shared<T>(std::forward<Args>(args)...);
-}
+}    // namespace Nilai::Interfaces
 
-template<typename T>
-using Ptr = std::unique_ptr<T>;
+#endif
 
-template<typename T, typename... Args>
-constexpr Ptr<T> CreatePtr(Args&&... args)
-{
-    return std::make_unique<T>(std::forward<Args>(args)...);
-}
-}    // namespace Nilai
-
-#endif    // NILAI_SMARTPOINTERS_H
+#endif    // GUARD_AT24QT2120_BUILDER_H

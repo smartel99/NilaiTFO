@@ -1,7 +1,7 @@
 /**
- * @file    SmartPointers.h
+ * @file    registers.h
  * @author  Samuel Martel
- * @date    2022-05-04
+ * @date    2022-07-12
  * @brief
  *
  * @copyright
@@ -14,30 +14,22 @@
  * You should have received a copy of the GNU General Public License along with this program. If
  * not, see <a href=https://www.gnu.org/licenses/>https://www.gnu.org/licenses/<a/>.
  */
-#ifndef NILAI_SMARTPOINTERS_H
-#define NILAI_SMARTPOINTERS_H
 
-#include <memory>
+#ifndef GUARD_AT24QT2120_REGISTERS_H
+#define GUARD_AT24QT2120_REGISTERS_H
 
-namespace Nilai
-{
-template<typename T>
-using Ref = std::shared_ptr<T>;
+#if defined(NILAI_USE_AT24QT2120)
+#    include "map.h"
 
-template<typename T, typename... Args>
-constexpr Ref<T> CreateRef(Args&&... args)
-{
-    return std::make_shared<T>(std::forward<Args>(args)...);
-}
+#    include "key.h"
 
-template<typename T>
-using Ptr = std::unique_ptr<T>;
+#    include "detection_status.h"
+#    include "firmware_version.h"
+#    include "group.h"
+#    include "key_options.h"
+#    include "key_status.h"
+#    include "pulse_scale.h"
+#    include "slider_options.h"
 
-template<typename T, typename... Args>
-constexpr Ptr<T> CreatePtr(Args&&... args)
-{
-    return std::make_unique<T>(std::forward<Args>(args)...);
-}
-}    // namespace Nilai
-
-#endif    // NILAI_SMARTPOINTERS_H
+#endif
+#endif    // GUARD_AT24QT2120_REGISTERS_H

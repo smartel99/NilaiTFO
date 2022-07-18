@@ -21,18 +21,11 @@
 #    include "../services/logger.h"
 #    include <utility>
 
-#    define I2C_INFO(msg, ...)  LOG_INFO("[%s]: " msg, m_label.c_str(), ##__VA_ARGS__)
-#    define I2C_ERROR(msg, ...) LOG_ERROR("[%s]: " msg, m_label.c_str(), ##__VA_ARGS__)
+#    define I2C_INFO(msg, ...)  LOG_INFO("[%s]: " msg, m_label.data(), ##__VA_ARGS__)
+#    define I2C_ERROR(msg, ...) LOG_ERROR("[%s]: " msg, m_label.data(), ##__VA_ARGS__)
 
 namespace Nilai::Drivers
 {
-I2cModule::I2cModule(I2C_HandleTypeDef* handle, std::string label)
-: m_handle(handle), m_label(std::move(label))
-{
-    NILAI_ASSERT(handle != nullptr, "In I2cModule: handle is NULL!");
-    I2C_INFO("Initialized");
-}
-
 /**
  * If the initialization passed, the POST passes.
  * @return

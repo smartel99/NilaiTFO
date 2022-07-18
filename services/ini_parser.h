@@ -22,8 +22,8 @@
 #        error The filesystem module must be used!
 #    else
 
-#        include "../defines/IniParser/Concepts.h"
-#        include "../defines/IniParser/Types.h"
+#        include "../defines/ini_parser/concepts.h"
+#        include "../defines/ini_parser/types.h"
 
 #        include <map>
 #        include <string>

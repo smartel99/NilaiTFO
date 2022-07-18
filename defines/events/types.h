@@ -17,6 +17,7 @@
 #ifndef NILAI_EVENT_TYPES_H
 #define NILAI_EVENT_TYPES_H
 
+
 #if defined(NILAI_USE_EVENTS)
 namespace Nilai::Events
 {
@@ -192,7 +193,150 @@ enum class EventCategories
 #    if defined(NILAI_USE_SAI_EVENTS)
     Sai,    //! SAI Event.
 #    endif
+
+    //! Number of Categories, should always be last.
+    Count
 };
+
+inline constexpr bool IsInCategory(EventTypes t, EventCategories c)
+{
+    EventCategories typeCategory = EventCategories::Count;
+    switch (t)
+    {
+        case EventTypes::Exti_Generic:
+        case EventTypes::Exti0:
+        case EventTypes::Exti1:
+        case EventTypes::Exti2:
+        case EventTypes::Exti3:
+        case EventTypes::Exti4:
+        case EventTypes::Exti5:
+        case EventTypes::Exti6:
+        case EventTypes::Exti7:
+        case EventTypes::Exti8:
+        case EventTypes::Exti9:
+        case EventTypes::Exti10:
+        case EventTypes::Exti11:
+        case EventTypes::Exti12:
+        case EventTypes::Exti13:
+        case EventTypes::Exti14:
+        case EventTypes::Exti15: typeCategory = EventCategories::External; break;
+
+        case EventTypes::DataEvent: typeCategory = EventCategories::Data; break;
+
+        case EventTypes::UserEvent1:
+        case EventTypes::UserEvent2:
+        case EventTypes::UserEvent3:
+        case EventTypes::UserEvent4:
+        case EventTypes::UserEvent5:
+        case EventTypes::UserEvent6:
+        case EventTypes::UserEvent7:
+        case EventTypes::UserEvent8:
+        case EventTypes::UserEvent9:
+        case EventTypes::UserEvent10: typeCategory = EventCategories::UserEvent; break;
+
+#    if defined(NILAI_USE_TIMER_EVENTS)
+        case EventTypes::Tim_Generic:
+        case EventTypes::Tim_PeriodElapsed:
+        case EventTypes::Tim_OC_DelayElapsed:
+        case EventTypes::Tim_IC_Capture:
+        case EventTypes::Tim_PWM_PulseFinished:
+        case EventTypes::Tim_Trigger:
+        case EventTypes::Tim_Error: typeCategory = EventCategories::Timer; break;
+#    endif
+
+#    if defined(NILAI_USE_I2C_EVENTS)
+        case EventTypes::I2C_Generic:
+        case EventTypes::I2C_MasterTxCplt:
+        case EventTypes::I2C_MasterRxCplt:
+        case EventTypes::I2C_SlaveTxCplt:
+        case EventTypes::I2C_SlaveRxCplt:
+        case EventTypes::I2C_Addr:
+        case EventTypes::I2C_ListenCplt:
+        case EventTypes::I2C_MemTxCplt:
+        case EventTypes::I2C_MemRxCplt:
+        case EventTypes::I2C_Error:
+        case EventTypes::I2C_AbortCplt: typeCategory = EventCategories::I2C; break;
+#    endif
+
+#    if defined(NILAI_USE_I2S_EVENTS)
+        case EventTypes::I2S_Generic:
+        case EventTypes::I2S_TxHalfCplt:
+        case EventTypes::I2S_TxCplt:
+        case EventTypes::I2S_RxHalfCplt:
+        case EventTypes::I2S_RxCplt:
+        case EventTypes::I2S_Error: typeCategory = EventCategories::I2S; break;
+#    endif
+
+#    if defined(NILAI_USE_RTC_EVENTS)
+        case EventTypes::RTC_Generic:
+        case EventTypes::RTC_AlarmAEvent: typeCategory = EventCategories::Rtc; break;
+#    endif
+
+#    if defined(NILAI_USE_SPI_EVENTS)
+        case EventTypes::SPI_Generic:
+        case EventTypes::SPI_TxCplt:
+        case EventTypes::SPI_RxCplt:
+        case EventTypes::SPI_TxRxCplt:
+        case EventTypes::SPI_TxHalfCplt:
+        case EventTypes::SPI_RxHalfCplt:
+        case EventTypes::SPI_TxRxHalfCplt:
+        case EventTypes::SPI_Error:
+        case EventTypes::SPI_AbortCplt: typeCategory = EventCategories::Spi; break;
+#    endif
+
+#    if defined(NILAI_USE_UART_EVENTS)
+        case EventTypes::UART_Generic:
+        case EventTypes::UART_TxHalfCplt:
+        case EventTypes::UART_TxCplt:
+        case EventTypes::UART_RxHalfCplt:
+        case EventTypes::UART_RxCplt:
+        case EventTypes::UART_Error:
+        case EventTypes::UART_AbortCplt:
+        case EventTypes::UART_AbortTxCplt:
+        case EventTypes::UART_AbortRxCplt:
+        case EventTypes::UART_RxEvent: typeCategory = EventCategories::Uart; break;
+#    endif
+
+#    if defined(NILAI_USE_ADC_EVENTS)
+        case EventTypes::ADC_Generic:
+        case EventTypes::ADC_ConvCplt:
+        case EventTypes::ADC_ConvHalfCplt:
+        case EventTypes::ADC_LevelOutOfWindow:
+        case EventTypes::ADC_Error: typeCategory = EventCategories::Adc; break;
+#    endif
+
+#    if defined(NILAI_USE_CAN_EVENTS)
+        case EventTypes::CAN_Generic:
+        case EventTypes::CAN_TxMailbox0Cplt:
+        case EventTypes::CAN_TxMailbox1Cplt:
+        case EventTypes::CAN_TxMailbox2Cplt:
+        case EventTypes::CAN_TxMailbox0AbortCplt:
+        case EventTypes::CAN_TxMailbox1AbortCplt:
+        case EventTypes::CAN_TxMailbox2AbortCplt:
+        case EventTypes::CAN_RxFifo0MsgPending:
+        case EventTypes::CAN_RxFifo0Full:
+        case EventTypes::CAN_RxFifo1MsgPending:
+        case EventTypes::CAN_RxFifo1Full:
+        case EventTypes::CAN_Sleep:
+        case EventTypes::CAN_WakeUpFromRx:
+        case EventTypes::CAN_Error: typeCategory = EventCategories::Can; break;
+#    endif
+
+#    if defined(NILAI_USE_SAI_EVENTS)
+        case EventTypes::SAI_Generic:
+        case EventTypes::SAI_TxHalfCplt:
+        case EventTypes::SAI_TxCplt:
+        case EventTypes::SAI_RxHalfCplt:
+        case EventTypes::SAI_RxCplt:
+        case EventTypes::SAI_Error: typeCategory = EventCategories::Sai; break;
+#    endif
+
+        case EventTypes::Count:
+        default: typeCategory = EventCategories::Count; break;
+    }
+
+    return c == typeCategory;
+}
 }    // namespace Nilai::Events
 #endif
 

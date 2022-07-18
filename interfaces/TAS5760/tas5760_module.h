@@ -18,7 +18,7 @@
 #define NILAI_TAS5760_TAS5760MODULE_H
 
 #include "../../defines/internal_config.h"
-
+#define NILAI_USE_TAS5760
 #if defined(NILAI_USE_TAS5760)
 
 #    if !defined(NILAI_USE_I2S) && !defined(NILAI_USE_SAI)

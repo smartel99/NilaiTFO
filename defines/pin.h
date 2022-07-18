@@ -22,6 +22,7 @@
 #        include "../test/Mocks/HALMocks/stm32_mock_hal.h"
 #    endif
 
+#    include <bit>
 #    include <cstdint>
 
 namespace Nilai
@@ -37,8 +38,7 @@ struct Pin
     //! The default pin, representing "no pin".
     static constexpr uint16_t s_defaultPin = 0;
 
-    // Use GPIOA as a default port to avoid crashes with default-constructed pins.
-    GPIO_TypeDef* port = GPIOA;
+    GPIO_TypeDef* port = nullptr;
     uint16_t      pin  = s_defaultPin;
 
     /**
@@ -74,6 +74,9 @@ struct Pin
      * @returns True if the pin is default-constructed.
      */
     [[nodiscard]] bool IsDefault() const { return pin == s_defaultPin; }
+
+    constexpr Pin(GPIO_TypeDef* _port, uint16_t _pin) : port(_port), pin(_pin) {}
+    constexpr Pin() = default;
 };
 
 }    // namespace Nilai

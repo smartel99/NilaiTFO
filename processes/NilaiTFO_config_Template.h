@@ -88,15 +88,15 @@
  */
 #    define NILAI_EVENTS_MAX_CALLBACKS 1
 
-#    define NILAI_USE_ADC_EVENTS
+//#    define NILAI_USE_ADC_EVENTS
 //#    define NILAI_USE_CAN_EVENTS
-#    define NILAI_USE_I2C_EVENTS
-#    define NILAI_USE_I2S_EVENTS
-#    define NILAI_USE_RTC_EVENTS
-#    define NILAI_USE_SAI_EVENTS
-#    define NILAI_USE_SPI_EVENTS
-#    define NILAI_USE_TIMER_EVENTS
-#    define NILAI_USE_UART_EVENTS
+//#    define NILAI_USE_I2C_EVENTS
+//#    define NILAI_USE_I2S_EVENTS
+//#    define NILAI_USE_RTC_EVENTS
+//#    define NILAI_USE_SAI_EVENTS
+//#    define NILAI_USE_SPI_EVENTS
+//#    define NILAI_USE_TIMER_EVENTS
+//#    define NILAI_USE_UART_EVENTS
 #endif
 
 /******************************************************************************/
@@ -118,6 +118,7 @@
 
 // Interfaces
 //#define NILAI_USE_ADS
+//#define NILAI_USE_AT24QT2120
 //#define NILAI_USE_DS2484
 //#define NILAI_USE_ESP32
 //#define NILAI_USE_HEARTBEAT
@@ -181,6 +182,16 @@
  */
 //#define NILAI_FS_STATUS_STRING
 #endif
+
+#if defined(NILAI_USE_ADC)
+// --- ADC settings.
+
+/**
+ * @brief Enables the interpretation of error codes for the ADC.
+ */
+#    define NILAI_ADC_STATUS_STRING
+#endif
+
 /**
  * @}
  */
