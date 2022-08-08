@@ -1,9 +1,5 @@
 /**
- * @addtogroup defines
- * @{
- * @addtogroup bitManipulations
- * @{
- * @file    bitManipulations.hpp
+ * @file    bit_manipulations.h
  * @author  Pascal-Emmanuel Lachance
  * @date    2019/11/24  -  20:14
  *
@@ -133,7 +129,6 @@ uint64_t combine(const uint8_t* array, uint8_t length)
  * @param   src:  Pointer to a source value
  * @param   len:  Number of bytes to copy
  * @param   dest: Destination array to copy the values into
- * @retval  None
  */
 constexpr void arraynificator(void* src, size_t len, void* dest)
 {
@@ -151,8 +146,4 @@ constexpr void arraynificator(void* src, size_t len, void* dest)
 
 /*************************************************************************************************/
 }    // namespace Nilai
-/**
- * @}
- * @}
- */
 /* ----- END OF FILE ----- */

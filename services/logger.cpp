@@ -1,7 +1,4 @@
 /**
- * @addtogroup logger.cpp
- * @{
- *******************************************************************************
  * @file	logger.cpp
  * @author	Samuel Martel
  * @brief

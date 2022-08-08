@@ -1,8 +1,6 @@
 ﻿/**
  ******************************************************************************
- * @addtogroup max14763Module
- * @{
- * @file    max14763Module
+ * @file    max14763_module.h
  * @author  Lou-Gabriel Gaucher
  * @brief   Header for the max14763Module module.
  *
@@ -61,7 +59,5 @@ private:
 /* Have a wonderful day :) */
 #    endif /* _max14763Module */
 #endif
-/**
- * @}
- */
+
 /****** END OF FILE ******/

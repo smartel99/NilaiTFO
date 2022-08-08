@@ -1,7 +1,4 @@
 /**
- * @addtogroup filesystem.h
- * @{
- *******************************************************************************
  * @file	filesystem.h
  * @author	Samuel Martel
  * @brief
@@ -85,9 +82,6 @@ const char* ResultToStr(Result res);
 }    // namespace Nilai
 
 
-/**
- * @}
- */
 #    endif
 #endif
 /* END OF FILE */

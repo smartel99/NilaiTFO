@@ -1,8 +1,5 @@
 /**
- * @addtogroup NilaiTFOConfig_Template.h
- * @{
- *******************************************************************************
- * @file    NilaiTFOConfig_Template.h
+ * @file    NilaiTFO_config_Template.h
  * @author  Samuel Martel
  * @brief
  * Created on: 2020/10/06
@@ -22,23 +19,23 @@
 /******************************************************************************/
 /* [SECTION]: Configuration                                                   */
 /******************************************************************************/
-/**
- * @brief Toggles the profiling of code and output on SWO.
+/*
+ * Toggles the profiling of code and output on SWO.
  */
 #define NILAI_ENABLE_PROFILING
 
-/**
- * @brief Sets the maximum number of events that can be profiled simultaneously.
+/*
+ * Sets the maximum number of events that can be profiled simultaneously.
  */
 #define NILAI_MAX_PROFILE_EVENTS 20
 
-/**
+/*
  * Warn if a module is included but the STM32 drivers are missing.
  * Set to 1 to enable, 0 to disable
  */
 #define WARN_MISSING_STM_DRIVERS 1
 
-/**
+/*
  * Select the STM32 you are using.
  * This is extremely important for the activated modules that depends on HAL functions.
  * Obviously, don't try enabling more than one at the same time, that won't work.
@@ -46,20 +43,20 @@
 //#define NILAI_USES_STM32F4xx
 //#define NILAI_USES_STM32L4xx
 
-/**
+/*
  * The maximum amount of modules that can operate simultaneously in the application.
  * Default: 16
  */
 #define NILAI_MAX_MODULE_AMOUNT 16
 
-/**
+/*
  * Select if the logger should use the system time or the RTC time.
  * To use the RTC, the RTC module must be enabled.
  * Uncomment to use the RTC, comment to use the system clock.
  */
 #define NILAI_LOGGER_USE_RTC
 
-/**
+/*
  * Toggle each level of logging.
  * To enable a level of logging, uncomment the definition, otherwise comment it.
  */
@@ -69,7 +66,7 @@
 #define NILAI_LOG_ENABLE_ERROR
 #define NILAI_LOG_ENABLE_CRITICAL
 
-/**
+/*
  * Defines the hardware layer used by Umo.
  * Selects if the hardware layer should be UART or CAN.
  * Can only have one at a time!
@@ -77,13 +74,13 @@
 //#define NILAI_UMO_USE_CAN
 #define NILAI_UMO_USE_UART
 
-/**
+/*
  * Toggles the use of the event system.
  */
 //#define NILAI_USE_EVENTS
 
 #if defined(NILAI_USE_EVENTS)
-/**
+/*
  * Set the number of callbacks that can be assigned to an event (Default: 1).
  */
 #    define NILAI_EVENTS_MAX_CALLBACKS 1
@@ -102,7 +99,7 @@
 /******************************************************************************/
 /* [SECTION]: Module Activation                                               */
 /******************************************************************************/
-/**
+/*
  * Uncomment a define to use that module, or comment it to disable it
  */
 // Drivers
@@ -119,8 +116,6 @@
 // Interfaces
 //#define NILAI_USE_ADS
 //#define NILAI_USE_AT24QT2120
-//#define NILAI_USE_DS2484
-//#define NILAI_USE_ESP32
 //#define NILAI_USE_HEARTBEAT
 //#define NILAI_USE_LTC2498
 //#define NILAI_USE_MAX14763
@@ -148,7 +143,7 @@
 #if defined(NILAI_USE_SW_TAS5760) || defined(NILAI_USE_HW_TAS5760)
 //--- TAS5760.
 
-/**
+/*
  * Controls if the PWM outputs should be disabled (none), in mono (just one) or in stereo (two
  * outputs).
  */
@@ -157,7 +152,7 @@
 #    define NILAI_TAS5760_PWM_STEREO 2
 #    define NILAI_TAS5760_PWM_MODE   NILAI_TAS5760_PWM_NONE
 
-/**
+/*
  * Controls if I2C writes should be verified or not.
  */
 #    define NILAI_TAS5760_VERIFY_WRITE
@@ -166,10 +161,11 @@
 #if defined(NILAI_USE_RTC)
 //--- Real-Time Clock settings.
 
-/**
- * @brief Enables the use of the standard library to convert epoch time to timestamps and
+/*
+ * Enables the use of the standard library to convert epoch time to timestamps and
  * vice-versa.
- * @note This adds significant bloat to the binary file (mktime taking 820 bytes just by itself).
+ *
+ * This adds significant bloat to the binary file (mktime taking 820 bytes just by itself).
  */
 //#define NILAI_RTC_USE_STL
 #endif
@@ -177,8 +173,8 @@
 #if defined(NILAI_USE_FILESYSTEM)
 //--- Tweak filesystem settings.
 
-/**
- * @brief Enables the interpretation of error codes.
+/*
+ * Enables the interpretation of error codes.
  */
 //#define NILAI_FS_STATUS_STRING
 #endif
@@ -186,14 +182,11 @@
 #if defined(NILAI_USE_ADC)
 // --- ADC settings.
 
-/**
- * @brief Enables the interpretation of error codes for the ADC.
+/*
+ * Enables the interpretation of error codes for the ADC.
  */
 #    define NILAI_ADC_STATUS_STRING
 #endif
 
-/**
- * @}
- */
 /* END OF FILE */
 #endif /* NILAI_NILAITFOCONFIG_H */

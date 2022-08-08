@@ -1,18 +1,12 @@
 ﻿/**
  ******************************************************************************
- * @addtogroup umoModule
- * @{
- * @file    umoModule
+ * @file    umo_module.h
  * @author  Samuel Martel
  * @brief   Header for the umoModule module.
  *
  * @date 9/17/2020 8:37:46 AM
  *
- ******************************************************************************
- */
-
-/**
- * DEFINITION:
+ * DEFINITIONS:
  * * Universe: A collection of 512 8-bit channels.
  *
  * STEPS:
@@ -29,14 +23,16 @@
  *  - Sends the Universe to the PC
  * - If CRC is bad:
  *  - Ignore Universe
+ ******************************************************************************
  */
-#ifndef _umoModule
-#    define _umoModule
+
+#ifndef GUARD_UMO_MODULE_H
+#    define GUARD_UMO_MODULE_H
 
 /*****************************************************************************/
 /* Includes */
 #    if defined(NILAI_USE_UMO)
-#    include "defines/module.hpp"
+#        include "defines/module.hpp"
 #        if defined(NILAI_UMO_USE_UART) && defined(NILAI_UMO_USE_CAN)
 #            error Cannot use UMO with both CAN and UART!
 #        endif
@@ -122,8 +118,5 @@ private:
 /* Exported functions */
 #    endif
 /* Have a wonderful day :) */
-#endif /* _umoModule */
-/**
- * @}
- */
+#endif /* GUARD_UMO_MODULE_H */
 /****** END OF FILE ******/

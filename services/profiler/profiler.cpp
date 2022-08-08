@@ -1,5 +1,5 @@
 /**
- * @file    profiling.cpp
+ * @file    profiler.cpp
  * @author  Serj Bashlayev
  *          https://github.com/Serj-Bashlayev
  *          email: phreak_ua@yahoo.com
@@ -24,7 +24,7 @@
  * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  * General Public License for more details.
  * You should have received a copy of the GNU General Public License along with this program. If
- * not, see <a href=https://www.gnu.org/licenses/>https://www.gnu.org/licenses/<a/>.
+ * not, see <a href=https://www.gnu.org/licenses/>https://www.gnu.org/licenses/</a>.
  */
 #include "profiler.h"
 

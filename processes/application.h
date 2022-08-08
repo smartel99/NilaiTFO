@@ -1,10 +1,5 @@
 /**
- * @addtogroup  processes
- * @{
- * @addtogroup  application
- * @{
- *
- * @file        application.hpp
+ * @file        application.h
  * @author      Pascal-Emmanuel Lachance feat.
  * @author      Samuel Martel
  * @date        2020/07/06  -  09:02
@@ -107,7 +102,6 @@ public:
     }
     /**
      * @brief Dispatch an event to the other modules.
-     * @param e The event type.
      * @param data The event data.
      */
     void DispatchEvent(Events::Event* data);
@@ -153,9 +147,5 @@ protected:
 }    // namespace Nilai
 
 /*************************************************************************************************/
-/**
- * @}
- * @}
- */
 #endif
 /* ----- END OF FILE ----- */

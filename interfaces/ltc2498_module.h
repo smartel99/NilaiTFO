@@ -1,8 +1,6 @@
 /**
- * @addtogroup ltc2498Module.h
- * @{
  *******************************************************************************
- * @file	ltc2498Module.h
+ * @file	ltc2498_module.h
  * @author	Samuel Martel
  * @brief
  * Created on: Apr 9, 2021
@@ -151,8 +149,8 @@ class Ltc2498Module : public Nilai::Module
 public:
     Ltc2498Module(const std::string& label,
                   SpiModule*         spi,
-                  const Nilai::Pin&    inPin,
-                  const Nilai::Pin&    csPin,
+                  const Nilai::Pin&  inPin,
+                  const Nilai::Pin&  csPin,
                   float              vcom = 0.00f);
     virtual ~Ltc2498Module() override = default;
 
@@ -172,8 +170,8 @@ public:
 private:
     std::string m_label   = "";
     SpiModule*  m_spi     = nullptr;
-    Nilai::Pin    m_misoPin = {};
-    Nilai::Pin    m_csPin   = {};
+    Nilai::Pin  m_misoPin = {};
+    Nilai::Pin  m_csPin   = {};
     float       m_vcom    = 0.00f;
 
     std::vector<LTC2498::ConversionSettings> m_conversions       = {};
@@ -195,11 +193,6 @@ private:
 
 /***********************************************/
 /* Function declarations */
-
-
-/**
- * @}
- */
 /* END OF FILE */
 #endif
 #endif

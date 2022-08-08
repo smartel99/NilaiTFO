@@ -1,8 +1,6 @@
 ﻿/**
  ******************************************************************************
- * @addtogroup max14778Module
- * @{
- * @file    max14778Module
+ * @file    max14778_module.h
  * @author  Samuel Martel
  * @brief   Header for the max14778Module module.
  *
@@ -86,7 +84,4 @@ private:
 /* Have a wonderful day :) */
 #    endif /* _max14778Module */
 #endif
-/**
- * @}
- */
 /****** END OF FILE ******/

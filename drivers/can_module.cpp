@@ -1,9 +1,5 @@
 /**
- * @addtogroup  drivers
- * @{
- * @addtogroup  can
- * @{
- * @file        canModule.cpp
+ * @file        can_module.cpp
  * @author      Samuel Martel
  * @author      Pascal-Emmanuel Lachance
  * @date        2020/08/10  -  13:56
@@ -389,8 +385,5 @@ void HAL_CAN_ErrorCallback(CAN_HandleTypeDef* hcan)
 }    // namespace Nilai::Drivers
 
 #endif
-/**
- * @}
- * @}
- */
+
 /* ----- END OF FILE ----- */

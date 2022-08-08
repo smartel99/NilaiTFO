@@ -1,9 +1,5 @@
 ﻿/**
- * @addtogroup  drivers
- * @{
- * @addtogroup  uart
- * @{
- * @file        uartModule.hpp
+ * @file        uart_module.h
  * @author      Samuel Martel
  * @author      Pascal-Emmanuel Lachance
  * @date        2020/08/13  -  09:25
@@ -121,8 +117,4 @@ private:
 #    endif
 #endif
 
-/**
- * @}
- * @}
- */
 /* ----- END OF FILE ----- */

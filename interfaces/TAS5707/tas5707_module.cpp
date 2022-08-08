@@ -1,5 +1,5 @@
 /**
- * @file    Tas5707Module.cpp
+ * @file    tas5707_module.cpp
  * @author  Samuel Martel
  * @date    2022-02-07
  * @brief
@@ -12,10 +12,10 @@
  * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  * General Public License for more details.
  * You should have received a copy of the GNU General Public License along with this program. If
- * not, see <a href=https://www.gnu.org/licenses/>https://www.gnu.org/licenses/<a/>.
+ * not, see <a href=https://www.gnu.org/licenses/>https://www.gnu.org/licenses/</a>.
  */
 #if defined(NILAI_USE_TAS5707)
-#include "Tas5707Module.h"
+#    include "Tas5707Module.h"
 
 
 #    include "Enums.h"
@@ -40,7 +40,8 @@ template<typename T>
 static bool UpdateRegisterValue(
   I2cModule* i2c, uint8_t addr, uint8_t reg, T val, T bits = std::numeric_limits<T>::max())
 {
-    T regVal = Nilai::VectorToVal<T, true>(i2c->ReceiveFrameFromRegister(addr, reg, sizeof(T)).data);
+    T regVal =
+      Nilai::VectorToVal<T, true>(i2c->ReceiveFrameFromRegister(addr, reg, sizeof(T)).data);
 
     // Update the value.
     regVal = (regVal & ~bits) | val;
@@ -66,8 +67,8 @@ static uint32_t StartStopRegValToTime(uint8_t ss);
 
 Tas5707Module::Tas5707Module(const Nilai::Tas5707::HardwareConfig& hw,
                              const Nilai::Tas5707::SoftwareConfig& sw,
-                             I2S_HandleTypeDef*                  i2s,
-                             std::string                         label)
+                             I2S_HandleTypeDef*                    i2s,
+                             std::string                           label)
 : I2sModule(i2s, "i2s"), m_hw(hw), m_sw(sw), m_label(std::move(label))
 {
     CEP_ASSERT(m_hw.IsValid(), "Hardware configuration is not valid");
@@ -419,7 +420,7 @@ void Tas5707Module::SendConfiguration()
     SetSysCtrl1Reg(m_sw.BlockDc, m_sw.ClkRecoverMode, m_sw.DeEmphasisMode);
     SetSerialDataInterface(m_sw.SerialMode);
     ToggleSoftMute(m_sw.Ch1Mute != 0, m_sw.Ch2Mute != 0);
-    SetMasterVolume(0x9E);                                       // 0dB
+    SetMasterVolume(0x9E);                                         // 0dB
     SetChannelVolume(Nilai::Tas5707::Channels::Channel1, 0x9E);    // 0dB
     SetChannelVolume(Nilai::Tas5707::Channels::Channel2, 0x9E);    // 0dB
 
@@ -520,7 +521,7 @@ void Tas5707Module::SetChannelOutputs(uint32_t ASrc, uint32_t BSrc, uint32_t CSr
  * the register.
  * @param vol The desired volume, from 0x00 to 0xCE
  * @return The value to set the register to.
- * @note If @code vol is over 0xCE, it will be clamped to 0xCE.
+ * @note If @c vol is over 0xCE, it will be clamped to 0xCE.
  */
 uint8_t VolumeToReg(uint8_t vol)
 {

@@ -1,8 +1,6 @@
 /**
- * @addtogroup max323Module.h
- * @{
  *******************************************************************************
- * @file	max323Module.h
+ * @file	max323_module.h
  * @author	Samuel Martel
  * @brief
  * Created on: Oct. 19, 2020
@@ -59,8 +57,6 @@ private:
 /* Function declarations */
 
 #endif
-/**
- * @}
- */
+
 /* END OF FILE */
 #endif /* MAX323MODULE_H_ */

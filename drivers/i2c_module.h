@@ -1,9 +1,5 @@
 /**
- * @addtogroup  drivers
- * @{
- * @addtogroup  i2c
- * @{
- * @file        i2cModule.hpp
+ * @file        i2c_module.h
  * @author      Lou-Gabriel Gaucher
  * @author      Pascal-Emmanuel Lachance
  * @author      Samuel Martel
@@ -40,7 +36,11 @@ namespace Nilai::Drivers
 class I2cModule : public Module
 {
 public:
-    constexpr I2cModule() noexcept = default;
+    constexpr I2cModule() noexcept                  = default;
+    constexpr I2cModule(const I2cModule&) noexcept  = default;
+    constexpr I2cModule(I2cModule&&) noexcept       = default;
+    I2cModule& operator=(const I2cModule&) noexcept = default;
+    I2cModule& operator=(I2cModule&&) noexcept      = default;
     constexpr I2cModule(I2C_HandleTypeDef* handle, std::string_view label) noexcept
     : m_handle(handle), m_label(label)
     {
@@ -101,10 +101,6 @@ protected:
 #                endif
 #            endif
 #        endif
-/**
- * @}
- * @}
- */
 #    endif
 #endif
 /* ----- END OF FILE ----- */

@@ -1,8 +1,6 @@
 /**
- * @addtogroup pwmModule.h
- * @{
  *******************************************************************************
- * @file	pwmModule.h
+ * @file	pwm_module.h
  * @author	Samuel Martel
  * @brief
  * Created on: Nov. 6, 2020
@@ -73,9 +71,6 @@ private:
 /***********************************************/
 /* Function declarations */
 
-/**
- * @}
- */
 #endif
 /* END OF FILE */
 #endif /* NILAI_PWMMODULE_H_ */

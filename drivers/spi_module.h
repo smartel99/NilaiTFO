@@ -1,9 +1,5 @@
 /**
- * @addtogroup  drivers
- * @{
- * @addtogroup  SPI
- * @{
- * @file        spiModule.hpp
+ * @file        spi_module.h
  * @author      Lou-Gabriel Gaucher
  * @author      Pascal-Emmanuel Lachance
  * @date        2020/08/13  -  09:25
@@ -108,8 +104,5 @@ private:
 #        endif
 #    endif
 #endif
-/**
- * @}
- * @}
- */
+
 /* ----- END OF FILE ----- */

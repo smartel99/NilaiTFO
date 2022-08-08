@@ -1,8 +1,6 @@
 ﻿/**
  ******************************************************************************
- * @addtogroup adsModule
- * @{
- * @file    adsModule
+ * @file    ads131_module.cpp
  * @author  Samuel Martel
  * @brief   Source for the adsModule module.
  *
@@ -13,19 +11,22 @@
 #include "ads131_module.h"
 #include <cmath>
 #if defined(NILAI_USE_ADS) && defined(NILAI_USE_SPI)
-#    include "defines/bitManipulations.hpp"
-#    include "defines/globaldef.h"
-#    include "defines/macros.hpp"
-#    include "services/logger.hpp"
+#    include "../../defines/bit_manipulations.h"
+#    include "../../defines/globaldef.h"
+#    include "../../defines/macros.h"
+#    include "../../services/logger.h"
 #    include APPLICATION_HEADER
 
 #    include <limits>
+#    include <utility>
 
 #    define ADS_INFO(msg, ...)  LOG_INFO("[%s] " msg, m_label.c_str(), ##__VA_ARGS__)
 #    define ADS_ERROR(msg, ...) LOG_ERROR("[%s] " msg, m_label.c_str(), ##__VA_ARGS__)
 
-AdsModule::AdsModule(SpiModule* spi, const std::string& label)
-: m_spi(spi), m_label(label), m_config(ADS::Config())
+namespace Nilai::Interfaces
+{
+AdsModule::AdsModule(Drivers::SpiModule* spi, std::string label)
+: m_spi(spi), m_label(std::move(label)), m_config(ADS::Config())
 {
     ADS_INFO("Initialized.");
 }
@@ -230,7 +231,7 @@ const AdsPacket& AdsModule::RefreshValues(uint32_t timeout)
 
     // Activate CS to start transaction.
     HAL_GPIO_WritePin(m_config.pins.chipSelect.port, m_config.pins.chipSelect.pin, GPIO_PIN_RESET);
-    m_spi->Receive(&data[0], SIZEOF_ARRAY(data));
+    m_spi->Receive(&data[0], std::size(data));
     // Release CS to complete transaction.
     HAL_GPIO_WritePin(m_config.pins.chipSelect.port, m_config.pins.chipSelect.pin, GPIO_PIN_SET);
 
@@ -313,10 +314,10 @@ const AdsPacket& AdsModule::RefreshValues(uint32_t timeout)
 
 void AdsModule::Reset()
 {
-    CEP_ASSERT(m_config.pins.chipSelect.port != nullptr, "ADS's Chip Select GPIO Port is NULL!");
-    CEP_ASSERT(m_config.pins.dataReady.port != nullptr, "ADS's Data Ready GPIO Port is NULL!");
-    CEP_ASSERT(m_config.pins.done.port != nullptr, "ADS's Done GPIO Port is NULL!");
-    CEP_ASSERT(m_config.pins.reset.port != nullptr, "ADS's Reset GPIO Port is NULL!");
+    NILAI_ASSERT(m_config.pins.chipSelect.port != nullptr, "ADS's Chip Select GPIO Port is NULL!");
+    NILAI_ASSERT(m_config.pins.dataReady.port != nullptr, "ADS's Data Ready GPIO Port is NULL!");
+    NILAI_ASSERT(m_config.pins.done.port != nullptr, "ADS's Done GPIO Port is NULL!");
+    NILAI_ASSERT(m_config.pins.reset.port != nullptr, "ADS's Reset GPIO Port is NULL!");
 
     const auto& cs  = m_config.pins.chipSelect;
     const auto& rst = m_config.pins.reset;
@@ -468,7 +469,7 @@ uint32_t AdsModule::ConvertToHex(float val)
 
 const std::vector<float>& AdsModule::GetChannel(size_t channel) const
 {
-    CEP_ASSERT((channel < 4), "Invalid channel requested");
+    NILAI_ASSERT((channel < 4), "Invalid channel requested");
     return m_channels[channel];
 }
 
@@ -550,9 +551,7 @@ void AdsModule::UpdateLatestFrame()
 #    endif
     m_lastStartTime = HAL_GetTick();
 }
+}    // namespace Nilai::Interfaces
 #endif
 /* Have a wonderful day :) */
-/**
- * @}
- */
 /****** END OF FILE ******/

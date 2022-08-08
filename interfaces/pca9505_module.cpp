@@ -1,8 +1,6 @@
 ﻿/**
  ******************************************************************************
- * @addtogroup pca9505Module
- * @{
- * @file    pca9505Module
+ * @file    pca9505_module.cpp
  * @author  Samuel Martel
  * @brief   Source for the pca9505Module module. (IO Extender)
  *

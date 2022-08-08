@@ -1,8 +1,4 @@
 ﻿/**
- * @addtogroup defines
- * @{
- * @addtogroup misc
- * @{
  * @file    misc.cpp
  * @author  Pascal-Emmanuel Lachance
  * @date    2019/08/27, 14:22
@@ -29,7 +25,6 @@
  * @brief   Forces a null termination character at the end of a character array
  * @param   string: The character array to force null-terminate
  * @param   size: The size in characters of the char array
- * @retval  None
  */
 void Nilai::forceNullTerminationCharacter(char* string, size_t size)
 {
@@ -41,7 +36,6 @@ void Nilai::forceNullTerminationCharacter(char* string, size_t size)
  * @brief   Clears an array using memset.
  * @param   array: the address of the array to clear
  * @param   length: the number of bytes to clear
- * @retval  None
  */
 void Nilai::clearArray(void* array, size_t length)
 {
@@ -201,7 +195,7 @@ std::string Nilai::IntToHex(size_t i)
 
     sprintf(msg, "%08X", i);
 
-    return std::string(msg);
+    return std::string {msg};
 }
 
 std::vector<uint8_t> Nilai::StrToVec(const std::string& str, size_t maxSize)
@@ -221,10 +215,6 @@ std::vector<uint8_t> Nilai::StrToVec(const std::string& str, size_t maxSize)
     return v;
 }
 /*************************************************************************************************/
-/**
- * @}
- * @}
- */
 
 /* Have a wonderful day! :) */
 /****** END OF FILE ******/

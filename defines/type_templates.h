@@ -1,9 +1,5 @@
 /**
- * @addtogroup defines
- * @{
- * @addtogroup typeTemplates
- * @{
- * @file    typeTemplates.hpp
+ * @file    type_templates.h
  * @author  Pascal-Emmanuel Lachance
  * @date    2020/08/10 -- 09:03
  *
@@ -29,8 +25,9 @@ namespace Nilai
 
 /*------------------------------------*/
 /**
- * @defgroup width2
- * @brief    An integral type that is twice the size of the inputed integral type.
+ * @defgroup width2 Integral type double the size of the input
+ * @{
+ * @brief    An integral type that is twice the size of the input integral type.
  *
  * From: https://stackoverflow.com/a/46385939
  */
@@ -80,7 +77,8 @@ struct width2<std::int32_t>
 
 /*------------------------------------*/
 /**
- * @defgroup is_std_vector
+ * @defgroup is_std_vector Is std::vector
+ * @{
  * @brief    Check if a variable is of type std::vector
  */
 template<typename>
@@ -99,7 +97,8 @@ struct is_std_vector<std::vector<T, A>> : std::true_type
 
 /*------------------------------------*/
 /**
- * @defgroup is_std_array
+ * @defgroup is_std_array Is std::array
+ * @{
  * @brief    Check if a variable is of type std::array
  */
 template<typename T>
@@ -143,7 +142,8 @@ struct is_std_array<std::array<std::string, size>> : std::true_type
 
 /*------------------------------------*/
 /**
- * @defgroup is_bool
+ * @defgroup is_bool Is bool
+ * @{
  * @brief    Check if a variable is of type bool
  */
 template<typename T>
@@ -167,7 +167,8 @@ struct is_bool : is_bool_helper<std::remove_cv_t<T>>
 
 /*------------------------------------*/
 /**
- * @defgroup is_string
+ * @defgroup is_string Is std::string
+ * @{
  * @brief    Check if a variable is of type std::string
  */
 template<typename T>
@@ -206,8 +207,4 @@ constexpr std::underlying_type_t<Enum> Underlying(Enum e) noexcept
 /*************************************************************************************************/
 }    // namespace Nilai
 #endif
-/**
- * @}
- * @}
- */
 /* ----- END OF FILE ----- */

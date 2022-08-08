@@ -1,7 +1,4 @@
 /**
- * @addtogroup version.h
- * @{
- *******************************************************************************
  * @file	version.h
  * @author	Samuel Martel
  * @brief
@@ -65,8 +62,5 @@ static constexpr size_t GetVersion()
 }
 }    // namespace Nilai
 
-/**
- * @}
- */
 /* END OF FILE */
 #endif /* VERSION_H_ */

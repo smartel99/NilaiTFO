@@ -1,8 +1,5 @@
 /**
- * @addtogroup internalConfig.h
- * @{
- *******************************************************************************
- * @file	internalConfig.h
+ * @file	internal_config.h
  * @author	Samuel Martel
  * @brief	Contains the internal configuration options for Nilai.
  * Created on: 2021/04/09
@@ -76,12 +73,15 @@
 #    define NILAI_USE_TAS5760
 #endif
 
+#if defined(NILAI_TEST)
+#    define NILAI_NOP()
+#else
+#    define NILAI_NOP() asm("NOP")
+#endif
+
 /***********************************************/
 /* Function declarations */
 
-/**
- * @}
- */
 /* ----- !!!!! DO NOT MODIFY THIS FILE !!!!! ----- */
 /* END OF FILE */
 #endif /* NILAI_INTERNALCONFIG_H_ */

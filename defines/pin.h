@@ -1,8 +1,6 @@
 /**
  ******************************************************************************
- * @addtogroup pin
- * @{
- * @file    pin
+ * @file    pin.h
  * @author  Samuel Martel
  * @brief   Header for the pin module.
  *
@@ -82,7 +80,4 @@ struct Pin
 }    // namespace Nilai
 /* Have a wonderful day :) */
 #endif /* NILAI_PIN_H */
-/**
- * @}
- */
 /****** END OF FILE ******/

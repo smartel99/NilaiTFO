@@ -1,5 +1,5 @@
 /**
- * @file    HardwareConfig.h
+ * @file    hardware_config.h
  * @author  Samuel Martel
  * @date    2022-02-07
  * @brief
@@ -12,7 +12,7 @@
  * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  * General Public License for more details.
  * You should have received a copy of the GNU General Public License along with this program. If
- * not, see <a href=https://www.gnu.org/licenses/>https://www.gnu.org/licenses/<a/>.
+ * not, see <a href=https://www.gnu.org/licenses/>https://www.gnu.org/licenses/</a>.
  */
 #ifndef NILAI_HARDTAS5707_WARECONFIG_H
 #define NILAI_HARDTAS5707_WARECONFIG_H
@@ -27,23 +27,21 @@ class I2cModule;
 namespace Nilai::Tas5707
 {
 /**
+ * @struct HardwareConfig
  * @brief Structure describing the hardware connections to and from the TAS5705 amplifier.
  *
  * Some fields are optional, others are mandatory.
  *
  * Mandatory information:
- * <ul>
- *  <li> @code I2cModule* I2cHandle </li>
- *  <li> @code Nilai::Pin Reset </li>
- *  <li> @code Nilai::Pin PwrDwn </li>
- * </ul>
+ *  @li I2cModule* I2cHandle
+ *  @li Nilai::Pin Reset
+ *  @li Nilai::Pin PwrDwn
  *
  * Optional pins:
- * <ul>
- *  <li> @code Nilai::Pin Fault </li>
- *  <li> @code Nilai::Pin HeadphoneSelect </li>
- *  <li> @code Nilai::Pin Mute </li>
- *  <li> @code Nilai::Pin PVddEn </li>
+ *  @li Nilai::Pin Fault
+ *  @li Nilai::Pin HeadphoneSelect
+ *  @li Nilai::Pin Mute
+ *  @li Nilai::Pin PVddEn
  */
 struct HardwareConfig
 {

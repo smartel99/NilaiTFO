@@ -12,7 +12,7 @@
  * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  * General Public License for more details.
  * You should have received a copy of the GNU General Public License along with this program. If
- * not, see <a href=https://www.gnu.org/licenses/>https://www.gnu.org/licenses/<a/>.
+ * not, see <a href=https://www.gnu.org/licenses/>https://www.gnu.org/licenses/</a>.
  */
 
 
@@ -41,167 +41,28 @@ namespace Nilai::Interfaces
  *
  * @brief Class interfacing with the AT24QT2120 capacitive touch sensing IC.
  *
- * <h2>Theory of operation:</h2>
  *
- * <dl>
- * <dt><b>Adjacent Key Suppression (AKS):</b></dt>
- *      <dd>This feature allows the use of tightly spaced keys with reduced interference between
- *      each one of them.
- *  </dd><dt></dt><dd>
- *      Up to three AKS groups can be used simultaneously, and there can only be one key in a
- *      group reported as being touched at any one time. Once a key in an AKS goes into "detect
- *      mode", no other key in that group can be detected until the first key is released.
- *  </dd><dt></dt><dd>
- *      <b>Note:</b> To use a key as a guard channel, its AKS group should be set to be the same
- *      as that of the keys it is to protect.
- *      </dd>
- * </dl>
+ * <b>Utilization:</b>
+ * Before using the At24Qt2120 instance, it must first be initialized through the @c Builder
+ * described bellow.
  *
- * <dl>
- *  <dt><b>The CHANGE pin:</b></dt>
- *      <dd>The CHANGE pin is pulled low by the chip whenever there is a change of state in the
- *      Detection status and/or Key Status bytes. It is cleared when the status bytes are read.
- *  </dd><dt></dt><dd>
- *      After a power-up reset, the CHANGE line is pulled <b>LOW</b> for 85ms.
- *  </dd><dt></dt><dd>
- *      This pin is also pulled <b>LOW</b> for another 16ms before any bursting on the touch pins
- *      occurs. If the state of any output needs to be changed, the new state needs to be written
- *      during this period.
- *      </dd>
- * </dl>
+ * Once created, simply query the time of the last event using @c GetLastEventTime and get the
+ * state of the sensor with @c GetSensorStatus.
  *
- * <dl>
- *  <dt><b>Types of Reset:</b></dt>
- *  <dd><dl>
- *      <dt>External Reset</dt>
- *          <dd>An (optional) external reset line can be used if desired. This signal is active
- *          <b>LOW</b>, and needs to be active for a minimum of 2us.
- *          </dd>
- *      <dt>Soft Reset</dt>
- *          <dd>
- *          The Reset register can be used to trigger a software. The reception of this command
- *          starts the internal watchdog timer of the IC, which expires after 125ms. Upon
- *          expiring, the IC executes a full reset.
- *          </dd><dt></dt><dd>
- *          The IC will not respond to any command received through I2C for approximately 200ms
- *          after the reset command has been received.
- *          </dd><dt></dt><dd>
- *          <b>Note:</b> The IC can receive a reset command even while it is in Power Down mode.
- *          </dd>
- *  </dl></dd>
- * </dl>
- *
- * <dl>
- *  <dt><b>Calibration:</b></dt>
- *      <dd>Writing any non zero value into the calibration register forces the IC to
- *      re-calibrate itself. This can be useful to clear out a key that is stuck, i.e. a key that
- *      have been detected as pressed for an unrealistic amount of time.
- *      </dd><dt></dt>
- *      <dd>The calibration command executes 15 burst cycles at a sampling rate mode of 1, as
- *      well as maintaining the <b>CALIBRATE</b> bit of the Detection Status to 1 for as long as
- *      the calibration is on-going.
- *      </dd><dt></dt>
- *      <dd><b>Note: </b>Calibration should be done whenever the Key Control bit 0 (EN) is changed.
- *      This changes the use of the key form a standard touch key to an output pin and vice-versa.
- *      </dd>
- * </dl>
- *
- * <dl>
- *  <dt><b>Guard Channel:</b></dt>
- *      <dd>A guard channel can be used to help prevent false detections on the key inputs. The
- *      channel which acts as the guard can be set through the Key Control bit 4 (GUARD).
- *      </dd><dt></dt>
- *      <dd>Due to the larger footprints of the guard channel, it becomes more susceptible to
- *      noise, therefore it should have a higher over-sampling rate than the other keys.
- *      </dd>
- * </dl>
- *
- * <dl>
- *  <dt><b>Signal Processing:</b></dt>
- *      <dd><dl>
- *          <dt><b>Detect Threshold:</b></dt>
- *          <dd>The device detects a touch when the signal has crossed a threshold level and
- *          remained there for a specified number of counts. This behavior can be altered on a
- *          key-by-key basis using the key Detect Threshold commands.
- *          </dd><dt></dt>
- *          <dd>This detect threshold is based on the reference value of the particular key. The
- *          delta of the key is obtained by subtracting the reference value from the signal
- *          value, which rises when a touch is present.
- *          </dd><dt></dt>
- *          <dd>The reference point of a key automatically drifts towards and away from the
- *          signal value at a configurable rate, which defaults to <i>160ms * 20 = 3.2
- *          seconds</i> towards the Touch Drift register, and to <i>160ms * 5 = 0.8 seconds</i>
- *          away from the Touch Drift register.
- *          </dd>
- *      </dl></dd>
- *      <dd><dl>
- *          <dt><b>Detection Integrator: </b></dt>
- *          <dd>The IC features a fast detection integrator counter/filter (DI filter), which is
- *          utilized to remove electrical noise at the small expense of a slower response time.
- *          </dd><dt></dt>
- *          <dd>For a touch to be registered as such, it needs to be detected for a programmable
- *          number of consecutive samples. The minimum number of consecutive samples is 1, with
- *          the maximum number being 32. Any value above 32 will result in a key never being
- *          registered as being touched, effectively disabling it.
- *          </dd><dt></dt>
- *          <dd>This filter is also present to detect the release of a key, using the same
- *          threshold value.
- *          </dd>
- *      </dl></dd>
- *      <dd><dl>
- *          <dt><b>Touch Recalibration Delay: </b></dt>
- *          <dd>An object placed in front of the key pad might result in erroneous detections,
- *          preventing the user from properly interacting with the device. To prevent this, the
- *          IC uses a timer which periodically monitors detections. If a detection exceeds the
- *          timer setting, the IC automatically performs a key recalibration. This is known as
- *          the Touch Recalibration Delay.
- *          </dd><dt></dt>
- *          <dd>This delay can be changed to any value between 160ms and 40800ms, in steps of
- *          160ms. The touch recalibration delay can also be disabled by using a delay of 0ms.
- *          </dd><dt></dt>
- *          <dd>This feature is global to the IC, covering every key.
- *          </dd>
- *      </dl></dd>
- *      <dd><dl>
- *          <dt><b>Away from Touch Recalibration:</b></dt>
- *          <dd>If a signal coming from a key jumps in the negative direction (with respect to
- *          its reference) by more than the Away from Touch Recalibration setting (25% of the
- *          detection threshold), then a recalibration of that key takes place.
- *          </dd><dt></dt>
- *          <dd><b>Note: </b>The minimum Away from Touch Recalibration threshold is hard
- *          limited to 4 counts.
- *          </dt>
- *      </dl></dd>
- *      <dd><dl>
- *          <dt><b>Drift Hold Time:</b></dt>
- *          <dd>Drift Hold Time (DHT) is used to restrict drift on all keys while one or more
- *          keys are active. DHT restricts the drifting on all keys until approximately four
- *          seconds after all touches have been removed.
- *          </dd><dt></dt>
- *          <dd>This feature is particularly useful in cases of high-density keypads, where
- *          touching a key or hovering a finger over the keypad would cause untouched keys to
- *          drift, and therefore create a sensitivity shift, and ultimately inhibit touch detection.
- *          The value of the DHT can be configured, with a default of ~4 seconds.
- *      </dl></dd>
- *      <dd><dl>
- *          <dt><b>Hysteresis:</b></dt>
- *          <dd>Hysteresis is fixed by default at 12.5% of the Detect Threshold. When a key
- *          enters a detect state once the DI count has been reached, the Detect Threshold (DTHR)
- *          value is changed by a small amount (12.5% of DTHR) in the direction away from the
- *          touch. This is done to effect hysteresis and thus makes it less likely that a key
- *          will dither in and out of detection. DTHR is restored once the key drops out of
- *          detection.
- *          </dd><dt></dt>
- *          <dd><b>Note: </b>The minimum value for hysteresis is 2 counts.
- *          </dd>
- *      </dl></dd>
- * </dl>
+ * @example interfaces/at24qt2120.cpp
  */
 class At24Qt2120 : public Nilai::Drivers::I2cModule
 {
+    /**
+     * @brief Alias for a pointer to the run function.
+     */
     using RunFunction = void (*)(At24Qt2120*);
 
 public:
+    /**
+     * @class Builder
+     * @brief Builder for the At24Qt2120 module.
+     */
     class Builder
     {
         using Self = Builder;
@@ -401,6 +262,12 @@ public:
     [[nodiscard]] AT24QT2120::FirmwareVersion GetFirmwareVersion() noexcept;
 
     /**
+     * @brief Gets the status information from the chip.
+     * @return The sensor's DetectionStatus, KeyStatus and SliderStatus.
+     */
+    [[nodiscard]] AT24QT2120::SensorStatus GetSensorStatus() noexcept;
+
+    /**
      * Gets the detection status of the chip.
      * @return The detection status.
      */
@@ -435,10 +302,12 @@ public:
      * @brief Triggers a software reset on the chip.
      * @param waitForReset If true, wait for the sensor to be in operational state after
      * triggering the reset.
+     * @returns True if the sensor responded after the reset.
+     * @returns False if the sensor failed to respond within the allowed time.
      *
      * @note If <b>waitForReset</b> is set, this method will block for up to 210ms.
      */
-    void Reset(bool waitForReset = false) noexcept;
+    bool Reset(bool waitForReset = false) noexcept;
 
     /**
      * @brief Sets the interval between key measurements.
@@ -530,8 +399,7 @@ public:
      *
      * Defaults to disabled.
      *
-     * @param enable Enables the slider/wheel.
-     * @param wheel Marks the slider as being a wheel.
+     * @param opts Slider options to be used.
      */
     void SetSliderOptions(AT24QT2120::SliderOptions opts) noexcept
     {
@@ -615,7 +483,7 @@ public:
      * @brief Gets the current options for the desired key.
      *
      * @param key The key to operate on.
-     * @return The current options for the key.
+     * @param options The options for the key.
      */
     void SetKeyOptions(AT24QT2120::Keys key, const AT24QT2120::KeyOptions& options) noexcept;
     [[nodiscard]] AT24QT2120::KeyOptions GetKeyOptions(AT24QT2120::Keys key) noexcept;
@@ -636,7 +504,7 @@ public:
      * Defaults to 0 for every key.
      *
      * @param key The key to operate on.
-     * @param pulse The pulse value.
+     * @param scale The scale value.
      */
     void SetKeyScale(AT24QT2120::Keys key, uint8_t scale) noexcept;
 
@@ -661,12 +529,18 @@ public:
 
     /**
      * @brief Provided only as a mean to have un-initialized instances.
-     * Using an un-itialized instance will result in UB.
+     * Using an un-initialized instance will result in UB.
      */
-    constexpr At24Qt2120() = default;
+    constexpr At24Qt2120() noexcept = default;
+    constexpr At24Qt2120(const At24Qt2120&) noexcept;
+    constexpr At24Qt2120(At24Qt2120&&) noexcept;
+    At24Qt2120& operator=(const At24Qt2120& o) noexcept = default;
+    At24Qt2120& operator=(At24Qt2120&& o) noexcept      = default;
+
+    constexpr operator bool() const noexcept { return m_initialized; }
 
 private:
-    constexpr At24Qt2120(I2C_HandleTypeDef* i2c) noexcept
+    constexpr explicit At24Qt2120(I2C_HandleTypeDef* i2c) noexcept
     : I2cModule(i2c, "AT24QT I2C"), m_run(&PollingRun)
     {
     }
@@ -711,6 +585,10 @@ private:
           (static_cast<size_t>(firstReg) + static_cast<size_t>(key)));
     }
 
+    I2C::Frame GetRegisters(AT24QT2120::Registers r, size_t cnt);
+    void       SetRegisters(AT24QT2120::Registers r, const uint8_t* data, size_t cnt);
+    bool       WaitForCalibrationEnd(size_t timeout);
+
 private:
     friend class At24Qt2120Builder;
     //! Function called in Run. This depends on the mode of operation, polling or interrupt-based.
@@ -719,10 +597,11 @@ private:
     //! Time of the last event detected by the touch sensor.
     uint32_t m_lastEventTime = 0;
 
-
-private:
     //! When in Polling mode, represents the pin to monitor.
     Pin m_changePin = {};
+
+    //! Set to true by the builder, indicates a properly functioning chip.
+    bool m_initialized = false;
 
 #    if defined(NILAI_USE_EVENTS)
     //! The ID of the event callback.
@@ -731,7 +610,7 @@ private:
     Events::EventTypes m_irqType = Events::EventTypes::Exti0;
 #    endif
 
-    static constexpr uint8_t s_i2cAddress = 0x1C;
+    static constexpr uint8_t s_i2cAddress = 0x1C << 1;
     static constexpr uint8_t s_chipId     = 0x3E;
 };
 }    // namespace Nilai::Interfaces

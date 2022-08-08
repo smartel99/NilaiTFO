@@ -1,8 +1,6 @@
 /**
- * @addtogroup compilerDefines.cpp
- * @{
  *******************************************************************************
- * @file	compilerDefines.cpp
+ * @file	compiler_defines.cpp
  * @author	Samuel Martel
  * @brief   This file's content is really meant to reduce program size.
  * Created on: May 12, 2021

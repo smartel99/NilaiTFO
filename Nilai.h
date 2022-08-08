@@ -36,8 +36,6 @@
 #include "drivers/uart_module.h"
 
 #include "interfaces/ADS131/ads131_module.h"
-#include "interfaces/ds2484_module.h"
-#include "interfaces/esp32_module.h"
 #include "interfaces/heartbeat_module.h"
 #include "interfaces/ltc2498_module.h"
 #include "interfaces/max14763_module.h"

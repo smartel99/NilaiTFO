@@ -1,8 +1,6 @@
 ﻿/**
  ******************************************************************************
- * @addtogroup heartbeatModule
- * @{
- * @file    heartbeatModule
+ * @file    heartbeat_module.cpp
  * @author  Samuel Martel
  * @brief   Sources for the heartbeatModule module.
  *

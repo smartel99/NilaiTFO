@@ -1,8 +1,6 @@
 ﻿/**
  ******************************************************************************
- * @addtogroup adsModuleConfig
- * @{
- * @file    adsModuleConfig
+ * @file    ads131_module_config.h
  * @author  Samuel Martel
  * @brief   Header for the adsModuleConfig module.
  *
@@ -10,13 +8,15 @@
  *
  ******************************************************************************
  */
-#ifndef _adsModuleConfig
-#    define _adsModuleConfig
+#ifndef GUARD_ADS131_MODULE_CONFIG_H
+#    define GUARD_ADS131_MODULE_CONFIG_H
 
+#    define NILAI_USE_ADS
+#    error asdf
 #    if defined(NILAI_USE_ADS)
 /*****************************************************************************/
 /* Includes */
-#        include "defines/pin.h"
+#        include "../../defines/pin.h"
 
 /*****************************************************************************/
 /* Exported defines */
@@ -114,21 +114,21 @@ enum class SpiMode
  ** @brief  Upper voltage threshold for fault detection */
 enum class Threshold
 {
-    /*!< 000 : 95%      VDD     | 5%    VSS / -1.5V */
+    //! 000 : 95%      VDD     | 5%    VSS / -1.5V.
     P95 = 0b000,
-    /*!< 001 : 92.5%    VDD     | 7.5%  VSS / -1.5V */
+    //! 001 : 92.5%    VDD     | 7.5%  VSS / -1.5V.
     P92 = 0b001,
-    /*!< 010 : 90%      VDD     | 10%   VSS / -1.5V */
+    //! 010 : 90%      VDD     | 10%   VSS / -1.5V.
     P90 = 0b010,
-    /*!< 011 : 87.5%    VDD     | 12.5% VSS / -1.5V */
+    //! 011 : 87.5%    VDD     | 12.5% VSS / -1.5V.
     P87 = 0b011,
-    /*!< 100 : 85%      VDD     | 15%   VSS / -1.5V */
+    //! 100 : 85%      VDD     | 15%   VSS / -1.5V.
     P85 = 0b100,
-    /*!< 101 : 80%      VDD     | 20%   VSS / -1.5V */
+    //! 101 : 80%      VDD     | 20%   VSS / -1.5V.
     P80 = 0b101,
-    /*!< 110 : 75%      VDD     | 25%   VSS / -1.5V */
+    //! 110 : 75%      VDD     | 25%   VSS / -1.5V.
     P75 = 0b110,
-    /*!< 111 : 70%      VDD     | 30%   VSS / -1.5V */
+    //! 111 : 70%      VDD     | 30%   VSS / -1.5V.
     P70 = 0b111,
 };
 
@@ -137,13 +137,13 @@ enum class Threshold
  ** @brief  Delay values (for DONE pin & Hi-Z assertion on DOUT */
 enum class Delay
 {
-    /*!< 00 : >= 6ns delay */
+    //! 00 : >= 6ns delay.
     Ns6 = 0b00,
-    /*!< 01 : >= 8ns delay */
+    //! 01 : >= 8ns delay.
     Ns8 = 0b01,
-    /*!< 10 : >= 10ns delay */
+    //! 10 : >= 10ns delay.
     Ns10 = 0b10,
-    /*!< 11 : >= 12ns delay */
+    //! 11 : >= 12ns delay.
     Ns12 = 0b11,
 };
 
@@ -153,8 +153,10 @@ enum class Delay
  ** */
 enum class ClockSource
 {
+    //! Dedicated clock input.
     CLKIN = 0b0,
-    SCLK  = 0b1
+    //! SPI clock input.
+    SCLK = 0b1
 };
 
 /**
@@ -173,19 +175,19 @@ enum class Resolution
  ** */
 enum class ClockDivision
 {
-    /*!< 001 : FICLK = FCLKIN / 2  */
+    //! 001 : FICLK = FCLKIN / 2.
     Div2 = 0b001,
-    /*!< 010 : FICLK = FCLKIN / 4  */
+    //! 010 : FICLK = FCLKIN / 4.
     Div4 = 0b010,
-    /*!< 011 : FICLK = FCLKIN / 6  */
+    //! 011 : FICLK = FCLKIN / 6.
     Div6 = 0b011,
-    /*!< 100 : FICLK = FCLKIN / 8  */
+    //! 100 : FICLK = FCLKIN / 8.
     Div8 = 0b100,
-    /*!< 101 : FICLK = FCLKIN / 10 */
+    //! 101 : FICLK = FCLKIN / 10.
     Div10 = 0b101,
-    /*!< 110 : FICLK = FCLKIN / 12 */
+    //! 110 : FICLK = FCLKIN / 12.
     Div12 = 0b110,
-    /*!< 111 : FICLK = FCLKIN / 14 */
+    //! 111 : FICLK = FCLKIN / 14.
     Div14 = 0b111,
 };
 
@@ -195,37 +197,37 @@ enum class ClockDivision
  ** */
 enum class Oversampling
 {
-    /*!< 1111 : FDATA = FMOD / 32   */
+    //! 1111 : FDATA = FMOD / 32.
     Ovr32 = 0b00001111,
-    /*!< 1110 : FDATA = FMOD / 48   */
+    //! 1110 : FDATA = FMOD / 48.
     Ovr48 = 0b00001110,
-    /*!< 1101 : FDATA = FMOD / 64   */
+    //! 1101 : FDATA = FMOD / 64.
     Ovr64 = 0b00001101,
-    /*!< 1100 : FDATA = FMOD / 96   */
+    //! 1100 : FDATA = FMOD / 96.
     Ovr96 = 0b00001100,
-    /*!< 1011 : FDATA = FMOD / 128  */
+    //! 1011 : FDATA = FMOD / 128.
     Ovr128 = 0b00001011,
-    /*!< 1010 : FDATA = FMOD / 192  */
+    //! 1010 : FDATA = FMOD / 192.
     Ovr192 = 0b00001010,
-    /*!< 1001 : FDATA = FMOD / 200  */
+    //! 1001 : FDATA = FMOD / 200.
     Ovr200 = 0b00001001,
-    /*!< 1000 : FDATA = FMOD / 256  */
+    //! 1000 : FDATA = FMOD / 256.
     Ovr256 = 0b00001000,
-    /*!< 0111 : FDATA = FMOD / 384  */
+    //! 0111 : FDATA = FMOD / 384.
     Ovr384 = 0b00000111,
-    /*!< 0110 : FDATA = FMOD / 400  */
+    //! 0110 : FDATA = FMOD / 400.
     Ovr400 = 0b00000110,
-    /*!< 0101 : FDATA = FMOD / 512  */
+    //! 0101 : FDATA = FMOD / 512.
     Ovr512 = 0b00000101,
-    /*!< 0100 : FDATA = FMOD / 768  */
+    //! 0100 : FDATA = FMOD / 768.
     Ovr768 = 0b00000100,
-    /*!< 0011 : FDATA = FMOD / 800  */
+    //! 0011 : FDATA = FMOD / 800.
     Ovr800 = 0b00000011,
-    /*!< 0010 : FDATA = FMOD / 1024 */
+    //! 0010 : FDATA = FMOD / 1024.
     Ovr1024 = 0b00000010,
-    /*!< 0001 : FDATA = FMOD / 2048 */
+    //! 0001 : FDATA = FMOD / 2048.
     Ovr2048 = 0b00000001,
-    /*!< 0000 : FDATA = FMOD / 4096 */
+    //! 0000 : FDATA = FMOD / 4096.
     Ovr4096 = 0b00000000,
 };
 
@@ -246,10 +248,15 @@ enum class Enable
  ** */
 enum class DigitalGain
 {
-    Gain1  = 0b000,
-    Gain2  = 0b001,
-    Gain4  = 0b010,
-    Gain8  = 0b011,
+    //! No gain.
+    Gain1 = 0b000,
+    //! 2x Gain.
+    Gain2 = 0b001,
+    //! 4x Gain.
+    Gain4 = 0b010,
+    //! 8x Gain.
+    Gain8 = 0b011,
+    //! 16x Gain.
     Gain16 = 0b100
 };
 
@@ -323,27 +330,46 @@ enum class CrcEnable
     Disable = 0b0
 };
 
+/**
+ * @struct Pins
+ * @brief Structure containing the pins used by the ADS131.
+ */
 struct Pins
 {
+    //! Chip select pin used by the SPI.
     Nilai::Pin chipSelect;
+    //! Reset pin.
     Nilai::Pin reset;
+    //! Data available signal.
     Nilai::Pin dataReady;
+    //! Conversion complete signal.
     Nilai::Pin done;
-    bool     operator==(const Pins& other) const
+
+    /**
+     * @brief Compares two pins together.
+     * @param other The other pin
+     * @returns True if the pins are identical
+     * @returns False if the pins are not identical.
+     */
+    bool operator==(const Pins& other) const
     {
         return ((chipSelect == other.chipSelect) && (this->reset == other.reset) &&
                 (this->dataReady == other.dataReady) && (this->done == other.done));
     }
 };
 
+/**
+ * @class Config
+ * @brief Configuration of the ADS131.
+ */
 class Config
 {
 public:
     Pins          pins;
     SampleRate    sampleRate  = SampleRate::Hz1000;
-    Hamming       hamming     = Hamming::Off;               /*!< Can only be changed by hardware */
-    WordSize      wordSize    = WordSize::Size24;           /*!< Can only be changed by hardware */
-    SpiMode       spiMode     = SpiMode::AsynchronousSlave; /*!< Can only be changed by hardware */
+    Hamming       hamming     = Hamming::Off;                  //!< Can only be changed by hardware.
+    WordSize      wordSize    = WordSize::Size24;              //!< Can only be changed by hardware.
+    SpiMode       spiMode     = SpiMode::AsynchronousSlave;    //!< Can only be changed by hardware.
     Threshold     threshold   = Threshold::P95;
     Delay         highZDelay  = Delay::Ns12;
     Delay         doneDelay   = Delay::Ns12;
@@ -446,7 +472,7 @@ public:
              *        - 10 : NC  - Synchronous slave mode
              *        - 11 : Reserved
              *
-             *          Can take the values of @ref ADS_SPI_MODE
+             *          Can take the values of @ref SpiMode
              */
             uint8_t m0Pin : 2;
 
@@ -456,7 +482,7 @@ public:
              *        - 10 : NC  - 16-bits device word
              *        - 11 : Reserved
              *
-             *          Can take the values of @ref ADS_WORDSIZE
+             *          Can take the values of @ref WordSize
              */
             uint8_t m1Pin : 2;
 
@@ -466,7 +492,7 @@ public:
              *        - 10 : No Connect - reserved
              *        - 11 : Reserved
              *
-             *          Can take the values of @ref ADS_HAMMING
+             *          Can take the values of @ref Hamming
              */
             uint8_t m2Pin : 2;
 
@@ -603,13 +629,13 @@ public:
              *        - 110 : 75%   VDD   | 25%   VSS / -1.5V
              *        - 111 : 70%   VDD   | 30%   VSS / -1.5V
              *
-             *          Can take the values of @ref ADS_VOLTAGE_THRESHOLD
+             *          Can take the values of @ref Threshold
              */
             uint8_t comparatorThreshold : 3;
 
             /** @brief  Internal reference enable.
              *
-             *          Can take the values of @ref ADS_INTERNAL_REFERENCE_ENABLE
+             *          Can take the values of @ref InternalReferenceEnable
              */
             uint8_t internalRef : 1;
 
@@ -617,7 +643,7 @@ public:
              *        - 0 : REFP set to 2.442V
              *        - 1 : REFP set to 4.0V
              *
-             *          Can take the values of @ref ADS_REFERENCE_VOLTAGE
+             *          Can take the values of @ref ReferenceVoltage
              */
             uint8_t referenceVoltage : 1;
 
@@ -625,7 +651,7 @@ public:
 
             /** @brief  High-resolution mode.
              *
-             *          Can take the values of @ref ADS_RESOLUTION
+             *          Can take the values of @ref Resolution
              */
             uint8_t highResMode : 1;
 
@@ -660,7 +686,8 @@ public:
     {
         struct
         {
-            uint8_t crcEnable : 1; /** @brief  CRC enable */
+            /** @brief  CRC enable */
+            uint8_t crcEnable : 1;
 
             /** @brief  Fixed word size enabled:
              *        - 0 : Lenght of frame depends on enable state of
@@ -668,7 +695,7 @@ public:
              *        - 1 : Fixed 6-words long data frame
              *              (when using ADS131A04)
              *
-             *          Can take the values of @ref ADS_FRAME_MODE
+             *          Can take the values of @ref FrameMode
              */
             uint8_t frameMode : 1;
 
@@ -679,7 +706,7 @@ public:
              *        - 10 : >= 10ns delay
              *        - 11 : >= 12ns delay
              *
-             *          Can take the values of @ref ADS_DELAY
+             *          Can take the values of @ref Delay
              *
              * @note    after LSB shifted out
              */
@@ -691,7 +718,7 @@ public:
              *        - 10 : >= 10ns delay
              *        - 11 : >= 12ns delay
              *
-             *          Can take the values of @ref ADS_DELAY
+             *          Can take the values of @ref Delay
              *
              * @note    after LSB shifted out
              */
@@ -701,13 +728,13 @@ public:
              *        - 0 : Only device words sent & received
              *        - 1 : All bits sent & received
              *
-             *          Can take the values of @ref ADS_CRC_MODE
+             *          Can take the values of @ref CrcMode
              */
             uint8_t crcMode : 1;
 
             /** @brief  Watchdog timer enable.
              *
-             *          Can take the values of @ref ADS_WATCHDOG_TIMER_ENABLE
+             *          Can take the values of @ref WatchdogEnable
              */
             uint8_t watchdogEnable : 1;
         };
@@ -861,68 +888,53 @@ public:
 }    // namespace Registers
 
 /**
- ** @enum   Acknowledges
+ ** @namespace   Acknowledges
  ** @brief  Acknowledge messages from the ADS
  ** */
 namespace Acknowledges
 {
-// Disable GCC's "unused variable" warning.
-#        pragma GCC diagnostic push
-#        pragma GCC diagnostic ignored "-Wunused"
-constexpr uint16_t Ready  = 0xFF04;
-constexpr uint16_t Lock   = 0x0555;
-constexpr uint16_t Unlock = 0x0655;
-constexpr uint16_t Wakeup = 0x0033;
-// Restore GCC's diagnostic options.
-#        pragma GCC diagnostic pop
-#        pragma GCC diagnostic pop
+[[maybe_unused]] static constexpr uint16_t Ready  = 0xFF04;
+[[maybe_unused]] static constexpr uint16_t Lock   = 0x0555;
+[[maybe_unused]] static constexpr uint16_t Unlock = 0x0655;
+[[maybe_unused]] static constexpr uint16_t Wakeup = 0x0033;
 }    // namespace Acknowledges
 
 /**
- ** @enum   SysCommands
+ ** @namespace   SysCommands
  ** @brief  System commands to the ADS
  ** */
 namespace SysCommands
 {
-// Disable GCC's "unused variable" warning.
-#        pragma GCC diagnostic push
-#        pragma GCC diagnostic ignored "-Wunused"
-constexpr uint16_t Null = 0x0000;
-/*!< Null command */
-constexpr uint16_t Reset = 0x0011;
-/*!< Software power-on reset */
-constexpr uint16_t Standby = 0x0022;
-/*!< Enter low-power standby mode */
-constexpr uint16_t Wakeup = 0x0033;
-/*!< Exit low-power standby mode */
-constexpr uint16_t Lock = 0x0555;
-/*!< Enter locked state (ignore all commands except NULL, RREGS & UNLOCK) */
-constexpr uint16_t Unlock = 0x0655;
-/*!< Exit locked state */
-// Restore GCC's diagnostic options.
-#        pragma GCC diagnostic pop
-#        pragma GCC diagnostic pop
+//! Null command.
+[[maybe_unused]] static constexpr uint16_t Null = 0x0000;
+//! Software power-on reset.
+[[maybe_unused]] static constexpr uint16_t Reset = 0x0011;
+//! Enter low-power standby mode.
+[[maybe_unused]] static constexpr uint16_t Standby = 0x0022;
+//! Exit low-power standby mode.
+[[maybe_unused]] static constexpr uint16_t Wakeup = 0x0033;
+//! Enter locked state (ignore all commands except NULL, RREGS & UNLOCK).
+[[maybe_unused]] static constexpr uint16_t Lock = 0x0555;
+//! Exit locked state.
+[[maybe_unused]] static constexpr uint16_t Unlock = 0x0655;
 }    // namespace SysCommands
 
 namespace Commands
 {
-// Disable GCC's "unused variable" warning.
-#        pragma GCC diagnostic push
-#        pragma GCC diagnostic ignored "-Wunused"
 /**
  ** @brief   Read a single register
  ** */
-constexpr uint16_t ReadSingleRegisterMask = 0x2000;
+[[maybe_unused]] static constexpr uint16_t ReadSingleRegisterMask = 0x2000;
 /**
  ** @brief  Read (`nnnn nnnn` + 1) registers starting at address `a aaaa`
  **         Command: 0b001a aaaa nnnn nnnn
  ** */
-constexpr uint16_t ReadRegistersMask = 0x2000;
+[[maybe_unused]] static constexpr uint16_t ReadRegistersMask = 0x2000;
 /**
  ** @brief  Write a single register at address `a aaaa` with data `dddd dddd`
  **         Command: 0b010a aaaa dddd dddd
  ** */
-constexpr uint16_t WriteSingleRegisterMask = 0x4000;
+[[maybe_unused]] static constexpr uint16_t WriteSingleRegisterMask = 0x4000;
 /**
  ** @brief  Write (`nnnn nnnn` + 1) registers beginning at address `a aaaa`.
  **         Addition device words are required to send data (`dddd dddd`) to
@@ -934,10 +946,7 @@ constexpr uint16_t WriteSingleRegisterMask = 0x4000;
  **         Command: 0b011a aaaa nnnn nnnn
  **         Additional data: 0bdddd dddd eeee eeee
  ** */
-constexpr uint16_t WriteRegistersMask = 0x6000;
-// Restore GCC's diagnostic options.
-#        pragma GCC diagnostic pop
-#        pragma GCC diagnostic pop
+[[maybe_unused]] static constexpr uint16_t WriteRegistersMask = 0x6000;
 }    // namespace Commands
 }    // namespace ADS
 
@@ -947,7 +956,4 @@ constexpr uint16_t WriteRegistersMask = 0x6000;
 /* Have a wonderful day :) */
 #    endif /* _adsModuleConfig */
 #endif
-/**
- * @}
- */
 /****** END OF FILE ******/

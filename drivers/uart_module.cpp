@@ -1,9 +1,5 @@
 ﻿/**
- * @addtogroup  drivers
- * @{
- * @addtogroup  uart
- * @{
- * @file        uartModule.cpp
+ * @file        uart_module.cpp
  * @author      Samuel Martel
  * @author      Pascal-Emmanuel Lachance
  * @date        2020/08/13  -  09:40
@@ -283,8 +279,4 @@ extern "C" void HAL_UART_RxCpltCallback(UART_HandleTypeDef* huart)
 }
 }    // namespace Nilai::Drivers
 #endif
-/**
- * @}
- * @}
- */
 /* ----- END OF FILE ----- */

@@ -1,8 +1,6 @@
 /**
- * @addtogroup pwmModule.cpp
- * @{
  *******************************************************************************
- * @file	pwmModule.cpp
+ * @file	pwm_module.cpp
  * @author	Samuel Martel
  * @brief
  * Created on: Nov 6, 2020

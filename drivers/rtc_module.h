@@ -1,9 +1,5 @@
 /**
- * @addtogroup  drivers
- * @{
- * @addtogroup  RTC
- * @{
- * @file        rtcModule
+ * @file        rtc_module.h
  * @author      Samuel Martel
  * @date        2021/04/09
  *
@@ -85,8 +81,4 @@ private:
 #        endif
 #    endif
 #endif
-/**
- * @}
- * @}
- */
 /* ----- END OF FILE ----- */

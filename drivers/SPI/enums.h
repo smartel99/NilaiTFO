@@ -1,5 +1,5 @@
 /**
- * @file    Enums.h
+ * @file    enums.h
  * @author  Samuel Martel
  * @date    2022-05-02
  * @brief
@@ -12,7 +12,7 @@
  * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  * General Public License for more details.
  * You should have received a copy of the GNU General Public License along with this program. If
- * not, see <a href=https://www.gnu.org/licenses/>https://www.gnu.org/licenses/<a/>.
+ * not, see <a href=https://www.gnu.org/licenses/>https://www.gnu.org/licenses/</a>.
  */
 #ifndef NILAI_SPI_ENUMS_H
 #define NILAI_SPI_ENUMS_H
@@ -28,8 +28,8 @@
 namespace Nilai::SPI
 {
 /**
- * @addtogroup  SPI_Status
- * @brief       SPI module status, mostly describing error states.
+ * @enum  Status
+ * @brief SPI module status, mostly describing error states.
  */
 enum class Status
 {
@@ -61,27 +61,31 @@ enum class Status
     TIMEOUT = 0x00000400U,
 };
 
+/**
+ * @enum Polarity
+ * @brief Polarity of the clock signal
+ */
 enum class Polarity
 {
-    /*!< Clock is low by default
-     *   and active high >*/
+    //! Clock is low by default and active high.
     LOW = SPI_POLARITY_LOW,
-    /*!< Clock is high by default
-     *   and active low >*/
+    //! Clock is high by default and active low.
     HIGH = SPI_POLARITY_HIGH
 };
 
+/**
+ * @enum Phase
+ * @brief Moment of sampling.
+ */
 enum class Phase
 {
-    /*!< Sampling is done on clock
-     *  rising edge */
+    //! Sampling is done on clock rising edge.
     EDGE1 = SPI_PHASE_1EDGE,
-    /*!< Sampling is done on clock
-     *   falling edge >*/
+    //! Sampling is done on clock falling edge.
     EDGE2 = SPI_PHASE_2EDGE
 };
 
-/** From: https://stackoverflow.com/a/15889501 */
+/* From: https://stackoverflow.com/a/15889501 */
 constexpr inline Status operator|(Status a, Status b) noexcept
 {
     return static_cast<Status>(static_cast<std::underlying_type_t<Status>>(a) |
@@ -96,9 +100,7 @@ constexpr inline Status operator|=(Status& a, const Status& b) noexcept
 {
     return a = a | b;
 }
-/**
- * @}
- */
+
 
 enum class SectionState
 {

@@ -1,8 +1,5 @@
 /**
- * @addtogroup fileLoggerModule.h
- * @{
- *******************************************************************************
- * @file	fileLoggerModule.h
+ * @file	file_logger_module.h
  * @author	Samuel Martel
  * @brief
  * Created on: Apr 9, 2021
@@ -63,10 +60,6 @@ private:
 /* Function declarations */
 
 
-
-/**
- * @}
- */
 /* END OF FILE */
 #endif
 #endif /* FILELOGGERMODULE_H_ */

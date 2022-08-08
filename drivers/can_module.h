@@ -1,9 +1,5 @@
 /**
- * @addtogroup  drivers
- * @{
- * @addtogroup  can
- * @{
- * @file        canModule.hpp
+ * @file        can_module.h
  * @author      Samuel Martel
  * @author      Pascal-Emmanuel Lachance
  * @date        2020/08/10  -  13:27
@@ -141,8 +137,4 @@ private:
 #        include "../test/Mocks/drivers/can_module.h"
 #    endif
 #endif
-/**
- * @}
- * @}
- */
 /* ----- END OF FILE ----- */

@@ -84,11 +84,13 @@ if ("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Os")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
 else ()
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0 -Wall -Wextra -Wmissing-include-dirs -Wswitch-default -Wswitch-enum")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Os")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0")
 endif ()
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-unused-parameter")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-register -Wno-volatile")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wmissing-include-dirs -Wswitch-default -Wswitch-enum -Wshadow")
 # To reduce binary file output size.
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-threadsafe-statics -fno-use-cxa-atexit -fno-rtti")
 add_compile_options(--no-exceptions -fno-exceptions)
@@ -99,6 +101,7 @@ file(GLOB_RECURSE SOURCES
         )
 
 list(FILTER SOURCES EXCLUDE REGEX "${ROOT_DIR}/test")
+list(FILTER SOURCES EXCLUDE REGEX "${ROOT_DIR}/example")
 list(FILTER SOURCES EXCLUDE REGEX "${ROOT_DIR}/vendor")
 set(SOURCES ${SOURCES} "${ROOT_DIR}/vendor/inih/ini.c")
 

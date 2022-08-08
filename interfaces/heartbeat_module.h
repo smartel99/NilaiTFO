@@ -1,8 +1,6 @@
 ﻿/**
  ******************************************************************************
- * @addtogroup heartbeatModule
- * @{
- * @file    heartbeatModule
+ * @file    heartbeat_module.h
  * @author  Samuel Martel
  * @brief   Header for the heartbeatModule module.
  *
@@ -53,7 +51,4 @@ private:
 /* Have a wonderful day :) */
 #    endif /* GUARD_HEARTBEATMODULE_H */
 #endif
-/**
- * @}
- */
 /****** END OF FILE ******/

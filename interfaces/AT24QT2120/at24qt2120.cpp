@@ -12,12 +12,13 @@
  * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  * General Public License for more details.
  * You should have received a copy of the GNU General Public License along with this program. If
- * not, see <a href=https://www.gnu.org/licenses/>https://www.gnu.org/licenses/<a/>.
+ * not, see <a href=https://www.gnu.org/licenses/>https://www.gnu.org/licenses/</a>.
  */
 #include "at24qt2120.h"
 
 #if defined(NILAI_USE_AT24QT2120)
 
+#    include "../../defines/internal_config.h"
 #    include "../../processes/application.h"
 
 #    include "registers/registers.h"
@@ -65,14 +66,15 @@ At24Qt2120 At24Qt2120::Builder::Build() const
     At24Qt2120 obj {m_i2c};
 
     // Trigger a full chip reset.
-    obj.Reset();
+    obj.Reset(true);
 
     // Verify that the chip is there.
     const uint8_t id = obj.GetId();
-    NILAI_ASSERT(id == At24Qt2120::s_chipId,
-                 "Expected chip ID to be %#02x, read %#02x",
-                 At24Qt2120::s_chipId,
-                 id);
+    if (id != At24Qt2120::s_chipId)
+    {
+        TS_ERROR("Expected chip ID to be %#02x, read %#02x", At24Qt2120::s_chipId, id);
+        return obj;
+    }
 
     // Verify the firmware version.
     FirmwareVersion version = obj.GetFirmwareVersion();
@@ -159,7 +161,14 @@ At24Qt2120 At24Qt2120::Builder::Build() const
         obj.m_changePin = m_pin;
     }
 
-    obj.Calibrate();
+    if (!obj.Calibrate(true))
+    {
+        TS_ERROR("Unable to calibrate sensor!");
+    }
+    else
+    {
+        obj.m_initialized = true;
+    }
 
     return obj;
 }
@@ -220,20 +229,20 @@ bool At24Qt2120::HandleIrq(Events::Event* e)
     return false;
 }
 
+#        if defined(NILAI_USE_EVENTS)
 void At24Qt2120::BindIrq(Events::EventTypes type)
 {
     m_irqType = type;
     m_irqId   = Application::Get()->RegisterEventCallback(
       type, [this](Events::Event* e) { return HandleIrq(e); });
 }
-
+#        endif
 
 uint8_t At24Qt2120::GetId() noexcept
 {
     static constexpr uint8_t REG_SIZE = 1;
 
-    I2C::Frame f =
-      ReceiveFrameFromRegister(s_i2cAddress, static_cast<uint8_t>(Registers::ChipId), REG_SIZE);
+    I2C::Frame f = GetRegisters(Registers::ChipId, REG_SIZE);
 
     return f.data.front();
 }
@@ -242,18 +251,25 @@ AT24QT2120::FirmwareVersion At24Qt2120::GetFirmwareVersion() noexcept
 {
     static constexpr uint8_t REG_SIZE = 1;
 
-    I2C::Frame f = ReceiveFrameFromRegister(
-      s_i2cAddress, static_cast<uint8_t>(Registers::FirmwareVersion), REG_SIZE);
+    I2C::Frame f = GetRegisters(Registers::FirmwareVersion, REG_SIZE);
 
     return AT24QT2120::FirmwareVersion {f.data.front()};
+}
+
+AT24QT2120::SensorStatus At24Qt2120::GetSensorStatus() noexcept
+{
+    static constexpr uint8_t REG_SIZE = 4;
+
+    I2C::Frame f = GetRegisters(Registers::DetectionStatus, REG_SIZE);
+
+    return AT24QT2120::SensorStatus {f.data};
 }
 
 AT24QT2120::DetectionStatus At24Qt2120::GetDetectionStatus() noexcept
 {
     static constexpr uint8_t REG_SIZE = 1;
 
-    I2C::Frame f = ReceiveFrameFromRegister(
-      s_i2cAddress, static_cast<uint8_t>(Registers::DetectionStatus), REG_SIZE);
+    I2C::Frame f = GetRegisters(Registers::DetectionStatus, REG_SIZE);
 
     return AT24QT2120::DetectionStatus {f.data.front()};
 }
@@ -262,8 +278,7 @@ AT24QT2120::KeyStatus At24Qt2120::GetKeyStatus() noexcept
 {
     static constexpr uint8_t REG_SIZE = 2;
 
-    I2C::Frame f =
-      ReceiveFrameFromRegister(s_i2cAddress, static_cast<uint8_t>(Registers::KeyStatus1), REG_SIZE);
+    I2C::Frame f = GetRegisters(Registers::KeyStatus1, REG_SIZE);
 
     uint16_t keyStatus = (static_cast<uint16_t>(f.data[0]) << 8) | static_cast<uint16_t>(f.data[1]);
     return AT24QT2120::KeyStatus {keyStatus};
@@ -273,8 +288,7 @@ uint8_t At24Qt2120::GetSliderPosition() noexcept
 {
     static constexpr uint8_t REG_SIZE = 1;
 
-    I2C::Frame f = ReceiveFrameFromRegister(
-      s_i2cAddress, static_cast<uint8_t>(Registers::SliderPosition), REG_SIZE);
+    I2C::Frame f = GetRegisters(Registers::SliderPosition, REG_SIZE);
 
     return f.data.front();
 }
@@ -287,33 +301,22 @@ bool At24Qt2120::Calibrate(bool waitForEnd) noexcept
 
     // Writing anything other than 0 to the calibration register initiates a calibration cycle.
     const uint8_t startCalibration = 0xFF;
-    TransmitFrameToRegister(s_i2cAddress,
-                            static_cast<uint8_t>(Registers::Calibrate),
-                            &startCalibration,
-                            sizeof(startCalibration));
+    SetRegisters(Registers::Calibrate, &startCalibration, sizeof(startCalibration));
+
+    AT24QT2120::SensorStatus sensorStatus = GetSensorStatus();
+    TS_DEBUG("Status: %#02x, %#04x, %#02x",
+             static_cast<uint8_t>(sensorStatus.ChipStatus),
+             static_cast<uint16_t>(sensorStatus.KeyStatuses),
+             sensorStatus.SliderPosition);
 
     if (waitForEnd)
     {
         // Datasheet says that a calibration cycle takes 15 measurements at LPM = 1.
         // 15 cycles * 16ms = 240ms.
-        // We wait slightly less than that, in case the sensor finishes before us.
-        static constexpr uint32_t CALIBRATION_WAIT_TIME = 230;
-        Nilai::Delay(CALIBRATION_WAIT_TIME);
-
-        // Give the sensor between 230 and 250ms to calibrate itself.
-        static constexpr uint32_t MAX_VERIFICATION_TIME = 20;
-        uint32_t                  maxTime               = Nilai::GetTime() + MAX_VERIFICATION_TIME;
-
-        AT24QT2120::DetectionStatus status = {};
-        do
+        static constexpr uint32_t CALIBRATION_WAIT_TIME = 240;
+        static constexpr uint32_t VERIFICATION_MARGIN   = 20;
+        if (!WaitForCalibrationEnd(CALIBRATION_WAIT_TIME + VERIFICATION_MARGIN))
         {
-            status = GetDetectionStatus();
-        } while (status.Calibrate == 1 && Nilai::GetTime() <= maxTime);
-
-        // Make sure that the calibration is over.
-        if (status.Calibrate == 1)
-        {
-            // Bit is still 1, calibration is not over yet.
             TS_ERROR("Calibration timed out after %i ms!", Nilai::GetTime() - startTime);
             return false;
         }
@@ -323,29 +326,30 @@ bool At24Qt2120::Calibrate(bool waitForEnd) noexcept
     return true;
 }
 
-void At24Qt2120::Reset(bool waitForReset) noexcept
+bool At24Qt2120::Reset(bool waitForReset) noexcept
 {
     TS_DEBUG("Resetting the sensor...");
 
     const uint8_t resetByte = 0xFF;
-    TransmitFrameToRegister(
-      s_i2cAddress, static_cast<uint8_t>(Registers::Reset), &resetByte, sizeof(resetByte));
+    SetRegisters(Registers::Reset, &resetByte, sizeof(resetByte));
 
     if (waitForReset)
     {
-        // It can take up to 200ms after a reset for the sensor to respond to us again.
-        static constexpr uint32_t RESET_TIME = 200;
+        // It can take up to 200ms after a reset for the sensor to respond to us again, according
+        // to the datasheet.
+        static constexpr uint32_t EXTRA_TIME = 20;
+        static constexpr uint32_t RESET_TIME = 200 + EXTRA_TIME;
         Nilai::Delay(RESET_TIME);
 
-        if (CheckIfDevOnBus(s_i2cAddress))
-        {
-            TS_DEBUG("Reset complete!");
-        }
-        else
+        if (!CheckIfDevOnBus(s_i2cAddress))
         {
             TS_ERROR("No response from sensor after reset!");
+            return false;
         }
     }
+
+    TS_DEBUG("Reset complete!");
+    return true;
 }
 
 void At24Qt2120::SetSamplingInterval(size_t time) noexcept
@@ -354,8 +358,7 @@ void At24Qt2120::SetSamplingInterval(size_t time) noexcept
 
     TS_DEBUG("Set LPM: %ims (%#02x)", time, regVal);
 
-    TransmitFrameToRegister(
-      s_i2cAddress, static_cast<uint8_t>(Registers::LowPowerMode), &regVal, sizeof(regVal));
+    SetRegisters(Registers::LowPowerMode, &regVal, sizeof(regVal));
 
     TS_VERIFY_VALUE(time, GetSamplingInterval());
 }
@@ -364,8 +367,7 @@ size_t At24Qt2120::GetSamplingInterval() noexcept
 {
     static constexpr uint8_t REG_SIZE = 1;
 
-    I2C::Frame f = ReceiveFrameFromRegister(
-      s_i2cAddress, static_cast<uint8_t>(Registers::LowPowerMode), REG_SIZE);
+    I2C::Frame f = GetRegisters(Registers::LowPowerMode, REG_SIZE);
 
     return RegValToSamplingTime(f.data.front());
 }
@@ -374,8 +376,7 @@ void At24Qt2120::SetTowardTouchDrift(uint8_t v) noexcept
 {
     TS_DEBUG("Set TTD: %#02x", v);
 
-    TransmitFrameToRegister(
-      s_i2cAddress, static_cast<uint8_t>(Registers::TowardTouchDrift), &v, sizeof(v));
+    SetRegisters(Registers::TowardTouchDrift, &v, sizeof(v));
 
     TS_VERIFY_VALUE(v, GetTowardTouchDrift());
 }
@@ -384,8 +385,7 @@ uint8_t At24Qt2120::GetTowardTouchDrift() noexcept
 {
     static constexpr uint8_t REG_SIZE = 1;
 
-    I2C::Frame f = ReceiveFrameFromRegister(
-      s_i2cAddress, static_cast<uint8_t>(Registers::TowardTouchDrift), REG_SIZE);
+    I2C::Frame f = GetRegisters(Registers::TowardTouchDrift, REG_SIZE);
 
     return f.data.front();
 }
@@ -394,8 +394,7 @@ void At24Qt2120::SetAwayFromTouchDrift(uint8_t v) noexcept
 {
     TS_DEBUG("Set AFD: %#02x", v);
 
-    TransmitFrameToRegister(
-      s_i2cAddress, static_cast<uint8_t>(Registers::AwayFromTouchDrift), &v, sizeof(v));
+    SetRegisters(Registers::AwayFromTouchDrift, &v, sizeof(v));
 
     TS_VERIFY_VALUE(v, GetAwayFromTouchDrift());
 }
@@ -404,8 +403,7 @@ uint8_t At24Qt2120::GetAwayFromTouchDrift() noexcept
 {
     static constexpr uint8_t REG_SIZE = 1;
 
-    I2C::Frame f = ReceiveFrameFromRegister(
-      s_i2cAddress, static_cast<uint8_t>(Registers::AwayFromTouchDrift), REG_SIZE);
+    I2C::Frame f = GetRegisters(Registers::AwayFromTouchDrift, REG_SIZE);
 
     return f.data.front();
 }
@@ -416,8 +414,7 @@ void At24Qt2120::SetDetectionIntegrator(uint8_t v) noexcept
     v = std::max(v, static_cast<uint8_t>(32));
     TS_DEBUG("Set DI: %#02x", v);
 
-    TransmitFrameToRegister(
-      s_i2cAddress, static_cast<uint8_t>(Registers::DetectionIntegrator), &v, sizeof(uint8_t));
+    SetRegisters(Registers::DetectionIntegrator, &v, sizeof(uint8_t));
 
     TS_VERIFY_VALUE(v, GetDetectionIntegrator());
 }
@@ -426,8 +423,7 @@ uint8_t At24Qt2120::GetDetectionIntegrator() noexcept
 {
     static constexpr uint8_t REG_SIZE = 1;
 
-    I2C::Frame f = ReceiveFrameFromRegister(
-      s_i2cAddress, static_cast<uint8_t>(Registers::DetectionIntegrator), REG_SIZE);
+    I2C::Frame f = GetRegisters(Registers::DetectionIntegrator, REG_SIZE);
 
     return f.data.front();
 }
@@ -437,8 +433,7 @@ void At24Qt2120::SetTouchRecalibrationDelay(size_t delay) noexcept
     uint8_t regVal = DriftTimeToRegVal(delay);
     TS_DEBUG("Set TRD: %ims (%#02x)", delay, regVal);
 
-    TransmitFrameToRegister(
-      s_i2cAddress, static_cast<uint8_t>(Registers::TouchRecalDelay), &regVal, sizeof(regVal));
+    SetRegisters(Registers::TouchRecalDelay, &regVal, sizeof(regVal));
 
     TS_VERIFY_VALUE(delay, GetTouchRecalibrationDelay());
 }
@@ -447,8 +442,7 @@ size_t At24Qt2120::GetTouchRecalibrationDelay() noexcept
 {
     static constexpr uint8_t REG_SIZE = 1;
 
-    I2C::Frame f = ReceiveFrameFromRegister(
-      s_i2cAddress, static_cast<uint8_t>(Registers::TouchRecalDelay), REG_SIZE);
+    I2C::Frame f = GetRegisters(Registers::TouchRecalDelay, REG_SIZE);
 
     return RegValToDriftTime(f.data.front());
 }
@@ -458,8 +452,7 @@ void At24Qt2120::SetDriftHoldTime(size_t time) noexcept
     uint8_t regVal = DriftTimeToRegVal(time);
     TS_DEBUG("Set DHT: %ims (%#02x)", time, regVal);
 
-    TransmitFrameToRegister(
-      s_i2cAddress, static_cast<uint8_t>(Registers::DriftHoldTime), &regVal, sizeof(regVal));
+    SetRegisters(Registers::DriftHoldTime, &regVal, sizeof(regVal));
 
     TS_VERIFY_VALUE(time, GetDriftHoldTime());
 }
@@ -468,8 +461,7 @@ size_t At24Qt2120::GetDriftHoldTime() noexcept
 {
     static constexpr uint8_t REG_SIZE = 1;
 
-    I2C::Frame f = ReceiveFrameFromRegister(
-      s_i2cAddress, static_cast<uint8_t>(Registers::DriftHoldTime), REG_SIZE);
+    I2C::Frame f = GetRegisters(Registers::DriftHoldTime, REG_SIZE);
 
     return RegValToDriftTime(f.data.front());
 }
@@ -482,8 +474,7 @@ void At24Qt2120::SetSliderOptions(bool enable, bool wheel) noexcept
     AT24QT2120::SliderOptions opt {enable, wheel};
     uint8_t                   regVal = static_cast<uint8_t>(opt);
 
-    TransmitFrameToRegister(
-      s_i2cAddress, static_cast<uint8_t>(Registers::SliderOption), &regVal, sizeof(regVal));
+    SetRegisters(Registers::SliderOption, &regVal, sizeof(regVal));
 
     TS_VERIFY_VALUE(opt, GetSliderOptions());
 }
@@ -492,8 +483,7 @@ AT24QT2120::SliderOptions At24Qt2120::GetSliderOptions() noexcept
 {
     static constexpr uint8_t REG_SIZE = 1;
 
-    I2C::Frame f = ReceiveFrameFromRegister(
-      s_i2cAddress, static_cast<uint8_t>(Registers::SliderOption), REG_SIZE);
+    I2C::Frame f = GetRegisters(Registers::SliderOption, REG_SIZE);
 
     return AT24QT2120::SliderOptions {f.data.front()};
 }
@@ -502,8 +492,7 @@ void At24Qt2120::SetChargeTime(uint8_t us) noexcept
 {
     TS_DEBUG("Set Charge Time: %ius", us);
 
-    TransmitFrameToRegister(
-      s_i2cAddress, static_cast<uint8_t>(Registers::ChargeTime), &us, sizeof(us));
+    SetRegisters(Registers::ChargeTime, &us, sizeof(us));
 
     TS_VERIFY_VALUE(us, GetChargeTime());
 }
@@ -512,8 +501,7 @@ uint8_t At24Qt2120::GetChargeTime() noexcept
 {
     static constexpr uint8_t REG_SIZE = 1;
 
-    I2C::Frame f =
-      ReceiveFrameFromRegister(s_i2cAddress, static_cast<uint8_t>(Registers::ChargeTime), REG_SIZE);
+    I2C::Frame f = GetRegisters(Registers::ChargeTime, REG_SIZE);
 
     return f.data.front();
 }
@@ -527,7 +515,7 @@ void At24Qt2120::SetDetectionThreshold(AT24QT2120::Keys key, uint8_t threshold) 
 
     Registers r = RegisterFromKey(key, Registers::Key0DetectThreshold);
 
-    TransmitFrameToRegister(s_i2cAddress, static_cast<uint8_t>(r), &threshold, sizeof(threshold));
+    SetRegisters(r, &threshold, sizeof(threshold));
 
     TS_VERIFY_VALUE(threshold, GetDetectionThreshold(key));
 }
@@ -538,7 +526,7 @@ uint8_t At24Qt2120::GetDetectionThreshold(AT24QT2120::Keys key) noexcept
 
     Registers r = RegisterFromKey(key, Registers::Key0DetectThreshold);
 
-    I2C::Frame f = ReceiveFrameFromRegister(s_i2cAddress, static_cast<uint8_t>(r), REG_SIZE);
+    I2C::Frame f = GetRegisters(r, REG_SIZE);
 
     return f.data.front();
 }
@@ -588,7 +576,7 @@ void At24Qt2120::SetKeyOptions(AT24QT2120::Keys key, const KeyOptions& options) 
 
     Registers r = RegisterFromKey(key, Registers::Key0Control);
 
-    TransmitFrameToRegister(s_i2cAddress, static_cast<uint8_t>(r), &regVal, sizeof(regVal));
+    SetRegisters(r, &regVal, sizeof(regVal));
 
     TS_VERIFY_VALUE(options, GetKeyOptions(key));
 }
@@ -598,7 +586,7 @@ AT24QT2120::KeyOptions At24Qt2120::GetKeyOptions(AT24QT2120::Keys key) noexcept
     static constexpr uint8_t REG_SIZE = 1;
 
     Registers  r = RegisterFromKey(key, Registers::Key0Control);
-    I2C::Frame f = ReceiveFrameFromRegister(s_i2cAddress, static_cast<uint8_t>(r), REG_SIZE);
+    I2C::Frame f = GetRegisters(r, REG_SIZE);
 
     return KeyOptions {f.data.front()};
 }
@@ -626,7 +614,7 @@ void At24Qt2120::SetKeyPulseScale(AT24QT2120::Keys key, const AT24QT2120::PulseS
     uint8_t   regVal = static_cast<uint8_t>(ps);
     Registers r      = RegisterFromKey(key, Registers::Key0PulseScale);
 
-    TransmitFrameToRegister(s_i2cAddress, static_cast<uint8_t>(r), &regVal, sizeof(regVal));
+    SetRegisters(r, &regVal, sizeof(regVal));
 
     TS_VERIFY_VALUE(ps, GetKeyPulseScale(key));
 }
@@ -637,7 +625,7 @@ AT24QT2120::PulseScale At24Qt2120::GetKeyPulseScale(AT24QT2120::Keys key) noexce
 
     Registers r = RegisterFromKey(key, Registers::Key0PulseScale);
 
-    I2C::Frame f = ReceiveFrameFromRegister(s_i2cAddress, static_cast<uint8_t>(r), REG_SIZE);
+    I2C::Frame f = GetRegisters(r, REG_SIZE);
 
     return AT24QT2120::PulseScale {f.data.front()};
 }
@@ -647,7 +635,7 @@ uint16_t At24Qt2120::GetKeySignal(AT24QT2120::Keys key) noexcept
     static constexpr uint8_t REG_SIZE = 2;
 
     Registers  r = RegisterFromKey(key, Registers::KeySignal0MSB);
-    I2C::Frame f = ReceiveFrameFromRegister(s_i2cAddress, static_cast<uint8_t>(r), REG_SIZE);
+    I2C::Frame f = GetRegisters(r, REG_SIZE);
 
     return (static_cast<uint16_t>(f.data[0]) << 8) | static_cast<uint16_t>(f.data[1]);
 }
@@ -657,10 +645,92 @@ uint16_t At24Qt2120::GetKeyReference(AT24QT2120::Keys key) noexcept
     static constexpr uint8_t REG_SIZE = 2;
 
     Registers  r = RegisterFromKey(key, Registers::ReferenceData0MSB);
-    I2C::Frame f = ReceiveFrameFromRegister(s_i2cAddress, static_cast<uint8_t>(r), REG_SIZE);
+    I2C::Frame f = GetRegisters(r, REG_SIZE);
 
     return (static_cast<uint16_t>(f.data[0]) << 8) | static_cast<uint16_t>(f.data[1]);
 }
+
+I2C::Frame At24Qt2120::GetRegisters(AT24QT2120::Registers r, size_t cnt)
+{
+    return ReceiveFrameFromRegister(s_i2cAddress, static_cast<uint8_t>(r), cnt);
+}
+
+void At24Qt2120::SetRegisters(AT24QT2120::Registers r, const uint8_t* data, size_t cnt)
+{
+    TransmitFrameToRegister(s_i2cAddress, static_cast<uint8_t>(r), data, cnt);
+}
+
+constexpr At24Qt2120::At24Qt2120(const At24Qt2120& o) noexcept : I2cModule(o)
+{
+    m_run           = o.m_run;
+    m_lastEventTime = o.m_lastEventTime;
+    m_changePin     = o.m_changePin;
+    m_initialized   = o.m_initialized;
+
+    m_irqType = o.m_irqType;
+    BindIrq(m_irqType);
+}
+
+constexpr At24Qt2120::At24Qt2120(At24Qt2120&& o) noexcept : I2cModule(std::move(o))
+{
+#        if defined(NILAI_USE_EVENTS)
+    Nilai::Application::Get()->UnregisterEventCallback(m_irqType, m_irqId);
+    BindIrq(m_irqType);
+#        endif
+}
+
+bool At24Qt2120::WaitForCalibrationEnd(size_t timeout)
+{
+    uint32_t timeoutTime = Nilai::GetTime() + timeout;
+
+    // In IRQ mode, wait for interrupt to happen.
+    uint32_t lastTime = m_lastEventTime;
+    while ((lastTime == m_lastEventTime) && (Nilai::GetTime() <= timeoutTime))
+    {
+        bool shouldCheck = false;
+#        if defined(NILAI_USE_EVENTS)
+        // With events enabled, we might be in interrupt mode or in polling mode.
+        if (m_irqId != std::numeric_limits<size_t>::max())
+        {
+            // IRQ mode.
+            static uint32_t lastTime = 0;
+            if (m_lastEventTime != lastTime)
+            {
+                lastTime    = m_lastEventTime;
+                shouldCheck = true;
+            }
+        }
+        else
+#        endif
+        {
+            // Polling mode.
+            static bool lastState = true;
+            if (m_changePin.Get() != lastState)
+            {
+                lastState = m_changePin.Get();
+                if (!lastState)
+                {
+                    // Change pin is active low.
+                    shouldCheck = true;
+                }
+            }
+        }
+
+        if (shouldCheck)
+        {
+            // Sensor indicated a change of state, go read its statuses.
+            AT24QT2120::SensorStatus s = GetSensorStatus();
+            if (!s.ChipStatus.Calibrate)
+            {
+                // Calibrate bit will be cleared when the calibration is completed.
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
 #    endif
 }    // namespace Nilai::Interfaces
 #endif

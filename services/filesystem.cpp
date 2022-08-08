@@ -1,8 +1,5 @@
 /**
- * @addtogroup sdModule.cpp
- * @{
- *******************************************************************************
- * @file	sdModule.cpp
+ * @file	filesystem.cpp
  * @author	Samuel Martel
  * @brief
  * Created on: Apr 9, 2021

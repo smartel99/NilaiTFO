@@ -1,8 +1,6 @@
 ﻿/**
  ******************************************************************************
- * @addtogroup ledPattern
- * @{
- * @file    ledPattern
+ * @file    led_pattern.h
  * @author  Samuel Martel
  * @brief   Header for the ledPattern module.
  *
@@ -10,8 +8,8 @@
  *
  ******************************************************************************
  */
-#ifndef _ledPattern
-#    define _ledPattern
+#ifndef GUARD_LED_PATTERN_H
+#    define GUARD_LED_PATTERN_H
 
 /*****************************************************************************/
 /* Includes */
@@ -47,8 +45,5 @@ constexpr LedPattern Error {100, 900, -1};
 
 }    // namespace Nilai
 /* Have a wonderful day :) */
-#endif /* _ledPattern */
-/**
- * @}
- */
+#endif /* GUARD_LED_PATTERN_H */
 /****** END OF FILE ******/

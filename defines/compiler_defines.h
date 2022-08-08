@@ -1,10 +1,5 @@
-/*
- * @addtogroup  defines
- * @{
- * @addtogroup  compilerDefines
- * @{
- *
- * @file    compilerDefines.h
+/**
+ * @file    compiler_defines.h
  * @author  Pascal-Emmanuel Lachance
  * @date    2019/08/06  -  16:39
  *
@@ -88,8 +83,5 @@
 #endif
 
 /*************************************************************************************************/
-/**
- * @}
- * @}
- */
+
 /* ----- END OF FILE ----- */

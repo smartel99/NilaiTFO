@@ -1,8 +1,6 @@
 /**
- * @addtogroup rtcModule.cpp
- * @{
  *******************************************************************************
- * @file	rtcModule.cpp
+ * @file	rtc_module.cpp
  * @author	Samuel Martel
  * @brief
  * Created on: Apr 9, 2021

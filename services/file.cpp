@@ -1,7 +1,4 @@
 /**
- * @addtogroup file.cpp
- * @{
- *******************************************************************************
  * @file	file.cpp
  * @author	Samuel Martel
  * @brief

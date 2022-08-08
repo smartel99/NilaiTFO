@@ -1,8 +1,6 @@
 ﻿/**
  ******************************************************************************
- * @addtogroup umoModule
- * @{
- * @file    umoModule
+ * @file    umo_module.cpp
  * @author  Samuel Martel
  * @brief   Sources for the umoModule module.
  *

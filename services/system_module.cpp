@@ -1,8 +1,6 @@
 ﻿/**
  ******************************************************************************
- * @addtogroup SystemModule
- * @{
- * @file    SystemModule
+ * @file    system_module.cpp
  * @author  Samuel Martel
  * @brief   Header for the SystemModule module.
  *

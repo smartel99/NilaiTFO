@@ -1,5 +1,5 @@
 /**
- * @file    IniParser.h
+ * @file    ini_parser.h
  * @author  Samuel Martel
  * @date    2022-02-16
  * @brief
@@ -12,7 +12,7 @@
  * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  * General Public License for more details.
  * You should have received a copy of the GNU General Public License along with this program. If
- * not, see <a href=https://www.gnu.org/licenses/>https://www.gnu.org/licenses/<a/>.
+ * not, see <a href=https://www.gnu.org/licenses/>https://www.gnu.org/licenses/</a>.
  */
 #ifndef NILAI_INIPARSER_H
 #define NILAI_INIPARSER_H

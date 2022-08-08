@@ -1,5 +1,5 @@
 /**
- * @file    Enums.h
+ * @file    enums.h
  * @author  Samuel Martel
  * @date    2022-02-07
  * @brief
@@ -12,17 +12,23 @@
  * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  * General Public License for more details.
  * You should have received a copy of the GNU General Public License along with this program. If
- * not, see <a href=https://www.gnu.org/licenses/>https://www.gnu.org/licenses/<a/>.
+ * not, see <a href=https://www.gnu.org/licenses/>https://www.gnu.org/licenses/</a>.
  */
 #ifndef NILAI_TAS5707_ENUMS_H
 #define NILAI_TAS5707_ENUMS_H
 
+#define NILAI_USE_TAS5707
+#error
 #if defined(NILAI_USE_TAS5707)
 
 #    include <cstdint>
 
 namespace Nilai::Tas5707
 {
+/**
+ * @enum Registers
+ * @brief List of all the registers of the TAS5707.
+ */
 enum class Registers : uint8_t
 {
     //! Clock control register. 1 byte, default value: 0x6C
@@ -78,6 +84,7 @@ enum class Registers : uint8_t
 
     /**
      * Biquad filters are all composed of 20 bytes, separated as:
+     * @htmlonly
      * <ul>
      *  <li>Bytes 0 to 3: b0 coefficient, default: 0x00800000</li>
      *  <li>Bytes 4 to 7: b1 coefficient, default: 0x00000000</li>
@@ -85,6 +92,7 @@ enum class Registers : uint8_t
      *  <li>Bytes 12 to 15: a1 coefficient, default: 0x00000000</li>
      *  <li>Bytes 16 to 19: a2 coefficient, default: 0x00000000</li>
      * </ul>
+     * @endhtmlonly
      */
     Ch1Bq_0 = 0x29,
     Ch1Bq_1,
@@ -147,6 +155,9 @@ enum class Registers : uint8_t
     // 0xFA-0xFF: Reserved.
 };
 
+/**
+ * @brief Audio channels of the TAS5707.
+ */
 enum class Channels
 {
     Master = 0,
@@ -155,7 +166,7 @@ enum class Channels
 };
 
 /**
- * @brief
+ * @brief Possible addresses that a TAS5760 may have.
  */
 namespace I2CAddresses
 {
@@ -167,7 +178,7 @@ namespace I2CAddresses
 
 
 /**
- * @addtogroup TAS5707 Clock Control Register
+ * @addtogroup TAS5707_clk_ctrl_reg "TAS5707 Clock Control Register"
  * @{
  */
 
@@ -224,7 +235,7 @@ namespace MclkFrequencies
  */
 
 /**
- * @addtogroup TAS5707 Error Statuses
+ * @addtogroup TAS5707_err_stat "TAS5707 Error Statuses"
  * @{
  */
 namespace ErrorCodes
@@ -250,7 +261,7 @@ namespace ErrorCodes
  */
 
 /**
- * @addtogroup TAS5707 System Control Register 1
+ * @addtogroup TAS5707_sys_ctrl_reg_1 "TAS5707 System Control Register 1"
  * @{
  */
 namespace PwmDcBlock
@@ -304,7 +315,7 @@ namespace DeEmphasisModes
  */
 
 /**
- * @addtogroup TAS5707 Serial Data Interface Register
+ * @addtogroup TAS5707_ser_data_int_reg "TAS5707 Serial Data Interface Register"
  * @{
  */
 namespace SerialDataMode
@@ -339,7 +350,7 @@ namespace SerialDataMode
       */
 
 /**
- * @addtogroup TAS5707 System Control Register 2
+ * @addtogroup TAS5707_sys_ctrl_reg_2 "TAS5707 System Control Register 2"
  * @{
  */
 namespace ChannelEnable
@@ -360,7 +371,7 @@ namespace ChannelEnable
       */
 
 /**
- * @addtogroup Soft Mute Register
+ * @addtogroup TAS5707_soft_mute_reg "TAS5707 Soft Mute Register"
  * @{
  */
 namespace Ch1SoftMute
@@ -395,7 +406,8 @@ namespace Ch2SoftMute
       */
 
 /**
- * @addtogroup TAS5707 Volume Registers
+ * @addtogroup TAS5707_vol_reg "TAS5707 Volume Registers"
+ * @{
  */
 namespace ChannelVolume
 {
@@ -415,9 +427,9 @@ namespace ChannelVolume
       */
 
 /**
- * @addtogroup TAS5707 Master Fine Volume Register
- * @brief This register can be used to provide precision tuning of master volume.
+ * @addtogroup TAS5707_master_fine_vol_reg "TAS5707 Master Fine Volume Register"
  * @{
+ * @brief This register can be used to provide precision tuning of master volume.
  */
 namespace FineVolume
 {
@@ -441,10 +453,13 @@ namespace FineVolume
       */
 
 /**
- * @addtogroup TAS5707 Volume Configuration Register
+ * @addtogroup TAS5707_vol_cfg_reg "TAS5707 Volume Configuration Register"
+ * @{
  * @brief Volume slew rate, used to control volume change and mute ramp rates.
  * This register controls the number of steps in a volume ramp. The rate at which these steps occurs
- * is dependent on the sample rate of the I2S data as follows: <table> <tr> <th>Sample Rate
+ * is dependent on the sample rate of the I2S data as follows:
+ * @htmlonly
+ * <table> <tr> <th>Sample Rate
  * (kHz)</th> <th>Approximate Ramp Rate</th>
  *  </tr>
  *  <tr>
@@ -460,7 +475,7 @@ namespace FineVolume
  *      <td>83.3us/step</td>
  *  </tr>
  * </table>
- * @{
+ * @endhtmlonly
  */
 namespace VolumeSlewRates
 {
@@ -484,9 +499,9 @@ namespace VolumeSlewRates
       */
 
 /**
- * @addtogroup TAS5707 Modulation Limit Register
- * @brief The modulation limit is the maximum duty cycle of the PWM output waveform.
+ * @addtogroup TAS5707_mod_limit_reg "TAS5707 Modulation Limit Register"
  * @{
+ * @brief The modulation limit is the maximum duty cycle of the PWM output waveform.
  */
 namespace ModulationLimit
 {
@@ -517,7 +532,8 @@ namespace ModulationLimit
       */
 
 /**
- * @addtogroup TAS5707 Inter-channel Delay Registers
+ * @addtogroup TAS5707_int_ch_delay_reg "TAS5707 Inter-channel Delay Registers"
+ * @{
  * @brief Internal PWM channels 1, 2, 1' and 2' are mapped into registers 0x11, 0x12, 0x13 and 0x14
  * respectively.
  *
@@ -525,7 +541,6 @@ namespace ModulationLimit
  * etc.). Therefore, appropriate ICD settings must be used. By default, the device has ICD settings
  * for AD mode. If used in BD mode, then update these registers before coming out of all-channel
  * shutdown.
- * @{
  */
 namespace InterchannelDelays
 {
@@ -563,12 +578,12 @@ namespace InterchannelDelays
       */
 
 /**
- * @addtogroup TAS5707 Start/Stop Period Register
+ * @addtogroup TAS5707_start_stop_per_reg "TAS5707 Start/Stop Period Register"
+ * @{
  * @brief This register is used to control the soft-start and soft-stop period following an
  * enter/exit all channel shut down command or change in the PDN state. This helps reduce pops and
  * clicks at start-up and shutdown. The times are only approximate and vary depending on device
  * activity level and I2S clock stability.
- * @{
  */
 namespace StartStopPeriods
 {
@@ -634,10 +649,10 @@ namespace StartStopPeriods
       */
 
 /**
- * @addtogroup TAS5707 Oscillator Trim Register
+ * @addtogroup TAS5707_osc_trim_reg "TAS5707 Oscillator Trim Register"
+ * @{
  * @brief Indicates the status of the TAS5707's internal oscillator used to automatically detect I2S
  * clock rates.
- * @{
  */
 namespace OscillatorTrimStates
 {
@@ -664,10 +679,10 @@ namespace OscillatorTrimSelect
       */
 
 /**
- * @addtogroup TAS5707 BKND_ERR Register
+ * @addtogroup TAS5707_bknd_err_reg "TAS5707 BKND_ERR Register"
+ * @{
  * @brief This register sets the time that the modulator waits before attempting to re-start the
  * power stage following the reception of a back-end error signal from the internal power stage.
- * @{
  */
 namespace BackEndRestartDelays
 {
@@ -700,10 +715,10 @@ namespace BackEndRestartDelays
       */
 
 /**
- * @addtogroup TAS5707 Input Multiplexer Register
+ * @addtogroup TAS5707_in_mult_reg "TAS5707 Input Multiplexer Register"
+ * @{
  * @brief This register controls the modulation scheme (AD or BD mode) as well as the routing of I2S
  * audio to the internal channels.
- * @{
  */
 
 namespace Channel1ModulationModes
@@ -766,10 +781,10 @@ namespace Channel2InputSources
       */
 
 /**
- * @addtogroup TAS5707 PWM Output Mux Register
+ * @addtogroup TAS5707_pwm_out_mux_reg "TAS5707 PWM Output Mux Register"
+ * @{
  * @brief This register selects which internal PWM channel is output to the external pins. Any
  * channel can be output to any external output pin.
- * @{
  */
 namespace OutASources
 {
@@ -843,10 +858,10 @@ namespace OutDSources
       */
 
 /**
- * @addtogroup TAS5707 DRC Control Register
+ * @addtogroup TAS5707_drc_ctrl_reg "TAS5707 DRC Control Register"
+ * @{
  * @brief Each DRC (Dynamic Range Control) can be enabled independently using the DRC control
  * register. The DRCs are disabled by default.
- * @{
  */
 namespace DrcModes
 {
@@ -865,10 +880,10 @@ namespace DrcModes
       */
 
 /**
- * @addtogroup TAS5707 Bank Switch and EQ Control Register
+ * @addtogroup TAS5707_bank_sw_and_eq_ctrl_reg "TAS5707 Bank Switch and EQ Control Register"
+ * @{
  * @brief This register controls the automatic bank switching for different sample rates as well as
  * controlling the behavior of the EQ and biquad filters.
- * @{
  */
 namespace BankSwitchingModes
 {
@@ -954,6 +969,7 @@ namespace BiquadModes
  *          <li>22.025/24kHz</li>
  *      </ul>
  *  </li>
+ * </ul>
  */
 namespace BankSampleRates
 {

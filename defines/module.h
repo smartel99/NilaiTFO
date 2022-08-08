@@ -1,9 +1,5 @@
 ﻿/**
- * @addtogroup  defines
- * @{
- * @addtogroup  module
- * @{
- * @file        module.hpp
+ * @file        module.h
  * @author      Pascal-Emmanuel Lachance
  * @author      Samuel Martel
  *
@@ -77,8 +73,4 @@ protected:
 
 /*************************************************************************************************/
 #endif
-/**
- * @}
- * @}
- */
 /* ----- END OF FILE ----- */

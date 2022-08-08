@@ -1,7 +1,4 @@
 /**
- * @addtogroup file.h
- * @{
- *******************************************************************************
  * @file	file.h
  * @author	Samuel Martel
  * @brief
@@ -148,9 +145,6 @@ private:
 };
 }    // namespace Nilai::Filesystem
 
-/**
- * @}
- */
 #    endif
 #endif
 /* END OF FILE */

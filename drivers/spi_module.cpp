@@ -1,9 +1,5 @@
 /**
- * @addtogroup  drivers
- * @{
- * @addtogroup  SPI
- * @{
- * @file        spiModule.cpp
+ * @file        spi_module.cpp
  * @author      Lou-Gabriel Gaucher
  * @author      Pascal-Emmanuel Lachance
  * @author      Samuel Martel
@@ -223,8 +219,4 @@ bool SpiModule::WaitUntilNotBusy()
 }
 }    // namespace Nilai::Drivers
 #endif
-/**
- * @}
- * @}
- */
 /* ----- END OF FILE ----- */

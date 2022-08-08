@@ -1,7 +1,5 @@
 /**
- * @addtogroup misc
- * @{
- * @file    misc.hpp
+ * @file    misc.h
  * @author  Pascal-Emmanuel Lachance
  * @author  Samuel Martel
  * @date    2019/08/27, 14:22
@@ -30,21 +28,6 @@ namespace Nilai
 /* Function-like macros ------------------------------------------------------------------------ */
 
 /*------------------------------------*/
-/**
- * @def     CLEAR_ARRAY
- * @brief   Calls the @ref clearArray function, by also entering automatically
- *          the size of the specified array into the 2nd parameter field of the
- *          function.
- *
- * @param   arr : The name of an array to clear.
- */
-#define CLEAR_ARRAY(arr) clearArray((arr), sizeof(arr));
-
-/**
- * @def     LABEL_TO_STRING
- * @brief   Turn a label (such as a raw enum value) into a `const char*` string
- */
-#define LABEL_TO_STRING(x) #x
 
 /*************************************************************************************************/
 /* Function declarations ----------------------------------------------------------------------- */
@@ -136,11 +119,34 @@ std::string VectorToVal(const std::array<uint8_t, N>& arr)
 std::vector<uint8_t> StrToVec(const std::string& str);
 std::vector<uint8_t> StrToVec(const std::string& str, size_t maxSize);
 
+template<std::integral T, bool, size_t>
+constexpr T PackImpl()
+{
+    return 0;
+}
+
+template<std::integral T,
+         bool          bigEndian = false,
+         size_t        shiftBy   = bigEndian ? (sizeof(T) * 8) - 8 : 0,
+         std::convertible_to<uint8_t>... Args>
+constexpr T PackImpl(uint8_t v, Args... args)
+{
+    return (static_cast<T>(v) << shiftBy) | PackImpl < T, bigEndian,
+           bigEndian ? shiftBy - 8 : shiftBy + 8 > (args...);
+}
+
+template<std::integral T,
+         bool          bigEndian = false,
+         size_t        shiftBy   = bigEndian ? (sizeof(T) * 8) - 8 : 0,
+         std::convertible_to<uint8_t>... Args>
+constexpr T Pack(Args... args)
+{
+    static_assert(sizeof...(args) == sizeof(T), "Invalid amount of data provided!");
+
+    return PackImpl<T, bigEndian, shiftBy>(std::forward<Args>(args)...);
+}
+
 /*************************************************************************************************/
 /* Have a wonderful day! :) */
 }    // namespace Nilai
-/**
- * @}
- * @}
- */
 /****** END OF FILE ******/

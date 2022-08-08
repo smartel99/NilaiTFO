@@ -1,5 +1,5 @@
 /**
- * @file    Concepts.h
+ * @file    concepts.h
  * @author  Samuel Martel
  * @date    2022-02-23
  * @brief
@@ -12,7 +12,7 @@
  * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  * General Public License for more details.
  * You should have received a copy of the GNU General Public License along with this program. If
- * not, see <a href=https://www.gnu.org/licenses/>https://www.gnu.org/licenses/<a/>.
+ * not, see <a href=https://www.gnu.org/licenses/>https://www.gnu.org/licenses/</a>.
  */
 #ifndef NILAI_CONCEPTS_H
 #define NILAI_CONCEPTS_H
@@ -27,34 +27,19 @@
 namespace Nilai
 {
 template<typename T>
-concept IsIniType = requires(T t)
-{
-    std::is_arithmetic<T>() || std::is_same<T, std::string>();
-};
+concept IsIniType = requires(T t) { std::is_arithmetic<T>() || std::is_same<T, std::string>(); };
 
 template<typename T>
-concept IsInteger = requires(T t)
-{
-    std::is_integral<T>() && std::is_signed<T>();
-};
+concept IsInteger = requires(T t) { std::is_integral<T>() && std::is_signed<T>(); };
 
 template<typename T>
-concept IsUnsignedInteger = requires(T t)
-{
-    std::is_unsigned<T>();
-};
+concept IsUnsignedInteger = requires(T t) { std::is_unsigned<T>(); };
 
 template<typename T>
-concept IsFloatingPoint = requires(T t)
-{
-    std::is_floating_point<T>();
-};
+concept IsFloatingPoint = requires(T t) { std::is_floating_point<T>(); };
 
 template<typename T>
-concept IsBool = requires(T t)
-{
-    std::is_same<T, bool>();
-};
+concept IsBool = requires(T t) { std::is_same<T, bool>(); };
 
 }    // namespace Nilai
 #    endif

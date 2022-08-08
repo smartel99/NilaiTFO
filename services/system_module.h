@@ -1,8 +1,6 @@
 ﻿/**
  ******************************************************************************
- * @addtogroup SystemModule
- * @{
- * @file    SystemModule
+ * @file    system_module.h
  * @author  Samuel Martel
  * @brief   Header for the SystemModule module.
  *
@@ -88,11 +86,11 @@ private:
     uint16_t    m_unused      = 0x0000;    // Unused, but don't removed, it is used for alignment.
     uint16_t    m_sn          = 0x0000;
     uint8_t     m_versions[6] = {NILAI_VERSION_MAJOR,
-                             NILAI_VERSION_MINOR,
-                             NILAI_VERSION_BUILD,
-                             FW_VERSION_MAJOR,
-                             FW_VERSION_MINOR,
-                             FW_VERSION_BUILD};
+                                 NILAI_VERSION_MINOR,
+                                 NILAI_VERSION_BUILD,
+                                 FW_VERSION_MAJOR,
+                                 FW_VERSION_MINOR,
+                                 FW_VERSION_BUILD};
 
     uint8_t m_rstRq      = 0x00;
     uint8_t m_universeId = 0x00;
@@ -109,7 +107,4 @@ private:
 #    endif
 /* Have a wonderful day :) */
 #endif /* _SystemModule */
-/**
- * @}
- */
 /****** END OF FILE ******/

@@ -1,8 +1,5 @@
 /**
- * @addtogroup Assertion.cpp
- * @{
- *******************************************************************************
- * @file	Assertion.cpp
+ * @file	assertion.cpp
  * @author	Samuel Martel
  * @brief
  * Created on: 13 juill. 2021
@@ -46,7 +43,3 @@ extern "C"
 #if defined(__cplusplus)
 }
 #endif
-
-/**
- * @}
- */

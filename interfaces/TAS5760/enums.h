@@ -1,5 +1,5 @@
 /**
- * @file    Enums.h
+ * @file    enums.h
  * @author  Samuel Martel
  * @date    2022-03-03
  * @brief
@@ -12,7 +12,7 @@
  * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  * General Public License for more details.
  * You should have received a copy of the GNU General Public License along with this program. If
- * not, see <a href=https://www.gnu.org/licenses/>https://www.gnu.org/licenses/<a/>.
+ * not, see <a href=https://www.gnu.org/licenses/>https://www.gnu.org/licenses/</a>.
  */
 #ifndef NILAI_TAS5760_ENUMS_H
 #define NILAI_TAS5760_ENUMS_H
@@ -76,7 +76,7 @@ enum class Registers : uint8_t
      *
      * <br><br>
      * <table style="border:1px solid">
-     *  <caption id="DevIdReg"><b>Register Map</b></caption>
+     *  <caption id="PwrCtrlReg"><b>Register Map</b></caption>
      *  <tr style="border-bottom:1px solid">
      *      <th style="text-align:center">Bit 7</th>
      *      <th style="border-left:1px solid;text-align:center">Bit 6</th>
@@ -116,7 +116,7 @@ enum class Registers : uint8_t
      *
      * <br><br>
      * <table style="border:1px solid">
-     *  <caption id="DevIdReg"><b>Register Map</b></caption>
+     *  <caption id="DigCtrlReg"><b>Register Map</b></caption>
      *  <tr style="border-bottom:1px solid">
      *      <th style="text-align:center">Bit 7</th>
      *      <th style="border-left:1px solid;text-align:center">Bit 6</th>
@@ -159,7 +159,7 @@ enum class Registers : uint8_t
      *
      * <br><br>
      * <table style="border:1px solid">
-     *  <caption id="DevIdReg"><b>Register Map</b></caption>
+     *  <caption id="VoltCtrlCfgReg"><b>Register Map</b></caption>
      *  <tr style="border-bottom:1px solid">
      *      <th style="text-align:center">Bit 7</th>
      *      <th style="border-left:1px solid;text-align:center">Bit 6</th>
@@ -200,7 +200,7 @@ enum class Registers : uint8_t
      *
      * <br><br>
      * <table style="border:1px solid">
-     *  <caption id="DevIdReg"><b>Register Map</b></caption>
+     *  <caption id="LeftChCtrlReg"><b>Register Map</b></caption>
      *  <tr style="border-bottom:1px solid">
      *      <th style="text-align:center"                      >Bit 7</th>
      *      <th style="border-left:1px solid;text-align:center">Bit 6</th>
@@ -238,7 +238,7 @@ enum class Registers : uint8_t
      *
      * <br><br>
      * <table style="border:1px solid">
-     *  <caption id="DevIdReg"><b>Register Map</b></caption>
+     *  <caption id="RightChVolCtrlReg"><b>Register Map</b></caption>
      *  <tr style="border-bottom:1px solid">
      *      <th style="text-align:center"                      >Bit 7</th>
      *      <th style="border-left:1px solid;text-align:center">Bit 6</th>
@@ -276,7 +276,7 @@ enum class Registers : uint8_t
      *
      * <br><br>
      * <table style="border:1px solid">
-     *  <caption id="DevIdReg"><b>Register Map</b></caption>
+     *  <caption id="AnalCtrlReg"><b>Register Map</b></caption>
      *  <tr style="border-bottom:1px solid">
      *      <th style="text-align:center"                      >Bit 7</th>
      *      <th style="border-left:1px solid;text-align:center">Bit 6</th>
@@ -318,7 +318,7 @@ enum class Registers : uint8_t
      *
      * <br><br>
      * <table style="border:1px solid">
-     *  <caption id="DevIdReg"><b>Register Map</b></caption>
+     *  <caption id="FaultCfgAndErrStatusReg"><b>Register Map</b></caption>
      *  <tr style="border-bottom:1px solid">
      *      <th style="text-align:center"                      >Bit 7</th>
      *      <th style="border-left:1px solid;text-align:center">Bit 6</th>
@@ -362,7 +362,7 @@ enum class Registers : uint8_t
      *
      * <br><br>
      * <table style="border:1px solid">
-     *  <caption id="DevIdReg"><b>Register Map</b></caption>
+     *  <caption id="DigClip2Reg"><b>Register Map</b></caption>
      *  <tr style="border-bottom:1px solid">
      *      <th style="text-align:center"                      >Bit 7</th>
      *      <th style="border-left:1px solid;text-align:center">Bit 6</th>
@@ -400,7 +400,7 @@ enum class Registers : uint8_t
      *
      * <br><br>
      * <table style="border:1px solid">
-     *  <caption id="DevIdReg"><b>Register Map</b></caption>
+     *  <caption id="DigClip1Reg"><b>Register Map</b></caption>
      *  <tr style="border-bottom:1px solid">
      *      <th style="text-align:center"                      >Bit 7</th>
      *      <th style="border-left:1px solid;text-align:center">Bit 6</th>
@@ -430,6 +430,9 @@ enum class Registers : uint8_t
     DigClip1 = 0x11,
 };
 
+/**
+ * @brief Audio channels of the TAS5760
+ */
 enum class Channels
 {
     Ch1 = 0,

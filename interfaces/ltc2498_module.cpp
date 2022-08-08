@@ -1,8 +1,6 @@
 /**
- * @addtogroup ltc2498Module.cpp
- * @{
  *******************************************************************************
- * @file	ltc2498Module.cpp
+ * @file	ltc2498_module.cpp
  * @author	Samuel Martel
  * @brief
  * Created on: Apr 9, 2021
@@ -41,8 +39,8 @@ std::array<uint8_t, 4> ConversionSettings::ToRegValues() const
 
 Ltc2498Module::Ltc2498Module(const std::string& label,
                              SpiModule*         spi,
-                             const Nilai::Pin&    inPin,
-                             const Nilai::Pin&    csPin,
+                             const Nilai::Pin&  inPin,
+                             const Nilai::Pin&  csPin,
                              float              vcom)
 : m_label(label), m_spi(spi), m_misoPin(inPin), m_csPin(csPin), m_vcom(vcom)
 {

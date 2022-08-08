@@ -12,7 +12,7 @@
  * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  * General Public License for more details.
  * You should have received a copy of the GNU General Public License along with this program. If
- * not, see <a href=https://www.gnu.org/licenses/>https://www.gnu.org/licenses/<a/>.
+ * not, see <a href=https://www.gnu.org/licenses/>https://www.gnu.org/licenses/</a>.
  */
 #include "adc_module.h"
 
@@ -177,12 +177,6 @@ uint32_t AdcModule::GetRawChannelReading(size_t channel) const
     return m_channelBuff[channel];
 }
 
-/**
- * @brief Adds a callback that will be invoked when the sequence of conversion is completed.
- * @param name The name of the callback. This is used to identify it and to be able to remove it at
- * a later point.
- * @param cb The callback function.
- */
 [[maybe_unused]] size_t AdcModule::AddConvCpltCallback(const std::function<void(AdcModule*)>& cb)
 {
     NILAI_ASSERT(cb, "Callback function must be callable!");
@@ -210,12 +204,6 @@ uint32_t AdcModule::GetRawChannelReading(size_t channel) const
     return -1;
 }
 
-/**
- * @brief Adds a callback that will be invoked when an error is detected by the hardware.
- * @param name The name of the callback. This is used to identify it and to be able to remove it at
- * a later point.
- * @param cb The callback function.
- */
 [[maybe_unused]] size_t AdcModule::AddErrorCallback(const std::function<void(AdcModule*)>& cb)
 {
     NILAI_ASSERT(cb, "Callback function must be callable!");

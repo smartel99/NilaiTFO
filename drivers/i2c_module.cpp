@@ -1,9 +1,5 @@
 ﻿/**
- * @addtogroup  drivers
- * @{
- * @addtogroup  I2C
- * @{
- * @file        i2cModule.cpp
+ * @file        i2c_module.cpp
  * @author      Lou-Gabriel Gaucher
  * @author      Pascal-Emmanuel Lachance
  * @author      Samuel Martel
@@ -113,8 +109,4 @@ bool I2cModule::CheckIfDevOnBus(uint8_t addr, size_t attempts, size_t timeout)
 }    // namespace Nilai::Drivers
 
 #endif
-/**
- * @}
- * @}
- */
 /* ----- END OF FILE ----- */

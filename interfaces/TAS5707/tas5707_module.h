@@ -1,5 +1,5 @@
 /**
- * @file    Tas5707Module.h
+ * @file    tas5707_module.h
  * @author  Samuel Martel
  * @date    2022-02-07
  * @brief
@@ -12,7 +12,7 @@
  * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  * General Public License for more details.
  * You should have received a copy of the GNU General Public License along with this program. If
- * not, see <a href=https://www.gnu.org/licenses/>https://www.gnu.org/licenses/<a/>.
+ * not, see <a href=https://www.gnu.org/licenses/>https://www.gnu.org/licenses/</a>.
  */
 #ifndef NILAI_TAS5707MODULE_H
 #define NILAI_TAS5707MODULE_H
@@ -68,12 +68,13 @@ public:
      * </ol>
      * @param hw
      * @param sw
+     * @param i2s
      * @param label
      */
     Tas5707Module(const Nilai::Tas5707::HardwareConfig& hw,
                   const Nilai::Tas5707::SoftwareConfig& sw,
-                  I2S_HandleTypeDef*                  i2s,
-                  std::string                         label);
+                  I2S_HandleTypeDef*                    i2s,
+                  std::string                           label);
     ~Tas5707Module() override;
 
     bool                             DoPost() override;
@@ -106,7 +107,7 @@ private:
 
     Nilai::Tas5707::HardwareConfig m_hw = {};
     Nilai::Tas5707::SoftwareConfig m_sw = {};
-    std::string                  m_label;
+    std::string                    m_label;
 
     //! I2C address of the TAS5707 on the bus.
     uint8_t m_i2cAddr = 0;

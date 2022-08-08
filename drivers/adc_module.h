@@ -12,7 +12,7 @@
  * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  * General Public License for more details.
  * You should have received a copy of the GNU General Public License along with this program. If
- * not, see <a href=https://www.gnu.org/licenses/>https://www.gnu.org/licenses/<a/>.
+ * not, see <a href=https://www.gnu.org/licenses/>https://www.gnu.org/licenses/</a>.
  */
 #ifndef NILAI_ADCMODULE_HPP
 #define NILAI_ADCMODULE_HPP
@@ -90,13 +90,13 @@ public:
 
 private:
 #            if defined(NILAI_ADC_REGISTER_CALLBACKS)
-    static void AdcModuleConvCpltCallback(ADC_HandleTypeDef* adc);
-    static void AdcModuleErrorCallback(ADC_HandleTypeDef* adc);
+    static void                  AdcModuleConvCpltCallback(ADC_HandleTypeDef* adc);
+    static void                  AdcModuleErrorCallback(ADC_HandleTypeDef* adc);
 #            endif
 
-#if defined(NILAI_ADC_STATUS_STRING)
+#            if defined(NILAI_ADC_STATUS_STRING)
     static constexpr const char* StatusToStr(uint32_t code);
-#endif
+#            endif
 
 protected:
     ADC_HandleTypeDef*    m_adc         = nullptr;

@@ -1,10 +1,5 @@
 /**
- * @addtogroup  services
- * @{
- * @addtogroup  logger
- * @{
- *
- * @file        Logger.h
+ * @file        logger.h
  * @author      Samuel Martel
  * @date        2020/06/29 - 11:30
  */
@@ -134,9 +129,5 @@ private:
 #endif
 /*************************************************************************************************/
 /* LOG_CRITICAL("Have a wonderful day! :)"); */
-/**
- * @}
- * @}
- */
 /* ----- END OF FILE ----- */
 #endif

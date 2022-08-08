@@ -1,6 +1,4 @@
 /**
- * @addtogroup Defines
- * {
  * @file   globaldef.h
  * @author Pascal-Emmanuel Lachance
  * @date   2019/07/07, 20:01
@@ -35,9 +33,6 @@
 
 /*****************************************************************************/
 #endif /* GLOBALDEF_H */
-/**
- * @}
- */
 
 /* Have a wonderful day! :) */
 /****** END OF FILE ******/

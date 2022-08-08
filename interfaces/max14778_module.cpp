@@ -1,8 +1,6 @@
 ﻿/**
  ******************************************************************************
- * @addtogroup max14778Module
- * @{
- * @file    max14778Module
+ * @file    max14778_module.cpp
  * @author  Samuel Martel
  * @brief   Sources for the max14778Module module.
  *

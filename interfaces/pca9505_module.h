@@ -1,8 +1,6 @@
 /**
  ******************************************************************************
- * @addtogroup pca9505Module
- * @{
- * @file    pca9505Module
+ * @file    pca9505_module.h
  * @author  Samuel Martel
  * @brief   Header for the pca9505Module module. (IO Extender)
  *
@@ -96,9 +94,9 @@ struct Config
     I2cModule* i2c = nullptr;
     //! Set by hardware, between 0x40 and 0x4E.
     uint8_t                address      = 0x40;
-    Nilai::Pin               outputEnable = {};
-    Nilai::Pin               interrupt    = {};
-    Nilai::Pin               reset        = {};
+    Nilai::Pin             outputEnable = {};
+    Nilai::Pin             interrupt    = {};
+    Nilai::Pin             reset        = {};
     std::vector<PinConfig> pinConfig    = {};
 };
 
@@ -158,9 +156,9 @@ private:
     uint8_t     m_address;
     std::string m_label;
 
-    Nilai::Pin                          m_outputEnable;
-    Nilai::Pin                          m_interrupt;
-    Nilai::Pin                          m_reset;
+    Nilai::Pin                        m_outputEnable;
+    Nilai::Pin                        m_interrupt;
+    Nilai::Pin                        m_reset;
     std::array<PCA9505::PortState, 5> m_ports;
     std::array<uint8_t, 5>            m_directions;
     std::array<uint8_t, 5>            m_polarities;
@@ -173,7 +171,4 @@ private:
 /* Have a wonderful day :) */
 #    endif /* _pca9505Module */
 #endif
-/**
- * @}
- */
 /****** END OF FILE ******/

@@ -1,8 +1,6 @@
 /**
  ******************************************************************************
- * @addtogroup RelayModule
- * @{
- * @file    RelayModule
+ * @file    relay_module.h
  * @author  Lou-Gabriel Gaucher
  * @brief   Header for the RelayModule module.
  *
@@ -69,8 +67,5 @@ private:
 /* Have a wonderful day :) */
 #    endif /* _relayModule */
 #endif
-/**
- * @}
- */
 /****** END OF FILE ******/
 #pragma once

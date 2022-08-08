@@ -12,7 +12,7 @@
  * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  * General Public License for more details.
  * You should have received a copy of the GNU General Public License along with this program. If
- * not, see <a href=https://www.gnu.org/licenses/>https://www.gnu.org/licenses/<a/>.
+ * not, see <a href=https://www.gnu.org/licenses/>https://www.gnu.org/licenses/</a>.
  */
 #ifndef NILAI_PROFILER_H
 #define NILAI_PROFILER_H
@@ -31,8 +31,8 @@
 #    define NILAI_PROFILING_DEINIT()            ::Nilai::Profiler::Deinit();
 #    define NILAI_PROFILING_START_SESSION(name) ::Nilai::Profiler::Start(name)
 
-/**
- * @brief This macro breaks the one-statement rule. However, I can't find a way to circumvent it
+/*
+ * This macro breaks the one-statement rule. However, I can't find a way to circumvent it
  * without degrading ease of use.
  */
 #    define NILAI_PROFILE_SCOPE(name)                                                              \
@@ -43,6 +43,11 @@
 
 namespace Nilai
 {
+/**
+ * @brief Code execution profiling class.
+ *
+ * @example services/profiler.cpp
+ */
 class Profiler
 {
 public:
