@@ -23,9 +23,23 @@
 namespace Nilai::Can
 {
 /**
- * @addtogroup  CAN_Status
- * @brief       Enum listing all the possible CAN status
+ * @addtogroup Nilai
  * @{
+ */
+
+/**
+ * @addtogroup Drivers
+ * @{
+ */
+
+/**
+ * @addtogroup CAN
+ * @{
+ */
+
+/**
+ * @enum  Status
+ * @brief       Enum listing all the possible CAN status
  */
 enum class Status
 {
@@ -158,9 +172,7 @@ constexpr inline Status operator|=(Status& a, const Status& b)
     return "";
 #    endif
 }
-/**
- * @}
- */
+
 
 #    if defined(NILAI_TEST)
 #        ifndef CAN_IT_TX_MAILBOX_EMPTY
@@ -237,6 +249,11 @@ enum class Irq
     LastErrorCode       = CAN_IT_LAST_ERROR_CODE,
     ErrorStatus         = CAN_IT_ERROR,
 };
+
+//!@}
+//!@}
+//!@}
+
 }    // namespace Nilai::Can
 #endif
 #endif    // NILAI_CAN_ENUMS_H

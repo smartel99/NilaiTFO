@@ -26,8 +26,21 @@
 namespace Nilai::Uart
 {
 /**
- * @addtogroup  UART_Status
- * @brief       UART module status, mostly describing error states.
+ * @addtogroup Nilai
+ * @{
+ */
+/**
+ * @addtogroup Drivers
+ * @{
+ */
+/**
+ * @addtogroup nilai_drivers_uart UART
+ * @{
+ */
+
+/**
+ * @enum  Status
+ * @brief UART module status codes, mostly describing error states.
  */
 enum class Status
 {
@@ -67,13 +80,19 @@ constexpr inline Status operator|=(Status& a, const Status& b)
     return a = a | b;
 }
 
+/**
+ * @enum SectionState
+ * @brief
+ */
 enum class SectionState
 {
     NotComplete,
     Complete,
 };
+//!@}
+//!@}
+//!@}
 }    // namespace Nilai::Uart
-
 #endif
 
 #endif    // NILAI_UART_ENUMS_H

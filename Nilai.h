@@ -1,7 +1,4 @@
 /**
- * @addtogroup Nilai
- * @{
- *******************************************************************************
  * @file	Nilai.h
  * @author	Samuel Martel
  * @brief
@@ -59,9 +56,5 @@
 #include "services/time.h"
 #include "services/umo_module.h"
 
-
-/**
- * @}
- */
 /* END OF FILE */
 #endif /* NILAI_CORE_H_ */

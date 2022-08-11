@@ -18,13 +18,28 @@
 #define NILAI_TAS5707_ENUMS_H
 
 #define NILAI_USE_TAS5707
-#error
+#error asdfasdf
 #if defined(NILAI_USE_TAS5707)
 
 #    include <cstdint>
 
 namespace Nilai::Tas5707
 {
+/**
+ * @addtogroup Nilai
+ * @{
+ */
+
+/**
+ * @addtogroup Interfaces
+ * @{
+ */
+
+/**
+ * @addtogroup TAS5707
+ * @{
+ */
+
 /**
  * @enum Registers
  * @brief List of all the registers of the TAS5707.
@@ -84,7 +99,6 @@ enum class Registers : uint8_t
 
     /**
      * Biquad filters are all composed of 20 bytes, separated as:
-     * @htmlonly
      * <ul>
      *  <li>Bytes 0 to 3: b0 coefficient, default: 0x00800000</li>
      *  <li>Bytes 4 to 7: b1 coefficient, default: 0x00000000</li>
@@ -92,7 +106,6 @@ enum class Registers : uint8_t
      *  <li>Bytes 12 to 15: a1 coefficient, default: 0x00000000</li>
      *  <li>Bytes 16 to 19: a2 coefficient, default: 0x00000000</li>
      * </ul>
-     * @endhtmlonly
      */
     Ch1Bq_0 = 0x29,
     Ch1Bq_1,
@@ -160,29 +173,39 @@ enum class Registers : uint8_t
  */
 enum class Channels
 {
+    //! Master channel, affecting channel 1 and 2.
     Master = 0,
+    //! Channel 1 (usually Left).
     Channel1,
+    //! Channel 2 (usually Right).
     Channel2,
 };
 
 /**
- * @brief Possible addresses that a TAS5760 may have.
+ * @namespace I2CAddresses
+ * @brief Possible I2C addresses that a TAS5707 may have.
  */
 namespace I2CAddresses
 {
-[[maybe_unused]] static constexpr uint8_t TAS5707Default  = 0x36;
-[[maybe_unused]] static constexpr uint8_t TAS5707Alt      = 0x38;
+//! Default I2C address for the TAS5707.
+[[maybe_unused]] static constexpr uint8_t TAS5707Default = 0x36;
+//! Alternative I2C address for the TAS5707.
+[[maybe_unused]] static constexpr uint8_t TAS5707Alt = 0x38;
+
+//! Default I2C address for the TAS5707A.
 [[maybe_unused]] static constexpr uint8_t TAS5707ADefault = 0x3A;
-[[maybe_unused]] static constexpr uint8_t TAS5707AAlt     = 0x3C;
+//! Alternative I2C address for the TAS5707A.
+[[maybe_unused]] static constexpr uint8_t TAS5707AAlt = 0x3C;
 }    // namespace I2CAddresses
 
 
 /**
- * @addtogroup TAS5707_clk_ctrl_reg "TAS5707 Clock Control Register"
+ * @addtogroup TAS5707_clk_ctrl_reg Clock Control Register
  * @{
  */
 
 /**
+ * @namespace SampleRates
  * @brief Enum listing the available sampling rate as well as their register values.
  */
 namespace SampleRates
@@ -200,6 +223,12 @@ namespace SampleRates
 //! 11.025/12kHz.
 [[maybe_unused]] static constexpr uint8_t Sr11_025Or12kHz = 0b11100000;
 
+/**
+ * @brief Checks if the provided value is a valid sampling rate.
+ * @param v The value to check.
+ * @returns True if the value is a valid sampling rate.
+ * @returns False if the value is not a valid sampling rate.
+ */
 [[maybe_unused]] static constexpr bool IsSampleRate(uint8_t v)
 {
     // A sample rate is valid if bits 0 to 4 are cleared.
@@ -207,6 +236,10 @@ namespace SampleRates
 }
 };    // namespace SampleRates
 
+/**
+ * @namespace MclkFrequencies
+ * @brief List of the possible MCLK frequencies.
+ */
 namespace MclkFrequencies
 {
 //! MCLK frequency = Fs * 64 (Only for 44.1kHz and 48kHz sample rate).
@@ -222,6 +255,12 @@ namespace MclkFrequencies
 //! MCLK frequency = Fs * 512.
 [[maybe_unused]] static constexpr uint8_t Fs512 = 0b00010100;
 
+/**
+ * @brief Checks if the provided value is a valid MCLK frequency.
+ * @param v The value to check.
+ * @returns True if the value is a valid MCLK frequency.
+ * @returns False if the value is not a valid MCLK frequency.
+ */
 [[maybe_unused]] static constexpr bool IsMclkFrequency(uint8_t v)
 {
     // A MCLK frequency is valid if bits 0, 1, 5, 6 and 7 are cleared, and bits 3 are 4 are not both
@@ -235,8 +274,12 @@ namespace MclkFrequencies
  */
 
 /**
- * @addtogroup TAS5707_err_stat "TAS5707 Error Statuses"
+ * @addtogroup TAS5707_err_stat Error Statuses
  * @{
+ */
+/**
+ * @namespace ErrorCode
+ * @brief Bit values corresponding to the possible error and status codes.
  */
 namespace ErrorCodes
 {
@@ -261,8 +304,12 @@ namespace ErrorCodes
  */
 
 /**
- * @addtogroup TAS5707_sys_ctrl_reg_1 "TAS5707 System Control Register 1"
+ * @addtogroup TAS5707_sys_ctrl_reg_1 System Control Register 1
  * @{
+ */
+/**
+ * @namespace PwmDcBlock
+ * @brief Bit values to control the PWM DC blocking filter.
  */
 namespace PwmDcBlock
 {
@@ -271,6 +318,12 @@ namespace PwmDcBlock
 //! PWM high-pass (dc blocking) enabled, -3dB @ <1Hz (Default).
 [[maybe_unused]] static constexpr uint8_t Enabled = 0x80;
 
+/**
+ * @brief Checks if the provided value is a valid value for this register.
+ * @param v The value to check
+ * @returns True if the value is valid.
+ * @returns False if the value is not valid.
+ */
 [[maybe_unused]] static constexpr bool IsValid(uint8_t v)
 {
     // Valid if bits 0 to 6 are clear.
@@ -279,6 +332,7 @@ namespace PwmDcBlock
 }    // namespace PwmDcBlock
 
 /**
+ * @namespace ClkErrRecoveryModes
  * @brief Mode of recovery after a clock error.
  */
 namespace ClkErrRecoveryModes
@@ -288,6 +342,12 @@ namespace ClkErrRecoveryModes
 //! Hard unmute on recovery from clock error (Default).
 [[maybe_unused]] static constexpr uint8_t Hard = 0x20;
 
+/**
+ * @brief Checks if the provided value is a valid value for this register.
+ * @param v The value to check
+ * @returns True if the value is valid.
+ * @returns False if the value is not valid.
+ */
 [[maybe_unused]] static constexpr bool IsValid(uint8_t v)
 {
     // Valid if all bits except bit 5 are clear.
@@ -295,6 +355,10 @@ namespace ClkErrRecoveryModes
 }
 }    // namespace ClkErrRecoveryModes
 
+/**
+ * @namespace DeEmphasisModes
+ * @brief List of the possible modes of de-emphasis.
+ */
 namespace DeEmphasisModes
 {
 //! No de-emphasis (Default).
@@ -304,6 +368,12 @@ namespace DeEmphasisModes
 //! De-emphasis for Fs = 48kHz.
 [[maybe_unused]] static constexpr uint8_t Fs48kHz = 0x03;
 
+/**
+ * @brief Checks if the provided value is a valid value for this register.
+ * @param v The value to check
+ * @returns True if the value is valid.
+ * @returns False if the value is not valid.
+ */
 [[maybe_unused]] static constexpr bool IsValid(uint8_t v)
 {
     // Valid if bits 2 to 7 are clear and bit 0 and 1 are not 0b10.
@@ -315,8 +385,12 @@ namespace DeEmphasisModes
  */
 
 /**
- * @addtogroup TAS5707_ser_data_int_reg "TAS5707 Serial Data Interface Register"
+ * @addtogroup TAS5707_ser_data_int_reg Serial Data Interface Register
  * @{
+ */
+/**
+ * @namespace SerialDataMode
+ * @brief List of the possible modes of communication with the TAS5707.
  */
 namespace SerialDataMode
 {
@@ -339,6 +413,12 @@ namespace SerialDataMode
 //! Left justified, 24 bit data word.
 [[maybe_unused]] static constexpr uint8_t LJ24Bits = 0x08;
 
+/**
+ * @brief Checks if the provided value is a valid value for this register.
+ * @param v The value to check
+ * @returns True if the value is valid.
+ * @returns False if the value is not valid.
+ */
 [[maybe_unused]] static constexpr bool IsValid(uint8_t v)
 {
     // Valid if value is from 0 to 8.
@@ -350,8 +430,12 @@ namespace SerialDataMode
       */
 
 /**
- * @addtogroup TAS5707_sys_ctrl_reg_2 "TAS5707 System Control Register 2"
+ * @addtogroup TAS5707_sys_ctrl_reg_2 System Control Register 2
  * @{
+ */
+/**
+ * @namespace ChannelEnable
+ * @brief Controls the global shutdown state applied to every channels.
  */
 namespace ChannelEnable
 {
@@ -360,6 +444,12 @@ namespace ChannelEnable
 //! Exit all-channel shutdown (normal operation).
 [[maybe_unused]] static constexpr uint8_t Enable = 0x00;
 
+/**
+ * @brief Checks if the provided value is a valid value for this register.
+ * @param v The value to check
+ * @returns True if the value is valid.
+ * @returns False if the value is not valid.
+ */
 [[maybe_unused]] static constexpr bool IsValid(uint8_t v)
 {
     // Valid if all bits except bit 6 are clear.
@@ -371,8 +461,12 @@ namespace ChannelEnable
       */
 
 /**
- * @addtogroup TAS5707_soft_mute_reg "TAS5707 Soft Mute Register"
+ * @addtogroup TAS5707_soft_mute_reg Soft Mute Register
  * @{
+ */
+/**
+ * @namespace Ch1SoftMute
+ * @brief Controls the software shutdown for channel 1.
  */
 namespace Ch1SoftMute
 {
@@ -381,6 +475,12 @@ namespace Ch1SoftMute
 //! Soft unmute channel 1 (Default).
 [[maybe_unused]] static constexpr uint8_t Unmute = 0x00;
 
+/**
+ * @brief Checks if the provided value is a valid value for this register.
+ * @param v The value to check
+ * @returns True if the value is valid.
+ * @returns False if the value is not valid.
+ */
 [[maybe_unused]] static constexpr bool IsValid(uint8_t v)
 {
     // Valid if all bits except bit 0 are clear.
@@ -388,6 +488,10 @@ namespace Ch1SoftMute
 }
 }    // namespace Ch1SoftMute
 
+/**
+ * @namespace Ch2SoftMute
+ * @brief Controls the software shutdown for channel 2.
+ */
 namespace Ch2SoftMute
 {
 //! Soft mute channel 2.
@@ -395,6 +499,12 @@ namespace Ch2SoftMute
 //! Soft unmute channel 2 (Default).
 [[maybe_unused]] static constexpr uint8_t Unmute = 0x00;
 
+/**
+ * @brief Checks if the provided value is a valid value for this register.
+ * @param v The value to check
+ * @returns True if the value is valid.
+ * @returns False if the value is not valid.
+ */
 [[maybe_unused]] static constexpr bool IsValid(uint8_t v)
 {
     // Valid if all bits except bit 2 are clear.
@@ -406,8 +516,12 @@ namespace Ch2SoftMute
       */
 
 /**
- * @addtogroup TAS5707_vol_reg "TAS5707 Volume Registers"
+ * @addtogroup TAS5707_vol_reg Volume Registers
  * @{
+ */
+/**
+ * @namespace ChannelVolume
+ * @brief Possible values for the volume of a channel.
  */
 namespace ChannelVolume
 {
@@ -416,6 +530,12 @@ namespace ChannelVolume
 //! Muted, default for master volume.
 [[maybe_unused]] static constexpr uint8_t Muted = 0xFF;
 
+/**
+ * @brief Checks if the provided value is a valid value for this register.
+ * @param v The value to check
+ * @returns True if the value is valid.
+ * @returns False if the value is not valid.
+ */
 [[maybe_unused]] static constexpr bool IsValid(uint8_t v)
 {
     // All values are valid, except between 0xCF and 0xFE.
@@ -427,8 +547,11 @@ namespace ChannelVolume
       */
 
 /**
- * @addtogroup TAS5707_master_fine_vol_reg "TAS5707 Master Fine Volume Register"
+ * @addtogroup TAS5707_master_fine_vol_reg Master Fine Volume Register
  * @{
+ */
+/**
+ * @namespace FineVolume
  * @brief This register can be used to provide precision tuning of master volume.
  */
 namespace FineVolume
@@ -442,6 +565,12 @@ namespace FineVolume
 //! +0.375dB.
 [[maybe_unused]] static constexpr uint8_t DB0_375 = 0x83;
 
+/**
+ * @brief Checks if the provided value is a valid value for this register.
+ * @param v The value to check
+ * @returns True if the value is valid.
+ * @returns False if the value is not valid.
+ */
 [[maybe_unused]] static constexpr bool IsValid(uint8_t v)
 {
     // Only values between 0x80 and 0x83 are valid.
@@ -453,12 +582,14 @@ namespace FineVolume
       */
 
 /**
- * @addtogroup TAS5707_vol_cfg_reg "TAS5707 Volume Configuration Register"
+ * @addtogroup TAS5707_vol_cfg_reg Volume Configuration Register
  * @{
+ */
+/**
+ * @namespace VolumeSlewRates
  * @brief Volume slew rate, used to control volume change and mute ramp rates.
  * This register controls the number of steps in a volume ramp. The rate at which these steps occurs
  * is dependent on the sample rate of the I2S data as follows:
- * @htmlonly
  * <table> <tr> <th>Sample Rate
  * (kHz)</th> <th>Approximate Ramp Rate</th>
  *  </tr>
@@ -475,7 +606,6 @@ namespace FineVolume
  *      <td>83.3us/step</td>
  *  </tr>
  * </table>
- * @endhtmlonly
  */
 namespace VolumeSlewRates
 {
@@ -488,6 +618,12 @@ namespace VolumeSlewRates
 //! Volume slew 256 steps (21ms volume ramp time at 48kHz).
 [[maybe_unused]] static constexpr uint8_t Steps256 = 0x93;
 
+/**
+ * @brief Checks if the provided value is a valid value for this register.
+ * @param v The value to check
+ * @returns True if the value is valid.
+ * @returns False if the value is not valid.
+ */
 [[maybe_unused]] static constexpr bool IsValid(uint8_t v)
 {
     // Rate is valid between 0x90 and 0x93.
@@ -499,8 +635,11 @@ namespace VolumeSlewRates
       */
 
 /**
- * @addtogroup TAS5707_mod_limit_reg "TAS5707 Modulation Limit Register"
+ * @addtogroup TAS5707_mod_limit_reg Modulation Limit Register
  * @{
+ */
+/**
+ * @namespace ModulationLimit
  * @brief The modulation limit is the maximum duty cycle of the PWM output waveform.
  */
 namespace ModulationLimit
@@ -522,6 +661,12 @@ namespace ModulationLimit
 //! 93.8%
 [[maybe_unused]] static constexpr uint8_t P93_8 = 0x07;
 
+/**
+ * @brief Checks if the provided value is a valid value for this register.
+ * @param v The value to check
+ * @returns True if the value is valid.
+ * @returns False if the value is not valid.
+ */
 [[maybe_unused]] static constexpr bool IsValid(uint8_t v)
 {
     return (v <= 0x07);
@@ -532,8 +677,12 @@ namespace ModulationLimit
       */
 
 /**
- * @addtogroup TAS5707_int_ch_delay_reg "TAS5707 Inter-channel Delay Registers"
+ * @addtogroup TAS5707_int_ch_delay_reg Inter-channel Delay Registers
  * @{
+ */
+
+/**
+ * @namespace InterchannelDelays
  * @brief Internal PWM channels 1, 2, 1' and 2' are mapped into registers 0x11, 0x12, 0x13 and 0x14
  * respectively.
  *
@@ -567,6 +716,12 @@ namespace InterchannelDelays
 //! Default for channel 2' in BD mode.
 [[maybe_unused]] static constexpr uint8_t Ch2PBDMode = 0x48;
 
+/**
+ * @brief Checks if the provided value is a valid value for this register.
+ * @param v The value to check
+ * @returns True if the value is valid.
+ * @returns False if the value is not valid.
+ */
 [[maybe_unused]] static constexpr bool IsValid(uint8_t v)
 {
     // Any value is valid, as long as bit 0 and 1 are clear.
@@ -580,6 +735,10 @@ namespace InterchannelDelays
 /**
  * @addtogroup TAS5707_start_stop_per_reg "TAS5707 Start/Stop Period Register"
  * @{
+ */
+
+/**
+ * @namespace StartStopPeriods
  * @brief This register is used to control the soft-start and soft-stop period following an
  * enter/exit all channel shut down command or change in the PDN state. This helps reduce pops and
  * clicks at start-up and shutdown. The times are only approximate and vary depending on device
@@ -638,6 +797,12 @@ namespace StartStopPeriods
 //! 13,196.4-ms 50% duty cycle start/stop period
 [[maybe_unused]] static constexpr uint8_t Ms13196_4 = 0x1F;
 
+/**
+ * @brief Checks if the provided value is a valid value for this register.
+ * @param v The value to check
+ * @returns True if the value is valid.
+ * @returns False if the value is not valid.
+ */
 [[maybe_unused]] static constexpr bool IsValid(uint8_t v)
 {
     // Any value between 0x08 and 0x1F, as well as 0x00 are valid.
@@ -651,6 +816,10 @@ namespace StartStopPeriods
 /**
  * @addtogroup TAS5707_osc_trim_reg "TAS5707 Oscillator Trim Register"
  * @{
+ */
+
+/**
+ * @namespace OscillatorTrimStates
  * @brief Indicates the status of the TAS5707's internal oscillator used to automatically detect I2S
  * clock rates.
  */
@@ -662,6 +831,10 @@ namespace OscillatorTrimStates
 [[maybe_unused]] static constexpr uint8_t Done = 0x40;
 }    // namespace OscillatorTrimStates
 
+/**
+ * @namespace OscillatorTrimSelect
+ * @brief Selects the kind of oscillator trimming should be used.
+ */
 namespace OscillatorTrimSelect
 {
 //! Select factory trim.
@@ -669,6 +842,12 @@ namespace OscillatorTrimSelect
 //! Factory trim is disabled (Default).
 [[maybe_unused]] static constexpr uint8_t Disabled = 0x02;
 
+/**
+ * @brief Checks if the provided value is a valid value for this register.
+ * @param v The value to check
+ * @returns True if the value is valid.
+ * @returns False if the value is not valid.
+ */
 [[maybe_unused]] static constexpr bool IsValid(uint8_t v)
 {
     return (v & 0xFD) == 0;
@@ -679,8 +858,12 @@ namespace OscillatorTrimSelect
       */
 
 /**
- * @addtogroup TAS5707_bknd_err_reg "TAS5707 BKND_ERR Register"
+ * @addtogroup TAS5707_bknd_err_reg BKND_ERR Register
  * @{
+ */
+
+/**
+ * @namespace BackEndRestartDelays
  * @brief This register sets the time that the modulator waits before attempting to re-start the
  * power stage following the reception of a back-end error signal from the internal power stage.
  */
@@ -705,6 +888,12 @@ namespace BackEndRestartDelays
 //! Reset period = 1496ms.
 [[maybe_unused]] static constexpr uint8_t Ms1496 = 0x0A;
 
+/**
+ * @brief Checks if the provided value is a valid value for this register.
+ * @param v The value to check
+ * @returns True if the value is valid.
+ * @returns False if the value is not valid.
+ */
 [[maybe_unused]] static constexpr bool IsValid(uint8_t v)
 {
     return (v >= 0x02) && (v <= 0x0A);
@@ -715,12 +904,15 @@ namespace BackEndRestartDelays
       */
 
 /**
- * @addtogroup TAS5707_in_mult_reg "TAS5707 Input Multiplexer Register"
+ * @addtogroup TAS5707_in_mult_reg Input Multiplexer Register
  * @{
+ */
+
+/**
+ * @namespace Channel1ModulationModes
  * @brief This register controls the modulation scheme (AD or BD mode) as well as the routing of I2S
  * audio to the internal channels.
  */
-
 namespace Channel1ModulationModes
 {
 //! Channel-1 AD mode (Default).
@@ -728,12 +920,23 @@ namespace Channel1ModulationModes
 //! Channel-1 BD mode.
 [[maybe_unused]] static constexpr uint32_t BD = 0x00800000;
 
+/**
+ * @brief Checks if the provided value is a valid value for this register.
+ * @param v The value to check
+ * @returns True if the value is valid.
+ * @returns False if the value is not valid.
+ */
 [[maybe_unused]] static constexpr bool IsValid(uint32_t v)
 {
     return (v & 0xFF7FFFFF) == 0;
 }
 }    // namespace Channel1ModulationModes
 
+/**
+ * @namespace Channel2ModulationModes
+ * @brief This register controls the modulation scheme (AD or BD mode) as well as the routing of I2S
+ * audio to the internal channels.
+ */
 namespace Channel2ModulationModes
 {
 //! Channel-2 AD mode (Default).
@@ -741,12 +944,22 @@ namespace Channel2ModulationModes
 //! Channel-2 BD mode.
 [[maybe_unused]] static constexpr uint32_t BD = 0x00080000;
 
+/**
+ * @brief Checks if the provided value is a valid value for this register.
+ * @param v The value to check
+ * @returns True if the value is valid.
+ * @returns False if the value is not valid.
+ */
 [[maybe_unused]] static constexpr bool IsValid(uint32_t v)
 {
     return (v & 0xFFF7FFFF) == 0;
 }
 }    // namespace Channel2ModulationModes
 
+/**
+ * @namespace Channel1InputSources
+ * @brief Sources of the data for channel 1.
+ */
 namespace Channel1InputSources
 {
 //! SDIN-L to channel 1 (Default).
@@ -756,12 +969,22 @@ namespace Channel1InputSources
 //! Channel 1 to ground.
 [[maybe_unused]] static constexpr uint32_t GND = 0x00600000;
 
+/**
+ * @brief Checks if the provided value is a valid value for this register.
+ * @param v The value to check
+ * @returns True if the value is valid.
+ * @returns False if the value is not valid.
+ */
 [[maybe_unused]] static constexpr bool IsValid(uint32_t v)
 {
     return (v == SDIN_L) || (v == SDIN_R) || (v == GND);
 }
 }    // namespace Channel1InputSources
 
+/**
+ * @namespace Channel2InputSources
+ * @brief Sources of the data for channel 2.
+ */
 namespace Channel2InputSources
 {
 //! SDIN-L to channel 2 (Default).
@@ -783,6 +1006,10 @@ namespace Channel2InputSources
 /**
  * @addtogroup TAS5707_pwm_out_mux_reg "TAS5707 PWM Output Mux Register"
  * @{
+ */
+
+/**
+ * @namespace OutASources
  * @brief This register selects which internal PWM channel is output to the external pins. Any
  * channel can be output to any external output pin.
  */
@@ -797,12 +1024,23 @@ namespace OutASources
 //! Multiplex channel 2' to OUT_A.
 [[maybe_unused]] static constexpr uint32_t Ch2P = 0x00300000;
 
+/**
+ * @brief Checks if the provided value is a valid value for this register.
+ * @param v The value to check
+ * @returns True if the value is valid.
+ * @returns False if the value is not valid.
+ */
 [[maybe_unused]] static constexpr bool IsValid(uint32_t v)
 {
     return (v & 0xFFCFFFFF) == 0;
 }
 }    // namespace OutASources
 
+/**
+ * @namespace OutBSources
+ * @brief This register selects which internal PWM channel is output to the external pins. Any
+ * channel can be output to any external output pin.
+ */
 namespace OutBSources
 {
 //! Multiplex channel 1 to OUT_B.
@@ -814,12 +1052,23 @@ namespace OutBSources
 //! Multiplex channel 2' to OUT_B.
 [[maybe_unused]] static constexpr uint32_t Ch2P = 0x00030000;
 
+/**
+ * @brief Checks if the provided value is a valid value for this register.
+ * @param v The value to check
+ * @returns True if the value is valid.
+ * @returns False if the value is not valid.
+ */
 [[maybe_unused]] static constexpr bool IsValid(uint32_t v)
 {
     return (v & 0xFFFCFFFF) == 0;
 }
 }    // namespace OutBSources
 
+/**
+ * @namespace OutCSources
+ * @brief This register selects which internal PWM channel is output to the external pins. Any
+ * channel can be output to any external output pin.
+ */
 namespace OutCSources
 {
 //! Multiplex channel 1 to OUT_C.
@@ -831,12 +1080,23 @@ namespace OutCSources
 //! Multiplex channel 2' to OUT_C.
 [[maybe_unused]] static constexpr uint32_t Ch2P = 0x00003000;
 
+/**
+ * @brief Checks if the provided value is a valid value for this register.
+ * @param v The value to check
+ * @returns True if the value is valid.
+ * @returns False if the value is not valid.
+ */
 [[maybe_unused]] static constexpr bool IsValid(uint32_t v)
 {
     return (v & 0xFFFFCFFF) == 0;
 }
 }    // namespace OutCSources
 
+/**
+ * @namespace OutDSources
+ * @brief This register selects which internal PWM channel is output to the external pins. Any
+ * channel can be output to any external output pin.
+ */
 namespace OutDSources
 {
 //! Multiplex channel 1 to OUT_D.
@@ -848,6 +1108,12 @@ namespace OutDSources
 //! Multiplex channel 2' to OUT_D (Default).
 [[maybe_unused]] static constexpr uint32_t Ch2P = 0x00000300;
 
+/**
+ * @brief Checks if the provided value is a valid value for this register.
+ * @param v The value to check
+ * @returns True if the value is valid.
+ * @returns False if the value is not valid.
+ */
 [[maybe_unused]] static constexpr bool IsValid(uint32_t v)
 {
     return (v & 0xFFFFFCFF) == 0;
@@ -858,8 +1124,12 @@ namespace OutDSources
       */
 
 /**
- * @addtogroup TAS5707_drc_ctrl_reg "TAS5707 DRC Control Register"
+ * @addtogroup TAS5707_drc_ctrl_reg DRC Control Register
  * @{
+ */
+
+/**
+ * @namespace DrcModes
  * @brief Each DRC (Dynamic Range Control) can be enabled independently using the DRC control
  * register. The DRCs are disabled by default.
  */
@@ -870,6 +1140,12 @@ namespace DrcModes
 //! DRC Turned ON.
 [[maybe_unused]] static constexpr uint32_t Enabled = 0x00000001;
 
+/**
+ * @brief Checks if the provided value is a valid value for this register.
+ * @param v The value to check
+ * @returns True if the value is valid.
+ * @returns False if the value is not valid.
+ */
 [[maybe_unused]] static constexpr bool IsValid(uint32_t v)
 {
     return (v & 0xFFFFFFFE) == 0;
@@ -880,10 +1156,15 @@ namespace DrcModes
       */
 
 /**
- * @addtogroup TAS5707_bank_sw_and_eq_ctrl_reg "TAS5707 Bank Switch and EQ Control Register"
+ * @addtogroup TAS5707_bank_sw_and_eq_ctrl_reg Bank Switch and EQ Control Register
  * @{
  * @brief This register controls the automatic bank switching for different sample rates as well as
  * controlling the behavior of the EQ and biquad filters.
+ */
+
+/**
+ * @namespace BankSwitchingModes
+ * @brief Selects which DRC bank is currently in use for updates.
  */
 namespace BankSwitchingModes
 {
@@ -898,12 +1179,22 @@ namespace BankSwitchingModes
 //! Automatic bank selection.
 [[maybe_unused]] static constexpr uint32_t Automatic = 0x00000004;
 
+/**
+ * @brief Checks if the provided value is a valid value for this register.
+ * @param v The value to check
+ * @returns True if the value is valid.
+ * @returns False if the value is not valid.
+ */
 [[maybe_unused]] static constexpr bool IsValid(uint32_t v)
 {
     return v <= 4;
 }
 }    // namespace BankSwitchingModes
 
+/**
+ * @namespace BankMappingOverrides
+ * @brief Enables the use of user-defined DAP banks.
+ */
 namespace BankMappingOverrides
 {
 //! Ignore bank-mapping, use the default mapping instead (Default).
@@ -911,12 +1202,22 @@ namespace BankMappingOverrides
 //! Use the overridden bank mapping.
 [[maybe_unused]] static constexpr uint32_t Override = 0x00000020;
 
+/**
+ * @brief Checks if the provided value is a valid value for this register.
+ * @param v The value to check
+ * @returns True if the value is valid.
+ * @returns False if the value is not valid.
+ */
 [[maybe_unused]] static constexpr bool IsValid(uint32_t v)
 {
     return (v & 0xFFFFFFDF) == 0;
 }
 }    // namespace BankMappingOverrides
 
+/**
+ * @namespace EqModes
+ * @brief Toggles the usage of the equalizer/biquad banks
+ */
 namespace EqModes
 {
 //! EQ ON (Default).
@@ -924,12 +1225,22 @@ namespace EqModes
 //! EQ OFF (Bypasses BQ 0-6 of channels 1 and 2).
 [[maybe_unused]] static constexpr uint32_t Disabled = 0x00000080;
 
+/**
+ * @brief Checks if the provided value is a valid value for this register.
+ * @param v The value to check
+ * @returns True if the value is valid.
+ * @returns False if the value is not valid.
+ */
 [[maybe_unused]] static constexpr bool IsValid(uint32_t v)
 {
     return (v & 0xFFFFFF7F) == 0;
 }
 }    // namespace EqModes
 
+/**
+ * @namespace BiquadModes
+ * @brief Selects the functionality of the biquad filters.
+ */
 namespace BiquadModes
 {
 //! L and R filters are independent (Default).
@@ -938,6 +1249,12 @@ namespace BiquadModes
 //! corresponding BQ of the right channel.
 [[maybe_unused]] static constexpr uint32_t Ganged = 0x00000010;
 
+/**
+ * @brief Checks if the provided value is a valid value for this register.
+ * @param v The value to check
+ * @returns True if the value is valid.
+ * @returns False if the value is not valid.
+ */
 [[maybe_unused]] static constexpr bool IsValid(uint32_t v)
 {
     return (v & 0xFFFFFFEF) == 0;
@@ -945,6 +1262,7 @@ namespace BiquadModes
 }    // namespace BiquadModes
 
 /**
+ * @namespace BankSampleRates
  * @brief Selects which sample rates uses a specific bank.
  *
  * A bank can be used by multiple sample rates.
@@ -986,6 +1304,12 @@ namespace BankSampleRates
 //! 11.025/12kHz uses bank.
 [[maybe_unused]] static constexpr uint8_t Use11_025Or12kHz = 0x01;
 
+/**
+ * @brief Checks if the provided value is a valid value for this register.
+ * @param v The value to check
+ * @returns True if the value is valid.
+ * @returns False if the value is not valid.
+ */
 [[maybe_unused]] static constexpr bool IsValid(uint8_t v)
 {
     // Bits 5 and 6 must be 0b00.
@@ -999,24 +1323,49 @@ namespace BankSampleRates
 //! Bank 1 is used by 32kHz by default.
 [[maybe_unused]] static constexpr uint8_t Bank1Default = 0x80;
 
+/**
+ * @brief Converts a sample rate into the value to be used in bank 1.
+ * @param v The sample rate
+ * @return The value to write in the register
+ */
 [[maybe_unused]] static constexpr uint32_t ToBank1(uint8_t v)
 {
     // Bank 1 is bits 8 to 15.
     return (uint32_t)v << 8;
 }
 
+/**
+ * @brief Converts a sample rate into the value to be used in bank 2.
+ * @param v The sample rate
+ * @return The value to write in the register
+ */
 [[maybe_unused]] static constexpr uint32_t ToBank2(uint8_t v)
 {
     // Bank 2 is bits 16 to 23.
     return ((uint32_t)v << 16) | 0x00600000;
 }
 
+/**
+ * @brief Converts a sample rate into the value to be used in bank 3.
+ * @param v The sample rate
+ * @return The value to write in the register
+ */
 [[maybe_unused]] static constexpr uint32_t ToBank3(uint8_t v)
 {
     // Bank 3 is bits 24 to 31.
     return (uint32_t)v << 24;
 }
 }    // namespace BankSampleRates
+/**
+ * @}
+ */
+
+/**
+ * @}
+ */
+/**
+ * @}
+ */
 /**
  * @}
  */
