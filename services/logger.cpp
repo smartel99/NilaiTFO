@@ -64,9 +64,9 @@ void Logger::VLog(const char* fmt, va_list args)
 {
     static char buff[1024] = {};
 
-    size_t s = vsnprintf(buff, SIZEOF_ARRAY(buff), fmt, args);
+    size_t s = vsnprintf(buff, std::size(buff), fmt, args);
 
-    NILAI_ASSERT(s < SIZEOF_ARRAY(buff), "vsnprintf error!");
+    NILAI_ASSERT(s < std::size(buff), "vsnprintf error!");
 #    if defined(NILAI_USE_UART)
     m_uart->Transmit(buff, s);
 #    endif
