@@ -17,14 +17,36 @@
 #if defined(NILAI_USE_EVENTS)
 #    include "../../defines/events/events.h"
 #    include "../../processes/application.h"
+#    include <defines/macros.h>
 
-static uint8_t PinIdToNum(uint16_t pin);
+using EventTypes = Nilai::Events::EventTypes;
 
+/**
+ * @addtogroup Nilai
+ * @{
+ */
+
+/**
+ * @addtogroup Events
+ * @{
+ */
+
+/**
+ * @addtogroup nilai_exti_events EXTI
+ * @{
+ */
+
+static constexpr uint8_t    PinIdToNum(uint16_t pin) noexcept;
+static constexpr EventTypes PinIdToEventType(uint16_t pin) noexcept;
+
+/**
+ * @brief Callback function invoked by the HAL's EXTI interrupt request handler.
+ * @param pin The ID of the pin that triggered the interrupt.
+ */
 extern "C" void HAL_GPIO_EXTI_Callback(uint16_t pin)
 {
     uint8_t                 pinNum = PinIdToNum(pin);
-    Nilai::Events::ExtEvent e(false, pinNum, Nilai::Events::EventTypes(pinNum - 1));
-    // Pin number goes from 1 to 16,
+    Nilai::Events::ExtEvent e(false, pinNum, PinIdToEventType(pin));
     Nilai::Application::Get()->DispatchEvent(&e);
 }
 
@@ -36,17 +58,43 @@ extern "C" void HAL_GPIO_EXTI_Callback(uint16_t pin)
  * @param pin The pin ID.
  * @return The pin number.
  */
-uint8_t PinIdToNum(uint16_t pin)
+constexpr uint8_t PinIdToNum(uint16_t pin) noexcept
 {
-    uint8_t pos = 1;
-
-    // We assume that the pin is never going to be 0.
-    while (pin != 1)
-    {
-        ++pos;
-        pin >>= 1;
-    }
-
-    return pos;
+    // A valid pin ID only has 1 bit set.
+    NILAI_ASSERT(std::popcount(pin) == 1, "Invalid pin ID %#04x", pin);
+    return std::countr_zero(pin) + 1;
 }
+
+/**
+ * @brief Converts a bit-coded pin into its corresponding EXTI event.
+ * @param pin The pin ID.
+ * @return The corresponding EXTI event.
+ */
+constexpr EventTypes PinIdToEventType(uint16_t pin) noexcept
+{
+    switch (pin)
+    {
+        case 0x0001: return EventTypes::Exti0;
+        case 0x0002: return EventTypes::Exti1;
+        case 0x0004: return EventTypes::Exti2;
+        case 0x0008: return EventTypes::Exti3;
+        case 0x0010: return EventTypes::Exti4;
+        case 0x0020: return EventTypes::Exti5;
+        case 0x0040: return EventTypes::Exti6;
+        case 0x0080: return EventTypes::Exti7;
+        case 0x0100: return EventTypes::Exti8;
+        case 0x0200: return EventTypes::Exti9;
+        case 0x0400: return EventTypes::Exti10;
+        case 0x0800: return EventTypes::Exti11;
+        case 0x1000: return EventTypes::Exti12;
+        case 0x2000: return EventTypes::Exti13;
+        case 0x4000: return EventTypes::Exti14;
+        case 0x8000: return EventTypes::Exti15;
+        default: NILAI_ASSERT(false, "Invalid pin ID %#04x", pin); return EventTypes::Exti_Generic;
+    }
+}
+
+//!@}
+//!@}
+//!@}
 #endif
