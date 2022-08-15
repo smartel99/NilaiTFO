@@ -24,15 +24,31 @@
 #        include "../../defines/smart_pointers.h"
 #        include "../../drivers/i2c_module.h"
 #        include "enums.h"
-#        include "register_structs.h"
+#        include "registers/registers.h"
 
 #        if NILAI_TAS5760_PWM_MODE > NILAI_TAS5760_PWM_NONE
 #            include "../../drivers/pwmModule.h"
 #        endif
 
-namespace Nilai::Tas5760
+/**
+ * @addtogroup Nilai
+ * @{
+ */
+
+/**
+ * @addtogroup Interfaces
+ * @{
+ */
+
+/**
+ * @addtogroup TAS5760
+ * @{
+ */
+
+namespace Nilai::Interfaces::TAS5760
 {
 /**
+ * @struct SwConfig
  * @brief Structure describing the configuration of the TAS5760 used in software control mode.
  */
 struct SwConfig
@@ -49,26 +65,30 @@ struct SwConfig
 #        endif
 
     //! Headphone mute, active low.
-    Nilai::Pin HpMute = {};
+    Pin HpMute = {};
     //! Chip shutdown, active low.
-    Nilai::Pin SpkShutdown = {};
+    Pin SpkShutdown = {};
 
     //// Optional Pins ////
     //! Fault Pin, falling edge means the chip detected a fault.
-    Nilai::Pin Fault = {};
+    Pin Fault = {};
     //! Headphone detect pin. An edge means the connections/disconnection of the headphones.
-    Nilai::Pin HpDetect = {};
+    Pin HpDetect = {};
 
-    PwrCtrlReg              PowerConfig   = {};
-    DigCtrlReg              DigitalConfig = {};
-    VolCtrConfigReg         VolumeConfig  = {};
-    AnalCtrlReg             AnalogConfig  = {};
-    FaultCfgAndErrStatusReg FaultConfig   = {};
+    PwrCtrlReg              PowerConfig   = {};    //!< Power control configuration register.
+    DigCtrlReg              DigitalConfig = {};    //!< Digital control configuration register.
+    VolCtrConfigReg         VolumeConfig = {};    //!< Global volume control configuration register.
+    AnalCtrlReg             AnalogConfig = {};    //!< Analog control configuration register.
+    FaultCfgAndErrStatusReg FaultConfig = {};    //!< Fault configuration and error status register.
 
-    uint8_t DigClipLev13_6 = 0xFF;
-    uint8_t DigClipLev5_0  = 0xFC;
+    uint8_t DigClipLev13_6 = 0xFF;    //!< Bits 13 to 6 of the digital clipping level.
+    uint8_t DigClipLev5_0  = 0xFC;    //!< Bits 5 to 0 of the digital clipping level.
 };
-}    // namespace Nilai::Tas5760
+}    // namespace Nilai::Interfaces::TAS5760
+
+//!@}
+//!@}
+//!@}
 #    endif
 #endif
 

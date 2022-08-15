@@ -27,7 +27,7 @@
 namespace Nilai::Interfaces
 {
 template<typename Device>
-void SwTas5760<Device>::Build(const Tas5760::SwConfig& cfg)
+void SwTas5760<Device>::Build(const TAS5760::SwConfig& cfg)
 {
     // If a fault pin is given, bind it to the event.
     if (!cfg.Fault.IsDefault())
@@ -122,14 +122,14 @@ void SwTas5760<Device>::ToggleMute(bool s)
 {
     m_cfg.VolumeConfig.MuteL = s;
     m_cfg.VolumeConfig.MuteR = s;
-    SetRegister(Tas5760::Registers::VolCtrlCfg, m_cfg.VolumeConfig);
+    SetRegister(TAS5760::Registers::VolCtrlCfg, static_cast<uint8_t>(m_cfg.VolumeConfig));
 }
 
 template<typename Device>
 void SwTas5760<Device>::ToggleSleep(bool s)
 {
     m_cfg.PowerConfig.SpkSleep = s;
-    SetRegister(Tas5760::Registers::PwrCtrl, m_cfg.PowerConfig);
+    SetRegister(TAS5760::Registers::PwrCtrl, static_cast<uint8_t>(m_cfg.PowerConfig));
 }
 
 template<typename Device>
@@ -153,17 +153,19 @@ bool SwTas5760<Device>::IsShutdown() const
 }
 
 template<typename Device>
-void SwTas5760<Device>::SetChannelVolume(Tas5760::Channels ch, uint8_t vol)
+void SwTas5760<Device>::SetChannelVolume(TAS5760::Channels ch, uint8_t vol)
 {
     struct ChInfo
     {
-        Tas5760::Registers reg;
+        TAS5760::Registers reg;
         uint8_t&           val;
     };
-    static ChInfo channels[] = {{Tas5760::Registers::LeftChVolCtrl, m_lVol},
-                                {Tas5760::Registers::RightChVolCtrl, m_rVol}};
+    static std::array channels = {ChInfo {TAS5760::Registers::LeftChVolCtrl, m_lVol},
+                                  ChInfo {TAS5760::Registers::RightChVolCtrl, m_rVol}};
+    auto              chId     = static_cast<size_t>(ch);
+    NILAI_ASSERT(chId < channels.size(), "Invalid Channel");
 
-    ChInfo& channel = channels[(size_t)ch];
+    ChInfo& channel = channels[chId];
     channel.val     = vol;
     SetRegister(channel.reg, channel.val);
 }
@@ -172,16 +174,16 @@ template<typename Device>
 bool SwTas5760<Device>::SetDigitalClipLevel(uint32_t lvl)
 {
     //! Bits 19..14 -> Power Control register.
-    m_cfg.PowerConfig.DigClipLev = (uint8_t)((lvl & 0x00FC0000) >> 14);
+    m_cfg.PowerConfig.DigClipLev = static_cast<uint8_t>(((lvl & 0x00FC0000) >> 14));
     //! Bits 13..6 -> Digital Clipper 2 register.
-    m_cfg.DigClipLev13_6 = (uint8_t)((lvl & 0x00003FC0) >> 6);
+    m_cfg.DigClipLev13_6 = static_cast<uint8_t>(((lvl & 0x00003FC0) >> 6));
     //! Bits 5..0 -> Digital Clipper 1 register.
-    m_cfg.DigClipLev5_0 = (uint8_t)((lvl & 0x0000003F) << 2);
+    m_cfg.DigClipLev5_0 = static_cast<uint8_t>(((lvl & 0x0000003F) << 2));
 
     bool isGood = true;
-    isGood &= SetRegister(Tas5760::Registers::PwrCtrl, m_cfg.PowerConfig);
-    isGood &= SetRegister(Tas5760::Registers::DigClip2, m_cfg.DigClipLev13_6);
-    isGood &= SetRegister(Tas5760::Registers::DigClip1, m_cfg.DigClipLev5_0);
+    isGood &= SetRegister(TAS5760::Registers::PwrCtrl, static_cast<uint8_t>(m_cfg.PowerConfig));
+    isGood &= SetRegister(TAS5760::Registers::DigClip2, m_cfg.DigClipLev13_6);
+    isGood &= SetRegister(TAS5760::Registers::DigClip1, m_cfg.DigClipLev5_0);
 
     return isGood;
 }
@@ -235,6 +237,8 @@ bool SwTas5760<Device>::StopStream()
  *  <li>Unmute the device via I2C</li>
  *  <li>The device is now in normal operation</li>
  * </ol>
+ *
+ * @tparam Device A class that can serve as the physical interface.
  * @returns True if the initialization was successful
  * @returns False if an error occurred during the initialization
  */
@@ -246,18 +250,22 @@ bool SwTas5760<Device>::Init()
     Device::StartClock();
 
     bool isConfigGood = true;
-    isConfigGood &= SetRegister(Tas5760::Registers::PwrCtrl, m_cfg.PowerConfig);
-    isConfigGood &= SetRegister(Tas5760::Registers::DigCtrl, m_cfg.DigitalConfig);
+    isConfigGood &=
+      SetRegister(TAS5760::Registers::PwrCtrl, static_cast<uint8_t>(m_cfg.PowerConfig));
+    isConfigGood &=
+      SetRegister(TAS5760::Registers::DigCtrl, static_cast<uint8_t>(m_cfg.DigitalConfig));
 
     // Mute both channels to avoid weird sounds during setup.
-    isConfigGood &= SetRegister(Tas5760::Registers::VolCtrlCfg, s_bothChMuted);
-    isConfigGood &= SetRegister(Tas5760::Registers::LeftChVolCtrl, m_lVol);
-    isConfigGood &= SetRegister(Tas5760::Registers::RightChVolCtrl, m_rVol);
-    isConfigGood &= SetRegister(Tas5760::Registers::AnalCtrl, m_cfg.AnalogConfig);
+    isConfigGood &= SetRegister(TAS5760::Registers::VolCtrlCfg, s_bothChMuted);
+    isConfigGood &= SetRegister(TAS5760::Registers::LeftChVolCtrl, m_lVol);
+    isConfigGood &= SetRegister(TAS5760::Registers::RightChVolCtrl, m_rVol);
+    isConfigGood &=
+      SetRegister(TAS5760::Registers::AnalCtrl, static_cast<uint8_t>(m_cfg.AnalogConfig));
     // Ignore errors for now...
-    /*isConfigGood &=*/SetRegister(Tas5760::Registers::FaultCfgAndErrStatus, m_cfg.FaultConfig);
-    isConfigGood &= SetRegister(Tas5760::Registers::DigClip2, m_cfg.DigClipLev13_6);
-    isConfigGood &= SetRegister(Tas5760::Registers::DigClip1, m_cfg.DigClipLev5_0);
+    /*isConfigGood &=*/SetRegister(TAS5760::Registers::FaultCfgAndErrStatus,
+                                   static_cast<uint8_t>(m_cfg.FaultConfig));
+    isConfigGood &= SetRegister(TAS5760::Registers::DigClip2, m_cfg.DigClipLev13_6);
+    isConfigGood &= SetRegister(TAS5760::Registers::DigClip1, m_cfg.DigClipLev5_0);
 
     Device::StopClock();
 
@@ -272,6 +280,11 @@ bool SwTas5760<Device>::Init()
     return isConfigGood;
 }
 
+/**
+ * @brief Gracefully shuts the TAS5760 down.
+ * @tparam Device A class that can serve as the physical interface with the TAS5760.
+ * @return true
+ */
 template<typename Device>
 bool SwTas5760<Device>::Deinit()
 {
@@ -292,11 +305,12 @@ void SwTas5760<Device>::HandleFault()
         // Fault pin needs to be still LOW. If it isn't low anymore, the error is gone.
         if (!m_cfg.Fault.Get())
         {
-            uint8_t s =
-              m_cfg.I2c
-                ->ReceiveFrameFromRegister(
-                  (uint8_t)m_cfg.Address, (uint8_t)Tas5760::Registers::FaultCfgAndErrStatus, 1)
-                .data[0];
+            uint8_t s = m_cfg.I2c
+                          ->ReceiveFrameFromRegister(
+                            static_cast<uint8_t>(m_cfg.Address),
+                            static_cast<uint8_t>(TAS5760::Registers::FaultCfgAndErrStatus),
+                            1)
+                          .data[0];
 
             if ((s & s_latchingErrors) != 0)
             {
@@ -314,19 +328,20 @@ void SwTas5760<Device>::HandleHeadphoneChange()
 {
     if (m_hpChanged)
     {
-        TAS_INFO("Headphone change detected: %i", (int)m_cfg.HpDetect.Get());
+        TAS_INFO("Headphone change detected: %i", static_cast<int>(m_cfg.HpDetect.Get()));
         m_hpChanged = false;
     }
 }
 
 template<typename Device>
-bool SwTas5760<Device>::SetRegister(Tas5760::Registers r, uint8_t v)
+bool SwTas5760<Device>::SetRegister(TAS5760::Registers r, uint8_t v)
 {
-    m_cfg.I2c->TransmitFrameToRegister((uint8_t)m_cfg.Address, (uint8_t)r, &v, sizeof(uint8_t));
+    m_cfg.I2c->TransmitFrameToRegister(
+      static_cast<uint8_t>(m_cfg.Address), static_cast<uint8_t>(r), &v, sizeof(uint8_t));
 
 #    if defined(NILAI_TAS5760_VERIFY_WRITE)
-    I2C::Frame f =
-      m_cfg.I2c->ReceiveFrameFromRegister((uint8_t)m_cfg.Address, (uint8_t)r, sizeof(uint8_t));
+    I2C::Frame f = m_cfg.I2c->ReceiveFrameFromRegister(
+      static_cast<uint8_t>(m_cfg.Address), static_cast<uint8_t>(r), sizeof(uint8_t));
     if (f.data[0] == v)
     {
         // Data read is data written, that's good.
@@ -336,7 +351,7 @@ bool SwTas5760<Device>::SetRegister(Tas5760::Registers r, uint8_t v)
     {
         // Mismatch between value read and value expected.
         TAS_ERROR("An error occurred while writing to 0x%02x, Exp: 0x%02x, got: 0x%02x",
-                  (uint8_t)r,
+                  static_cast<uint8_t>(r),
                   v,
                   f.data[0]);
         return false;
@@ -370,10 +385,6 @@ std::string SwTas5760<Device>::StatusToStr(uint8_t s)
 
     return errStr;
 }
-
-
-
-
 }    // namespace Nilai::Interfaces
 
 #endif

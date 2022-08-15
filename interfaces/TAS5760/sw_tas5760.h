@@ -31,8 +31,32 @@
 #        include <functional>
 #        include <string>
 
+/**
+ * @addtogroup Nilai
+ * @{
+ */
+
+/**
+ * @addtogroup Interfaces
+ * @{
+ */
+
+/**
+ * @addtogroup TAS5760
+ * @{
+ */
+
 namespace Nilai::Interfaces
 {
+/**
+ * @class SwTas5760
+ * @brief Class representing a TAS5760 digital audio amplifier controlled by software.
+ * @tparam Device A type capable of streaming audio to the TAS5760.
+ *
+ * Refer to the <a
+ * href=https://www.ti.com/lit/ds/symlink/tas5760md.pdf?ts=1660571967342&ref_url=https%253A%252F%252Fwww.ti.com%252Fproduct%252FTAS5760MD>
+ * datasheet</a> for more information.
+ */
 template<typename Device>
 class SwTas5760 : public Tas5760Module<Device>
 {
@@ -40,12 +64,16 @@ class SwTas5760 : public Tas5760Module<Device>
 
 public:
     template<typename... Args>
-    SwTas5760(const Tas5760::SwConfig& cfg, Handle handle, const std::string& label, Args... args)
+    SwTas5760(const TAS5760::SwConfig& cfg, Handle handle, const std::string& label, Args... args)
     : Tas5760Module<Device>(handle, label, args...), m_cfg(cfg)
     {
         Build(cfg);
     }
-    void Build(const Tas5760::SwConfig& cfg);
+    /**
+     * @brief Initializes the TAS5760 with the passed configuration.
+     * @param cfg The desired configuration of the TAS5760.
+     */
+    void Build(const TAS5760::SwConfig& cfg);
 
     ~SwTas5760() override = default;
 
@@ -60,8 +88,19 @@ public:
     void               ToggleShutdown(bool s) override;
     [[nodiscard]] bool IsShutdown() const override;
 
-    void SetChannelVolume(Tas5760::Channels ch, uint8_t vol);
+    /**
+     * @brief Sets the volume of the desired channel.
+     * @param ch The desired channel to affect.
+     * @param vol The new volume.
+     */
+    void SetChannelVolume(TAS5760::Channels ch, uint8_t vol);
 
+    /**
+     * @brief Sets the digital clipping level of the TAS5760.
+     * @param lvl The desired clipping level.
+     * @returns True if the operation succeeded.
+     * @returns False if the operation failed.
+     */
     bool SetDigitalClipLevel(uint32_t lvl);
 
     bool Stream(const void* samples, size_t cnt) override;
@@ -76,11 +115,11 @@ private:
     void HandleFault();
     void HandleHeadphoneChange();
 
-    bool               SetRegister(Tas5760::Registers r, uint8_t v);
+    bool               SetRegister(TAS5760::Registers r, uint8_t v);
     static std::string StatusToStr(uint8_t s);
 
 private:
-    Tas5760::SwConfig m_cfg;
+    TAS5760::SwConfig m_cfg;
 
     std::function<void()> m_faultFunction    = []() {};
     std::function<void()> m_hpChangeFunction = []() {};
@@ -122,6 +161,10 @@ private:
     static constexpr uint32_t s_minErrorTime = 2;
 };
 }    // namespace Nilai::Interfaces
+
+//!@}
+//!@}
+//!@}
 #    endif
 #endif
 

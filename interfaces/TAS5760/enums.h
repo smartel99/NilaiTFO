@@ -21,9 +21,31 @@
 #if defined(NILAI_USE_SW_TAS5760)
 #    include <cstdint>
 
-namespace Nilai::Tas5760
+/**
+ * @addtogroup Nilai
+ * @{
+ */
+
+/**
+ * @addtogroup Interfaces
+ * @{
+ */
+
+/**
+ * @addtogroup TAS5760
+ * @{
+ */
+
+namespace Nilai::Interfaces::TAS5760
 {
-//! List of the registers of the TAS5760.
+/**
+ * @enum Registers
+ * @brief List of the registers of the TAS5760.
+ *
+ * Refer to the <a
+ * href=https://www.ti.com/lit/ds/symlink/tas5760md.pdf?ts=1660571967342&ref_url=https%253A%252F%252Fwww.ti.com%252Fproduct%252FTAS5760MD>
+ * datasheet</a> for more information.
+ */
 enum class Registers : uint8_t
 {
     /**
@@ -431,15 +453,17 @@ enum class Registers : uint8_t
 };
 
 /**
+ * @enum Channels
  * @brief Audio channels of the TAS5760
  */
 enum class Channels
 {
-    Ch1 = 0,
-    Ch2
+    Ch1 = 0,    //!< Channel 1.
+    Ch2         //!< Channel 2.
 };
 
 /**
+ * @enum I2cAddresses
  * @brief Possible I2C addresses of the TAS5760, which depends on its ADDR pin.
  */
 enum class I2cAddresses
@@ -449,7 +473,11 @@ enum class I2cAddresses
     //! When ADDR pin is HIGH.
     Addr1 = 0xDA
 };
-}    // namespace Nilai::Tas5760
+}    // namespace Nilai::Interfaces::TAS5760
+
+//!@}
+//!@}
+//!@}
 #endif
 
 #endif    // NILAI_TAS5760_ENUMS_H
