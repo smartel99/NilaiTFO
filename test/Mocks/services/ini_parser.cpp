@@ -1,7 +1,7 @@
 /**
  * @file    ini_parser.cpp
  * @author  Samuel Martel
- * @date    2022-02-16
+ * @date    2022-08-16
  * @brief
  *
  * @copyright
@@ -14,68 +14,41 @@
  * You should have received a copy of the GNU General Public License along with this program. If
  * not, see <a href=https://www.gnu.org/licenses/>https://www.gnu.org/licenses/</a>.
  */
-#include "ini_parser.h"
 
-#include <utility>
+#if defined(NILAI_TEST) && defined(NILAI_USE_INI_PARSER)
+#    include "../../../services/ini_parser.h"
+#    include "../../../services/logger.h"
+#    include "../../../vendor/inih/ini.h"
 
-#if defined(NILAI_USE_INI_PARSER) && !defined(NILAI_TEST)
-#    include "../vendor/inih/ini.h"
+#    include "../../../defines/macros.h"
 
-#    include "filesystem.h"
-#    include "logger.h"
-
+#    include <fstream>
 
 namespace Nilai::Services
 {
 IniParser::IniParser(std::string_view fp) : m_fp(fp)
 {
-    using File      = Nilai::Filesystem::File;
-    using FileModes = Nilai::Filesystem::FileModes;
+    std::ifstream f(m_fp);
+    NILAI_ASSERT(f.is_open(), "Unable to open '%s'", m_fp.c_str());
 
-    // Open the file first.
-    File f(m_fp, FileModes::Read);
-    if (!f.IsOpen())
-    {
-        LOG_ERROR("Unable to open '%s': (%i) %s",
-                  m_fp.c_str(),
-                  static_cast<int>(f.GetError()),
-                  ResultToStr(f.GetError()));
-        // Unable to open the file.
-        m_error = -1;
-        return;
-    }
+    std::string str;
+    f.seekg(0, std::ios::end);
+    str.reserve(f.tellg());
+    f.seekg(0, std::ios::beg);
 
-    // Read the entire file into a string.
-    std::string file;
-    file.reserve(f.GetSize());
+    str.assign(std::istreambuf_iterator<char>(f), std::istreambuf_iterator<char>());
 
-    while (!f.AtEoF())
-    {
-        std::string l;
-        f.GetString(l, INI_MAX_LINE);
-        file += l;
-    }
-
-    f.Close();
-
-    m_error = ini_parse_string(file.c_str(), ValueHandler, this);
+    m_error = ini_parse_string(str.c_str(), ValueHandler, this);
 }
 
 void IniParser::Save()
 {
-    using File      = Nilai::Filesystem::File;
-    using FileModes = Nilai::Filesystem::FileModes;
-
-    File f(m_fp, FileModes::Write);
-    if (!f.IsOpen())
+    std::ofstream f(m_fp);
+    if (!f.is_open())
     {
-        LOG_ERROR("Unable to open '%s': (%i) %s",
-                  m_fp.c_str(),
-                  static_cast<int>(f.GetError()),
-                  ResultToStr(f.GetError()));
+        LOG_ERROR("Unable to open '%s'", m_fp.c_str());
         return;
     }
-
     // Find all the sections.
     struct Kvp
     {
@@ -94,17 +67,17 @@ void IniParser::Save()
     // Dump the sections and key-value pairs.
     for (const auto& [section, kvp] : data)
     {
-        f.WriteFmtString("[%s]\n", section.c_str());
+        f << "[" << section << "]\n";
         for (const auto& [k, v] : kvp)
         {
-            f.WriteFmtString("%s=%s\n", k.c_str(), v.c_str());
+            f << k << "=" << v << "\n";
         }
-        f.WriteString("\n");
+        f << "\n";
     }
 
-    f.Close();
     m_isDirty = false;
 }
+
 
 void IniParser::SetStr(std::string_view section, std::string_view name, std::string_view v)
 {

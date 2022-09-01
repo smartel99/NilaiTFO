@@ -19,8 +19,8 @@
 
 /*************************************************************************************************/
 /* Defines ------------------------------------------------------------------------------------- */
-#    define UART_INFO(msg, ...)  LOG_INFO("[%s]: " msg, m_label.c_str(), ##__VA_ARGS__)
-#    define UART_ERROR(msg, ...) LOG_ERROR("[%s]: " msg, m_label.c_str(), ##__VA_ARGS__)
+#    define UART_INFO(msg, ...)  LOG_INFO("[%s]: " msg, m_label.c_str() __VA_OPT__(, ) __VA_ARGS__)
+#    define UART_ERROR(msg, ...) LOG_ERROR("[%s]: " msg, m_label.c_str() __VA_OPT__(, ) __VA_ARGS__)
 
 
 static std::vector<Nilai::Uart::UartDataBuffer> s_dataBuffers;
@@ -36,7 +36,7 @@ namespace Nilai::Drivers
 UartModule::UartModule(UART_HandleTypeDef* uart, std::string label)
 : m_handle(uart), m_label(std::move(label))
 {
-    NILAI_ASSERT(uart != nullptr, "UART Handle is NULL!");
+    NILAI_ASSERT(uart != nullptr, "Handle is NULL!");
     m_txBuf.reserve(64);
     m_sof.reserve(2);
     m_eof.reserve(2);
@@ -89,7 +89,7 @@ void UartModule::Run()
 
 void UartModule::Transmit(const char* msg, size_t len)
 {
-    NILAI_ASSERT(msg != nullptr, "msg is NULL in UartModule::Transmit");
+    NILAI_ASSERT(msg != nullptr, "msg is NULL");
 
     if (!WaitUntilTransmitionComplete())
     {
@@ -104,7 +104,7 @@ void UartModule::Transmit(const char* msg, size_t len)
     // Send the message.
     if (HAL_UART_Transmit_IT(m_handle, m_txBuf.data(), (uint16_t)m_txBuf.size()) != HAL_OK)
     {
-        UART_ERROR("In Transmit: Unable to transmit message");
+        UART_ERROR("Tx failed");
         return;
     }
 }
@@ -116,7 +116,7 @@ void UartModule::Transmit(const std::string& msg)
 
 void UartModule::Transmit(const std::vector<uint8_t>& msg)
 {
-    Transmit((const char*)msg.data(), msg.size());
+    Transmit(reinterpret_cast<const char*>(msg.data()), msg.size());
 }
 
 [[maybe_unused]] void UartModule::VTransmit(const char* fmt, ...)
@@ -151,8 +151,7 @@ void UartModule::ClearExpectedRxLen()
 
 void UartModule::SetFrameReceiveCpltCallback(const std::function<void()>& cb)
 {
-    NILAI_ASSERT(
-      cb, "[%s]: In SetFrameReceiveCpltCallback, invalid callback function", m_label.c_str());
+    NILAI_ASSERT(cb, "Invalid callback");
 
     if (cb)
     {
@@ -167,8 +166,8 @@ void UartModule::ClearFrameReceiveCpltCallback()
 
 void UartModule::SetStartOfFrameSequence(uint8_t* sof, size_t len)
 {
-    NILAI_ASSERT(sof != nullptr, "[%s]: In SetStartOfFrameSequence, sof is NULL", m_label.c_str());
-    NILAI_ASSERT(len > 0, "[%s]: In SetStartOfFrameSequence, len is 0", m_label.c_str());
+    NILAI_ASSERT(sof != nullptr, "sof is NULL");
+    NILAI_ASSERT(len > 0, "len is 0");
     SetStartOfFrameSequence(std::string(sof, sof + len));
 }
 
@@ -191,8 +190,8 @@ void UartModule::ClearStartOfFrameSequence()
 
 void UartModule::SetEndOfFrameSequence(uint8_t* eof, size_t len)
 {
-    NILAI_ASSERT(eof != nullptr, "[%s]: In SetEndOfFrameSequence, sof is NULL", m_label.c_str());
-    NILAI_ASSERT(len > 0, "[%s]: In SetStartOfFrameSequence, len is 0", m_label.c_str());
+    NILAI_ASSERT(eof != nullptr, "sof is NULL", m_label.c_str());
+    NILAI_ASSERT(len > 0, "len is 0", m_label.c_str());
     SetEndOfFrameSequence(std::string(eof, eof + len));
 }
 
@@ -238,7 +237,7 @@ bool UartModule::ResizeDmaBuffer(size_t sofLen, size_t len, size_t eofLen)
     HAL_StatusTypeDef s = HAL_UART_DMAStop(m_handle);
     if (s != HAL_OK)
     {
-        UART_ERROR("Unable to stop the DMA stream! %i", (int)s);
+        UART_ERROR("Unable to stop the DMA stream! %i", static_cast<int>(s));
         return false;
     }
 
@@ -248,7 +247,7 @@ bool UartModule::ResizeDmaBuffer(size_t sofLen, size_t len, size_t eofLen)
                              s_dataBuffers[m_dataBufferIdx].rxDmaData.size());
     if (s != HAL_OK)
     {
-        UART_ERROR("Unable to start the DMA stream! %i", (int)s);
+        UART_ERROR("Unable to start the DMA stream! %i", static_cast<int>(s));
         return false;
     }
 

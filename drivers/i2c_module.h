@@ -13,35 +13,62 @@
 /* Includes
  * ------------------------------------------------------------------------------------
  */
+
+/**
+ * @addtogroup Nilai
+ * @{
+ */
+
+/**
+ * @addtogroup Drivers
+ * @{
+ */
+
+/**
+ * @addtogroup nilai_drivers_i2c I2C
+ * @{
+ */
+
 #    if defined(NILAI_USE_I2C)
+#        include "../defines/internal_config.h"
 #        if defined(NILAI_TEST)
 #            include "../test/Mocks/drivers/i2c_module.h"
 #        else
-#            include "../defines/internal_config.h"
 #            include NILAI_HAL_HEADER
-#            if defined(HAL_I2C_MODULE_ENABLED)
-#                include "../defines/macros.h"
-#                include "../defines/misc.h"
-#                include "../defines/module.h"
+#        endif
+#        if defined(HAL_I2C_MODULE_ENABLED) || defined(NILAI_TEST)
+#            include "../defines/macros.h"
+#            include "../defines/misc.h"
+#            include "../defines/module.h"
 
-#                include "I2C/enums.h"
-#                include "I2C/structs.h"
+#            include "I2C/enums.h"
+#            include "I2C/structs.h"
 
-#                include <string_view>
-#                include <vector>
+#            include <string_view>
+#            include <vector>
 
 // TODO Events for I2cModule
 namespace Nilai::Drivers
 {
+/**
+ * @class I2cModule
+ * @brief Abstraction around an I2C peripheral.
+ */
 class I2cModule : public Module
 {
+public:
+#            if defined(NILAI_TEST)
+    using Handle = Nilai::Test::Drivers::I2cMockHandle;
+#            else
+    using Handle = I2C_HandleTypeDef;
+#            endif
 public:
     constexpr I2cModule() noexcept                  = default;
     constexpr I2cModule(const I2cModule&) noexcept  = default;
     constexpr I2cModule(I2cModule&&) noexcept       = default;
     I2cModule& operator=(const I2cModule&) noexcept = default;
     I2cModule& operator=(I2cModule&&) noexcept      = default;
-    constexpr I2cModule(I2C_HandleTypeDef* handle, std::string_view label) noexcept
+    constexpr I2cModule(Handle* handle, std::string_view label) noexcept
     : m_handle(handle), m_label(label)
     {
         NILAI_ASSERT(handle != nullptr, "In I2cModule: handle is NULL!");
@@ -89,18 +116,20 @@ public:
                                                         size_t  timeout  = 2);
 
 protected:
-    I2C_HandleTypeDef* m_handle = nullptr;
-    std::string_view   m_label;
+    Handle*          m_handle = nullptr;
+    std::string_view m_label;
 
     static constexpr uint16_t TIMEOUT = 200;
 };
 }    // namespace Nilai::Drivers
-#            else
-#                if WARN_MISSING_STM_DRIVERS
-#                    warning NilaiTFO I2C Module enabled, but HAL_I2C_MODULE_ENABLED is not defined!
-#                endif
+#        else
+#            if WARN_MISSING_STM_DRIVERS
+#                warning NilaiTFO I2C Module enabled, but HAL_I2C_MODULE_ENABLED is not defined!
 #            endif
 #        endif
 #    endif
+//!@}
+//!@}
+//!@}
 #endif
 /* ----- END OF FILE ----- */

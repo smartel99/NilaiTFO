@@ -1,5 +1,5 @@
 /**
- * @file    pwr_ctrl_reg.h
+ * @file    anal_ctrl_reg.h
  * @author  Samuel Martel
  * @date    2022-08-15
  * @brief
@@ -12,7 +12,7 @@
  * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  * General Public License for more details.
  * You should have received a copy of the GNU General Public License along with this program. If
- * not, see <a href=https://www.gnu.org/licenses/>https://www.gnu.org/licenses/<a/>.
+ * not, see <a href=https://www.gnu.org/licenses/>https://www.gnu.org/licenses/</a>.
  */
 
 #ifndef GUARD_NILAI_INTERFACES_TAS5760_ANAL_CTRL_REG_H
@@ -48,8 +48,7 @@ namespace Nilai::Interfaces::TAS5760
  */
 struct AnalCtrlReg
 {
-    //! @attention This control is reserved and must not be changed from its default setting.
-    uint8_t Reserved : 1;
+    const uint8_t Reserved : 1 = 1;
     /**
      * @brief Channel Selection for PBTL Mode
      *
@@ -59,7 +58,7 @@ struct AnalCtrlReg
      * @b 1: When placed in PBTL mode, the audio information from the left channel of the serial
      * audio input stream is used by the speaker amplifier.
      */
-    uint8_t PbtlChSel : 1;
+    uint8_t PbtlChSel : 1 = 0;
     /**
      * @brief Analog Gain Setting
      *
@@ -72,7 +71,7 @@ struct AnalCtrlReg
      * <br>
      * @b 11: This setting is reserved and must not be used.
      */
-    uint8_t AGain : 2;
+    uint8_t AGain : 2 = 0;
     /**
      * @brief PWM Rate Select
      *
@@ -110,7 +109,7 @@ struct AnalCtrlReg
      * @note All rates listed above are valid for single speed mode. For double speed mode,
      * switching frequency is half of that represented above.
      */
-    uint8_t PwmRateSel : 3;
+    uint8_t PwmRateSel : 3 = 0b101;
     /**
      * @brief PBTL Enable
      *
@@ -119,10 +118,16 @@ struct AnalCtrlReg
      * <br>
      * @b 1: Device is placed in PBTL (Parallel Bridge-Tied Load) mode.
      */
-    uint8_t PbtlEnable : 1;
+    uint8_t PbtlEnable : 1 = 0;
 
     /**
      * @brief Default constructor.
+     *
+     * Default values taken from the datasheet:
+     * - PBTL Ch Sel: 0b0
+     * - A_GAIN: 0b0
+     * - PWM Rate Select: 0b101
+     * - PBTL Enable: 0b0
      */
     constexpr AnalCtrlReg() noexcept = default;
 
@@ -131,16 +136,16 @@ struct AnalCtrlReg
      * @param v The data to initialize the struct with.
      */
     constexpr explicit AnalCtrlReg(uint8_t v) noexcept
+    : PbtlChSel((v & PbtlChSelMask) >> PbtlChSelShift),
+      AGain((v & AGainMask) >> AGainShift),
+      PwmRateSel((v & PwmRateSelMask) >> PwmRateSelShift),
+      PbtlEnable((v & PbtlEnMask) >> PbtlEnShift)
     {
-        PbtlChSel  = (v & PbtlChSelMask) >> PbtlChSelShift;
-        AGain      = (v & AGainMask) >> AGainShift;
-        PwmRateSel = (v & PwmRateSelMask) >> PwmRateSelShift;
-        PbtlEnable = (v & PbtlEnMask) >> PbtlEnShift;
     }
 
     /**
-     * @brief Converts the structure into a uint16_t.
-     * @return The uint16_t representing the structure.
+     * @brief Converts the structure into a uint8_t.
+     * @return The uint8_t representing the structure.
      */
     [[nodiscard]] explicit constexpr operator uint8_t() const noexcept
     {

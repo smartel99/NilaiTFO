@@ -12,16 +12,29 @@
 /***********************************************/
 /* Includes */
 #if defined(NILAI_USE_FILESYSTEM)
-#    if defined(NILAI_TEST)
+#    include "../defines/filesystem/error_codes.h"
 
-#    else
-
-#        include "../defines/filesystem/error_codes.h"
-
+#    if !defined(NILAI_TEST)
 #        include "ff.h"
 
 #        include <functional>
 #        include <string>
+#        include <string_view>
+
+/**
+ * @addtogroup Nilai
+ * @{
+ */
+
+/**
+ * @addtogroup Services
+ * @{
+ */
+
+/**
+ * @addtogroup Filesystem
+ * @{
+ */
 
 namespace Nilai::Filesystem
 {
@@ -29,25 +42,26 @@ using file_t  = FIL;
 using fsize_t = FSIZE_t;
 
 /**
- * Mode flags that specifies the type of access and open method for a file.
+ * @enum FileModes
+ * @brief Mode flags that specifies the type of access and open method for a file.
  * Multiple flags can be combined.
  */
 enum class FileModes : uint8_t
 {
-    //!< Specifies read access to the file. Data can be read from the file.
+    //! Specifies read access to the file. Data can be read from the file.
     Read = FA_READ,
-    //!< Specifies write access to the file. Data can be written to the file.
+    //! Specifies write access to the file. Data can be written to the file.
     //! Combine with Read for read-write access.
     Write = FA_WRITE,
-    //!< Opens a file. The function fails if the file is not existing. (Default)
+    //! Opens a file. The function fails if the file is not existing. (Default)
     OpenExisting = FA_OPEN_EXISTING,
-    //!< Creates a new file. The function fails with Result::Exist if the file already exists.
+    //! Creates a new file. The function fails with Result::Exist if the file already exists.
     CreateNew = FA_CREATE_NEW,
-    //!< Creates a new file. If the file already exists, it will be truncated and overwritten.
+    //! Creates a new file. If the file already exists, it will be truncated and overwritten.
     CreateAlways = FA_CREATE_ALWAYS,
-    //!< Opens the file if it exists. If it doesn't, create it.
+    //! Opens the file if it exists. If it doesn't, create it.
     OpenAlways = FA_OPEN_ALWAYS,
-    //!< Same as FA_OPEN_ALWAYS except the read/write pointer is set at the end of the file.
+    //! Same as FA_OPEN_ALWAYS except the read/write pointer is set at the end of the file.
     OpenAppend = FA_OPEN_APPEND,
 
     DEFAULT       = Read | OpenExisting,
@@ -70,20 +84,28 @@ constexpr inline FileModes operator|=(FileModes& a, const FileModes& b)
     return a = a | b;
 }
 
+/**
+ * @enum AllocModes
+ * @brief Modes of allocation used by FATFS
+ */
 enum class AllocModes
 {
     PrepareToAllocate = 0,
     AllocateNow       = 1,
 };
 
+/**
+ * @class File
+ * @brief Structure representing a file object.
+ */
 class File
 {
 public:
     File() = default;
-    File(const std::string& path, FileModes mode = FileModes::DEFAULT);
+    File(std::string path, FileModes mode = FileModes::DEFAULT);
     ~File();
 
-    Result Open(const std::string& path = "", FileModes mode = FileModes::DEFAULT);
+    Result Open(std::string path = "", FileModes mode = FileModes::DEFAULT);
     Result Close();
     Result Read(void* outData, size_t lenDesired, size_t* lenRead = nullptr);
     Result Write(const void* data, size_t dataLen, size_t* dataWritten = nullptr);
@@ -112,7 +134,7 @@ public:
 #            endif
         if (f_printf(&m_file, fmt, args...) <= 0)
         {
-            m_status = (Result)f_error(&m_file);
+            m_status = static_cast<Result>(f_error(&m_file));
         }
         else
         {
@@ -145,6 +167,9 @@ private:
 };
 }    // namespace Nilai::Filesystem
 
+//!@}
+//!@}
+//!@}
 #    endif
 #endif
 /* END OF FILE */

@@ -21,15 +21,6 @@
 #    include "../defines/internal_config.h"
 #    include NILAI_HAL_HEADER
 #else
-#    if defined(_WIN32) || defined(_WIN64) || defined(__CYGWIN__)
-#        define NILAI_OS_WINDOWS
-#        include <windows.h>
-#    elif defined(unix) || defined(__unix) || defined(__unix__)
-#        define NILAI_OS_LINUX
-#        include <sys/sysinfo.h>
-#    else
-#        error unsupported OS
-#    endif
 #    include <chrono>
 #    include <thread>
 #endif
@@ -71,11 +62,7 @@ inline static void Delay(uint32_t ms)
 #ifndef NILAI_TEST
     HAL_Delay(ms);
 #else
-#    ifdef NILAI_OS_WINDOWS
-    Sleep(ms);
-#    else
     std::this_thread::sleep_for(std::chrono::milliseconds(ms));
-#    endif
 #endif
 }
 }    // namespace Nilai

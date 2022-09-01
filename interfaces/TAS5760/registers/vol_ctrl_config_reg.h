@@ -12,7 +12,7 @@
  * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  * General Public License for more details.
  * You should have received a copy of the GNU General Public License along with this program. If
- * not, see <a href=https://www.gnu.org/licenses/>https://www.gnu.org/licenses/<a/>.
+ * not, see <a href=https://www.gnu.org/licenses/>https://www.gnu.org/licenses/</a>.
  */
 
 #ifndef GUARD_NILAI_INTERFACES_TAS5760_VOL_CTRL_CONFIG_REG_H
@@ -57,7 +57,7 @@ struct VolCtrConfigReg
      * @b 1: The left channel is muted. In software mute, most analog and digital blocks remain
      * active and the speaker amplifier outputs transition to a 50/50 duty cycle.
      */
-    uint8_t MuteL : 1;
+    uint8_t MuteL : 1 = 0;
     /**
      * @brief Mute Right Channel.
      *
@@ -67,11 +67,9 @@ struct VolCtrConfigReg
      * @b 1: The right channel is muted. In software mute, most analog and digital blocks remain
      * active and the speaker amplifier outputs transition to a 50/50 duty cycle.
      */
-    uint8_t MuteR : 1;
-    /**
-     * @attention This control is reserved and must not be changed from its default setting.
-     */
-    uint8_t Reserved : 5;
+    uint8_t MuteR : 1 = 0;
+
+    const uint8_t Reserved : 5 = 0b00000;
     /**
      * @brief Volume Fade Enable
      *
@@ -80,10 +78,15 @@ struct VolCtrConfigReg
      * <br>
      * @b 1: Volume fading is enabled.
      */
-    uint8_t Fade : 1;
+    uint8_t Fade : 1 = 1;
 
     /**
      * @brief Default constructor.
+     *
+     * Default values taken from the datasheet:
+     * - Mute L : 0b0
+     * - Mute R : 0b0
+     * - Fade : 0b1
      */
     constexpr VolCtrConfigReg() noexcept = default;
 
@@ -92,15 +95,15 @@ struct VolCtrConfigReg
      * @param v The data to initialize the struct with.
      */
     constexpr explicit VolCtrConfigReg(uint8_t v) noexcept
+    : MuteL((v & MuteLMask) >> MuteLShift),
+      MuteR((v & MuteRMask) >> MuteRShift),
+      Fade((v & FadeMask) >> FadeShift)
     {
-        MuteL = (v & MuteLMask) >> MuteLShift;
-        MuteR = (v & MuteRMask) >> MuteRShift;
-        Fade  = (v & FadeMask) >> FadeShift;
     }
 
     /**
-     * @brief Converts the structure into a uint16_t.
-     * @return The uint16_t representing the structure.
+     * @brief Converts the structure into a uint8_t.
+     * @return The uint8_t representing the structure.
      */
     [[nodiscard]] explicit constexpr operator uint8_t() const noexcept
     {

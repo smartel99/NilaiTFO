@@ -22,26 +22,19 @@ namespace Nilai::Services
 Logger* Logger::s_instance = nullptr;
 
 #    if defined(NILAI_USE_UART)
-Logger::Logger(Ref<Drivers::UartModule> uart, const LogFunc& logFunc)
+Logger::Logger(Drivers::UartModule& uart, LogFunc logFunc)
+: m_uart(uart), m_logFunc(std::move(logFunc))
 {
-    NILAI_ASSERT(s_instance == nullptr, "Can only have one instance of Logger!");
-    NILAI_ASSERT(uart != nullptr, "Uart handle is null!");
+    NILAI_ASSERT(s_instance == nullptr, "");
+    NILAI_ASSERT(m_logFunc, "");
     s_instance = this;
-    m_uart     = std::move(uart);
-    if (logFunc)
-    {
-        m_logFunc = logFunc;
-    }
 }
 #    else
-Logger::Logger(const LogFunc& logFunc)
+Logger::Logger(const LogFunc& logFunc) : m_logFunc(std::move(logFunc))
 {
     CEP_ASSERT(s_instance == nullptr, "Can only have one instance of Logger!");
+    NILAI_ASSERT(m_logFunc, "");
     s_instance = this;
-    if (logFunc)
-    {
-        m_logFunc = logFunc;
-    }
 }
 #    endif
 
@@ -68,7 +61,7 @@ void Logger::VLog(const char* fmt, va_list args)
 
     NILAI_ASSERT(s < std::size(buff), "vsnprintf error!");
 #    if defined(NILAI_USE_UART)
-    m_uart->Transmit(buff, s);
+    m_uart.Transmit(buff, s);
 #    endif
     m_logFunc(buff, s);
 }

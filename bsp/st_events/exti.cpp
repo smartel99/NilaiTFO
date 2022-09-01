@@ -17,7 +17,7 @@
 #if defined(NILAI_USE_EVENTS)
 #    include "../../defines/events/events.h"
 #    include "../../processes/application.h"
-#    include <defines/macros.h>
+#    include "../../defines/macros.h"
 
 using EventTypes = Nilai::Events::EventTypes;
 
@@ -61,7 +61,7 @@ extern "C" void HAL_GPIO_EXTI_Callback(uint16_t pin)
 constexpr uint8_t PinIdToNum(uint16_t pin) noexcept
 {
     // A valid pin ID only has 1 bit set.
-    NILAI_ASSERT(std::popcount(pin) == 1, "Invalid pin ID %#04x", pin);
+    NILAI_ASSERT(std::popcount(pin) == 1, "Invalid ID %#04x", pin);
     return std::countr_zero(pin) + 1;
 }
 
@@ -90,7 +90,7 @@ constexpr EventTypes PinIdToEventType(uint16_t pin) noexcept
         case 0x2000: return EventTypes::Exti13;
         case 0x4000: return EventTypes::Exti14;
         case 0x8000: return EventTypes::Exti15;
-        default: NILAI_ASSERT(false, "Invalid pin ID %#04x", pin); return EventTypes::Exti_Generic;
+        default: NILAI_ASSERT(false, "Invalid ID %#04x", pin); return EventTypes::Exti_Generic;
     }
 }
 

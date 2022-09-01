@@ -27,9 +27,25 @@
 
 #    include "enums.h"
 
+#    include "../../defines/types/function.h"
+
 #    include <concepts>
 #    include <string>
 
+/**
+ * @addtogroup Nilai
+ * @{
+ */
+
+/**
+ * @addtogroup Interfaces
+ * @{
+ */
+
+/**
+ * @addtogroup TAS5760
+ * @{
+ */
 namespace Nilai::Interfaces
 {
 template<typename T>
@@ -51,19 +67,31 @@ concept CommunicationDevice = requires(T t) {
                                       } -> std::same_as<bool>;
                               };
 
-
+/**
+ * @class Tas5760Module
+ * @brief Abstract class representing a TAS5760 digital audio amplifier.
+ *
+ * <a
+ * href=https://www.ti.com/lit/ds/symlink/tas5760md.pdf?ts=1661106039545&ref_url=https%253A%252F%252Fwww.ti.com%252Fproduct%252FTAS5760MD>
+ * Datasheet</a>
+ * @tparam Device
+ */
 template<CommunicationDevice Device>
 class Tas5760Module : public Device
 {
 protected:
-    using Handle = typename std::result_of<decltype (&Device::GetHandle)(Device)>::type;
+    using Handle = typename std::invoke_result_t<decltype(&Device::GetHandle), Device>;
 
 public:
     template<typename... Args>
-    Tas5760Module(Handle handle, const std::string& label, Args... args)
-    : Device(handle, label, args...)
+    Tas5760Module(Handle handle, const std::string& label, Args&&... args)
+    : Device(handle, label, std::forward<Args>(args)...)
     {
     }
+    Tas5760Module(const Tas5760Module&)            = delete;
+    Tas5760Module(Tas5760Module&&)                 = delete;
+    Tas5760Module& operator=(const Tas5760Module&) = delete;
+    Tas5760Module& operator=(Tas5760Module&&)      = delete;
 
     virtual void               ToggleSleep([[maybe_unused]] bool s) {}
     [[nodiscard]] virtual bool IsAsleep() const { return true; }
@@ -72,6 +100,9 @@ public:
     [[nodiscard]] virtual bool IsShutdown() const { return true; }
 };
 }    // namespace Nilai::Interfaces
+//!@}
+//!@}
+//!@}
 #endif
 
 #endif    // NILAI_TAS5760_TAS5760MODULE_H

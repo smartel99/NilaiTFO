@@ -1,7 +1,7 @@
 /**
- * @file    registers.h
+ * @file    crc.cpp
  * @author  Samuel Martel
- * @date    2022-07-12
+ * @date    2022-08-31
  * @brief
  *
  * @copyright
@@ -15,23 +15,26 @@
  * not, see <a href=https://www.gnu.org/licenses/>https://www.gnu.org/licenses/</a>.
  */
 
-#ifndef GUARD_AT24QT2120_REGISTERS_H
-#define GUARD_AT24QT2120_REGISTERS_H
+#include "crc.h"
 
-#if defined(NILAI_USE_AT24QT2120)
-#    include "map.h"
+#include "../../defines/internal_config.h"
+#include NILAI_HAL_HEADER
 
-#    include "key.h"
+namespace Nilai::Services
+{
 
-#    include "detection_status.h"
-#    include "firmware_version.h"
-#    include "group.h"
-#    include "key_options.h"
-#    include "key_status.h"
-#    include "pulse_scale.h"
-#    include "sensor_status.h"
-#    include "signal_reference_pack.h"
-#    include "slider_options.h"
-
+uint32_t Crc(const uint32_t* data, size_t len, uint32_t initial)
+{
+#if defined(HAL_CRC_MODULE_ENABLED)
+    auto* crc = reinterpret_cast<CRC_TypeDef*>(CRC_BASE);
+    crc->DR   = initial;
+    for (size_t i = 0; i < len; i++)
+    {
+        crc->DR = data[i];
+    }
+    return crc->DR;
+#else
+    return ConstexprCrc(data, len, initial);
 #endif
-#endif    // GUARD_AT24QT2120_REGISTERS_H
+}
+}    // namespace Nilai::Services

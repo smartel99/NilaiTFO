@@ -23,18 +23,44 @@
 #    include "detection_status.h"
 #    include "key_status.h"
 
+#    include "../../../defines/misc.h"
+
 #    include <vector>
 
 namespace Nilai::Interfaces::AT24QT2120
 {
 /**
- * Collection of the various statuses contained in the sensor.
+ * @addtogroup Nilai
+ * @{
+ */
+
+/**
+ * @addtogroup Interfaces
+ * @{
+ */
+
+/**
+ * @addtogroup AT24QT2120
+ * @{
+ */
+
+/**
+ * @struct SensorStatus
+ * @brief Collection of the various statuses contained in the sensor.
  */
 struct SensorStatus
 {
-    DetectionStatus ChipStatus     = {};
-    KeyStatus       KeyStatuses    = {};
-    uint8_t         SliderPosition = {};
+    //! Detection status of the sensor. Also includes more generic status information.
+    DetectionStatus ChipStatus = {};
+
+    //! Detection status of each keys.
+    KeyStatus KeyStatuses = {};
+
+    /**
+     * Reports the slider/wheel position. Only valid when the @c SDet bit is set in @ref
+     * ChipStatus.
+     */
+    uint8_t SliderPosition = {};
 
     constexpr SensorStatus() noexcept = default;
     /**
@@ -46,6 +72,7 @@ struct SensorStatus
       KeyStatuses(KeyStatus {Nilai::Pack<uint16_t>(data[1], data[2])}),
       SliderPosition(data[3])
     {
+        NILAI_ASSERT(data.size() == 4, "bad data");
     }
 
     bool operator==(const SensorStatus& rhs) const
@@ -55,6 +82,10 @@ struct SensorStatus
     }
     bool operator!=(const SensorStatus& rhs) const { return !(rhs == *this); }
 };
+
+//!@}
+//!@}
+//!@}
 }    // namespace Nilai::Interfaces::AT24QT2120
 #endif
 #endif    // GUARD_AT24QT2120_REGISTERS_SENSOR_STATUS_H

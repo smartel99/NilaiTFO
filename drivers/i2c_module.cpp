@@ -13,12 +13,13 @@
  */
 #include "i2c_module.h"
 
-#if defined(NILAI_USE_I2C) && !defined(NILAI_TEST)
+#if defined(NILAI_USE_I2C)
 #    include "../services/logger.h"
 #    include <utility>
 
 #    define I2C_INFO(msg, ...)  LOG_INFO("[%s]: " msg, m_label.data(), ##__VA_ARGS__)
 #    define I2C_ERROR(msg, ...) LOG_ERROR("[%s]: " msg, m_label.data(), ##__VA_ARGS__)
+
 
 namespace Nilai::Drivers
 {
@@ -38,10 +39,13 @@ void I2cModule::Run()
 
 void I2cModule::TransmitFrame(uint8_t addr, const uint8_t* data, size_t len)
 {
-    if (HAL_I2C_Master_Transmit(
-          m_handle, addr, const_cast<uint8_t*>(data), (uint16_t)len, I2cModule::TIMEOUT) != HAL_OK)
+    if (HAL_I2C_Master_Transmit(m_handle,
+                                addr,
+                                const_cast<uint8_t*>(data),
+                                static_cast<uint16_t>(len),
+                                I2cModule::TIMEOUT) != HAL_OK)
     {
-        I2C_ERROR("In TransmitFrame, unable to transmit frame");
+        I2C_ERROR("Unable to transmit frame");
     }
 }
 
@@ -55,10 +59,10 @@ void I2cModule::TransmitFrameToRegister(uint8_t        addr,
                           regAddr,
                           sizeof(regAddr),
                           const_cast<uint8_t*>(data),
-                          (uint16_t)len,
+                          static_cast<uint16_t>(len),
                           I2cModule::TIMEOUT) != HAL_OK)
     {
-        I2C_ERROR("In TransmitFrameToRegister, unable to transmit frame");
+        I2C_ERROR("Unable to transmit frame to register");
     }
 }
 
@@ -70,11 +74,13 @@ I2C::Frame I2cModule::ReceiveFrame(uint8_t addr, size_t len)
     // Allocate memory for the data.
     frame.data.resize(len);
 
-    if (HAL_I2C_Master_Receive(
-          m_handle, addr, frame.data.data(), (uint16_t)frame.data.size(), I2cModule::TIMEOUT) !=
-        HAL_OK)
+    if (HAL_I2C_Master_Receive(m_handle,
+                               addr,
+                               frame.data.data(),
+                               static_cast<uint16_t>(frame.data.size()),
+                               I2cModule::TIMEOUT) != HAL_OK)
     {
-        I2C_ERROR("In ReceiveFrame, unable to receive frame");
+        I2C_ERROR("Unable to receive frame");
     }
 
     return frame;
@@ -93,10 +99,10 @@ I2C::Frame I2cModule::ReceiveFrameFromRegister(uint8_t addr, uint8_t regAddr, si
                          frame.registerAddress,
                          sizeof(frame.registerAddress),
                          frame.data.data(),
-                         (uint16_t)frame.data.size(),
+                         static_cast<uint16_t>(frame.data.size()),
                          I2cModule::TIMEOUT) != HAL_OK)
     {
-        I2C_ERROR("In ReceiveFrameFromRegister, unable to receive frame");
+        I2C_ERROR("Unable to receive frame from register");
     }
 
     return frame;

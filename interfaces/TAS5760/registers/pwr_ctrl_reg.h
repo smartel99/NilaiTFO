@@ -12,7 +12,7 @@
  * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  * General Public License for more details.
  * You should have received a copy of the GNU General Public License along with this program. If
- * not, see <a href=https://www.gnu.org/licenses/>https://www.gnu.org/licenses/<a/>.
+ * not, see <a href=https://www.gnu.org/licenses/>https://www.gnu.org/licenses/</a>.
  */
 
 #ifndef GUARD_NILAI_INTERFACES_TAS5760_PWR_CTRL_REG_H
@@ -58,7 +58,7 @@ struct PwrCtrlReg
      * <br>
      * @b 1: Speaker amplifier is not shut down.
      */
-    uint8_t SpkShutdown : 1;
+    uint8_t SpkShutdown : 1 = 1;
     /**
      * @brief Sleep Mode
      *
@@ -70,7 +70,7 @@ struct PwrCtrlReg
      * on standby. This reduces the time required to resume playback when compared with entering
      * and exiting full shut down.
      */
-    uint8_t SpkSleep : 1;
+    uint8_t SpkSleep : 1 = 0;
     /**
      * @brief The digital clipper is decoded from 3 registers-
      *  DigClipLev[19:14], DigClipLev[13:6] and DigClipLev[5:0].
@@ -78,10 +78,15 @@ struct PwrCtrlReg
      * DigClipLev[19:14], shown here, represents the upper 6 bits of the total of 20 bits that
      * are used to set the digital clipping threshold.
      */
-    uint8_t DigClipLev : 6;
+    uint8_t DigClipLev : 6 = 0b111111;
 
     /**
      * @brief Default constructor.
+     *
+     * Default values taken from the datasheet:
+     * - SpkShutdown = 0x01
+     * - SpkSleep = 0x00
+     * - DigClipLev = 0x3F
      */
     constexpr PwrCtrlReg() noexcept = default;
 
@@ -90,10 +95,10 @@ struct PwrCtrlReg
      * @param v The data to initialize the struct with.
      */
     constexpr explicit PwrCtrlReg(uint8_t v) noexcept
+    : SpkShutdown((v & SpkShutdownMask) >> SpkShutdownShift),
+      SpkSleep((v & SpkSleepMask) >> SpkSleepShift),
+      DigClipLev((v & DigClipLevMask) >> DigClipLevShift)
     {
-        SpkShutdown = (v & SpkShutdownMask) >> SpkShutdownShift;
-        SpkSleep    = (v & SpkSleepMask) >> SpkSleepShift;
-        DigClipLev  = (v & DigClipLevMask) >> DigClipLevShift;
     }
 
     /**

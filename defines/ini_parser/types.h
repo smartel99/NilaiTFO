@@ -19,10 +19,25 @@
 
 #if defined(NILAI_USE_INI_PARSER)
 
-#    include "Concepts.h"
+#    include "concepts.h"
 #    include <algorithm>
 #    include <array>
 #    include <string>
+
+/**
+ * @addtogroup Nilai
+ * @{
+ */
+
+/**
+ * @addtogroup Services
+ * @{
+ */
+
+/**
+ * @addtogroup nilai_ini Ini Parser
+ * @{
+ */
 
 namespace Nilai
 {
@@ -62,6 +77,9 @@ inline static T StrToVal(const std::string& s)
 
 }    // namespace Nilai
 
+//!@}
+//!@}
+//!@}
 #endif
 
 #endif    // NILAI_TYPES_H

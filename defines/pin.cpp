@@ -22,7 +22,6 @@
 
 namespace Nilai
 {
-
 void Pin::Set(bool state) const
 {
     NILAI_ASSERT(port != nullptr, "Port is null!");

@@ -28,8 +28,7 @@ class Application;
 class Module
 {
 public:
-    Module()          = default;
-    virtual ~Module() = default;
+    virtual ~Module() noexcept = default;
 
     /**
      * @brief Called when the module is being attached to the application.
@@ -61,7 +60,7 @@ public:
      * @brief Gets the ID of the module.
      * @return the ID of the module
      */
-    [[nodiscard]] size_t GetId() const { return m_id; }
+    [[nodiscard]] size_t GetId() const noexcept { return m_id; }
 
 protected:
     friend class Application;

@@ -12,7 +12,7 @@
  * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  * General Public License for more details.
  * You should have received a copy of the GNU General Public License along with this program. If
- * not, see <a href=https://www.gnu.org/licenses/>https://www.gnu.org/licenses/<a/>.
+ * not, see <a href=https://www.gnu.org/licenses/>https://www.gnu.org/licenses/</a>.
  */
 
 #ifndef GUARD_NILAI_INTERFACES_TAS5760_FAULT_CFG_AND_ERR_STATUS_REG_H
@@ -58,7 +58,7 @@ struct FaultCfgAndErrStatusReg
      * characteristics table. This is a latching error and SPK_SD must be toggled for the device
      * to resume normal operation. This bit will remain HIGH until SPK_SD is toggled.
      */
-    uint8_t OverTemp : 1;
+    uint8_t OverTemp : 1 = 0;
     /**
      * @brief Output DC Error Status
      *
@@ -70,7 +70,7 @@ struct FaultCfgAndErrStatusReg
      * DCE event for the device to resume normal operation. This bit will remain HIGH until
      * SPK_SD is toggled.
      */
-    uint8_t DCErr : 1;
+    uint8_t DCErr : 1 = 0;
     /**
      * @brief Over Current Error Status
      *
@@ -81,7 +81,7 @@ struct FaultCfgAndErrStatusReg
      * error. This is a latching error and SPK_SD must be toggled after an OCE event for the
      * device to resume normal operation. This bit will remain HIGH until SPK_SD is toggle.
      */
-    uint8_t OverCurr : 1;
+    uint8_t OverCurr : 1 = 0;
     /**
      * @brief Clock Error Status
      *
@@ -92,7 +92,7 @@ struct FaultCfgAndErrStatusReg
      * errors will be cleared when clocks re-enter valid state and the device will resume normal
      * operation automatically. This bit will likewise be cleared once normal operation resumes.
      */
-    uint8_t ClkErr : 1;
+    uint8_t ClkErr : 1 = 0;
     /**
      * @brief Over Current Threshold
      *
@@ -106,11 +106,18 @@ struct FaultCfgAndErrStatusReg
      * @b 11: Threshold is reduced to 25% of the level specified in the electrical
      * characteristics table.
      */
-    uint8_t OverCurrThresh : 2;
-    uint8_t : 2;
+    uint8_t       OverCurrThresh : 2 = 0;
+    const uint8_t Reserved : 2       = 0;
 
     /**
      * @brief Default constructor.
+     *
+     * Default values taken from the datasheet:
+     * - OTE: 0b0
+     * - DCE: 0b0
+     * - OCE: 0b0
+     * - CLKE: 0b0
+     * - OCE Thres: 0b00
      */
     constexpr FaultCfgAndErrStatusReg() noexcept = default;
 
@@ -119,12 +126,12 @@ struct FaultCfgAndErrStatusReg
      * @param v The data to initialize the struct with.
      */
     constexpr explicit FaultCfgAndErrStatusReg(uint8_t v) noexcept
+    : OverTemp((v & OverTempMask) >> OverTempShift),
+      DCErr((v & DCErrMask) >> DCErrShift),
+      OverCurr((v & OverCurrMask) >> OverCurrShift),
+      ClkErr((v & ClkErrMask) >> ClkErrShift),
+      OverCurrThresh((v & OverCurrThreshMask) >> OverCurrThreshShift)
     {
-        OverTemp       = (v & OverTempMask) >> OverTempShift;
-        DCErr          = (v & DCErrMask) >> DCErrShift;
-        OverCurr       = (v & OverCurrMask) >> OverCurrShift;
-        ClkErr         = (v & ClkErrMask) >> ClkErrShift;
-        OverCurrThresh = (v & OverCurrThreshMask) >> OverCurrThreshShift;
     }
 
     /**

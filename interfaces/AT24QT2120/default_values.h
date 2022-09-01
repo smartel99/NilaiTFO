@@ -25,11 +25,47 @@
 
 namespace Nilai::Interfaces::AT24QT2120
 {
+/**
+ * @addtogroup Nilai
+ * @{
+ */
+
+/**
+ * @addtogroup Interfaces
+ * @{
+ */
+
+/**
+ * @addtogroup AT24QT2120
+ * @{
+ */
+
+/**
+ * @struct KeyValues
+ * @brief Contains the options for a single key.
+ */
 struct KeyValues
 {
-    uint8_t    DetectThreshold = 10;    //!< Defaults to 10 count.
-    KeyOptions Configuration   = {};
-    PulseScale PulseAndScale   = {};
+    /**
+     * @brief Detection threshold of the key.
+     *
+     * Defaults to 10 counts.
+     */
+    uint8_t DetectThreshold = 10;
+
+    /**
+     * @brief Key-specific options.
+     */
+    KeyOptions Configuration = {};
+
+    /**
+     * @brief Pulse and Scale of the key.
+     *
+     * @note Refer to the <a
+     * href=https://ww1.microchip.com/downloads/en/DeviceDoc/doc9634.pdf>datasheet</a> for more
+     * information.
+     */
+    PulseScale PulseAndScale = {};
 
     constexpr KeyValues() noexcept = default;
     constexpr bool operator==(const KeyValues& o) const noexcept
@@ -39,20 +75,26 @@ struct KeyValues
     }
 };
 
+/**
+ * @struct RegisterMap
+ * @brief List of the touch sensor's registers.
+ *
+ * These includes the default values for each registers.
+ */
 struct RegisterMap
 {
 public:
     uint8_t       Calibrate               = 0;
     uint8_t       Reset                   = 0;
-    size_t        SamplingInterval        = 1;      //!< Defaults to 16 ms interval.
-    uint8_t       TowardTouchDrift        = 20;     //!< Defaults to 3.2s/reference level.
-    uint8_t       AwayFromTouchDrift      = 5;      //!< Defaults to 0.8s/reference level.
-    uint8_t       DetectionIntegrator     = 4;      //!< Defaults to 4 consecutive measurements.
-    uint8_t       TouchRecalibrationDelay = 255;    //!< Defaults to 40.8 seconds.
-    uint8_t       DriftHoldTime           = 25;     //!< Defaults to 4 seconds.
+    size_t        SamplingInterval        = 1;        //!< Defaults to 16 ms interval.
+    uint8_t       TowardTouchDrift        = 20;       //!< Defaults to 3.2s/reference level.
+    uint8_t       AwayFromTouchDrift      = 5;        //!< Defaults to 0.8s/reference level.
+    uint8_t       DetectionIntegrator     = 4;        //!< Defaults to 4 consecutive measurements.
+    size_t        TouchRecalibrationDelay = 40800;    //!< Defaults to 40.8 seconds.
+    size_t        DriftHoldTime           = 4000;     //!< Defaults to 4 seconds.
     SliderOptions SliderOption            = {};
     uint8_t       ChargeTime              = 0;
-    std::array<KeyValues, 11> Keys        = {};
+    std::array<KeyValues, 12> Keys        = {};
 
     constexpr RegisterMap() noexcept = default;
     [[nodiscard]] constexpr bool IsDefault() const noexcept { return *this == RegisterMap {}; }
@@ -69,6 +111,9 @@ public:
     }
     bool operator!=(const RegisterMap& rhs) const { return !(rhs == *this); }
 };
+//!@}
+//!@}
+//!@}
 }    // namespace Nilai::Interfaces::AT24QT2120
 #endif
 #endif    // GUARD_AT24QT2120_BUILDER_DEFAULT_VALUES_H

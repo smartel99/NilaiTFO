@@ -13,6 +13,8 @@
 
 #include "../services/profiler/profiler.h"
 
+#include <exception>
+
 static void AtExitForwarder();
 
 
@@ -24,7 +26,6 @@ Application* Application::s_instance = nullptr;
 Application::Application()
 {
     std::set_terminate(&AtExitForwarder);
-    std::set_unexpected(&AtExitForwarder);
     std::signal(SIGABRT, &AbortionHandler);
     std::atexit(&AtExitForwarder);
 
@@ -104,10 +105,16 @@ void Application::DispatchEvent(Events::Event* data)
 
 [[noreturn]] void Application::Run()
 {
+    std::for_each(
+      m_modules.begin(), m_modules.end(), [](const ModuleInfo& module) { module.Mod->OnAttach(); });
+
     while (true)
     {
         OnRun();
     }
+
+    std::for_each(
+      m_modules.begin(), m_modules.end(), [](const ModuleInfo& module) { module.Mod->OnDetach(); });
 }
 
 void Application::OnRun()
@@ -123,8 +130,8 @@ void Application::OnRun()
         m_modulesPendingDeletion = false;
         for (size_t id : m_deletionQueue)
         {
-            Ref<Module> module = GetModule(id);
-            module->OnDetach();
+            auto& module = GetModule<Module>(id);
+            module.OnDetach();
         }
 
         // Remove the modules to be removed from the list.
@@ -151,24 +158,11 @@ void Application::RemoveModule(size_t id)
     m_modulesPendingDeletion = true;
 }
 
-Ref<Module> Application::GetModule(size_t id)
-{
-    for (auto& module : m_modules)
-    {
-        if (module.Id == id)
-        {
-            return module.Mod;
-        }
-    }
-
-    // Module not found.
-    AssertFailed((const uint8_t*)__FILE__, __LINE__, 1);
-}
 
 [[noreturn]] void AbortionHandler([[maybe_unused]] int signal)
 {
     // This function will in most cases be called by the STL, in place of the standard _exit().
-    AssertFailed((const uint8_t*)__FILE__, __LINE__, 1);
+    AssertFailed(reinterpret_cast<const uint8_t*>(__FILE__), __LINE__, 1);
     while (true)
     {
     }

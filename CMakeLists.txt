@@ -62,14 +62,14 @@ if (NOT NILAI_TEST)
     add_compile_options(-mfloat-abi=hard -mfpu=fpv4-sp-d16)
     add_link_options(-mfloat-abi=hard -mfpu=fpv4-sp-d16)
 
-    add_compile_options(-mcpu=cortex-m4 -mthumb -mthumb-interwork)
+    add_compile_options(-mcpu=cortex-m4 -mthumb)
     add_compile_options(--specs=nano.specs)
 
     # Enable assembler files preprocessing
     add_compile_options($<$<COMPILE_LANGUAGE:ASM>:-x$<SEMICOLON>assembler-with-cpp>)
 
     add_link_options(-Wl,-gc-sections,--print-memory-usage)
-    add_link_options(-mcpu=cortex-m4 -mthumb -mthumb-interwork)
+    add_link_options(-mcpu=cortex-m4 -mthumb)
     add_link_options(-nolibc -Bsymbolic --specs=nano.specs -Wl,--start-group -lc -lm -lstdc++ -lsupc++ -Wl,--end-group -Wl,-nmagic)
 endif ()
 
@@ -88,11 +88,18 @@ else ()
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0")
 endif ()
 
+# Disable warnings for C code.
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-unused-parameter")
+# Enable desired C++ warnings.
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -pedantic -Wmissing-include-dirs -Wswitch-default -Wswitch-enum")
+# Disable warnings that are known and understood in C++.
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-register -Wno-volatile")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wmissing-include-dirs -Wswitch-default -Wswitch-enum -Wshadow")
+if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    # Enable useful error messages with concepts.
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fconcepts-diagnostics-depth=2")
+endif ()
 # To reduce binary file output size.
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-threadsafe-statics -fno-use-cxa-atexit -fno-rtti")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fnothrow-opt -fno-enforce-eh-specs -fstrict-enums -fno-threadsafe-statics -fno-use-cxa-atexit -fno-rtti")
 add_compile_options(--no-exceptions -fno-exceptions)
 add_compile_options(-ffunction-sections -fdata-sections -fno-common -fmessage-length=0)
 

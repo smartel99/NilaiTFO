@@ -25,6 +25,21 @@
 
 #        include <type_traits>
 
+/**
+ * @addtogroup Nilai
+ * @{
+ */
+
+/**
+ * @addtogroup Drivers
+ * @{
+ */
+
+/**
+ * @addtogroup nilai_drivers_spi SPI
+ * @{
+ */
+
 namespace Nilai::SPI
 {
 /**
@@ -33,31 +48,31 @@ namespace Nilai::SPI
  */
 enum class Status
 {
-    /*!< No error                         */
+    //! No error
     NONE = 0x00000000U,
-    /*!< MODF error                       */
+    //! MODF error
     MODF = 0x00000001U,
-    /*!< CRC error                        */
+    //! CRC error
     CRC_ERROR = 0x00000002U,
-    /*!< OVR error                        */
+    //! OVR error
     OVR = 0x00000004U,
-    /*!< FRE error                        */
+    //! FRE error
     FRE = 0x00000008U,
-    /*!< DMA transfer error               */
+    //! DMA transfer error
     DMA = 0x00000010U,
-    /*!< Error on RXNE/TXE/BSY Flag       */
+    //! Error on RXNE/TXE/BSY Flag
     FLAG = 0x00000020U,
-    /*!< Error during SPI Abort procedure */
+    //! Error during SPI Abort procedure
     ABORT = 0x00000040U,
 #        if USE_HAL_SPI_REGISTER_CALLBACKS == 1
-    /*!< Invalid Callback error  */
+    //! Invalid Callback error
     SPI_ERROR_INVALID_CALLBACK = 0x00000080U,
-#        endif /* USE_HAL_SPI_REGISTER_CALLBACKS */
-    /*!< Module is not enabled            */
+#        endif    // USE_HAL_SPI_REGISTER_CALLBACKS
+    //! Module is not enabled
     NOT_INIT = 0x00000100U,
-    /*!< Bad initialization               */
+    //! Bad initialization
     BAD_INIT = 0x00000200U,
-    /*!< Module has timed out             */
+    //! Module has timed out
     TIMEOUT = 0x00000400U,
 };
 
@@ -101,13 +116,19 @@ constexpr inline Status operator|=(Status& a, const Status& b) noexcept
     return a = a | b;
 }
 
-
+/**
+ * @enum SectionState
+ * @brief State of a section
+ */
 enum class SectionState
 {
     NOT_COMPLETE,
     COMPLETE,
 };
 }    // namespace Nilai::SPI
+     //!@}
+     //!@}
+     //!@}
 #    endif
 #endif
 

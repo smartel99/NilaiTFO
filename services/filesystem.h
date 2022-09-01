@@ -12,15 +12,19 @@
 /***********************************************/
 /* Includes */
 #if defined(NILAI_USE_FILESYSTEM)
-#    if defined(NILAI_TEST)
-
-#    else
-#        include "../defines/filesystem/error_codes.h"
-#        include "../defines/pin.h"
+#    include "../defines/filesystem/error_codes.h"
+#    include "../defines/pin.h"
+#    if !defined(NILAI_TEST)
 #        include "ff.h"
-#        include "file.h"
+#    else
+using DWORD   = size_t;
+using FATFS   = void;
+using DIR     = void;
+using FILINFO = void;
+#    endif
+#    include "file.h"
 
-#        include <string>
+#    include <string>
 
 
 namespace Nilai
@@ -78,11 +82,8 @@ Result Unlink(const std::string& path);
 Result Utime(const std::string& path, const fileInfo_t* fno);
 
 const char* ResultToStr(Result res);
-};    // namespace Filesystem
+}    // namespace Filesystem
 }    // namespace Nilai
-
-
-#    endif
 #endif
 /* END OF FILE */
 #endif /* FILESYSTEM_H_ */

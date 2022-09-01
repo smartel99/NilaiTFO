@@ -12,7 +12,7 @@
  * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  * General Public License for more details.
  * You should have received a copy of the GNU General Public License along with this program. If
- * not, see <a href=https://www.gnu.org/licenses/>https://www.gnu.org/licenses/<a/>.
+ * not, see <a href=https://www.gnu.org/licenses/>https://www.gnu.org/licenses/</a>.
  */
 
 #ifndef GUARD_NILAI_INTERFACES_TAS5760_DIG_CTRL_REG_H
@@ -64,7 +64,7 @@ struct DigCtrlReg
      * <br>
      * @attention Values above 0b100 shouldn't be used.
      */
-    uint8_t InFmt : 3;
+    uint8_t InFmt : 3 = 0b100;
     /**
      * @brief Single Speed/Double Speed Mode Select
      *
@@ -74,7 +74,7 @@ struct DigCtrlReg
      * @b 1: Serial audio port will accept double speed sample rates (that is: 88.2kHz and
      * 96kHz).
      */
-    uint8_t SsDs : 1;
+    uint8_t SsDs : 1 = 0;
     /**
      * @brief Digital Boost
      *
@@ -87,11 +87,9 @@ struct DigCtrlReg
      * <br>
      * @b 11: +18dB is added to the signal in the digital path.
      */
-    uint8_t DigitalBoost : 2;
-    /**
-     * @attention This control is reserved and must not be changed from it's default setting.
-     */
-    uint8_t Reserved : 1;
+    uint8_t DigitalBoost : 2 = 0b01;
+
+    const uint8_t Reserved : 1 = 0;
     /**
      * @brief High-Pass Filter Bypass.
      * <br>
@@ -99,10 +97,17 @@ struct DigCtrlReg
      * <br>
      * @b 1: The internal high-pass filter in the digital path is bypassed.
      */
-    uint8_t HpfBypass : 1;
+    uint8_t HpfBypass : 1 = 0;
 
     /**
      * @brief Default constructor.
+     *
+     * Default values taken from the datasheet:
+     * - Serial Audio Input Format: 0b100
+     * - SS/DS: 0b0
+     * - Digital Boost: 0b01
+     * - Reserved: 0b0
+     * - HPF Bypass: 0b0
      */
     constexpr DigCtrlReg() noexcept = default;
 
@@ -111,11 +116,11 @@ struct DigCtrlReg
      * @param v The data to initialize the struct with.
      */
     constexpr explicit DigCtrlReg(uint8_t v) noexcept
+    : InFmt((v & InFmtMask) >> InFmtShift),
+      SsDs((v & SsDsMask) >> SsDsShift),
+      DigitalBoost((v & DigitalBoostMask) >> DigitalBoostShift),
+      HpfBypass((v & HpfBypassMask) >> HpfBypassShift)
     {
-        HpfBypass    = (v & HpfBypassMask) >> HpfBypassShift;
-        DigitalBoost = (v & DigitalBoostMask) >> DigitalBoostShift;
-        SsDs         = (v & SsDsMask) >> SsDsShift;
-        InFmt        = (v & InFmtMask) >> InFmtShift;
     }
 
     /**

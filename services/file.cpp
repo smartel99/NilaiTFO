@@ -28,10 +28,9 @@
 
 namespace Nilai::Filesystem
 {
-File::File(const std::string& path, FileModes mode) : m_path(path), m_mode(mode)
+File::File(std::string path, FileModes mode) : m_path(std::move(path)), m_mode(mode), m_file {}
 {
-    m_file = file_t {};
-    Open(path, mode);
+    Open(m_path, mode);
 }
 
 File::~File()
@@ -42,16 +41,17 @@ File::~File()
     //    }
 }
 
-Result File::Open(const std::string& path, FileModes mode)
+Result File::Open(std::string path, FileModes mode)
 {
     // If path is empty, just reopen the file.
     if (!path.empty())
     {
-        m_path = path;
+        m_path = std::move(path);
     }
 
     m_mode   = mode;
-    m_status = (Result)f_open(&m_file, m_path.c_str(), std::underlying_type_t<FileModes>(m_mode));
+    m_status = static_cast<Result>(
+      f_open(&m_file, m_path.c_str(), std::underlying_type_t<FileModes>(m_mode)));
 
     if (m_status != Result::Ok)
     {
@@ -70,7 +70,7 @@ Result File::Close()
 {
     ASSERT_FILE_IS_OK();
 
-    m_status = (Result)f_close(&m_file);
+    m_status = static_cast<Result>(f_close(&m_file));
 
     if (m_status != Result::Ok)
     {
@@ -89,7 +89,7 @@ Result File::Read(void* outData, size_t lenDesired, size_t* lenRead)
     ASSERT_FILE_IS_OK();
     NILAI_ASSERT(outData != nullptr, "Pointer is null!");
     size_t br = 0;
-    Result r  = (Result)f_read(&m_file, outData, lenDesired, &br);
+    auto   r  = static_cast<Result>(f_read(&m_file, outData, lenDesired, &br));
 
     if (lenRead != nullptr)
     {
@@ -105,7 +105,7 @@ Result File::Write(const void* data, size_t dataLen, size_t* dataWritten)
 
     size_t bw = 0;
 
-    Result r = (Result)f_write(&m_file, data, dataLen, &bw);
+    Result r = static_cast<Result>(f_write(&m_file, data, dataLen, &bw));
 
     if (dataWritten != nullptr)
     {
@@ -120,9 +120,9 @@ Result File::Seek(fsize_t ofs)
 #    if _FS_MINIMIZE <= 2
     ASSERT_FILE_IS_OK();
 
-    return (Result)f_lseek(&m_file, ofs);
+    return static_cast<Result>(f_lseek(&m_file, ofs));
 #    else
-    CEP_ASSERT(false, "This function is not enabled");
+    NILAI_ASSERT(false, "This function is not enabled");
     return Result::Ok;
 #    endif
 }
@@ -132,9 +132,9 @@ Result File::Rewind()
 #    if _FS_MINIMIZE <= 2
     ASSERT_FILE_IS_OK();
 
-    return (Result)f_lseek(&m_file, 0);
+    return static_cast<Result>(f_lseek(&m_file, 0));
 #    else
-    CEP_ASSERT(false, "This function is not enabled");
+    NILAI_ASSERT(false, "This function is not enabled");
     return Result::Ok;
 #    endif
 }
@@ -143,9 +143,9 @@ Result File::Truncate()
 {
 #    if _FS_READONLY == 0 && _FS_MINIMIZE == 0
     ASSERT_FILE_IS_OK();
-    return (Result)f_truncate(&m_file);
+    return static_cast<Result>(f_truncate(&m_file));
 #    else
-    CEP_ASSERT(false, "This function is not enabled");
+    NILAI_ASSERT(false, "This function is not enabled");
     return Result::Ok;
 #    endif
 }
@@ -154,9 +154,9 @@ Result File::Sync()
 {
 #    if _FS_READONLY == 0
     ASSERT_FILE_IS_OK();
-    return (Result)f_sync(&m_file);
+    return static_cast<Result>(f_sync(&m_file));
 #    else
-    CEP_ASSERT(false, "This function is not enabled");
+    NILAI_ASSERT(false, "This function is not enabled");
     return Result::Ok;
 #    endif
 }
@@ -198,9 +198,9 @@ Result File::GetString(std::string& outStr, size_t maxLen)
     char* buff = new char[maxLen];
     NILAI_ASSERT(buff != nullptr, "Unable to allocate memory!");
 
-    if (f_gets(buff, maxLen, &m_file) == nullptr)
+    if (f_gets(buff, static_cast<int>(maxLen), &m_file) == nullptr)
     {
-        m_status = (Result)f_error(&m_file);
+        m_status = static_cast<Result>(f_error(&m_file));
     }
     else
     {
@@ -215,7 +215,7 @@ Result File::GetString(std::string& outStr, size_t maxLen)
 #    else
     UNUSED(outStr);
     UNUSED(maxLen);
-    CEP_ASSERT(false, "This function is not enabled");
+    NILAI_ASSERT(false, "This function is not enabled");
     return Result::Ok;
 #    endif
 }
@@ -227,7 +227,7 @@ Result File::WriteChar(uint8_t c)
 
     if (f_putc(c, &m_file) <= 0)
     {
-        m_status = (Result)f_error(&m_file);
+        m_status = static_cast<Result>(f_error(&m_file));
     }
     else
     {
@@ -236,7 +236,7 @@ Result File::WriteChar(uint8_t c)
     return m_status;
 #    else
     UNUSED(c);
-    CEP_ASSERT(false, "This function is not enabled");
+    NILAI_ASSERT(false, "This function is not enabled");
     return Result::Ok;
 #    endif
 }
@@ -248,7 +248,7 @@ Result File::WriteString(const std::string& str)
 
     if (f_puts(str.c_str(), &m_file) <= 0)
     {
-        m_status = (Result)f_error(&m_file);
+        m_status = static_cast<Result>(f_error(&m_file));
     }
     else
     {
@@ -258,7 +258,7 @@ Result File::WriteString(const std::string& str)
 
 #    else
     UNUSED(str);
-    CEP_ASSERT(false, "This function is not enabled");
+    NILAI_ASSERT(false, "This function is not enabled");
     return Result::Ok;
 #    endif
 }
@@ -283,7 +283,7 @@ fsize_t File::GetSize()
 
 bool File::HasError()
 {
-    return !((Result)f_error(&m_file) == Result::Ok);
+    return static_cast<Result>(f_error(&m_file)) != Result::Ok;
 }
 
 }    // namespace Nilai::Filesystem

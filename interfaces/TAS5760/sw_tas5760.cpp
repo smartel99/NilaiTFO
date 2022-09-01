@@ -21,8 +21,10 @@
 #    include "../../processes/application.h"
 #    include "../../services/logger.h"
 
-#    define TAS_INFO(msg, ...)  LOG_INFO("[%s]: " msg, Device::m_label.c_str(), ##__VA_ARGS__)
-#    define TAS_ERROR(msg, ...) LOG_ERROR("[%s]: " msg, Device::m_label.c_str(), ##__VA_ARGS__)
+#    define TAS_INFO(msg, ...)                                                                     \
+        LOG_INFO("[%s]: " msg, Device::m_label.c_str() __VA_OPT__(, ) __VA_ARGS__)
+#    define TAS_ERROR(msg, ...)                                                                    \
+        LOG_ERROR("[%s]: " msg, Device::m_label.c_str() __VA_OPT__(, ) __VA_ARGS__)
 
 namespace Nilai::Interfaces
 {
@@ -306,7 +308,7 @@ void SwTas5760<Device>::HandleFault()
         if (!m_cfg.Fault.Get())
         {
             uint8_t s = m_cfg.I2c
-                          ->ReceiveFrameFromRegister(
+                          .ReceiveFrameFromRegister(
                             static_cast<uint8_t>(m_cfg.Address),
                             static_cast<uint8_t>(TAS5760::Registers::FaultCfgAndErrStatus),
                             1)
@@ -336,11 +338,11 @@ void SwTas5760<Device>::HandleHeadphoneChange()
 template<typename Device>
 bool SwTas5760<Device>::SetRegister(TAS5760::Registers r, uint8_t v)
 {
-    m_cfg.I2c->TransmitFrameToRegister(
+    m_cfg.I2c.TransmitFrameToRegister(
       static_cast<uint8_t>(m_cfg.Address), static_cast<uint8_t>(r), &v, sizeof(uint8_t));
 
 #    if defined(NILAI_TAS5760_VERIFY_WRITE)
-    I2C::Frame f = m_cfg.I2c->ReceiveFrameFromRegister(
+    I2C::Frame f = m_cfg.I2c.ReceiveFrameFromRegister(
       static_cast<uint8_t>(m_cfg.Address), static_cast<uint8_t>(r), sizeof(uint8_t));
     if (f.data[0] == v)
     {
@@ -362,25 +364,33 @@ bool SwTas5760<Device>::SetRegister(TAS5760::Registers r, uint8_t v)
 }
 
 template<typename Device>
-std::string SwTas5760<Device>::StatusToStr(uint8_t s)
+const std::string& SwTas5760<Device>::StatusToStr(uint8_t s)
 {
-    std::string errStr;
+    using namespace std::string_literals;
+    static std::string errStr = std::string(64, '\0');    // Pre-allocate 64 bytes.
+    errStr.clear();
 
     if ((s & s_clkeMask) != 0)
     {
-        errStr += "Clock error, ";
+        errStr += "Clock error, "s;
     }
     if ((s & s_oceMask) != 0)
     {
-        errStr += "Over current, ";
+        errStr += "Over current, "s;
     }
     if ((s & s_dceMask) != 0)
     {
-        errStr += "DC error, ";
+        errStr += "DC error, "s;
     }
     if ((s & s_oteMask) != 0)
     {
-        errStr += "Over temperature";
+        errStr += "Over temperature"s;
+    }
+
+    // Remove any trailing ',' at the end of the string.
+    if (errStr.ends_with(','))
+    {
+        errStr.pop_back();
     }
 
     return errStr;

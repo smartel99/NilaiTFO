@@ -18,10 +18,11 @@
 #define NILAI_FILESYSTEM_ERRORCODES_H
 
 #if defined(NILAI_USE_FILESYSTEM)
-#    if defined(NILAI_TEST)
-
-#    else
+#    if !defined(NILAI_TEST)
 #        include "ff.h"
+#    else
+#        include "../../test/Mocks/fatfs_mocks/ff.h"
+#    endif
 
 namespace Nilai::Filesystem
 {
@@ -50,7 +51,6 @@ enum class Result
     InvalidParameter = FR_INVALID_PARAMETER,
 };
 }    // namespace Nilai::Filesystem
-#    endif
 #endif
 
 #endif    // NILAI_FILESYSTEM_ERRORCODES_H

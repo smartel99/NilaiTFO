@@ -20,6 +20,7 @@
 
 #    include "../../defines/internal_config.h"
 #    include "../../processes/application.h"
+#    include "../../services/logger.h"
 
 #    include "registers/registers.h"
 
@@ -28,11 +29,11 @@
 #    define TS_ENABLE_DEBUG
 
 #    if defined(TS_ENABLE_DEBUG)
-#        define TS_DEBUG(msg, ...) LOG_DEBUG("[AT24QT]: " msg, ##__VA_ARGS__)
+#        define TS_DEBUG(msg, ...) LOG_DEBUG("[AT24QT]: " msg __VA_OPT__(, ) __VA_ARGS__)
 #        define TS_VERIFY_VALUE(exp, v)                                                            \
             do                                                                                     \
             {                                                                                      \
-                auto readback = v;                                                                 \
+                [[maybe_unused]] auto readback = v;                                                \
                 NILAI_ASSERT(                                                                      \
                   (exp) == readback, "Readback failed, exp: %i, got: %i", exp, readback);          \
             } while (0)
@@ -40,8 +41,9 @@
 #        define TS_DEBUG(msg, ...)
 #        define TS_VERIFY_VALUE(x, msg, ...)
 #    endif
-#    define TS_INFO(msg, ...)  LOG_INFO("[AT24QT]: " msg, ##__VA_ARGS__)
-#    define TS_ERROR(msg, ...) LOG_ERROR("[AT24QT]: " msg, ##__VA_ARGS__)
+#    define TS_INFO(msg, ...)  LOG_INFO("[AT24QT]: " msg __VA_OPT__(, ) __VA_ARGS__)
+#    define TS_ERROR(msg, ...) LOG_ERROR("[AT24QT]: " msg __VA_OPT__(, ) __VA_ARGS__)
+
 
 #    define IS_NOT_DEFAULT(v) (m_values.v != defaults.v)
 #    define CONFIG_IF_NOT_DEFAULT(v)                                                               \
@@ -81,10 +83,6 @@ At24Qt2120 At24Qt2120::Builder::Build() const
     TS_INFO("FW: v%i.%i", version.Major, version.Minor);
 
     AT24QT2120::RegisterMap defaults = {};
-    if (IS_NOT_DEFAULT(Calibrate))
-    {
-        obj.Calibrate(false);
-    }
 
     if (IS_NOT_DEFAULT(Reset))
     {
@@ -229,14 +227,13 @@ bool At24Qt2120::HandleIrq(Events::Event* e)
     return false;
 }
 
-#        if defined(NILAI_USE_EVENTS)
 void At24Qt2120::BindIrq(Events::EventTypes type)
 {
     m_irqType = type;
     m_irqId   = Application::Get()->RegisterEventCallback(
       type, [this](Events::Event* e) { return HandleIrq(e); });
 }
-#        endif
+#    endif
 
 uint8_t At24Qt2120::GetId() noexcept
 {
@@ -303,7 +300,7 @@ bool At24Qt2120::Calibrate(bool waitForEnd) noexcept
     const uint8_t startCalibration = 0xFF;
     SetRegisters(Registers::Calibrate, &startCalibration, sizeof(startCalibration));
 
-    AT24QT2120::SensorStatus sensorStatus = GetSensorStatus();
+    [[maybe_unused]] AT24QT2120::SensorStatus sensorStatus = GetSensorStatus();
     TS_DEBUG("Status: %#02x, %#04x, %#02x",
              static_cast<uint8_t>(sensorStatus.ChipStatus),
              static_cast<uint16_t>(sensorStatus.KeyStatuses),
@@ -314,7 +311,7 @@ bool At24Qt2120::Calibrate(bool waitForEnd) noexcept
         // Datasheet says that a calibration cycle takes 15 measurements at LPM = 1.
         // 15 cycles * 16ms = 240ms.
         static constexpr uint32_t CALIBRATION_WAIT_TIME = 240;
-        static constexpr uint32_t VERIFICATION_MARGIN   = 20;
+        static constexpr uint32_t VERIFICATION_MARGIN   = 60;
         if (!WaitForCalibrationEnd(CALIBRATION_WAIT_TIME + VERIFICATION_MARGIN))
         {
             TS_ERROR("Calibration timed out after %i ms!", Nilai::GetTime() - startTime);
@@ -435,7 +432,7 @@ void At24Qt2120::SetTouchRecalibrationDelay(size_t delay) noexcept
 
     SetRegisters(Registers::TouchRecalDelay, &regVal, sizeof(regVal));
 
-    TS_VERIFY_VALUE(delay, GetTouchRecalibrationDelay());
+    TS_VERIFY_VALUE(RegValToDriftTime(regVal), GetTouchRecalibrationDelay());
 }
 
 size_t At24Qt2120::GetTouchRecalibrationDelay() noexcept
@@ -566,13 +563,18 @@ void At24Qt2120::KeyIsOutput(AT24QT2120::Keys key, bool output) noexcept
 void At24Qt2120::SetKeyOptions(AT24QT2120::Keys key, const KeyOptions& options) noexcept
 {
     uint8_t regVal = static_cast<uint8_t>(options);
-    TS_DEBUG("Set key %i options (%#02x):\n\tGuard: %i\n\tGroup: %i\n\tState: %i\n\tOutput: %i",
-             static_cast<int>(key),
-             regVal,
-             options.Guard,
-             options.AKS,
-             options.GPO,
-             options.Enable);
+    TS_DEBUG(
+      "Set key %i options (%#02x):"
+      "\n\r\tGuard: %i"
+      "\n\r\tGroup: %i"
+      "\n\r\tState: %i"
+      "\n\r\tOutput: %i",
+      static_cast<int>(key),
+      regVal,
+      options.Guard,
+      options.AKS,
+      options.GPO,
+      options.Enable);
 
     Registers r = RegisterFromKey(key, Registers::Key0Control);
 
@@ -650,6 +652,15 @@ uint16_t At24Qt2120::GetKeyReference(AT24QT2120::Keys key) noexcept
     return (static_cast<uint16_t>(f.data[0]) << 8) | static_cast<uint16_t>(f.data[1]);
 }
 
+AT24QT2120::SignalReferencePack At24Qt2120::GetSignalReferencePack() noexcept
+{
+    static constexpr uint8_t REG_SIZE = AT24QT2120::SignalReferencePack::s_dataLen;
+
+    I2C::Frame f = GetRegisters(Registers::Key0DetectThreshold, REG_SIZE);
+
+    return {f.data};
+}
+
 I2C::Frame At24Qt2120::GetRegisters(AT24QT2120::Registers r, size_t cnt)
 {
     return ReceiveFrameFromRegister(s_i2cAddress, static_cast<uint8_t>(r), cnt);
@@ -660,35 +671,50 @@ void At24Qt2120::SetRegisters(AT24QT2120::Registers r, const uint8_t* data, size
     TransmitFrameToRegister(s_i2cAddress, static_cast<uint8_t>(r), data, cnt);
 }
 
-constexpr At24Qt2120::At24Qt2120(const At24Qt2120& o) noexcept : I2cModule(o)
+constexpr At24Qt2120::At24Qt2120(At24Qt2120&& o) noexcept : I2cModule(std::move(o))
 {
+#    if defined(NILAI_USE_EVENTS)
+    Nilai::Application::Get()->UnregisterEventCallback(m_irqType, m_irqId);
+    BindIrq(m_irqType);
+#    endif
+}
+
+At24Qt2120& At24Qt2120::operator=(At24Qt2120&& o) noexcept
+{
+    // Self-assignment detection.
+    if (&o == this)
+    {
+        return *this;
+    }
+
     m_run           = o.m_run;
     m_lastEventTime = o.m_lastEventTime;
     m_changePin     = o.m_changePin;
     m_initialized   = o.m_initialized;
 
+#    if defined(NILAI_USE_EVENTS)
+    Nilai::Application::Get()->UnregisterEventCallback(o.m_irqType, o.m_irqId);
     m_irqType = o.m_irqType;
     BindIrq(m_irqType);
-}
+#    endif
 
-constexpr At24Qt2120::At24Qt2120(At24Qt2120&& o) noexcept : I2cModule(std::move(o))
-{
-#        if defined(NILAI_USE_EVENTS)
-    Nilai::Application::Get()->UnregisterEventCallback(m_irqType, m_irqId);
-    BindIrq(m_irqType);
-#        endif
+    I2cModule::operator=(std::move(o));
+
+    return *this;
 }
 
 bool At24Qt2120::WaitForCalibrationEnd(size_t timeout)
 {
     uint32_t timeoutTime = Nilai::GetTime() + timeout;
 
+    // Clear the status of the chip by reading from it.
+    [[maybe_unused]] volatile AT24QT2120::SensorStatus dummy = GetSensorStatus();
+
     // In IRQ mode, wait for interrupt to happen.
-    uint32_t lastTime = m_lastEventTime;
-    while ((lastTime == m_lastEventTime) && (Nilai::GetTime() <= timeoutTime))
+    while (Nilai::GetTime() <= timeoutTime)
     {
         bool shouldCheck = false;
-#        if defined(NILAI_USE_EVENTS)
+#    if defined(NILAI_USE_EVENTS)
         // With events enabled, we might be in interrupt mode or in polling mode.
         if (m_irqId != std::numeric_limits<size_t>::max())
         {
@@ -701,7 +727,7 @@ bool At24Qt2120::WaitForCalibrationEnd(size_t timeout)
             }
         }
         else
-#        endif
+#    endif
         {
             // Polling mode.
             static bool lastState = true;
@@ -731,6 +757,7 @@ bool At24Qt2120::WaitForCalibrationEnd(size_t timeout)
     return false;
 }
 
-#    endif
+
+
 }    // namespace Nilai::Interfaces
 #endif

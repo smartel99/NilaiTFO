@@ -193,7 +193,7 @@ std::string Nilai::IntToHex(size_t i)
 {
     char msg[9] = {0};
 
-    sprintf(msg, "%08X", i);
+    sprintf(msg, "%08X", static_cast<unsigned int>(i));
 
     return std::string {msg};
 }

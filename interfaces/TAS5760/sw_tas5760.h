@@ -64,11 +64,15 @@ class SwTas5760 : public Tas5760Module<Device>
 
 public:
     template<typename... Args>
-    SwTas5760(const TAS5760::SwConfig& cfg, Handle handle, const std::string& label, Args... args)
-    : Tas5760Module<Device>(handle, label, args...), m_cfg(cfg)
+    SwTas5760(const TAS5760::SwConfig& cfg, Handle handle, const std::string& label, Args&&... args)
+    : Tas5760Module<Device>(handle, label, std::forward<Args>(args)...), m_cfg(cfg)
     {
         Build(cfg);
     }
+    SwTas5760(const SwTas5760&)            = delete;
+    SwTas5760(SwTas5760&&)                 = delete;
+    SwTas5760& operator=(const SwTas5760&) = delete;
+    SwTas5760& operator=(SwTas5760&&)      = delete;
     /**
      * @brief Initializes the TAS5760 with the passed configuration.
      * @param cfg The desired configuration of the TAS5760.
@@ -115,8 +119,8 @@ private:
     void HandleFault();
     void HandleHeadphoneChange();
 
-    bool               SetRegister(TAS5760::Registers r, uint8_t v);
-    static std::string StatusToStr(uint8_t s);
+    bool                      SetRegister(TAS5760::Registers r, uint8_t v);
+    static const std::string& StatusToStr(uint8_t s);
 
 private:
     TAS5760::SwConfig m_cfg;

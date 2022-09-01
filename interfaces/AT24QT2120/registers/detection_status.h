@@ -23,27 +23,63 @@
 namespace Nilai::Interfaces::AT24QT2120
 {
 /**
- * General status flags.
+ * @addtogroup Nilai
+ * @{
+ */
+
+/**
+ * @addtogroup Interfaces
+ * @{
+ */
+
+/**
+ * @addtogroup AT24QT2120
+ * @{
+ */
+
+/**
+ * @struct DetectionStatus
+ * @brief General status flags.
  *
  * A change in these bytes will cause the CHANGE line to go low.
  *
- * @note If the slider or wheel is enabled, the SDET bit will be set when it is in a detected state.
- * Also, the relevant Key Status bit (0..2) and the TDET bit will be set. These bits can be ignored
- * if the SDET bit is set as the slider/wheel takes priority over the keys.
+ * @note If the slider or wheel is enabled, the @ref SDet bit will be set when it is in a detected
+ * state.
+ * Also, the relevant Key Status bit (0..2) and the @ref TDet bit will be set. These bits can be
+ * ignored
+ * if the @ref SDet bit is set as the slider/wheel takes priority over the keys.
  */
 struct DetectionStatus
 {
-    //! This bit is set if any of the keys are in detect.
+    /**
+     * @brief This bit is set if any of the keys are in detect.
+     */
     uint8_t TDet : 1;
-    //! This bit is set if any of the slider/wheel channels are in detect.
+    /**
+     * @brief This bit is set if any of the slider/wheel channels are in detect.
+     */
     uint8_t SDet : 1;
+    /**
+     * @brief Reserved bits.
+     */
     uint8_t : 4;
-    //! This bit is set if the time to acquire all key signals exceeds 16ms.
+    /**
+     * @brief This bit is set if the time to acquire all key signals exceeds 16ms.
+     */
     uint8_t Overflow : 1;
-    //! This bit is set during a calibration sequence.
+    /**
+     * @brief This bit is set during a calibration sequence.
+     */
     uint8_t Calibrate : 1;
 
+    /**
+     * @brief Default constructor.
+     */
     constexpr DetectionStatus() noexcept = default;
+    /**
+     * @brief Constructs the detection status with the byte received from the sensor.
+     * @param v The data received from the sensor.
+     */
     constexpr explicit DetectionStatus(uint8_t v) noexcept
     {
         TDet      = (v & TDetMask) >> TDetShift;
@@ -52,30 +88,59 @@ struct DetectionStatus
         Calibrate = (v & CalibrateMask) >> CalibrateShift;
     }
 
+    /**
+     * @brief Converts the structure into a byte.
+     * @return The byte
+     */
     [[nodiscard]] constexpr explicit operator uint8_t() const noexcept
     {
         return (TDet << TDetShift) | (SDet << SDetShift) | (Overflow << OverflowShift) |
                (Calibrate << CalibrateShift);
     }
 
+    /**
+     * @brief Check if two @ref DetectionStatus are identical.
+     * @param rhs The other @ref DetectionStatus.
+     * @returns True if every members of both structures are identical.
+     * @returns False otherwise.
+     */
     bool operator==(const DetectionStatus& rhs) const
     {
         return TDet == rhs.TDet && SDet == rhs.SDet && Overflow == rhs.Overflow &&
                Calibrate == rhs.Calibrate;
     }
+
+    /**
+     * @brief Check if two @ref DetectionStatus are different.
+     * @param rhs The other @ref DetectionStatus.
+     * @returns True if one or more members of both structures are not identical.
+     * @returns False if both structures are identical.
+     */
     bool operator!=(const DetectionStatus& rhs) const { return !(rhs == *this); }
 
 private:
-    static constexpr uint8_t TDetMask      = 0x01;
-    static constexpr uint8_t SDetMask      = 0x02;
-    static constexpr uint8_t OverflowMask  = 0x40;
+    //! Bit-wise mask for @ref TDet.
+    static constexpr uint8_t TDetMask = 0x01;
+    //! Bit-wise mask for @ref SDet.
+    static constexpr uint8_t SDetMask = 0x02;
+    //! Bit-wise mask for @ref Overflow.
+    static constexpr uint8_t OverflowMask = 0x40;
+    //! Bit-wise mask for @ref Calibrate.
     static constexpr uint8_t CalibrateMask = 0x80;
 
-    static constexpr uint8_t TDetShift      = 0;
-    static constexpr uint8_t SDetShift      = 1;
-    static constexpr uint8_t OverflowShift  = 6;
+    //! Bit-wise shift for @ref TDet.
+    static constexpr uint8_t TDetShift = 0;
+    //! Bit-wise shift for @ref SDet.
+    static constexpr uint8_t SDetShift = 1;
+    //! Bit-wise shift for @ref Overflow.
+    static constexpr uint8_t OverflowShift = 6;
+    //! Bit-wise shift for @ref Calibrate.
     static constexpr uint8_t CalibrateShift = 7;
 };
+
+//!@}
+//!@}
+//!@}
 }    // namespace Nilai::Interfaces::AT24QT2120
 #endif
 #endif    // GUARD_AT24QT2120_REGISTERS_DETECTION_STATUS_H

@@ -18,27 +18,27 @@
 #define LOG_DEBUG(msg, ...)                                                                        \
     do                                                                                             \
     {                                                                                              \
-        Logger().Log("[Debug]: " msg, ##__VA_ARGS__);                                              \
+        Logger().Log("[Debug]: " msg __VA_OPT__(, ) __VA_ARGS__);                                  \
     } while (0)
 #define LOG_INFO(msg, ...)                                                                         \
     do                                                                                             \
     {                                                                                              \
-        Logger().Log("[Info]: " msg "\n\r", ##__VA_ARGS__);                                        \
+        Logger().Log("[Info]: " msg "\n\r" __VA_OPT__(, ) __VA_ARGS__);                            \
     } while (0)
 #define LOG_WARNING(msg, ...)                                                                      \
     do                                                                                             \
     {                                                                                              \
-        Logger().Log("[Warning]: " msg "\n\r", ##__VA_ARGS__);                                     \
+        Logger().Log("[Warning]: " msg "\n\r" __VA_OPT__(, ) __VA_ARGS__);                         \
     } while (0)
 #define LOG_ERROR(msg, ...)                                                                        \
     do                                                                                             \
     {                                                                                              \
-        Logger().Log("[Error]: " msg "\n\r", ##__VA_ARGS__);                                       \
+        Logger().Log("[Error]: " msg "\n\r" __VA_OPT__(, ) __VA_ARGS__);                           \
     } while (0)
 #define LOG_CRITICAL(msg, ...)                                                                     \
     do                                                                                             \
     {                                                                                              \
-        Logger().Log("[Critical]: " msg "\n\r", ##__VA_ARGS__);                                    \
+        Logger().Log("[Critical]: " msg "\n\r" __VA_OPT__(, ) __VA_ARGS__);                        \
     } while (0)
 
 using LogFunc = std::function<void(const char*, size_t)>;

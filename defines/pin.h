@@ -25,10 +25,18 @@
 
 namespace Nilai
 {
-/*****************************************************************************/
-/* Exported types */
+/**
+ * @addtogroup Nilai
+ * @{
+ */
 
 /**
+ * @addtogroup nilai_hal Hardware Abstraction
+ * @{
+ */
+
+/**
+ * @struct Pin
  * @brief Structure representing a physical pin.
  */
 struct Pin
@@ -36,8 +44,10 @@ struct Pin
     //! The default pin, representing "no pin".
     static constexpr uint16_t s_defaultPin = 0;
 
+    //! The port of the pin.
     GPIO_TypeDef* port = nullptr;
-    uint16_t      pin  = s_defaultPin;
+    //! The ID of the pin.
+    uint16_t pin = s_defaultPin;
 
     /**
      * @brief Sets the pin in the desired state.
@@ -58,25 +68,43 @@ struct Pin
      */
     [[nodiscard]] bool Get() const;
 
+    /**
+     * @brief Check if two Pins are identical.
+     * @param other The other Pin.
+     * @returns True if the two pins are identical.
+     * @returns False if the two pins are different.
+     */
     bool operator==(const Pin& other) const
     {
         return ((this->port == other.port) && (this->pin == other.pin));
     }
 
+    /**
+     * @brief Check if two Pins are different.
+     * @param other The other Pin.
+     * @returns True if the two pins are different.
+     * @returns False if the two pins are identical.
+     */
     bool operator!=(const Pin& other) const { return !(*this == other); }
 
+    /**
+     * @brief Gets the current state of the pin.
+     * @return The current state of the pin.
+     */
     explicit operator bool() const { return Get(); }
 
     /**
      * @brief Check if the pin is default-constructed.
      * @returns True if the pin is default-constructed.
      */
-    [[nodiscard]] bool IsDefault() const { return pin == s_defaultPin; }
+    [[nodiscard]] bool IsDefault() const noexcept { return pin == s_defaultPin; }
 
-    constexpr Pin(GPIO_TypeDef* _port, uint16_t _pin) : port(_port), pin(_pin) {}
-    constexpr Pin() = default;
+    constexpr Pin(GPIO_TypeDef* _port, uint16_t _pin) noexcept : port(_port), pin(_pin) {}
+    constexpr Pin() noexcept = default;
 };
 
+//!@}
+//!@}
 }    // namespace Nilai
 /* Have a wonderful day :) */
 #endif /* NILAI_PIN_H */

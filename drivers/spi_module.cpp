@@ -13,75 +13,61 @@
  */
 #include "spi_module.h"
 #if defined(NILAI_USE_SPI) && defined(HAL_SPI_MODULE_ENABLED)
-#    include "../defines/macros.h"
 #    include "../processes/application.h"
-#    include "../services/logger.h"
 
-#    include <algorithm>
-#    include <array>
-#    include <functional>
-#    include <utility>
 #    include <vector>
 
 /*************************************************************************************************/
 /* Defines
  * -------------------------------------------------------------------------------------
  */
-#    define SPI_INFO(msg, ...)  LOG_INFO("[%s]: " msg, m_label.c_str(), ##__VA_ARGS__)
-#    define SPI_ERROR(msg, ...) LOG_ERROR("[%s]: " msg, m_label.c_str(), ##__VA_ARGS__)
+#    define SPI_INFO(msg, ...)  LOG_INFO("[%s]: " msg, m_label.c_str() __VA_OPT__(, ) __VA_ARGS__)
+#    define SPI_ERROR(msg, ...) LOG_ERROR("[%s]: " msg, m_label.c_str() __VA_OPT__(, ) __VA_ARGS__)
 
 namespace Nilai::Drivers
 {
 /*************************************************************************************************/
 /* Public function definitions
  * --------------------------------------------------------------- */
-SpiModule::SpiModule(SPI_HandleTypeDef* handle, std::string label)
-: m_label(std::move(label)), m_handle(handle)
+SpiModule::SpiModule(SPI_HandleTypeDef* handle, std::string_view label) noexcept
+: m_label(label), m_handle(handle)
 {
-    NILAI_ASSERT(handle != nullptr, "SPI Handle is NULL!");
+    NILAI_ASSERT(handle != nullptr, "Handle is NULL!");
     SPI_INFO("Initialized");
 }
 
-SpiModule::~SpiModule()
+SpiModule::~SpiModule() noexcept
 {
     /* Abort ongoing messages on SPI peripheral */
     if (HAL_SPI_Abort_IT(m_handle) != HAL_OK)
     {
-        m_status |= (SPI::Status)m_handle->ErrorCode;
+        m_status |= static_cast<SPI::Status>(m_handle->ErrorCode);
         ErrorHandler();
     }
 
     /* De-init peripheral */
     if (HAL_SPI_DeInit(m_handle) != HAL_OK)
     {
-        m_status |= (SPI::Status)m_handle->ErrorCode;
+        m_status |= static_cast<SPI::Status>(m_handle->ErrorCode);
         ErrorHandler();
     }
 }
 
-/**
- * If the initialization passed, the POST passes.
- * @return
- */
-bool SpiModule::DoPost()
+bool SpiModule::DoPost() noexcept
 {
     SPI_INFO("POST OK");
     return true;
 }
 
-void SpiModule::Run()
-{
-}
-
-SPI::Status SpiModule::Transmit(const std::vector<uint8_t>& pkt)
+SPI::Status SpiModule::Transmit(const std::vector<uint8_t>& pkt) noexcept
 {
     return Transmit(pkt.data(), pkt.size());
 }
 
-SPI::Status SpiModule::Transmit(const uint8_t* data, size_t len)
+SPI::Status SpiModule::Transmit(const uint8_t* data, size_t len) noexcept
 {
-    NILAI_ASSERT(data != nullptr, "SPI Data pointer in null in SpiModule::Transmit");
-    NILAI_ASSERT(len != 0, "SPI Transmit data length is 0 in SpiModule::Transmit");
+    NILAI_ASSERT(data != nullptr, "Ptr is null");
+    NILAI_ASSERT(len != 0, "len is 0");
 
     // Wait for peripheral to be free.
     if (!WaitUntilNotBusy())
@@ -89,10 +75,11 @@ SPI::Status SpiModule::Transmit(const uint8_t* data, size_t len)
         return SPI::Status::TIMEOUT;
     }
 
-    if (HAL_SPI_Transmit(m_handle, const_cast<uint8_t*>(data), (uint16_t)len, SpiModule::TIMEOUT) !=
+    if (HAL_SPI_Transmit(
+          m_handle, const_cast<uint8_t*>(data), static_cast<uint16_t>(len), SpiModule::s_timeout) !=
         HAL_OK)
     {
-        m_status |= (SPI::Status)m_handle->ErrorCode;
+        m_status |= static_cast<SPI::Status>(m_handle->ErrorCode);
         ErrorHandler();
         return m_status;
     }
@@ -100,10 +87,10 @@ SPI::Status SpiModule::Transmit(const uint8_t* data, size_t len)
     return SPI::Status::NONE;
 }
 
-SPI::Status SpiModule::Receive(uint8_t* ouptutData, size_t len)
+SPI::Status SpiModule::Receive(uint8_t* ouptutData, size_t len) noexcept
 {
-    NILAI_ASSERT(ouptutData != nullptr, "Pointer is NULL in SpiModule::Receive");
-    NILAI_ASSERT(len > 0, "Length is 0 in SpiModule::Receive");
+    NILAI_ASSERT(ouptutData != nullptr, "Ptr is null");
+    NILAI_ASSERT(len > 0, "len is 0");
 
     // Wait for SPI peripheral to be ready.
     if (!WaitUntilNotBusy())
@@ -111,9 +98,10 @@ SPI::Status SpiModule::Receive(uint8_t* ouptutData, size_t len)
         return SPI::Status::TIMEOUT;
     }
 
-    if (HAL_SPI_Receive(m_handle, ouptutData, (uint16_t)len, SpiModule::TIMEOUT) != HAL_OK)
+    if (HAL_SPI_Receive(m_handle, ouptutData, static_cast<uint16_t>(len), SpiModule::s_timeout) !=
+        HAL_OK)
     {
-        m_status |= (SPI::Status)m_handle->ErrorCode;
+        m_status |= static_cast<SPI::Status>(m_handle->ErrorCode);
         ErrorHandler();
         return m_status;
     }
@@ -124,12 +112,12 @@ SPI::Status SpiModule::Receive(uint8_t* ouptutData, size_t len)
 SPI::Status SpiModule::Transaction(const uint8_t*          txData,
                                    size_t                  txLen,
                                    uint8_t*                rxData,
-                                   [[maybe_unused]] size_t rxLen)
+                                   [[maybe_unused]] size_t rxLen) noexcept
 {
-    NILAI_ASSERT(txData != nullptr, "TxData is NULL in SpiModule::Transaction");
-    NILAI_ASSERT(rxData != nullptr, "RxData is NULL in SpiModule::Transaction");
-    NILAI_ASSERT(txLen > 0, "TxLen is 0 in SpiModule::Transaction");
-    NILAI_ASSERT(txLen == rxLen, "TxLen is not equal to RxLen in SpiModule::Transaction");
+    NILAI_ASSERT(txData != nullptr, "TxData is NULL");
+    NILAI_ASSERT(rxData != nullptr, "RxData is NULL");
+    NILAI_ASSERT(txLen > 0, "TxLen is 0");
+    NILAI_ASSERT(txLen == rxLen, "TxLen != RxLen");
 
     // Wait for SPI peripheral to be ready.
     if (!WaitUntilNotBusy())
@@ -137,11 +125,13 @@ SPI::Status SpiModule::Transaction(const uint8_t*          txData,
         return SPI::Status::TIMEOUT;
     }
 
-    if (HAL_SPI_TransmitReceive(
-          m_handle, const_cast<uint8_t*>(txData), rxData, (uint16_t)txLen, SpiModule::TIMEOUT) !=
-        HAL_OK)
+    if (HAL_SPI_TransmitReceive(m_handle,
+                                const_cast<uint8_t*>(txData),
+                                rxData,
+                                static_cast<uint16_t>(txLen),
+                                SpiModule::s_timeout) != HAL_OK)
     {
-        m_status |= (SPI::Status)m_handle->ErrorCode;
+        m_status |= static_cast<SPI::Status>(m_handle->ErrorCode);
         ErrorHandler();
         return m_status;
     }
@@ -149,7 +139,8 @@ SPI::Status SpiModule::Transaction(const uint8_t*          txData,
     return SPI::Status::NONE;
 }
 
-SPI::Status SpiModule::Transaction(const std::vector<uint8_t>& txData, std::vector<uint8_t>& rxData)
+SPI::Status SpiModule::Transaction(const std::vector<uint8_t>& txData,
+                                   std::vector<uint8_t>&       rxData) noexcept
 {
     // Make sure we got enough space in rxData.
     rxData.resize(txData.size());
@@ -160,50 +151,50 @@ SPI::Status SpiModule::Transaction(const std::vector<uint8_t>& txData, std::vect
 /*************************************************************************************************/
 /* Private functions definitions
  * --------------------------------------------------------------- */
-void SpiModule::ErrorHandler()
+void SpiModule::ErrorHandler() noexcept
 {
     // TODO: Not this.
     if ((m_status & SPI::Status::MODF) != SPI::Status::NONE)
     {
-        SPI_ERROR("SPI MODF error");
+        SPI_ERROR("MODF");
     }
     if ((m_status & SPI::Status::CRC_ERROR) != SPI::Status::NONE)
     {
-        SPI_ERROR("SPI CRC error");
+        SPI_ERROR("CRC");
     }
     if ((m_status & SPI::Status::OVR) != SPI::Status::NONE)
     {
-        SPI_ERROR("SPI OVR error");
+        SPI_ERROR("OVR");
     }
     if ((m_status & SPI::Status::DMA) != SPI::Status::NONE)
     {
-        SPI_ERROR("SPI FRE error");
+        SPI_ERROR("FRE");
     }
     if ((m_status & SPI::Status::FLAG) != SPI::Status::NONE)
     {
-        SPI_ERROR("SPI FLAG error");
+        SPI_ERROR("FLAG");
     }
     if ((m_status & SPI::Status::ABORT) != SPI::Status::NONE)
     {
-        SPI_ERROR("SPI ABORT state");
+        SPI_ERROR("ABORT state");
     }
 
     if ((m_status & SPI::Status::NOT_INIT) != SPI::Status::NONE)
     {
-        SPI_ERROR("SPI module is not initialized");
+        SPI_ERROR("Not initialized");
     }
     if ((m_status & SPI::Status::TIMEOUT) != SPI::Status::NONE)
     {
-        SPI_ERROR("SPI timeout error");
+        SPI_ERROR("Timeout");
     }
 
     m_status = SPI::Status::NONE;
 }
 
-bool SpiModule::WaitUntilNotBusy()
+bool SpiModule::WaitUntilNotBusy() noexcept
 {
     // Timeout time = 200 fast ticks.
-    uint32_t timeoutTime = GetTime() + 200;
+    uint32_t timeoutTime = GetTime() + s_timeout;
 
     // While the SPI port is busy and the timeout wasn't hit:
     while (GetTime() <= timeoutTime)

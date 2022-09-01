@@ -21,6 +21,7 @@
 #    if defined(NILAI_USE_EVENTS)
 #        include "../defines/events/events.h"
 
+#        include <array>
 #        include <functional>
 #    endif
 
@@ -37,10 +38,12 @@ class Application
 {
     struct ModuleInfo
     {
-        Ref<Module> Mod = nullptr;
+        Ptr<Module> Mod = nullptr;
         size_t      Id  = 0;
 
         operator bool() const { return Mod != nullptr; }
+
+        ModuleInfo(Ptr<Module> mod, size_t id) : Mod(std::move(mod)), Id(id) {}
     };
 
 public:
@@ -54,28 +57,36 @@ public:
     virtual void OnRun();
 
     template<IsModule T, typename... Args>
-    Ref<T> AddModule(Args&&... args)
+    T& AddModule(Args&&... args)
+        requires std::constructible_from<T, Args...>
     {
-        if (m_modules.size() >= NILAI_MAX_MODULE_AMOUNT)
-        {
-            // Too many modules!
-            return nullptr;
-        }
-        ModuleInfo m;
-        Ref<T>     module = CreateRef<T>(std::forward<Args>(args)...);
-        m.Mod             = module;
-        m.Mod->m_id       = m_lastId;
-        m.Id              = m_lastId;
-
-        m_modules.push_back(m);
+        ModuleInfo& m =
+          m_modules.emplace_back(CreatePtr<Module>(new T(std::forward<Args>(args)...)), m_lastId);
+        m.Mod->m_id = m_lastId;
 
         ++m_lastId;
 
-        return module;
+        return *static_cast<T*>(m.Mod.get());
     }
 
-    void        RemoveModule(size_t id);
-    Ref<Module> GetModule(size_t id);
+    void RemoveModule(size_t id);
+
+    template<IsModule T>
+    T& GetModule(size_t id)
+    {
+        auto it = std::find_if(
+          m_modules.begin(), m_modules.end(), [id](const auto& m) { return m.Id == id; });
+
+        if (it != m_modules.end())
+        {
+            return *static_cast<T*>(it->Mod.get());
+        }
+        else
+        {
+            // Module not found.
+            AssertFailed(reinterpret_cast<const uint8_t*>(__FILE__), __LINE__, 1);
+        }
+    }
 
 #    if defined(NILAI_USE_EVENTS)
     /**
@@ -96,6 +107,7 @@ public:
 
     template<typename T>
     void TriggerDataEvent(const T& data)
+        requires std::constructible_from<Events::DataEvent, T>
     {
         Events::DataEvent e(data);
         DispatchEvent(&e);

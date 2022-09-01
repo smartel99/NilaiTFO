@@ -92,4 +92,6 @@ struct FIL
 #endif
 };
 
+using FSIZE_T = size_t;
+
 #endif    // NILAI_MOCKS_FF_H

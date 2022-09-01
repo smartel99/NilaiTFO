@@ -141,8 +141,8 @@ enum class CompandingMethod : uint32_t
  */
 enum class ReleaseMethod : uint32_t
 {
-    NotReleased = SAI_OUTPUT_NOTRELEASED,    //! Output is not released?
-    Released    = SAI_OUTPUT_RELEASED,       //! Output is released?
+    NotReleased       = SAI_OUTPUT_NOTRELEASED,    //! Output is not released?
+    ReleasedFromPress = SAI_OUTPUT_RELEASED,       //! Output is released?
 };
 
 /**

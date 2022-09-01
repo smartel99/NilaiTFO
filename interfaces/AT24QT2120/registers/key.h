@@ -22,6 +22,26 @@
 #    include <cstdint>
 namespace Nilai::Interfaces::AT24QT2120
 {
+
+/**
+ * @addtogroup Nilai
+ * @{
+ */
+
+/**
+ * @addtogroup Interfaces
+ * @{
+ */
+
+/**
+ * @addtogroup AT24QT2120
+ * @{
+ */
+
+/**
+ * @enum Keys
+ * @brief List of the different keys of the sensor.
+ */
 enum class Keys
 {
     Key0 = 0,
@@ -36,7 +56,14 @@ enum class Keys
     Key9,
     Key10,
     Key11,
+
+    //! Number of keys available. Should always be last.
+    Count
 };
+
+//!@}
+//!@}
+//!@}
 }    // namespace Nilai::Interfaces::AT24QT2120
 #endif
 #endif    // GUARD_AT24QT2120_REGISTERS_KEY_H

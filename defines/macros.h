@@ -12,7 +12,7 @@
 #ifndef NILAI_MACROS_H
 #    define NILAI_MACROS_H
 
-#    if defined(DEBUG)
+#    if defined(DEBUG) || defined(NILAI_TEST)
 #        include "../defines/assertion.h"
 #        include "../services/logger.h"
 #    endif
@@ -27,7 +27,7 @@
 /*
  * @brief Suppresses unused variable warnings.
  */
-#    define NILAI_UNUSED(x) (void)x
+#    define NILAI_UNUSED(x) static_cast<void>(x)
 
 /*
  * @brief   Check if a boolean condition `x` is true, if false:                                  \n
@@ -41,11 +41,25 @@
 #        define NILAI_ASSERT(x, msg, ...)                                                          \
             do                                                                                     \
             {                                                                                      \
-                if (!(x))                                                                          \
+                if (!static_cast<bool>(x))                                                         \
                 {                                                                                  \
-                    LOG_CRITICAL(                                                                  \
-                      "Assert Failed at line %i %s: " msg, __LINE__, __FILE__, ##__VA_ARGS__);     \
-                    AssertFailed((uint8_t*)__FILE__, __LINE__, 0);                                 \
+                    LOG_CRITICAL("Assert Failed at line %i %s: " msg,                              \
+                                 __LINE__,                                                         \
+                                 __FILE__ __VA_OPT__(, ) __VA_ARGS__);                             \
+                    AssertFailed(reinterpret_cast<const uint8_t*>(__FILE__), __LINE__, 0);         \
+                }                                                                                  \
+            } while (false)
+#    elif defined(NILAI_TEST)
+#        include <cassert>
+#        define NILAI_ASSERT(x, msg, ...)                                                          \
+            do                                                                                     \
+            {                                                                                      \
+                if (!static_cast<bool>(x))                                                         \
+                {                                                                                  \
+                    LOG_CRITICAL("Assert Failed at line %i %s: " msg,                              \
+                                 __LINE__,                                                         \
+                                 __FILE__ __VA_OPT__(, ) __VA_ARGS__);                             \
+                    assert(false);                                                                 \
                 }                                                                                  \
             } while (false)
 #    else

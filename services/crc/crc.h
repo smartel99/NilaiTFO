@@ -1,7 +1,7 @@
 /**
- * @file    concepts.h
+ * @file    crc.h
  * @author  Samuel Martel
- * @date    2022-02-23
+ * @date    2022-08-24
  * @brief
  *
  * @copyright
@@ -14,15 +14,9 @@
  * You should have received a copy of the GNU General Public License along with this program. If
  * not, see <a href=https://www.gnu.org/licenses/>https://www.gnu.org/licenses/</a>.
  */
-#ifndef NILAI_CONCEPTS_H
-#define NILAI_CONCEPTS_H
 
-#if defined(NILAI_USE_INI_PARSER)
-
-#    if defined(__cpp_concepts)
-
-#        include <string>
-#        include <type_traits>
+#ifndef GUARD_NILAI_SERVICES_CRC_H
+#define GUARD_NILAI_SERVICES_CRC_H
 
 /**
  * @addtogroup Nilai
@@ -35,33 +29,32 @@
  */
 
 /**
- * @addtogroup nilai_ini Ini Parser
+ * @addtogroup nilai_services_crc CRC
  * @{
  */
 
-namespace Nilai
+#include <array>
+#include <cstdint>
+#include <vector>
+
+namespace Nilai::Services
 {
-template<typename T>
-concept IsIniType = requires(T t) { std::is_arithmetic<T>() || std::is_same<T, std::string>(); };
+uint32_t Crc(const uint32_t* data, size_t len, uint32_t initial = 0xFFFFFFFF);
 
-template<typename T>
-concept IsInteger = requires(T t) { std::is_integral<T>() && std::is_signed<T>(); };
+template<size_t N>
+static uint32_t Crc(const std::array<uint32_t, N>& array, uint32_t initial = 0xFFFFFFFF)
+{
+    return Crc(array.data(), array.size(), initial);
+}
 
-template<typename T>
-concept IsUnsignedInteger = requires(T t) { std::is_unsigned<T>(); };
-
-template<typename T>
-concept IsFloatingPoint = requires(T t) { std::is_floating_point<T>(); };
-
-template<typename T>
-concept IsBool = requires(T t) { std::is_same<T, bool>(); };
-
-}    // namespace Nilai
-
+[[maybe_unused]] static uint32_t Crc(const std::vector<uint32_t>& array,
+                                     uint32_t                     initial = 0xFFFFFFFF)
+{
+    return Crc(array.data(), array.size(), initial);
+}
+}    // namespace Nilai::Services
 //!@}
 //!@}
 //!@}
-#    endif
-#endif
 
-#endif    // NILAI_CONCEPTS_H
+#endif    // GUARD_NILAI_SERVICES_CRC_H

@@ -22,10 +22,26 @@
 #    include <cstdint>
 #    include <vector>
 
+/**
+ * @addtogroup Nilai
+ * @{
+ */
+
+/**
+ * @addtogroup Drivers
+ * @{
+ */
+
+/**
+ * @addtogroup nilai_drivers_i2c I2C
+ * @{
+ */
+
 namespace Nilai::I2C
 {
 /**
- * I2C Frame to be sent or received.
+ * @struct Frame
+ * @brief I2C Frame to be sent or received.
  */
 struct Frame
 {
@@ -36,17 +52,31 @@ struct Frame
     //! Data that was exchanged with the device.
     std::vector<uint8_t> data = {};
 
-    Frame() = default;
-    Frame(uint8_t devAddr, std::vector<uint8_t> pData = std::vector<uint8_t>())
+    Frame() noexcept = default;
+    Frame(uint8_t devAddr, std::vector<uint8_t> pData = {}) noexcept
     : deviceAddress(devAddr), data(std::move(pData))
     {
     }
-    Frame(uint8_t devAddr, uint8_t regAddr, std::vector<uint8_t> pData = std::vector<uint8_t>())
+    Frame(uint8_t devAddr, uint8_t regAddr, std::vector<uint8_t> pData = {}) noexcept
     : deviceAddress(devAddr), registerAddress(regAddr), data(std::move(pData))
     {
     }
+    Frame(const Frame&) noexcept            = default;
+    Frame(Frame&&) noexcept                 = default;
+    Frame& operator=(const Frame&) noexcept = default;
+    Frame& operator=(Frame&&) noexcept      = default;
+
+    [[nodiscard]] bool Matches(uint8_t addr) const noexcept { return Matches(addr, 0); }
+    [[nodiscard]] bool Matches(uint8_t addr, uint8_t regAddr) const noexcept
+    {
+        return deviceAddress == addr && registerAddress == regAddr;
+    }
 };
 }    // namespace Nilai::I2C
+
+//!@}
+//!@}
+//!@}
 #endif
 
 #endif    // NILAI_DRIVERS_I2C_STRUCTS_H

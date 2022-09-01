@@ -28,13 +28,13 @@
 #        define LOG_HELPER(msg, ...)                                                               \
             do                                                                                     \
             {                                                                                      \
-                Logger::Get() != nullptr ? Logger::Get()->Log("[%02i:%02i:%02i.%03i]" msg,         \
-                                                              GET_CUR_H(),                         \
-                                                              GET_CUR_MIN() % 60,                  \
-                                                              GET_CUR_SEC() % 60,                  \
-                                                              GET_CUR_MS() % 1000,                 \
-                                                              ##__VA_ARGS__)                       \
-                                         : (void)0;                                                \
+                Logger::Get() != nullptr                                                           \
+                  ? Logger::Get()->Log("[%02i:%02i:%02i.%03i]" msg,                                \
+                                       GET_CUR_H(),                                                \
+                                       GET_CUR_MIN() % 60,                                         \
+                                       GET_CUR_SEC() % 60,                                         \
+                                       GET_CUR_MS() % 1000 __VA_OPT__(, ) __VA_ARGS__)             \
+                  : (void)0;                                                                       \
             } while (0)
 #        define INT_NILAI_LOG_IMPL_OK
 #    elif !defined(NILAI_USE_RTC)
@@ -49,39 +49,38 @@
                       "[%s %s.%03i] " msg,                                                         \
                       Nilai::Drivers::RtcModule::Get()->GetDate().ToStr().c_str(),                 \
                       Nilai::Drivers::RtcModule::Get()->GetTime().ToStr().c_str(),                 \
-                      Nilai::GetTime() % 1000,                                                     \
-                      ##__VA_ARGS__)                                                               \
+                      Nilai::GetTime() % 1000 __VA_OPT__(, ) __VA_ARGS__)                          \
                   : (void)0;                                                                       \
             } while (0)
 #        define INT_NILAI_LOG_IMPL_OK
 #    endif
 
 #    if defined(NILAI_LOG_ENABLE_DEBUG) && defined(INT_NILAI_LOG_IMPL_OK)
-#        define LOG_DEBUG(msg, ...) LOG_HELPER("[DEB ]: " msg "\n\r", ##__VA_ARGS__)
+#        define LOG_DEBUG(msg, ...) LOG_HELPER("[DEB ]: " msg "\n\r" __VA_OPT__(, ) __VA_ARGS__)
 #    else
 #        define LOG_DEBUG(msg, ...)
 #    endif
 
 #    if defined(NILAI_LOG_ENABLE_INFO) && defined(INT_NILAI_LOG_IMPL_OK)
-#        define LOG_INFO(msg, ...) LOG_HELPER("[INFO]: " msg "\n\r", ##__VA_ARGS__)
+#        define LOG_INFO(msg, ...) LOG_HELPER("[INFO]: " msg "\n\r" __VA_OPT__(, ) __VA_ARGS__)
 #    else
 #        define LOG_INFO(msg, ...)
 #    endif
 
 #    if defined(NILAI_LOG_ENABLE_WARNING) && defined(INT_NILAI_LOG_IMPL_OK)
-#        define LOG_WARNING(msg, ...) LOG_HELPER("[WARN]: " msg "\n\r", ##__VA_ARGS__)
+#        define LOG_WARNING(msg, ...) LOG_HELPER("[WARN]: " msg "\n\r" __VA_OPT__(, ) __VA_ARGS__)
 #    else
 #        define LOG_WARNING(msg, ...)
 #    endif
 
 #    if defined(NILAI_LOG_ENABLE_ERROR) && defined(INT_NILAI_LOG_IMPL_OK)
-#        define LOG_ERROR(msg, ...) LOG_HELPER("[ERR ]: " msg "\n\r", ##__VA_ARGS__)
+#        define LOG_ERROR(msg, ...) LOG_HELPER("[ERR ]: " msg "\n\r" __VA_OPT__(, ) __VA_ARGS__)
 #    else
 #        define LOG_ERROR(msg, ...)
 #    endif
 
 #    if defined(NILAI_LOG_ENABLE_CRITICAL) && defined(INT_NILAI_LOG_IMPL_OK)
-#        define LOG_CRITICAL(msg, ...) LOG_HELPER("[CRIT]: " msg "\n\r", ##__VA_ARGS__)
+#        define LOG_CRITICAL(msg, ...) LOG_HELPER("[CRIT]: " msg "\n\r" __VA_OPT__(, ) __VA_ARGS__)
 #    else
 #        define LOG_CRITICAL(msg, ...)
 #    endif
@@ -101,7 +100,8 @@ class Logger
 {
 public:
 #    if defined(NILAI_USE_UART)
-    explicit Logger(Ref<Drivers::UartModule> uart, const LogFunc& logFunc = {});
+    explicit Logger(
+      Drivers::UartModule& uart, LogFunc logFunc = [](const char*, size_t) {});
 #    else
     Logger(const LogFunc& logFunc);
 #    endif
@@ -110,20 +110,20 @@ public:
     void Log(const char* fmt, ...);
     void VLog(const char* fmt, va_list args);
 
-    void                     SetLogFunc(const LogFunc& logFunc);
+    void                 SetLogFunc(const LogFunc& logFunc);
 #    if defined(NILAI_USE_UART)
-    Ref<Drivers::UartModule> GetUart() { return m_uart; }
+    Drivers::UartModule& GetUart() { return m_uart; }
 #    endif
 
     static Logger* Get() { return s_instance; }
 
 private:
-    static Logger*           s_instance;
+    static Logger*       s_instance;
 
 #    if defined(NILAI_USE_UART)
-    Ref<Drivers::UartModule> m_uart    = nullptr;
+    Drivers::UartModule& m_uart;
 #    endif
-    LogFunc                  m_logFunc = [](const char*, size_t) {};
+    LogFunc              m_logFunc = [](const char*, size_t) {};
 };
 }    // namespace Nilai::Services
 #endif
