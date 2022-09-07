@@ -25,11 +25,11 @@
 #        define GET_CUR_MIN() (GET_CUR_SEC() / 60)
 #        define GET_CUR_H()   (GET_CUR_MIN() / 60)
 
-#        define LOG_HELPER(msg, ...)                                                               \
+#        define LOG_HELPER(color, msg, ...)                                                        \
             do                                                                                     \
             {                                                                                      \
                 Logger::Get() != nullptr                                                           \
-                  ? Logger::Get()->Log("[%02i:%02i:%02i.%03i]" msg,                                \
+                  ? Logger::Get()->Log(color "[%02i:%02i:%02i.%03i]" msg,                          \
                                        GET_CUR_H(),                                                \
                                        GET_CUR_MIN() % 60,                                         \
                                        GET_CUR_SEC() % 60,                                         \
@@ -41,12 +41,12 @@
 #        error NILAI_LOGGER_USE_RTC was defined, the RTC module must also be enabled!
 #    else
 #        include "../drivers/rtc_module.h"
-#        define LOG_HELPER(msg, ...)                                                               \
+#        define LOG_HELPER(color, msg, ...)                                                        \
             do                                                                                     \
             {                                                                                      \
                 Nilai::Services::Logger::Get() != nullptr                                          \
                   ? Nilai::Services::Logger::Get()->Log(                                           \
-                      "[%s %s.%03i] " msg,                                                         \
+                      color "[%s %s.%03i] " msg "\033[0m",                                         \
                       Nilai::Drivers::RtcModule::Get()->GetDate().ToStr().c_str(),                 \
                       Nilai::Drivers::RtcModule::Get()->GetTime().ToStr().c_str(),                 \
                       Nilai::GetTime() % 1000 __VA_OPT__(, ) __VA_ARGS__)                          \
@@ -56,31 +56,36 @@
 #    endif
 
 #    if defined(NILAI_LOG_ENABLE_DEBUG) && defined(INT_NILAI_LOG_IMPL_OK)
-#        define LOG_DEBUG(msg, ...) LOG_HELPER("[DEB ]: " msg "\n\r" __VA_OPT__(, ) __VA_ARGS__)
+#        define LOG_DEBUG(msg, ...)                                                                \
+            LOG_HELPER("\033[37;40mD ", msg "\n\r" __VA_OPT__(, ) __VA_ARGS__)
 #    else
 #        define LOG_DEBUG(msg, ...)
 #    endif
 
 #    if defined(NILAI_LOG_ENABLE_INFO) && defined(INT_NILAI_LOG_IMPL_OK)
-#        define LOG_INFO(msg, ...) LOG_HELPER("[INFO]: " msg "\n\r" __VA_OPT__(, ) __VA_ARGS__)
+#        define LOG_INFO(msg, ...)                                                                 \
+            LOG_HELPER("\033[32;40mI ", msg "\n\r" __VA_OPT__(, ) __VA_ARGS__)
 #    else
 #        define LOG_INFO(msg, ...)
 #    endif
 
 #    if defined(NILAI_LOG_ENABLE_WARNING) && defined(INT_NILAI_LOG_IMPL_OK)
-#        define LOG_WARNING(msg, ...) LOG_HELPER("[WARN]: " msg "\n\r" __VA_OPT__(, ) __VA_ARGS__)
+#        define LOG_WARNING(msg, ...)                                                              \
+            LOG_HELPER("\033[93;40mW ", msg "\n\r" __VA_OPT__(, ) __VA_ARGS__)
 #    else
 #        define LOG_WARNING(msg, ...)
 #    endif
 
 #    if defined(NILAI_LOG_ENABLE_ERROR) && defined(INT_NILAI_LOG_IMPL_OK)
-#        define LOG_ERROR(msg, ...) LOG_HELPER("[ERR ]: " msg "\n\r" __VA_OPT__(, ) __VA_ARGS__)
+#        define LOG_ERROR(msg, ...)                                                                \
+            LOG_HELPER("\033[91;40mE ", msg "\n\r" __VA_OPT__(, ) __VA_ARGS__)
 #    else
 #        define LOG_ERROR(msg, ...)
 #    endif
 
 #    if defined(NILAI_LOG_ENABLE_CRITICAL) && defined(INT_NILAI_LOG_IMPL_OK)
-#        define LOG_CRITICAL(msg, ...) LOG_HELPER("[CRIT]: " msg "\n\r" __VA_OPT__(, ) __VA_ARGS__)
+#        define LOG_CRITICAL(msg, ...)                                                             \
+            LOG_HELPER("\033[97;101mC ", msg "\n\r" __VA_OPT__(, ) __VA_ARGS__)
 #    else
 #        define LOG_CRITICAL(msg, ...)
 #    endif

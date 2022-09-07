@@ -17,7 +17,6 @@
  *
  * These settings should be made available to every translation units.
  */
-#error asd
 #ifndef NILAI_NILAITFOCONFIG_H_a
 #    define NILAI_NILAITFOCONFIG_H
 
