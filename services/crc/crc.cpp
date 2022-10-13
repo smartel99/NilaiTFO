@@ -34,7 +34,11 @@ uint32_t Crc(const uint32_t* data, size_t len, uint32_t initial)
     }
     return crc->DR;
 #else
-    return ConstexprCrc(data, len, initial);
+    // TODO Implement crc
+    (void)data;
+    (void)len;
+    (void)initial;
+    return 0;
 #endif
 }
 }    // namespace Nilai::Services

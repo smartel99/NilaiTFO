@@ -38,6 +38,20 @@ struct Event
     uint32_t        Timestamp = 0;
     EventTypes      Type;
     EventCategories Category;
+
+    template<typename T>
+    T& As() noexcept
+        requires std::derived_from<T, Event>
+    {
+        return *reinterpret_cast<T*>(this);
+    }
+
+    [[nodiscard]] bool Is(EventCategories c, EventTypes t) const noexcept
+    {
+        return IsType(t) && IsCategory(c);
+    }
+    [[nodiscard]] bool IsType(EventTypes t) const noexcept { return t == Type; }
+    [[nodiscard]] bool IsCategory(EventCategories t) const noexcept { return t == Category; }
 };
 
 /**

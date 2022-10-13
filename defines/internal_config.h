@@ -14,14 +14,15 @@
 /* Includes */
 
 
-#if defined(NILAI_TEST)
-#    define NILAI_HAL_HEADER          "test/Mocks/HALMocks/stm32_mock_hal.h"
-#    define NILAI_UART_DATA_REG       RDR
-#    define NILAI_UART_IRQ_STATUS_REG ISR
+// #if defined(NILAI_TEST)
+// #    define NILAI_HAL_HEADER          "test/Mocks/HALMocks/stm32_mock_hal.h"
+// #    define NILAI_UART_DATA_REG       RDR
+// #    define NILAI_UART_IRQ_STATUS_REG ISR
 
-#    define NILAI_GPIO_BSRR_REG BSRR
-#    define NILAI_GPIO_IDR_REG  IDR
-#elif defined(NILAI_USES_STM32F4xx)
+// #    define NILAI_GPIO_BSRR_REG BSRR
+// #    define NILAI_GPIO_IDR_REG  IDR
+// #elif defined(NILAI_USES_STM32F4xx)
+#if defined(NILAI_USES_STM32F4xx)
 #    define NILAI_HAL_HEADER          "stm32f4xx_hal.h"
 #    define NILAI_UART_DATA_REG       DR
 #    define NILAI_UART_IRQ_STATUS_REG SR

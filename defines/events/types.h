@@ -57,6 +57,10 @@ enum class EventTypes
 
     DataEvent,    //!< A software event carrying data.
 
+#    if defined(NILAI_USE_COMMAND_INTERFACE)
+    CommandEvent,    //!< A command received through the command interface.
+#    endif
+
     UserEvent1,     //!< The 1st user defined event.
     UserEvent2,     //!< The 2nd user defined event.
     UserEvent3,     //!< The 3rd user defined event.
@@ -461,6 +465,11 @@ enum class EventCategories
     External = 0,    //!< External Event (external interrupt and software request).
     UserEvent,       //!< User defined software event.
     Data,            //!< User defined Data Event.
+
+#    if defined(NILAI_USE_COMMAND_INTERFACE)
+    Command,    //!< Command event.
+#    endif
+
 #    if defined(NILAI_USE_TIMER_EVENTS)
     /**
      * @brief Timer Event.
@@ -560,6 +569,10 @@ inline constexpr bool IsInCategory(EventTypes t, EventCategories c)
         case EventTypes::Exti15: typeCategory = EventCategories::External; break;
 
         case EventTypes::DataEvent: typeCategory = EventCategories::Data; break;
+
+#    if defined(NILAI_USE_COMMAND_INTERFACE)
+        case EventTypes::CommandEvent: typeCategory = EventCategories::Command; break;
+#    endif
 
         case EventTypes::UserEvent1:
         case EventTypes::UserEvent2:

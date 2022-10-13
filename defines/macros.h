@@ -12,10 +12,8 @@
 #ifndef NILAI_MACROS_H
 #    define NILAI_MACROS_H
 
-#    if defined(DEBUG) || defined(NILAI_TEST)
-#        include "../defines/assertion.h"
-#        include "../services/logger.h"
-#    endif
+#    include "../defines/assertion.h"
+#    include "../services/logger.h"
 
 #    include <string_view>
 /*************************************************************************************************/

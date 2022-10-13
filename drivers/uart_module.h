@@ -1,120 +1,202 @@
 ﻿/**
- * @file        uart_module.h
+ * @addtogroup  drivers
+ * @{
+ * @addtogroup  uart
+ * @{
+ * @file        uartModule.hpp
  * @author      Samuel Martel
  * @author      Pascal-Emmanuel Lachance
+ * @author      Paul Thomas
  * @date        2020/08/13  -  09:25
  *
  * @brief       UART communication module
  */
-#ifndef NILAI_UARTMODULE_HPP
-#    define NILAI_UARTMODULE_HPP
+#ifndef GUARD_UARTMODULE_HPP
+#    define GUARD_UARTMODULE_HPP
 /*************************************************************************************************/
-/* Includes ------------------------------------------------------------------------------------ */
+/* Includes
+ * ------------------------------------------------------------------------------------
+ */
+#    define NILAI_USE_UART
 #    if defined(NILAI_USE_UART)
-#        if defined(NILAI_TEST)
-#        else
-#            include "../defines/internal_config.h"
-#            include NILAI_HAL_HEADER
-#            if defined(HAL_UART_MODULE_ENABLED)
-#                include "../defines/macros.h"
-#                include "../defines/misc.h"
-#                include "../defines/module.h"
 
-#                include "UART/enums.h"
-#                include "UART/structs.h"
+#        include "../defines/internal_config.h"
 
-#                include <cstdint>       // For uint8_t, size_t
-#                include <functional>    // For std::function
-#                include <string>        // For std::string
-#                include <vector>        // For std::vector
+#        pragma GCC diagnostic push
+#        pragma GCC diagnostic ignored "-Wunused-parameter"
 
-/*************************************************************************************************/
-/* Defines ------------------------------------------------------------------------------------- */
-#                if USE_HAL_UART_REGISTER_CALLBACKS == 1
-#                    define NILAI_UART_REGISTER_CALLBACKS
-#                endif
-/*************************************************************************************************/
-/* Enumerated Types ---------------------------------------------------------------------------- */
+#        include NILAI_HAL_HEADER
 
-/*************************************************************************************************/
-/* Classes ------------------------------------------------------------------------------------- */
+#        pragma GCC diagnostic pop
+#        define HAL_UART_MODULE_ENABLED
+#        if defined(HAL_UART_MODULE_ENABLED)
+
+#            include "../defines/circular_buffer.h"
+#            include "../defines/macros.h"
+#            include "../defines/misc.h"
+#            include "../defines/module.h"
+#            include "../services/time.h"
+
+#            include "UART/frame.h"
+#            include "UART/status.h"
+
+#            include <cstdint>       // For uint8_t, size_t
+#            include <functional>    // For std::function
+#            include <string>        // For std::string
+#            include <vector>        // For std::vector
+
+#            ifdef GTEST
+#                include <gtest/gtest_prod.h>
+#            endif
+
 namespace Nilai::Drivers
 {
-class UartModule : public Module
+
+enum class SectionState
+{
+    NotComplete,
+    Complete,
+};
+
+class UartModule : public Nilai::Module
 {
 public:
-    UartModule(UART_HandleTypeDef* uart, std::string label);
+    using handle_type    = UART_HandleTypeDef;
+    using handle_pointer = std::add_pointer<handle_type>::type;
+
+    using data_type        = uint8_t;
+    using signed_data_type = char;
+
+    using raw_buffer_type = std::vector<data_type>;
+    using buffer_type     = CircularBuffer<typename raw_buffer_type::value_type>;
+    using size_type       = buffer_type::size_type;
+
+    using timeout_t = Nilai::time_t;
+
+    using callback_t = std::function<void()>;
+
+public:
+    UartModule(const std::string& label,
+               handle_pointer     uart,
+               size_type          txl = 512,
+               size_type          rxl = 512);
     ~UartModule() override;
 
-    bool                             DoPost() override;
-    void                             Run() override;
-    [[nodiscard]] const std::string& GetLabel() const { return m_label; }
+    bool DoPost() override;
+    void Run() override;
 
-    void                  Transmit(const char* msg, size_t len);
+    [[nodiscard]] const std::string& GetLabel() const noexcept { return m_label; }
+
+    /**
+     * Non blocking send for bytes buffer
+     * @param msg bytes to send
+     * @param len number of bytes to send
+     */
+    void Transmit(const signed_data_type* msg, size_type len);
+
+    /**
+     * Blocking send
+     * does not cancel transmission on timeout
+     * @param msg bytes to send
+     * @param len number of bytes to send
+     * @param timeout waiting time for transmission
+     * @return false on timeout
+     */
+    bool                  Transmit(const signed_data_type*, size_type len, timeout_t timeout);
+    void                  Transmit(const data_type* buff, size_type len);
+    bool                  Transmit(const data_type* buff, size_t len, timeout_t timeout);
     void                  Transmit(const std::string& msg);
-    void                  Transmit(const std::vector<uint8_t>& msg);
-    [[maybe_unused]] void VTransmit(const char* fmt, ...);
+    void                  Transmit(const raw_buffer_type& msg);
+    [[maybe_unused]] void VTransmit(const signed_data_type* fmt, ...);
 
-    [[nodiscard]] size_t GetNumberOfWaitingFrames() const { return (m_framePending ? 1 : 0); }
-    Uart::Frame          Receive();
+    [[nodiscard]] size_type AvailableBytes() const noexcept { return m_rxCirc.Size(); }
+    [[nodiscard]] size_type AvailableFrames() const noexcept { return m_rxFrames.Size(); }
 
-    void SetExpectedRxLen(size_t len);
+    size_type   Receive(data_type* buf, size_type len);
+    size_type   Receive(data_type* buf, size_type len, timeout_t timeout);
+    Uart::Frame Receive();
+
+    void SetExpectedRxLen(size_type len);
     void ClearExpectedRxLen();
 
-    void SetFrameReceiveCpltCallback(const std::function<void()>& cb);
+    void SetFrameReceiveCpltCallback(const callback_t& cb);
     void ClearFrameReceiveCpltCallback();
 
-    void SetStartOfFrameSequence(uint8_t* sof, size_t len);
     void SetStartOfFrameSequence(const std::string& sof);
-    void SetStartOfFrameSequence(const std::vector<uint8_t>& sof);
+    void SetStartOfFrameSequence(const raw_buffer_type& sof);
+    void SetStartOfFrameSequence(const data_type* sof, size_type len);
     void ClearStartOfFrameSequence();
 
-    void SetEndOfFrameSequence(uint8_t* eof, size_t len);
     void SetEndOfFrameSequence(const std::string& eof);
-    void SetEndOfFrameSequence(const std::vector<uint8_t>& eof);
+    void SetEndOfFrameSequence(const raw_buffer_type& eof);
+    void SetEndOfFrameSequence(const data_type* eof, size_type len);
     void ClearEndOfFrameSequence();
 
-private:
-    bool WaitUntilTransmitionComplete();
-
-    bool        ResizeDmaBuffer(size_t sofLen, size_t len, size_t eofLen);
-
-#                if defined(NILAI_UART_REGISTER_CALLBACKS)
-    static void ReceptionCompleteCb(UART_HandleTypeDef* huart);
-#                endif
+    void FlushRecv();
 
 private:
-    UART_HandleTypeDef* m_handle = nullptr;
-    std::string         m_label;
+    bool WaitUntilTransmissionComplete(timeout_t timeout = s_txTimeout);
+    bool ResizeDmaBuffer();
+    void SetTriage();
+    void SearchFrame(const raw_buffer_type&  data,
+                     const raw_buffer_type&  pattern,
+                     std::vector<size_type>& result,
+                     size_type               max_depth = 0,
+                     size_type               offset    = 0);
 
-    Uart::Status         m_status           = Uart::Status::Ok;
-    size_t               m_txBytesRemaining = -1;
-    std::vector<uint8_t> m_txBuf;
-    size_t               m_expectedLen               = 0;
-    uint32_t             m_lastCharReceivedTimestamp = 0;
-    Uart::Frame          m_latestFrames;
-    bool                 m_framePending = false;
+protected:
+    std::string m_label;
 
-    std::string m_sof;
-    bool        m_hasReceivedSof = false;
-    std::string m_eof;
+private:
+    handle_type* m_handle = nullptr;
 
-    std::function<void()> m_cb = []() {};
+    Uart::Status m_status = Uart::Status::Ok;
 
-    size_t m_dataBufferIdx = 0;
+    std::string m_sof;        // start of frame
+    std::string m_eof;        // end of frame
+    size_type   m_efl = 0;    // expected frame length
 
-    static constexpr uint32_t TIMEOUT    = 100;    // Systicks.
-    static constexpr uint32_t RX_TIMEOUT = 50;     // Systicks.
+    size_type m_txl;    // transmission buffer size
+    size_type m_rxl;    // reception buffer size
+
+    size_type                   m_sBuffId = 0;    // Static buffer id
+    raw_buffer_type             m_txBuff;         // transmission buffer
+    raw_buffer_type             m_rxBuff;         // reception buffer
+    buffer_type                 m_rxCirc;         // circular read access for reception buffer
+    CircularBuffer<Uart::Frame> m_rxFrames;       // reception frame buffer
+
+    callback_t m_cb;
+
+    callback_t m_run;
+
+    // Triage
+    callback_t m_triage;
+
+    static constexpr timeout_t s_txTimeout = 100;    // Systicks.
+    static constexpr timeout_t s_rxTimeout = 50;     // Systicks.
+
+#            ifdef GTEST
+private:
+    FRIEND_TEST(Uart, TriageSof);
+    FRIEND_TEST(Uart, TriageEof);
+    FRIEND_TEST(Uart, TriageSofEof);
+    FRIEND_TEST(Uart, TriageElf);
+    FRIEND_TEST(Uart, TriageNone);
+    FRIEND_TEST(Uart, Sequence);
+#            endif
 };
 }    // namespace Nilai::Drivers
 
-#            else
-#                if WARN_MISSING_STM_DRIVERS
-#                    warning NilaiTFO UART module enabled, but HAL_UART_MODULE_ENABLE is not defined!
-#                endif
+#        else
+#            if WARN_MISSING_STM_DRIVERS
+#                warning NilaiTFO UART module enabled, but HAL_UART_MODULE_ENABLE is not defined!
 #            endif
 #        endif
 #    endif
 #endif
 
+/**
+ * @}
+ * @}
+ */
 /* ----- END OF FILE ----- */

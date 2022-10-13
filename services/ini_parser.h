@@ -19,7 +19,7 @@
 
 #if defined(NILAI_USE_INI_PARSER)
 #    if !defined(NILAI_USE_FILESYSTEM)
-#        error The filesystem module must be used!
+static_assert(false, "The filesystem module must be used!");
 #    else
 
 #        include "../defines/ini_parser/concepts.h"
@@ -151,5 +151,4 @@ private:
 //!@}
 #    endif
 #endif
-
 #endif    // NILAI_INIPARSER_H

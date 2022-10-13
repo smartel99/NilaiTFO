@@ -10,23 +10,44 @@ FetchContent_Declare(
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 
+add_compile_definitions(GTEST)
+
 include(GoogleTest)
 enable_testing()
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 
-get_filename_component(ROOT_DIR ${CMAKE_SOURCE_DIR}/.. ABSOLUTE)
+add_compile_options(-Wall -Wextra -pedantic)
+add_compile_options(-fconcepts-diagnostics-depth=3)
+
+#get_filename_component(ROOT_DIR ${CMAKE_SOURCE_DIR}/.. ABSOLUTE)
 #get_filename_component(SERVICE_DIR ${ROOT_DIR}/services ABSOLUTE)
 #get_filename_component(PROCESS_DIR ${ROOT_DIR}/processes ABSOLUTE)
 #get_filename_component(INTERFACE_DIR ${ROOT_DIR}/interfaces ABSOLUTE)
-include_directories(${ROOT_DIR})
+set(NILAI_DIR ${CMAKE_CURRENT_SOURCE_DIR}/..)
+include_directories(${NILAI_DIR})
+message(STATUS "Nilai Tests's NILAI_DIR: ${NILAI_DIR}")
+
+# Added for the intellisense.
+include_directories(${CMAKE_BINARY_DIR}/_deps/googletest-src/googletest/include)
+
+include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+
+if ("${NILAI_MCU}" STREQUAL "L452")
+    include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Mocks/STM32L452)
+elseif ("${NILAI_MCU}" STREQUAL "F405")
+    include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Mocks/STM32F405)
+else ()
+    message(FATAL_ERROR "A MCU must be specified!")
+endif ()
 
 add_compile_options(-DNILAI_TEST)
 
 add_subdirectory(bit_manipulations)
 add_subdirectory(pin)
-add_subdirectory(processes)
-add_subdirectory(interfaces/TAS5707)
-add_subdirectory(interfaces/TAS5760)
-
-
+# add_subdirectory(processes)
+# add_subdirectory(interfaces/TAS5707)
+# add_subdirectory(interfaces/TAS5760)
+add_subdirectory(drivers)
+add_subdirectory(services)
+add_subdirectory(circular_buffer)

@@ -37,13 +37,13 @@ void SwTas5760<Device>::Build(const TAS5760::SwConfig& cfg)
 #    if defined(NILAI_USE_EVENTS)
         Events::EventTypes event = Events::PinToEvent(cfg.Fault);
         m_faultEvent             = event;
-        Application::Get()->RegisterEventCallback(event,
-                                                  [this](Events::Event*) -> bool
-                                                  {
-                                                      m_faultTime = GetTime();
-                                                      m_hasFault  = true;
-                                                      return false;
-                                                  });
+        Application::Get().RegisterEventCallback(event,
+                                                 [this](Events::Event*) -> bool
+                                                 {
+                                                     m_faultTime = GetTime();
+                                                     m_hasFault  = true;
+                                                     return false;
+                                                 });
         m_faultFunction = [this]() { HandleFault(); };
 #    else
         // Events disabled, must be manually checked.
@@ -69,12 +69,12 @@ void SwTas5760<Device>::Build(const TAS5760::SwConfig& cfg)
 #    if defined(NILAI_USE_EVENTS)
         Events::EventTypes event = Events::PinToEvent(cfg.HpDetect);
         m_hpChangeEvent          = event;
-        Application::Get()->RegisterEventCallback(event,
-                                                  [this](Events::Event*) -> bool
-                                                  {
-                                                      m_hpChanged = true;
-                                                      return false;
-                                                  });
+        Application::Get().RegisterEventCallback(event,
+                                                 [this](Events::Event*) -> bool
+                                                 {
+                                                     m_hpChanged = true;
+                                                     return false;
+                                                 });
         m_hpChangeFunction = [this]() { HandleHeadphoneChange(); };
 #    else
         // Events disabled, must be manually checked.

@@ -27,7 +27,9 @@
 
 namespace Nilai
 {
-inline static uint32_t GetTime()
+using time_t = uint32_t;
+
+inline static time_t GetTime()
 {
 #ifndef NILAI_TEST
     return HAL_GetTick();
@@ -48,16 +50,16 @@ inline static uint32_t GetTime()
 #endif
 }
 
-inline static uint32_t GetTicks()
+inline static time_t GetTicks()
 {
 #if !defined(NILAI_TEST)
-    return DWT->CYCCNT;
+    return DWT->CYCCNT;    // NOLINT(cppcoreguidelines-pro-type-cstyle-cast)
 #else
     return GetTime();
 #endif
 }
 
-inline static void Delay(uint32_t ms)
+inline static void Delay(time_t ms)
 {
 #ifndef NILAI_TEST
     HAL_Delay(ms);

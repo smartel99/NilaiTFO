@@ -76,6 +76,19 @@
 #define NILAI_CONCEPT_REJECTS_TYPES(Concept, ...)                                                  \
     NILAI_CONCEPT_EXPECT_X_WITH_TYPES(Concept, false __VA_OPT__(, ) __VA_ARGS__)
 
+#define NILAI_CONCEPT_ALL_PRIMITIVES()                                                             \
+    bool, char, short, int, long, long long, unsigned char, unsigned short, unsigned int,          \
+      unsigned long, unsigned long long, float, double
+
+#define NILAI_CONCEPT_ALL_PRIMITIVES_OF_CONTAINER(x, ...)                                          \
+    x<bool __VA_OPT__(, ) __VA_ARGS__>, x<char __VA_OPT__(, ) __VA_ARGS__>,                        \
+      x<short __VA_OPT__(, ) __VA_ARGS__>, x<int __VA_OPT__(, ) __VA_ARGS__>,                      \
+      x<long __VA_OPT__(, ) __VA_ARGS__>, x<long long __VA_OPT__(, ) __VA_ARGS__>,                 \
+      x<unsigned char __VA_OPT__(, ) __VA_ARGS__>, x<unsigned short __VA_OPT__(, ) __VA_ARGS__>,   \
+      x<unsigned int __VA_OPT__(, ) __VA_ARGS__>, x<unsigned long __VA_OPT__(, ) __VA_ARGS__>,     \
+      x<unsigned long long __VA_OPT__(, ) __VA_ARGS__>, x<float __VA_OPT__(, ) __VA_ARGS__>,       \
+      x<double __VA_OPT__(, ) __VA_ARGS__>
+
 //!@}
 //!@}
 

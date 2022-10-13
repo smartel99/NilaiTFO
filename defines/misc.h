@@ -12,8 +12,9 @@
 /*************************************************************************************************/
 /* File includes ------------------------------------------------------------------------------- */
 
-#include "macros.h"
+//#include "macros.h"
 
+#include <bit>
 #include <iomanip>
 #include <sstream>
 #include <string>
@@ -119,26 +120,53 @@ std::string VectorToVal(const std::array<uint8_t, N>& arr)
 std::vector<uint8_t> StrToVec(const std::string& str);
 std::vector<uint8_t> StrToVec(const std::string& str, size_t maxSize);
 
-template<std::integral T, bool, size_t>
+template<typename T>
+struct PackType
+{
+    using type = T;
+};
+
+template<>
+struct PackType<float>
+{
+    using type = uint32_t;
+};
+
+template<>
+struct PackType<double>
+{
+    using type = uint64_t;
+};
+
+template<typename T>
+using PackType_t = typename PackType<T>::type;
+
+template<typename T, bool, size_t>
+    requires std::is_arithmetic_v<T>
 constexpr T PackImpl()
 {
     return 0;
 }
 
-template<std::integral T,
-         bool          bigEndian = false,
-         size_t        shiftBy   = bigEndian ? (sizeof(T) * 8) - 8 : 0,
+template<typename T,
+         bool   bigEndian = std::endian::native == std::endian::big,
+         size_t shiftBy   = bigEndian ? (sizeof(T) * 8) - 8 : 0,
          std::convertible_to<uint8_t>... Args>
+    requires std::is_arithmetic_v<T>
 constexpr T PackImpl(uint8_t v, Args... args)
 {
-    return (static_cast<T>(v) << shiftBy) | PackImpl < T, bigEndian,
-           bigEndian ? shiftBy - 8 : shiftBy + 8 > (args...);
+    using AltT = PackType_t<T>;
+    AltT altT  = (static_cast<PackType_t<T>>(v) << shiftBy) |
+                static_cast<PackType_t<T>>(
+                  PackImpl < T, bigEndian, bigEndian ? shiftBy - 8 : shiftBy + 8 > (args...));
+    return std::bit_cast<T>(altT);
 }
 
-template<std::integral T,
-         bool          bigEndian = false,
-         size_t        shiftBy   = bigEndian ? (sizeof(T) * 8) - 8 : 0,
+template<typename T,
+         bool   bigEndian = std::endian::native == std::endian::big,
+         size_t shiftBy   = bigEndian ? (sizeof(T) * 8) - 8 : 0,
          std::convertible_to<uint8_t>... Args>
+    requires std::is_arithmetic_v<T>
 constexpr T Pack(Args... args)
 {
     static_assert(sizeof...(args) == sizeof(T), "Invalid amount of data provided!");

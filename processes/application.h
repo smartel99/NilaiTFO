@@ -119,7 +119,7 @@ public:
     void DispatchEvent(Events::Event* data);
 #    endif
 
-    static Application* Get() { return s_instance; }
+    static Application& Get() { return *s_instance; }
 
 private:
     size_t m_lastId = 0;

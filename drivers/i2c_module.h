@@ -31,12 +31,9 @@
 
 #    if defined(NILAI_USE_I2C)
 #        include "../defines/internal_config.h"
-#        if defined(NILAI_TEST)
-#            include "../test/Mocks/drivers/i2c_module.h"
-#        else
-#            include NILAI_HAL_HEADER
-#        endif
-#        if defined(HAL_I2C_MODULE_ENABLED) || defined(NILAI_TEST)
+
+#        include NILAI_HAL_HEADER
+#        if defined(HAL_I2C_MODULE_ENABLED)
 #            include "../defines/macros.h"
 #            include "../defines/misc.h"
 #            include "../defines/module.h"
@@ -57,11 +54,8 @@ namespace Nilai::Drivers
 class I2cModule : public Module
 {
 public:
-#            if defined(NILAI_TEST)
-    using Handle = Nilai::Test::Drivers::I2cMockHandle;
-#            else
     using Handle = I2C_HandleTypeDef;
-#            endif
+
 public:
     constexpr I2cModule() noexcept                  = default;
     constexpr I2cModule(const I2cModule&) noexcept  = default;
@@ -124,7 +118,7 @@ protected:
 }    // namespace Nilai::Drivers
 #        else
 #            if WARN_MISSING_STM_DRIVERS
-#                warning NilaiTFO I2C Module enabled, but HAL_I2C_MODULE_ENABLED is not defined!
+static_assert(false, "NilaiTFO I2C Module enabled, but HAL_I2C_MODULE_ENABLED is not defined!");
 #            endif
 #        endif
 #    endif

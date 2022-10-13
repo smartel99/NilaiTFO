@@ -44,10 +44,13 @@ struct Frame
         len  = data.size();
     }
 
-    [[nodiscard]] std::string ToStr() const { return std::string {(char*)data.data()}; }
-    bool                      operator==(const std::string& s) const
+    [[nodiscard]] std::string ToStr() const
     {
-        return (std::string((char*)data.data(), len) == s);
+        return std::string {reinterpret_cast<const char*>(data.data()), len};
+    }
+    bool operator==(const std::string& s) const
+    {
+        return (std::string {reinterpret_cast<const char*>(data.data()), len} == s);
     }
     bool operator!=(const std::string& s) const { return !operator==(s); }
 };

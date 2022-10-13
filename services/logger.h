@@ -6,9 +6,7 @@
 #ifndef NILAI_LOGGER_H
 #define NILAI_LOGGER_H
 
-#if defined(NILAI_TEST)
-#    include "../test/Mocks/services/logger.h"
-#elif defined(NILAI_USE_LOGGER)
+#if defined(NILAI_USE_LOGGER) && !defined(NILAI_TEST)
 
 /*************************************************************************************************/
 /* Includes ------------------------------------------------------------------------------------ */
@@ -115,7 +113,7 @@ public:
     void Log(const char* fmt, ...);
     void VLog(const char* fmt, va_list args);
 
-    void                 SetLogFunc(const LogFunc& logFunc);
+    void SetLogFunc(const LogFunc& logFunc);
 #    if defined(NILAI_USE_UART)
     Drivers::UartModule& GetUart() { return m_uart; }
 #    endif
@@ -123,14 +121,21 @@ public:
     static Logger* Get() { return s_instance; }
 
 private:
-    static Logger*       s_instance;
+    static Logger* s_instance;
 
 #    if defined(NILAI_USE_UART)
     Drivers::UartModule& m_uart;
 #    endif
-    LogFunc              m_logFunc = [](const char*, size_t) {};
+    LogFunc m_logFunc = [](const char*, size_t) {};
 };
 }    // namespace Nilai::Services
+#else
+#    define LOG_HELPER(fmt, ...)
+#    define LOG_DEBUG(msg, ...)
+#    define LOG_INFO(msg, ...)
+#    define LOG_WARNING(msg, ...)
+#    define LOG_ERROR(msg, ...)
+#    define LOG_CRITICAL(msg, ...)
 #endif
 /*************************************************************************************************/
 /* LOG_CRITICAL("Have a wonderful day! :)"); */

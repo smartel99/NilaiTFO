@@ -47,7 +47,7 @@ extern "C" void HAL_GPIO_EXTI_Callback(uint16_t pin)
 {
     uint8_t                 pinNum = PinIdToNum(pin);
     Nilai::Events::ExtEvent e(false, pinNum, PinIdToEventType(pin));
-    Nilai::Application::Get()->DispatchEvent(&e);
+    Nilai::Application::Get().DispatchEvent(&e);
 }
 
 /**

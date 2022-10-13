@@ -79,7 +79,7 @@ At24Qt2120 At24Qt2120::Builder::Build() const
     }
 
     // Verify the firmware version.
-    FirmwareVersion version = obj.GetFirmwareVersion();
+    [[maybe_unused]] FirmwareVersion version = obj.GetFirmwareVersion();
     TS_INFO("FW: v%i.%i", version.Major, version.Minor);
 
     AT24QT2120::RegisterMap defaults = {};
@@ -230,7 +230,7 @@ bool At24Qt2120::HandleIrq(Events::Event* e)
 void At24Qt2120::BindIrq(Events::EventTypes type)
 {
     m_irqType = type;
-    m_irqId   = Application::Get()->RegisterEventCallback(
+    m_irqId   = Application::Get().RegisterEventCallback(
       type, [this](Events::Event* e) { return HandleIrq(e); });
 }
 #    endif
@@ -294,7 +294,7 @@ bool At24Qt2120::Calibrate(bool waitForEnd) noexcept
 {
     TS_DEBUG("Started calibration...");
 
-    uint32_t startTime = Nilai::GetTime();
+    [[maybe_unused]] uint32_t startTime = Nilai::GetTime();
 
     // Writing anything other than 0 to the calibration register initiates a calibration cycle.
     const uint8_t startCalibration = 0xFF;
@@ -674,7 +674,7 @@ void At24Qt2120::SetRegisters(AT24QT2120::Registers r, const uint8_t* data, size
 constexpr At24Qt2120::At24Qt2120(At24Qt2120&& o) noexcept : I2cModule(std::move(o))
 {
 #    if defined(NILAI_USE_EVENTS)
-    Nilai::Application::Get()->UnregisterEventCallback(m_irqType, m_irqId);
+    Nilai::Application::Get().UnregisterEventCallback(m_irqType, m_irqId);
     BindIrq(m_irqType);
 #    endif
 }
@@ -693,7 +693,7 @@ At24Qt2120& At24Qt2120::operator=(At24Qt2120&& o) noexcept
     m_initialized   = o.m_initialized;
 
 #    if defined(NILAI_USE_EVENTS)
-    Nilai::Application::Get()->UnregisterEventCallback(o.m_irqType, o.m_irqId);
+    Nilai::Application::Get().UnregisterEventCallback(o.m_irqType, o.m_irqId);
     m_irqType = o.m_irqType;
     BindIrq(m_irqType);
 #    endif

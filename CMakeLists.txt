@@ -7,6 +7,9 @@ set(CMAKE_CXX_STANDARD 20)
 if (NILAI_TEST)
     message(STATUS "Building Nilai in Test Mode")
     add_definitions(-DNILAI_TEST)
+    add_definitions(-DHAL_ADC_MODULE_ENABLED)
+    add_definitions(-DHAL_I2C_MODULE_ENABLED)
+    add_subdirectory(test)
 else ()
     message(STATUS "Building Nilai in Normal Mode")
 endif ()
@@ -75,8 +78,10 @@ endif ()
 
 
 # Gets the absolute path and puts it in a variable called `ROOT_DIR`
-get_filename_component(ROOT_DIR ${CMAKE_CURRENT_LIST_DIR} ABSOLUTE)
+#get_filename_component(ROOT_DIR ${CMAKE_CURRENT_SOURCE_DIR} ABSOLUTE)
+set(ROOT_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(${ROOT_DIR})
+message(STATUS "Nilai's ROOT_DIR: ${ROOT_DIR}")
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -include ${ROOT_DIR}/defines/compiler_defines.h")
 
@@ -114,8 +119,17 @@ set(SOURCES ${SOURCES} "${ROOT_DIR}/vendor/inih/ini.c")
 
 if (NILAI_TEST)
     include_directories(${ROOT_DIR}/test/Mocks)
-
     file(GLOB_RECURSE MOCK_SOURCES "${ROOT_DIR}/test/Mocks/*.*")
+
+    if ("${NILAI_MCU}" STREQUAL "L452")
+        list(FILTER MOCK_SOURCES EXCLUDE REGEX "${ROOT_DIR}/test/Mocks/STM32F405")
+        include_directories(${CMAKE_CURRENT_SOURCE_DIR}/test/Mocks/STM32L452)
+    elseif ("${NILAI_MCU}" STREQUAL "F405")
+        list(FILTER MOCK_SOURCES EXCLUDE REGEX "${ROOT_DIR}/test/Mocks/STM32L452")
+        include_directories(${CMAKE_CURRENT_SOURCE_DIR}/test/Mocks/STM32F405)
+    else ()
+        message(FATAL_ERROR "A MCU must be specified!")
+    endif ()
 
     set(SOURCES ${SOURCES} ${MOCK_SOURCES})
 endif ()

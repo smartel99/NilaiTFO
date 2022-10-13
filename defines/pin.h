@@ -17,7 +17,6 @@
 #        include "Core/Inc/gpio.h"
 #    else
 #        include "../test/Mocks/GPIO/gpio.h"
-#        include "../test/Mocks/HALMocks/stm32_mock_hal.h"
 #    endif
 
 #    include <bit>
@@ -34,6 +33,17 @@ namespace Nilai
  * @addtogroup nilai_hal Hardware Abstraction
  * @{
  */
+
+/**
+ * @enum PinModes
+ * @brief List of the possible pin modes.
+ */
+enum class PinModes
+{
+    Analog = 0,    //!< High impedance, inactive.
+    Input,         //!< Input pin.
+    Output         //!< Output pin.
+};
 
 /**
  * @struct Pin

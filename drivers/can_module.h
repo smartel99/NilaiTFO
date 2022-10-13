@@ -12,32 +12,31 @@
 /* Includes
  * ------------------------------------------------------------------------------------
  */
-#    if !defined(NILAI_TEST)
-#        if defined(NILAI_USE_CAN)
-#            include "../defines/internal_config.h"
-#            include NILAI_HAL_HEADER
-#            if defined(HAL_CAN_MODULE_ENABLED)
-#                include "../defines/macros.h"
-#                include "../defines/misc.h"
-#                include "../defines/module.h"
+#    if defined(NILAI_USE_CAN)
+#        include "../defines/internal_config.h"
+#        include NILAI_HAL_HEADER
+#        if defined(HAL_CAN_MODULE_ENABLED)
+#            include "../defines/macros.h"
+#            include "../defines/misc.h"
+#            include "../defines/module.h"
 
-#                include "CAN/enums.h"
-#                include "CAN/structs.h"
+#            include "CAN/enums.h"
+#            include "CAN/structs.h"
 
-#                include <array>
-#                include <cstdint>
-#                include <functional>
-#                include <map>
-#                include <vector>
+#            include <array>
+#            include <cstdint>
+#            include <functional>
+#            include <map>
+#            include <vector>
 
 /*************************************************************************************************/
 /* Defines
  * -------------------------------------------------------------------------------------
  */
 
-#                if USE_HAL_CAN_REGISTER_CALLBACKS == 1
-#                    define NILAI_CAN_REGISTER_CALLBACKS
-#                endif
+#            if USE_HAL_CAN_REGISTER_CALLBACKS == 1
+#                define NILAI_CAN_REGISTER_CALLBACKS
+#            endif
 
 /*************************************************************************************************/
 /* Enumerated Types
@@ -98,9 +97,9 @@ private:
     void                       HandleFrameReception(Can::RxFifo fifo);
     static CAN_TxHeaderTypeDef BuildTxHeader(uint32_t addr, size_t len, bool forceExtended);
 
-#                if !defined(NILAI_CAN_REGISTER_CALLBACKS)
+#            if !defined(NILAI_CAN_REGISTER_CALLBACKS)
 public:
-#                endif
+#            endif
     static void CanTxMailbox0CpltCb(CAN_HandleTypeDef* can);
     static void CanTxMailbox1CpltCb(CAN_HandleTypeDef* can);
     static void CanTxMailbox2CpltCb(CAN_HandleTypeDef* can);
@@ -127,14 +126,11 @@ private:
     static constexpr uint32_t s_timeout = 15;
 };
 }    // namespace Nilai::Drivers
-#            else
-#                if WARN_MISSING_STM_DRIVERS
-#                    warning NilaiTFO CAN module enabled, but HAL_CAN_MODULE_ENABLED is not defined!
-#                endif
+#        else
+#            if WARN_MISSING_STM_DRIVERS
+static_assert(false, "NilaiTFO CAN module enabled, but HAL_CAN_MODULE_ENABLED is not defined!");
 #            endif
 #        endif
-#    else
-#        include "../test/Mocks/drivers/can_module.h"
 #    endif
 #endif
 /* ----- END OF FILE ----- */

@@ -18,7 +18,9 @@
 extern "C"
 {
 #endif
-    [[noreturn]] void AssertFailed(const uint8_t* file, uint32_t line, uint8_t shouldPrint)
+    [[noreturn]] void AssertFailed([[maybe_unused]] const uint8_t* file,
+                                   [[maybe_unused]] uint32_t       line,
+                                   uint8_t                         shouldPrint)
     {
 #if defined(NILAI_USE_LOGGER)
         if (shouldPrint == 1)
