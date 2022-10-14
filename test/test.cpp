@@ -1,7 +1,7 @@
 /**
- * @file    generic_stm32.h
+ * @file    test.cpp
  * @author  Samuel Martel
- * @date    2022-10-13
+ * @date    2022-10-14
  * @brief
  *
  * @copyright
@@ -14,30 +14,4 @@
  * You should have received a copy of the GNU General Public License along with this program. If
  * not, see <a href=https://www.gnu.org/licenses/>https://www.gnu.org/licenses/</a>.
  */
-
-#ifndef GUARD_NILAI_TEST_MOCK_GENERIC_STM32_H
-#define GUARD_NILAI_TEST_MOCK_GENERIC_STM32_H
-#include "defines/circular_buffer.h"
-
-typedef enum
-{
-    HAL_OK      = 0x00,
-    HAL_ERROR   = 0x01,
-    HAL_BUSY    = 0x02,
-    HAL_TIMEOUT = 0x03
-} HAL_StatusTypeDef;
-
-
-template<typename T>
-struct IoBuffer
-{
-    using type       = T;
-    using value_type = Nilai::CircularBuffer<type>;
-    value_type tx;
-    value_type rx;
-
-    IoBuffer() = default;
-    IoBuffer(size_t txLen, size_t rxLen) : tx(txLen), rx(rxLen) {}
-};
-
-#endif    // GUARD_NILAI_TEST_MOCK_GENERIC_STM32_H
+// Empty file, to be able to do add_executable in cmake

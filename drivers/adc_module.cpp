@@ -16,16 +16,17 @@
  */
 #include "adc_module.h"
 
-#if defined(NILAI_USE_ADC) && defined(HAL_ADC_MODULE_ENABLED)
+#if defined(NILAI_USE_ADC) && (defined(HAL_ADC_MODULE_ENABLED) || defined(NILAI_TEST))
 #    include "../defines/macros.h"
 #    include "../defines/system.h"
 #    include "../services/logger.h"
 #    include "../services/time.h"
 
-#    define ADC_DEBUG(msg, ...)   LOG_DEBUG("[%s]: " msg, m_label.c_str(), ##__VA_ARGS__)
-#    define ADC_INFO(msg, ...)    LOG_INFO("[%s]: " msg, m_label.c_str(), ##__VA_ARGS__)
-#    define ADC_WARNING(msg, ...) LOG_WARNING("[%s]: " msg, m_label.c_str(), ##__VA_ARGS__)
-#    define ADC_ERROR(msg, ...)   LOG_ERROR("[%s]: " msg, m_label.c_str(), ##__VA_ARGS__)
+#    define ADC_DEBUG(msg, ...) LOG_DEBUG("[%s]: " msg, m_label.c_str() __VA_OPT__(, ) __VA_ARGS__)
+#    define ADC_INFO(msg, ...)  LOG_INFO("[%s]: " msg, m_label.c_str() __VA_OPT__(, ) __VA_ARGS__)
+#    define ADC_WARNING(msg, ...)                                                                  \
+        LOG_WARNING("[%s]: " msg, m_label.c_str() __VA_OPT__(, ) __VA_ARGS__)
+#    define ADC_ERROR(msg, ...) LOG_ERROR("[%s]: " msg, m_label.c_str() __VA_OPT__(, ) __VA_ARGS__)
 
 #    if defined(NILAI_ADC_REGISTER_CALLBACKS)
 #        define REGISTER_CALLBACK(cbId, cb)                                                        \
@@ -80,22 +81,20 @@ static constexpr float ConvertToVolt(uint32_t val)
 AdcModule::AdcModule(ADC_HandleTypeDef* adc, std::string label)
 : m_adc(adc), m_label(std::move(label))
 {
-#    if !defined(NILAI_TEST)
     NILAI_ASSERT(adc != nullptr, "[%s]: ADC handle is null!", m_label.c_str());
     m_channelBuff.resize(adc->Init.NbrOfConversion);
 
     s_modules.emplace_back(m_adc->Instance, this);
 
-#        if defined(NILAI_ADC_REGISTER_CALLBACKS)
+#    if defined(NILAI_ADC_REGISTER_CALLBACKS)
     // Register conversion complete and error callbacks.
     REGISTER_CALLBACK(HAL_ADC_CONVERSION_COMPLETE_CB_ID, &AdcModule::AdcModuleConvCpltCallback);
     REGISTER_CALLBACK(HAL_ADC_ERROR_CB_ID, &AdcModule::AdcModuleErrorCallback);
-#        endif
+#    endif
 
     Start();
 
     ADC_INFO("Initialized");
-#    endif
 }
 
 AdcModule::~AdcModule()

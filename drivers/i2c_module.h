@@ -33,7 +33,7 @@
 #        include "../defines/internal_config.h"
 
 #        include NILAI_HAL_HEADER
-#        if defined(HAL_I2C_MODULE_ENABLED)
+#        if defined(HAL_I2C_MODULE_ENABLED) || defined(NILAI_TEST)
 #            include "../defines/macros.h"
 #            include "../defines/misc.h"
 #            include "../defines/module.h"

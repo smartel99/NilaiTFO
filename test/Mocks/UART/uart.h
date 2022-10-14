@@ -3,16 +3,17 @@
 
 #include "../DMA/dma.h"
 
-#include "../../../defines/internal_config.h"
-#include NILAI_HAL_HEADER
+#include "../generic_stm32.h"
 
 #include <cstddef>
 #include <cstdint>
 #include <map>
+#include <memory>
 #include <string>
 #include <vector>
 
 using HAL_UART_StateTypeDef = uint32_t;
+using UartIoBuffer          = IoBuffer<uint8_t>;
 
 
 #define HAL_UART_STATE_READY                                                                       \
@@ -24,9 +25,12 @@ struct UART_HandleTypeDef
     size_t                id;
     HAL_UART_StateTypeDef gState;
     DMA_HandleTypeDef*    hdmarx;
+
+    uint8_t* data;
+    size_t len;
 };
 
-extern std::map<size_t, IoBuffer*> s_uart_buffers;
+extern std::map<size_t, std::unique_ptr<UartIoBuffer>> s_uart_buffers;
 
 HAL_StatusTypeDef HAL_UART_DeInit(UART_HandleTypeDef*);
 HAL_StatusTypeDef HAL_UART_Receive_DMA(UART_HandleTypeDef*, uint8_t*, size_t);
@@ -37,5 +41,5 @@ HAL_StatusTypeDef HAL_UART_DMAStop(UART_HandleTypeDef*);
 void              Nilai_UART_Inject_DMA(UART_HandleTypeDef*, const uint8_t*, size_t);
 void              Nilai_UART_Inject_DMA(UART_HandleTypeDef*, const std::string&);
 void              Nilai_UART_Inject_DMA(UART_HandleTypeDef*, const std::vector<uint8_t>&);
-IoBuffer*         Nilai_UART_Get_Buffer(UART_HandleTypeDef*);
+UartIoBuffer&     Nilai_UART_Get_Buffer(UART_HandleTypeDef*);
 #endif

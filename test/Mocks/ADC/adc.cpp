@@ -15,5 +15,22 @@
  * not, see <a href=https://www.gnu.org/licenses/>https://www.gnu.org/licenses/</a>.
  */
 #include "adc.h"
-
-ADC_TypeDef ADC1;
+HAL_StatusTypeDef HAL_ADC_Start_DMA(ADC_HandleTypeDef* adc, uint32_t* data, uint32_t size)
+{
+    return HAL_BUSY;
+}
+HAL_StatusTypeDef HAL_ADC_Stop_DMA(ADC_HandleTypeDef* adc)
+{
+    return HAL_BUSY;
+}
+uint32_t HAL_ADC_GetState(ADC_HandleTypeDef* adc)
+{
+    return 0;
+}
+uint32_t HAL_ADC_GetError(ADC_HandleTypeDef* adc)
+{
+    return 0;
+}
+void NILAI_ADC_Init(ADC_HandleTypeDef* adc, size_t chCount)
+{
+}

@@ -11,7 +11,7 @@
 #ifndef GUARD_GPIO_H
 #define GUARD_GPIO_H
 
-#include "../../defines/internal_config.h"
+#include "../../../defines/internal_config.h"
 #include <cstdint>
 
 struct GPIO_TypeDef

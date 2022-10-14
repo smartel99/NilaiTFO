@@ -7,8 +7,6 @@ set(CMAKE_CXX_STANDARD 20)
 if (NILAI_TEST)
     message(STATUS "Building Nilai in Test Mode")
     add_definitions(-DNILAI_TEST)
-    add_definitions(-DHAL_ADC_MODULE_ENABLED)
-    add_definitions(-DHAL_I2C_MODULE_ENABLED)
     add_subdirectory(test)
 else ()
     message(STATUS "Building Nilai in Normal Mode")
@@ -119,6 +117,8 @@ set(SOURCES ${SOURCES} "${ROOT_DIR}/vendor/inih/ini.c")
 
 if (NILAI_TEST)
     include_directories(${ROOT_DIR}/test/Mocks)
+    include_directories(${ROOT_DIR}/test/Mocks/fatfs)
+    
     file(GLOB_RECURSE MOCK_SOURCES "${ROOT_DIR}/test/Mocks/*.*")
 
     if ("${NILAI_MCU}" STREQUAL "L452")

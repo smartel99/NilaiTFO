@@ -177,12 +177,12 @@ private:
 
 #            ifdef GTEST
 private:
-    FRIEND_TEST(Uart, TriageSof);
-    FRIEND_TEST(Uart, TriageEof);
-    FRIEND_TEST(Uart, TriageSofEof);
-    FRIEND_TEST(Uart, TriageElf);
-    FRIEND_TEST(Uart, TriageNone);
-    FRIEND_TEST(Uart, Sequence);
+    FRIEND_TEST(NilaiUart, TriageSof);
+    FRIEND_TEST(NilaiUart, TriageEof);
+    FRIEND_TEST(NilaiUart, TriageSofEof);
+    FRIEND_TEST(NilaiUart, TriageElf);
+    FRIEND_TEST(NilaiUart, TriageNone);
+    FRIEND_TEST(NilaiUart, Sequence);
 #            endif
 };
 }    // namespace Nilai::Drivers

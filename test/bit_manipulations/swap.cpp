@@ -11,9 +11,9 @@
 #include "defines/bit_manipulations.h"
 #include <gtest/gtest.h>
 
-using namespace cep;
+using namespace Nilai;
 
-TEST(BitManipulation, Swap_integrals)
+TEST(NilaiBitManipulation, Swap_integrals)
 {
     EXPECT_EQ(0x5A, swap<uint8_t>(0xA5));
     EXPECT_EQ(0x1122, swap<uint16_t>(0x2211));

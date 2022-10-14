@@ -11,9 +11,9 @@
 #include "defines/bit_manipulations.h"
 #include <gtest/gtest.h>
 
-using namespace cep;
+using namespace Nilai;
 
-TEST(BitManipulation, Combine)
+TEST(NilaiBitManipulation, Combine)
 {
     uint8_t a[8] = {0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88};
     // Results that are expected by each iteration of the test.
@@ -33,7 +33,7 @@ TEST(BitManipulation, Combine)
     }
 }
 
-TEST(BitManipulation, Combine_nullptr)
+TEST(NilaiBitManipulation, Combine_nullptr)
 {
     EXPECT_EQ(0, combine(nullptr, 8));
 }

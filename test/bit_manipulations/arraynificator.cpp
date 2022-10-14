@@ -11,9 +11,9 @@
 #include "defines/bit_manipulations.h"
 #include <gtest/gtest.h>
 
-using namespace cep;
+using namespace Nilai;
 
-TEST(BitManipulation, Arraynificator)
+TEST(NilaiBitManipulation, Arraynificator)
 {
     uint64_t v  = 0x0102030405060708;
     uint64_t v2 = 0;
@@ -22,7 +22,7 @@ TEST(BitManipulation, Arraynificator)
     EXPECT_EQ(v, v2);
 }
 
-TEST(BitManipulation, Arraynificator_nullptr)
+TEST(NilaiBitManipulation, Arraynificator_nullptr)
 {
     // Nullptr with size > 0
     EXPECT_NO_THROW(arraynificator(nullptr, 8, nullptr));

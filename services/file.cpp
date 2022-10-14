@@ -7,7 +7,7 @@
  */
 
 
-#if defined(NILAI_USE_FILESYSTEM) && !defined(NILAI_TEST)
+#if defined(NILAI_USE_FILESYSTEM)
 #    include "file.h"
 #    include "filesystem.h"
 
@@ -88,8 +88,8 @@ Result File::Read(void* outData, size_t lenDesired, size_t* lenRead)
 {
     ASSERT_FILE_IS_OK();
     NILAI_ASSERT(outData != nullptr, "Pointer is null!");
-    size_t br = 0;
-    auto   r  = static_cast<Result>(f_read(&m_file, outData, lenDesired, &br));
+    UINT br = 0;
+    auto r  = static_cast<Result>(f_read(&m_file, outData, lenDesired, &br));
 
     if (lenRead != nullptr)
     {
@@ -103,7 +103,7 @@ Result File::Write(const void* data, size_t dataLen, size_t* dataWritten)
     ASSERT_FILE_IS_OK();
     NILAI_ASSERT(data != nullptr, "Pointer is null!");
 
-    size_t bw = 0;
+    UINT bw = 0;
 
     Result r = static_cast<Result>(f_write(&m_file, data, dataLen, &bw));
 
@@ -161,36 +161,31 @@ Result File::Sync()
 #    endif
 }
 
-Result File::Forward(const std::function<size_t(const uint8_t*, size_t)>& func,
-                     size_t                                               cntToFwd,
-                     size_t*                                              forwarded)
+Result File::Forward([[maybe_unused]] const std::function<size_t(const uint8_t*, size_t)>& func,
+                     [[maybe_unused]] size_t                                               cntToFwd,
+                     [[maybe_unused]] size_t* forwarded)
 {
 #    if _USE_FORWARD == 1
     ASSERT_FILE_IS_OK();
 #        error Not implemented!
 #    else
-    UNUSED(func);
-    UNUSED(cntToFwd);
-    UNUSED(forwarded);
     NILAI_ASSERT(false, "This function is not enabled");
     return Result::Ok;
 #    endif
 }
 
-Result File::Expand(fsize_t newSize, AllocModes mode)
+Result File::Expand([[maybe_unused]] fsize_t newSize, [[maybe_unused]] AllocModes mode)
 {
 #    if _USE_EXPAND == 1 && _FS_READONLY == 0
     ASSERT_FILE_IS_OK();
 #        error Not implemented!
 #    else
-    UNUSED(newSize);
-    UNUSED(mode);
     NILAI_ASSERT(false, "This function is not enabled");
     return Result::Ok;
 #    endif
 }
 
-Result File::GetString(std::string& outStr, size_t maxLen)
+Result File::GetString([[maybe_unused]] std::string& outStr, [[maybe_unused]] size_t maxLen)
 {
 #    if _USE_STRFUNC >= 1
     ASSERT_FILE_IS_OK();
@@ -213,14 +208,12 @@ Result File::GetString(std::string& outStr, size_t maxLen)
 
     return m_status;
 #    else
-    UNUSED(outStr);
-    UNUSED(maxLen);
     NILAI_ASSERT(false, "This function is not enabled");
     return Result::Ok;
 #    endif
 }
 
-Result File::WriteChar(uint8_t c)
+Result File::WriteChar([[maybe_unused]] uint8_t c)
 {
 #    if _FS_READONLY == 0 && _USE_STRFUNC >= 1
     ASSERT_FILE_IS_OK();
@@ -235,13 +228,12 @@ Result File::WriteChar(uint8_t c)
     }
     return m_status;
 #    else
-    UNUSED(c);
     NILAI_ASSERT(false, "This function is not enabled");
     return Result::Ok;
 #    endif
 }
 
-Result File::WriteString(const std::string& str)
+Result File::WriteString([[maybe_unused]] const std::string& str)
 {
 #    if _FS_READONLY == 0 && _USE_STRFUNC >= 1
     ASSERT_FILE_IS_OK();
@@ -257,7 +249,6 @@ Result File::WriteString(const std::string& str)
     return m_status;
 
 #    else
-    UNUSED(str);
     NILAI_ASSERT(false, "This function is not enabled");
     return Result::Ok;
 #    endif

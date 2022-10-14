@@ -1,8 +1,7 @@
-#pragma once
+#ifndef NILAI_TEST_MOCK_STM32F4XX_HAL_H
+#define NILAI_TEST_MOCK_STM32F4XX_HAL_H
 
 #include "stm32f4xx_hal_def.h"
-
-#include "io_buffer.h"
 
 #include "../ADC/adc.h"
 #include "../CAN/can.h"
@@ -15,3 +14,5 @@
 uint32_t HAL_GetTick(void);
 void     HAL_SetTick(uint32_t tick = 0);
 void     HAL_IncTick(uint32_t tick = 1);
+
+#endif

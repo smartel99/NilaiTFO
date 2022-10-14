@@ -6,20 +6,20 @@
  *******************************************************************************
  */
 
-#ifndef NILAI_FILE_H_
-#define NILAI_FILE_H_
+#ifndef NILAI_SERVICES_FILESYSTEM_FILE_H_
+#define NILAI_SERVICES_FILESYSTEM_FILE_H_
 
 /***********************************************/
 /* Includes */
 #if defined(NILAI_USE_FILESYSTEM)
 #    include "../defines/filesystem/error_codes.h"
+#    include "../defines/macros.h"
 
-#    if !defined(NILAI_TEST)
-#        include "ff.h"
+#    include "ff.h"
 
-#        include <functional>
-#        include <string>
-#        include <string_view>
+#    include <functional>
+#    include <string>
+#    include <string_view>
 
 /**
  * @addtogroup Nilai
@@ -122,16 +122,16 @@ public:
     Result WriteString(const std::string& str);
 
     template<typename... Ts>
-    Result WriteFmtString(const char* fmt, Ts... args)
+    Result WriteFmtString([[maybe_unused]] const char* fmt, [[maybe_unused]] Ts... args)
     {
-#        if _FS_READONLY == 0 && _USE_STRFUNC >= 1
-#            if defined(DEBUG)
+#    if _FS_READONLY == 0 && _USE_STRFUNC >= 1
+#        if defined(DEBUG)
         if (!m_isOpen)
         {
             // File must be open and valid!
             return Result::NoFile;
         }
-#            endif
+#        endif
         if (f_printf(&m_file, fmt, args...) <= 0)
         {
             m_status = static_cast<Result>(f_error(&m_file));
@@ -143,10 +143,10 @@ public:
 
         return m_status;
 
-#        else
+#    else
         NILAI_ASSERT(false, "This function is not enabled");
-        return 0;
-#        endif
+        return Result::Ok;
+#    endif
     }
 
     fsize_t              Tell();
@@ -160,8 +160,8 @@ public:
 
 private:
     std::string m_path;
-    FileModes   m_mode = FileModes::Read | FileModes::OpenExisting;
-    file_t      m_file;
+    FileModes   m_mode   = FileModes::Read | FileModes::OpenExisting;
+    file_t      m_file   = {};
     bool        m_isOpen = false;
     Result      m_status = {};
 };
@@ -170,7 +170,6 @@ private:
 //!@}
 //!@}
 //!@}
-#    endif
 #endif
 /* END OF FILE */
-#endif /* NILAI_FILE_H_ */
+#endif /* NILAI_SERVICES_FILESYSTEM_FILE_H_ */

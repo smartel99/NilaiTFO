@@ -104,7 +104,7 @@ constexpr T swap(T input)
  *
  * @retval  uint64_t: combined value
  */
-uint64_t combine(const uint8_t* array, uint8_t length)
+[[maybe_unused]] uint64_t combine(const uint8_t* array, uint8_t length)
 {
     if (array == nullptr)
     {

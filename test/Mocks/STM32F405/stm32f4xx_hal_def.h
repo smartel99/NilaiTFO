@@ -1,9 +1,4 @@
-#pragma once
+#ifndef NILAI_TEST_MOCK_STM32F4XX_HAL_DEF_H
+#define NILAI_TEST_MOCK_STM32F4XX_HAL_DEF_H
 
-typedef enum
-{
-  HAL_OK       = 0x00,
-  HAL_ERROR    = 0x01,
-  HAL_BUSY     = 0x02,
-  HAL_TIMEOUT  = 0x03
-} HAL_StatusTypeDef;
+#endif

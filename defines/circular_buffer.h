@@ -230,8 +230,8 @@ public:
      * array access operator for writing
      * Note: does not update cursors position nor array size counter;
      */
-    constexpr reference       operator[](signed_size_type i) { return m_buff[Idx(i)]; }
-    constexpr const_reference operator[](signed_size_type i) const { return m_buff[Idx(i)]; }
+    constexpr reference       operator[](size_type i) { return m_buff[Idx(i)]; }
+    constexpr const_reference operator[](size_type i) const { return m_buff[Idx(i)]; }
 
 private:
     std::vector<T> m_buff = {};
@@ -246,11 +246,7 @@ private:
     [[nodiscard]] constexpr size_type Next(size_type origin) const
     {
         size_type r = origin + 1;
-        while (r >= m_buff.capacity())
-        {
-            r -= m_buff.capacity();
-        }
-        return r;
+        return r % m_buff.capacity();
     }
 
     [[nodiscard]] constexpr size_type Idx(size_type idx) const

@@ -1,14 +1,15 @@
 #include <gtest/gtest.h>
 #ifndef HAL_UART_MODULE_ENABLED
-#define HAL_UART_MODULE_ENABLED
+#    define HAL_UART_MODULE_ENABLED
 #endif
-#include "NilaiTFOConfig.h"
-#include "Mocks/UART/uart.h"
 #include "drivers/uart_module.h"
+#include "Mocks/UART/uart.h"
 
-namespace Nilai::Drivers {
+namespace Nilai::Drivers
+{
 
-TEST(Uart, TriageSof) {
+TEST(NilaiUart, TriageSof)
+{
     UART_HandleTypeDef handle;
     Nilai_UART_Init(&handle, 512, 512);
     UartModule module("test", &handle, 512, 512);
@@ -22,18 +23,19 @@ TEST(Uart, TriageSof) {
     ASSERT_EQ(module.AvailableFrames(), 2);
     ASSERT_EQ(module.AvailableBytes(), 3);
 
-    Uart::Frame frame = module.Receive();
+    Uart::Frame frame     = module.Receive();
     std::string frame_str = std::string(frame.data.begin(), frame.data.end());
     ASSERT_STREQ(frame_str.c_str(), "msg");
     ASSERT_EQ(module.AvailableFrames(), 1);
 
-    frame = module.Receive();
+    frame     = module.Receive();
     frame_str = std::string(frame.data.begin(), frame.data.end());
     ASSERT_STREQ(frame_str.c_str(), "smg");
     ASSERT_EQ(module.AvailableFrames(), 0);
 }
 
-TEST(Uart, TriageEof) {
+TEST(NilaiUart, TriageEof)
+{
     UART_HandleTypeDef handle;
     Nilai_UART_Init(&handle, 512, 512);
     UartModule module("test", &handle, 512, 512);
@@ -47,23 +49,24 @@ TEST(Uart, TriageEof) {
     ASSERT_EQ(module.AvailableFrames(), 3);
     ASSERT_EQ(module.AvailableBytes(), 0);
 
-    Uart::Frame frame = module.Receive();
+    Uart::Frame frame     = module.Receive();
     std::string frame_str = std::string(frame.data.begin(), frame.data.end());
     ASSERT_STREQ(frame_str.c_str(), "Hello World!");
     ASSERT_EQ(module.AvailableFrames(), 2);
 
-    frame = module.Receive();
+    frame     = module.Receive();
     frame_str = std::string(frame.data.begin(), frame.data.end());
     ASSERT_STREQ(frame_str.c_str(), "msg");
     ASSERT_EQ(module.AvailableFrames(), 1);
 
-    frame = module.Receive();
+    frame     = module.Receive();
     frame_str = std::string(frame.data.begin(), frame.data.end());
     ASSERT_STREQ(frame_str.c_str(), "smg");
     ASSERT_EQ(module.AvailableFrames(), 0);
 }
 
-TEST(Uart, TriageLen) {
+TEST(NilaiUart, TriageLen)
+{
     UART_HandleTypeDef handle;
     Nilai_UART_Init(&handle, 512, 512);
     UartModule module("test", &handle, 512, 512);
@@ -81,24 +84,24 @@ TEST(Uart, TriageLen) {
     ASSERT_EQ(module.AvailableFrames(), 3);
     ASSERT_EQ(module.AvailableBytes(), 1);
 
-    Uart::Frame frame = module.Receive();
+    Uart::Frame frame     = module.Receive();
     std::string frame_str = std::string(frame.data.begin(), frame.data.end());
     ASSERT_STREQ(frame_str.c_str(), "1234567890");
     ASSERT_EQ(module.AvailableFrames(), 2);
 
-    frame = module.Receive();
+    frame     = module.Receive();
     frame_str = std::string(frame.data.begin(), frame.data.end());
     ASSERT_STREQ(frame_str.c_str(), "1234567890");
     ASSERT_EQ(module.AvailableFrames(), 1);
 
-    frame = module.Receive();
+    frame     = module.Receive();
     frame_str = std::string(frame.data.begin(), frame.data.end());
     ASSERT_STREQ(frame_str.c_str(), "1234567890");
     ASSERT_EQ(module.AvailableFrames(), 0);
-
 }
 
-TEST(Uart, TriageNone) {
+TEST(NilaiUart, TriageNone)
+{
     UART_HandleTypeDef handle;
     Nilai_UART_Init(&handle, 512, 512);
     UartModule module("test", &handle, 512, 512);
@@ -120,7 +123,8 @@ TEST(Uart, TriageNone) {
     ASSERT_EQ(module.AvailableBytes(), 10);
 }
 
-TEST(Uart, Overlap) {
+TEST(NilaiUart, Overlap)
+{
     UART_HandleTypeDef handle;
     Nilai_UART_Init(&handle, 10, 10);
     UartModule module("test", &handle, 10, 10);
@@ -147,29 +151,31 @@ TEST(Uart, Overlap) {
     // Fully fill in one go
     Nilai_UART_Inject_DMA(&handle, "1234567890");
     module.Run();
-    ASSERT_NE(module.AvailableFrames(), 3); // What we expect
-    ASSERT_EQ(module.AvailableFrames(), 2); // What we have
+    ASSERT_NE(module.AvailableFrames(), 3);    // What we expect
+    ASSERT_EQ(module.AvailableFrames(), 2);    // What we have
 
     // // Overflow
     Nilai_UART_Inject_DMA(&handle, "1234567890120");
     module.Run();
-    ASSERT_NE(module.AvailableFrames(), 4); // What we expect
-    ASSERT_EQ(module.AvailableFrames(), 2); // What we have
+    ASSERT_NE(module.AvailableFrames(), 4);    // What we expect
+    ASSERT_EQ(module.AvailableFrames(), 2);    // What we have
 }
 
-TEST(Uart, Sequence) {
+TEST(NilaiUart, Sequence)
+{
     UART_HandleTypeDef handle;
     Nilai_UART_Init(&handle, 50, 50);
     UartModule module("test", &handle, 50, 50);
     module.SetStartOfFrameSequence("[");
     module.SetEndOfFrameSequence("]");
 
-    for(size_t i = 0; i < 5; ++i) {
+    for (size_t i = 0; i < 5; ++i)
+    {
         Nilai_UART_Inject_DMA(&handle, "gibberish[Ceci est une trame]more gibberish");
         module.Run();
         ASSERT_EQ(module.AvailableFrames(), 1);
         Uart::Frame frame = module.Receive();
-        std::string str = std::string(frame.data.begin(), frame.data.end());
+        std::string str   = std::string(frame.data.begin(), frame.data.end());
         ASSERT_STREQ(str.c_str(), "Ceci est une trame");
         std::vector<uint8_t> result(module.m_rxCirc.Size());
         module.m_rxCirc.Peek(result.data());
@@ -177,4 +183,4 @@ TEST(Uart, Sequence) {
         ASSERT_STREQ(str.c_str(), "more gibberish");
     }
 }
-}
+}    // namespace Nilai::Drivers

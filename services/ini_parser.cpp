@@ -14,11 +14,11 @@
  * You should have received a copy of the GNU General Public License along with this program. If
  * not, see <a href=https://www.gnu.org/licenses/>https://www.gnu.org/licenses/</a>.
  */
-#include "ini_parser.h"
+#if defined(NILAI_USE_INI_PARSER)
+#    include "ini_parser.h"
 
-#include <utility>
+#    include <utility>
 
-#if defined(NILAI_USE_INI_PARSER) && !defined(NILAI_TEST)
 #    include "../vendor/inih/ini.h"
 
 #    include "filesystem.h"

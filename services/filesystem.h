@@ -14,14 +14,8 @@
 #if defined(NILAI_USE_FILESYSTEM)
 #    include "../defines/filesystem/error_codes.h"
 #    include "../defines/pin.h"
-#    if !defined(NILAI_TEST)
-#        include "ff.h"
-#    else
-using DWORD   = size_t;
-using FATFS   = void;
-using DIR     = void;
-using FILINFO = void;
-#    endif
+#    include "ff.h"
+
 #    include "file.h"
 
 #    include <string>

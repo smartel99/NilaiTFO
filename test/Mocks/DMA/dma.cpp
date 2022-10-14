@@ -1,21 +1,29 @@
 #include "dma.h"
 
-void __NILAI_DMA_SET_CAPACITY(DMA_HandleTypeDef* handle, size_t capacity) {
+namespace Nilai::Test::Internal
+{
+void DmaSetCapacity(DMA_HandleTypeDef* handle, size_t capacity)
+{
     handle->capacity = capacity;
-    handle->counter = capacity;
+    handle->counter  = static_cast<int>(capacity);
 }
 
-uint32_t __HAL_DMA_GET_COUNTER(DMA_HandleTypeDef* handle) {
+uint32_t DmaGetCounter(DMA_HandleTypeDef* handle)
+{
     return handle->counter;
 }
 
-void __NILAI_DMA_SET_COUNTER(DMA_HandleTypeDef* handle, size_t count) {
-    handle->counter = count;
+void DmaSetCounter(DMA_HandleTypeDef* handle, size_t count)
+{
+    handle->counter = static_cast<int>(count);
 }
 
-void __NILAI_DMA_DEC_COUNTER(DMA_HandleTypeDef* handle, size_t count) {
-    handle->counter -= count;
-    while(handle->counter <= 0) {
-        handle->counter += handle->capacity;
+void DmaDecCounter(DMA_HandleTypeDef* handle, size_t count)
+{
+    handle->counter -= static_cast<int>(count);
+    while (handle->counter <= 0)
+    {
+        handle->counter += static_cast<int>(handle->capacity);
     }
 }
+}    // namespace Nilai::Test::Internal

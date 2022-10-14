@@ -41,86 +41,62 @@ namespace Nilai::Interfaces
 template<typename T>
 consteval bool CommandInterfaceDeviceHasRegisterCommandInterface()
 {
-    if constexpr (requires(T t) {
-                      {
-                          t.RegisterCommandInterface([](T&, const std::vector<uint8_t>&) {})
-                          } -> std::same_as<bool>;
-                  })
-    {
-        return true;
-    }
-    return false;
+    return requires(T t) {
+               {
+                   t.RegisterCommandInterface([](T&, const std::vector<uint8_t>&) {})
+                   } -> std::same_as<bool>;
+           };
 };
 
 
 template<typename T>
 consteval bool CommandInterfaceDeviceHasWriteByte()
 {
-    if constexpr (requires(T t) {
-                      {
-                          t.WriteByte(static_cast<uint8_t>(0))
-                          } -> std::same_as<bool>;
-                  })
-    {
-        return true;
-    }
-    return false;
+    return requires(T t) {
+               {
+                   t.WriteByte(static_cast<uint8_t>(0))
+                   } -> std::same_as<bool>;
+           };
 }
 
 template<typename T>
 consteval bool CommandInterfaceDeviceHasWriteData()
 {
-    if constexpr (requires(T t) {
-                      {
-                          t.WriteData(std::vector<uint8_t> {})
-                          } -> std::same_as<bool>;
-                  })
-    {
-        return true;
-    }
-    return false;
+    return requires(T t) {
+               {
+                   t.WriteData(std::vector<uint8_t> {})
+                   } -> std::same_as<bool>;
+           };
 };
 
 template<typename T>
 consteval bool CommandInterfaceDeviceHasSendSoF()
 {
-    if constexpr (requires(T t) {
-                      {
-                          t.SendSoF()
-                          } -> std::same_as<bool>;
-                  })
-    {
-        return true;
-    }
-    return false;
+    return requires(T t) {
+               {
+                   t.SendSoF()
+                   } -> std::same_as<bool>;
+           };
 }
 
 template<typename T>
 consteval bool CommandInterfaceDeviceHasSendEoF()
 {
-    if constexpr (requires(T t) {
-                      {
-                          t.SendEoF()
-                          } -> std::same_as<bool>;
-                  })
-    {
-        return true;
-    }
-    return false;
+    return requires(T t) {
+               {
+                   t.SendEoF()
+                   } -> std::same_as<bool>;
+           };
 }
 
 template<typename T>
 consteval bool CommandInterfaceDeviceHasWaitForResponse()
 {
-    if constexpr (requires(T t) {
-                      {
-                          t.WaitForResponse(static_cast<size_t>(0))
-                          } -> std::same_as<std::vector<uint8_t>>;
-                  })
-    {
-        return true;
-    }
-    return false;
+    return requires(T t) {
+               {
+                   t.WaitForResponse(static_cast<size_t>(0))
+                   } -> std::same_as<std::vector<uint8_t>>;
+           };
 }
 
 template<typename T>

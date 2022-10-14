@@ -15,7 +15,7 @@
 using namespace Nilai;
 
 
-TEST(Pin, Set_Single)
+TEST(NilaiPin, Set_Single)
 {
     Pin p = {&GPIOA, 1};
     p.Set(true);
@@ -26,7 +26,7 @@ TEST(Pin, Set_Single)
     EXPECT_EQ(0x00010000, GPIOA.NILAI_GPIO_BSRR_REG);
 }
 
-TEST(Pin, Set_Multiple)
+TEST(NilaiPin, Set_Multiple)
 {
     Pin p = {&GPIOA, 0xAAAA};
     p.Set(true);
@@ -35,7 +35,7 @@ TEST(Pin, Set_Multiple)
     EXPECT_EQ(0xAAAA0000, GPIOA.NILAI_GPIO_BSRR_REG);
 }
 
-TEST(Pin, Get_Single)
+TEST(NilaiPin, Get_Single)
 {
     Pin p = {&GPIOA, 1};
     GPIOA.Refresh();
@@ -46,7 +46,7 @@ TEST(Pin, Get_Single)
     EXPECT_TRUE(p.Get());
 }
 
-TEST(Pin, Compare_eq)
+TEST(NilaiPin, Compare_eq)
 {
     Pin a  = {&GPIOA, 1};
     Pin a2 = {&GPIOA, 1};
@@ -54,7 +54,7 @@ TEST(Pin, Compare_eq)
     EXPECT_TRUE(a == a2) << "Expected pin a to be identical to pin a2";
 }
 
-TEST(Pin, Compare_neq)
+TEST(NilaiPin, Compare_neq)
 {
     // Different port, same pin.
     Pin a = {&GPIOA, 1};

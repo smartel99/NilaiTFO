@@ -21,7 +21,7 @@
 
 #    include "../defines/internal_config.h"
 #    include NILAI_HAL_HEADER
-#    if defined(HAL_ADC_MODULE_ENABLED)
+#    if defined(HAL_ADC_MODULE_ENABLED) || defined(NILAI_TEST)
 #        include "../defines/module.h"
 
 #        include <functional>
