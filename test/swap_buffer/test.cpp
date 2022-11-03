@@ -1,7 +1,7 @@
 /**
- * @file    generic_stm32.h
+ * @file    test.cpp
  * @author  Samuel Martel
- * @date    2022-10-13
+ * @date    2022-10-19
  * @brief
  *
  * @copyright
@@ -14,31 +14,17 @@
  * You should have received a copy of the GNU General Public License along with this program. If
  * not, see <a href=https://www.gnu.org/licenses/>https://www.gnu.org/licenses/</a>.
  */
+#include "defines/swap_buffer.h"
+#include <gtest/gtest.h>
 
-#ifndef GUARD_NILAI_TEST_MOCK_GENERIC_STM32_H
-#define GUARD_NILAI_TEST_MOCK_GENERIC_STM32_H
-#include "defines/circular_buffer.h"
+#include <vector>
 
-typedef enum
+using namespace Nilai;
+
+TEST(NilaiSwapBuffer, DefaultInit)
 {
-    HAL_OK      = 0x00,
-    HAL_ERROR   = 0x01,
-    HAL_BUSY    = 0x02,
-    HAL_TIMEOUT = 0x03
-} HAL_StatusTypeDef;
+    auto swap = MakeSwap<std::vector<int>>();
+    swap->push_back(1);
 
-
-template<typename T, size_t N>
-struct IoBuffer
-{
-    using type                     = T;
-    static constexpr size_t s_size = N;
-    using value_type               = Nilai::CircularBuffer<type, s_size>;
-
-    value_type tx;
-    value_type rx;
-
-    IoBuffer() = default;
-};
-
-#endif    // GUARD_NILAI_TEST_MOCK_GENERIC_STM32_H
+    //    EXPECT_EQ()
+}

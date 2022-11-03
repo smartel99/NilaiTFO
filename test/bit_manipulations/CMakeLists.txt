@@ -1,10 +1,12 @@
 # Bit manipulation
+
 set(NILAI_TEST_SOURCES
         ${CMAKE_CURRENT_SOURCE_DIR}/swap.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/combine.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/arraynificator.cpp)
 
 set(NILAI_TEST_NAME nilai_bit_manipulation_test)
+message(STATUS "Building ${NILAI_TEST_NAME}")
 
 if (DEFINED NILAI_SINGLE_TEST_EXE)
     add_custom_target(${NILAI_TEST_NAME}

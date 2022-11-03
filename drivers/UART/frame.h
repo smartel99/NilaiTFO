@@ -10,23 +10,26 @@ namespace Nilai::Drivers::Uart
 
 struct Frame
 {
-    std::vector<uint8_t> data;
-    size_t               len       = 0;
-    uint32_t             timestamp = 0;
+    std::vector<uint8_t> Data;
+    size_t               Len       = 0;
+    uint32_t             Timestamp = 0;
 
     Frame() = default;
 
 
-    Frame(const std::vector<uint8_t>& d, uint32_t t) : data(d), len(data.size()), timestamp(t) {}
+    Frame(std::vector<uint8_t> data, uint32_t timestamp)
+    : Data(std::move(data)), Len(Data.size()), Timestamp(timestamp)
+    {
+    }
 
     [[nodiscard]] std::string ToStr() const
     {
-        return std::string {reinterpret_cast<const char*>(data.data())};
+        return std::string {reinterpret_cast<const char*>(Data.data())};
     }
 
     bool operator==(const std::string& s) const
     {
-        return (std::string {reinterpret_cast<const char*>(data.data()), len} == s);
+        return (std::string {reinterpret_cast<const char*>(Data.data()), Len} == s);
     }
 
     bool operator!=(const std::string& s) const { return !(*this == s); }

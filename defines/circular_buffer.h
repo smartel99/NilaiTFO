@@ -17,8 +17,9 @@
 #ifndef NILAI_DEFINES_CIRCULAR_BUFFER_H
 #define NILAI_DEFINES_CIRCULAR_BUFFER_H
 
+#include <array>
 #include <cstdint>
-#include <type_traits>
+#include <optional>
 #include <vector>
 
 /**
@@ -28,237 +29,245 @@
 
 namespace Nilai
 {
-template<typename T>
+template<typename T, size_t N>
 class CircularBuffer
 {
+    static constexpr size_t s_size = N;    // Need 1 extra space so that
+                                           // 1-past-end is not begin.
 public:
-    using value_type       = typename std::vector<T>::value_type;
-    using size_type        = typename std::vector<T>::size_type;
-    using signed_size_type = std::make_signed_t<size_type>;
-    using reference        = typename std::vector<T>::reference;
-    using const_reference  = typename std::vector<T>::const_reference;
-    using pointer          = typename std::vector<T>::pointer;
-    using const_pointer    = typename std::vector<T>::const_pointer;
+    using array_t = std::array<T, s_size>;
 
-public:
-    CircularBuffer() noexcept = default;
+    class iterator;
 
+    constexpr CircularBuffer() {}
 
-    explicit CircularBuffer(size_t len, const T& v = {}) : m_buff(len, v), m_size(0) {}
-
-    CircularBuffer(std::initializer_list<T> args) : m_buff {args}, m_size(args.size()) {}
-
-    /**
-     * Return the first element of the buffer
-     */
-    constexpr reference       Front() { return m_buff[m_read]; }
-    constexpr const_reference Front() const { return m_buff[m_read]; }
-
-    /**
-     * Increment the read pointer by one, effectively removing the first element
-     * of the buffer If the buffer size is 0, does nothing
-     */
-    constexpr void Pop()
+    template<typename... Args, size_t ArgSize = sizeof...(Args) + 1>
+    constexpr explicit CircularBuffer(T&& i, Args&&... args)
+        requires(ArgSize <= N)
+    : m_buff {i, args...}, m_head(NextIdx(0, ArgSize)), m_full(ArgSize == m_capacity)
     {
-        if (m_size > 0)
+    }
+
+    template<typename... Args>
+    constexpr void Emplace(Args&&... args) noexcept
+        requires std::constructible_from<T, Args...>
+    {
+        Push(T {std::forward<Args>(args)...});
+    }
+
+    constexpr void Push(const T& t) noexcept
+    {
+        m_buff[m_head] = t;
+        if (m_full)
         {
-            m_read = Next(m_read);
-            --m_size;
+            // Buffer full, rotate the tail.
+            m_tail = (m_tail + 1) % m_capacity;
+        }
+        m_head = (m_head + 1) % m_capacity;
+
+        m_full = m_head == m_tail;
+    }
+
+    constexpr void PushMany(const T* items, size_t count) noexcept
+    {
+        for (size_t i = 0; i < count; i++)
+        {
+            Push(items[i]);
         }
     }
 
-    /**
-     * Increment the read pointer by a number n
-     * effectively removing the n first elements of the buffer
-     */
-    constexpr void Pop(size_type n)
+    template<typename I>
+    constexpr void PushMany(const std::vector<I>& items) noexcept
     {
-        for (size_type i = 0; (i < n) && (m_size >= 0); i++)
+        return PushManyImpl(items);
+    }
+
+    template<typename I>
+    constexpr void PushMany(const std::initializer_list<I>& items) noexcept
+    {
+        return PushManyImpl(items);
+    }
+
+    template<typename I, size_t S>
+    constexpr void PushMany(const std::array<I, S>& items) noexcept
+    {
+        return PushManyImpl(items);
+    }
+
+    constexpr std::optional<T> Peek() noexcept
+    {
+        if (Empty())
         {
-            Pop();
-        }
-    }
-
-    /**
-     * Insert an element at the end of the buffer
-     * If the buffer is full, does nothing
-     * @param t the element to insert
-     */
-    constexpr size_type Push(const_reference t)
-    {
-        if (m_size < m_buff.size())
-        {
-            m_buff[m_write] = t;
-            m_write         = Next(m_write);
-            ++m_size;
-            return 1;
-        }
-        return 0;
-    }
-
-    constexpr size_type Push(const_pointer t, size_type len)
-    {
-        size_type pushed = 0;
-        for (size_type i = 0; i < len; ++i)
-        {
-            pushed += Push(t[i]);
-        }
-        return pushed;
-    }
-
-    [[nodiscard]] constexpr size_type Push(const std::vector<value_type>& buff)
-    {
-        return Push(buff.data(), buff.size());
-    }
-
-    [[nodiscard]] constexpr const_reference Read()
-    {
-        reference obj = m_buff[m_read];
-        m_read        = Next(m_read);
-        return obj;
-    }
-
-    constexpr size_type Read(pointer buff, size_type len = 0)
-    {
-        len = std::clamp(len, static_cast<size_type>(0), m_size);
-
-        for (size_type i = 0; i < len; ++i)
-        {
-            buff[i] = this->operator[](i);
-        }
-        m_read = Next(m_read + len - 1);
-        m_size -= len;
-        return len;
-    }
-
-    [[nodiscard]] constexpr const_reference Peek() const noexcept
-    {
-        const_reference obj = m_buff[m_read];
-        return obj;
-    }
-
-    constexpr size_type Peek(pointer buff, size_type len = 0)
-    {
-        len = std::clamp(len, static_cast<size_type>(0), m_size);
-
-        for (size_type i = 0; i < len; ++i)
-        {
-            buff[i] = this->operator[](i);
+            return std::nullopt;
         }
 
-        return len;
+        return m_buff[m_tail];
     }
 
-    constexpr size_type DmaCounter(signed_size_type counter)
+    constexpr std::vector<T> PeekMany(size_t count) noexcept
     {
-        size_type capacity = m_buff.capacity();
-        // DMA counter is number of bytes remaining
-        // We want the number of bytes written
-        counter = capacity - counter;
+        count = std::min(count, Size());    // Clip count to size of buffer.
+        std::vector<T> elems;
+        elems.reserve(count);
 
-        if (static_cast<signed_size_type>(counter) < m_lastDmaCounter)
+        for (size_t i = 0; i < count; i++)
         {
-            m_lastDmaCounter -= capacity;
-        }
-        signed_size_type diff = counter - m_lastDmaCounter;
-
-        m_write += diff;
-        m_size += diff;
-
-        // Wrap if needed
-        while (m_write >= static_cast<signed_size_type>(capacity))
-        {
-            m_write -= capacity;
+            elems.push_back(m_buff[Idx(i)]);
         }
 
-        // Check overload
-        if (m_size > capacity)
-        {
-            m_read = Next(m_read + m_size - capacity - 1);
-            m_size = capacity;
-        }
-        m_lastDmaCounter = static_cast<int32_t>(counter);
-
-        return diff;
+        return elems;
     }
 
-    [[nodiscard]] constexpr signed_size_type GetWritePos() const noexcept { return m_write; }
-
-    [[nodiscard]] constexpr signed_size_type GetReadPos() const noexcept { return m_read; }
-
-    constexpr void SetReadPos(size_type readPos)
+    constexpr std::optional<T> Pop() noexcept
     {
-        while (readPos > m_buff.capacity())
+        // Read data then advance the tail (+1 free slot).
+        auto val = Peek();
+        if (val)    // Only advance if value is valid.
         {
-            readPos -= m_buff.capacity();
+            m_tail = (m_tail + 1) % m_capacity;
+            m_full = false;
         }
-        m_read = static_cast<signed_size_type>(readPos);
-        m_size = m_write - m_read;
-        if (m_size < 0)
-        {
-            m_size += m_buff.capacity();
-        }
+        return val;
     }
 
-    /**
-     * Return the number of elements inserted in the buffer
-     * Does not return the max size of the buffer
-     * Elements inserted using operator [] are ignored
-     */
-    [[nodiscard]] constexpr size_type Size() const noexcept { return m_size; }
-
-    [[nodiscard]] constexpr size_type Capacity() const noexcept { return m_buff.capacity(); }
-
-    /**
-     * Reset the cursor and size of the buffer to 0
-     * Effectively clearing the buffer
-     */
-    constexpr void Clear() noexcept
+    constexpr std::vector<T> PopMany(size_t count) noexcept
     {
-        m_size  = 0;
-        m_read  = 0;
-        m_write = 0;
+        count = std::min(count, Size());
+        std::vector<T> elems;
+        elems.reserve(count);
+
+        for (size_t i = 0; i < count; i++)
+        {
+            auto v = Pop();
+            if (!v)
+            {
+                return elems;
+            }
+            elems.push_back(*v);
+        }
+
+        return elems;
     }
 
-    /**
-     * Access to the underlying array
-     */
-    constexpr pointer       Data() noexcept { return m_buff.data(); }
-    constexpr const_pointer Data() const noexcept { return m_buff.data(); }
+    constexpr void Reset() noexcept
+    {
+        m_head = m_tail;
+        m_full = false;
+    }
 
-    /**
-     * array access operator for writing
-     * Note: does not update cursors position nor array size counter;
-     */
-    constexpr reference       operator[](size_type i) { return m_buff[Idx(i)]; }
-    constexpr const_reference operator[](size_type i) const { return m_buff[Idx(i)]; }
+    [[nodiscard]] constexpr bool Empty() const noexcept
+    {
+        // If head and tail are the same, buffer is empty.
+        return !m_full && (m_head == m_tail);
+    }
+
+    [[nodiscard]] constexpr bool Full() const noexcept { return m_full; }
+
+    constexpr void Resize(size_t newCap)
+    {
+        m_tail = std::min(newCap, m_tail);
+        m_head = std::min(newCap, m_head);
+        // Can't get bigger than N!
+        m_capacity = std::min(newCap, N);
+    }
+    [[nodiscard]] constexpr size_t Capacity() const noexcept { return m_capacity; }
+
+    [[nodiscard]] constexpr size_t Size() const noexcept
+    {
+        if (!m_full)
+        {
+            if (m_head >= m_tail)
+            {
+                return m_head - m_tail;
+            }
+            else
+            {
+                return m_capacity + m_head - m_tail;
+            }
+        }
+        return m_capacity;
+    }
+
+    [[nodiscard]] constexpr size_t GetHeadIdx() const noexcept { return m_head; }
+    [[nodiscard]] constexpr size_t GetTailIdx() const noexcept { return m_tail; }
+
+    constexpr const array_t& RawBuffer() const noexcept { return m_buff; }
+    constexpr array_t&       RawBuffer() noexcept { return m_buff; }
+
+    constexpr std::pair<T*, size_t> DataAndRemainingSpace() noexcept
+    {
+        size_t remainingSpace = m_capacity - m_head;
+        return std::make_pair(m_buff.data() + m_head, remainingSpace);
+    }
+
+    [[nodiscard]] constexpr size_t Idx(size_t idx) const noexcept { return NextIdx(m_tail, idx); }
+
+    [[nodiscard]] constexpr size_t NextIdx(size_t current, size_t incBy = 1) const noexcept
+    {
+        return (current + incBy) % m_capacity;
+    }
+
+    class iterator
+    {
+        CircularBuffer& m_buff;
+        size_t          m_idx = 0;
+
+    public:
+        constexpr iterator(CircularBuffer& buff, size_t idx) noexcept : m_buff(buff), m_idx(idx) {}
+        constexpr iterator& operator++() noexcept
+        {
+            m_idx++;
+            return *this;
+        }
+        constexpr iterator operator++(int) noexcept
+        {
+            iterator retval = *this;
+            ++(*this);
+            return retval;
+        }
+        constexpr bool operator==(const iterator& rhs) const noexcept { return m_idx == rhs.m_idx; }
+        constexpr bool operator!=(const iterator& rhs) const noexcept { return !(*this == rhs); }
+        constexpr T&   operator*() { return m_buff[m_idx]; }
+
+        // Iterator traits.
+        using difference_type   = std::ptrdiff_t;
+        using value_type        = T;
+        using pointer           = const T*;
+        using reference         = const T&;
+        using iterator_category = std::forward_iterator_tag;
+    };
+
+    iterator begin() noexcept { return iterator(*this, 0); }
+    iterator end() noexcept { return iterator(*this, Size()); }
+
+    constexpr const T& operator[](size_t idx) const noexcept { return m_buff[Idx(idx)]; }
+    constexpr T&       operator[](size_t idx) noexcept { return m_buff[Idx(idx)]; }
 
 private:
-    std::vector<T> m_buff = {};
+    array_t m_buff;
 
-    // This is used so we have different sized buffer
-    signed_size_type m_read  = 0;
-    signed_size_type m_write = 0;
-    size_type        m_size  = 0;
+    size_t m_capacity = N;
 
-    signed_size_type m_lastDmaCounter = 0;
+    size_t m_head = 0;    //!< End of the array.
+    size_t m_tail = 0;    //!< Start of the array.
 
-    [[nodiscard]] constexpr size_type Next(size_type origin) const
+    bool m_full = false;
+
+    template<typename I>
+    constexpr void PushManyImpl(const I& items) noexcept
+        requires std::constructible_from<T, typename I::value_type>
     {
-        size_type r = origin + 1;
-        return r % m_buff.capacity();
-    }
-
-    [[nodiscard]] constexpr size_type Idx(size_type idx) const
-    {
-        size_type r = m_read + idx;
-        while (r >= m_buff.capacity())
+        for (auto&& item : items)
         {
-            r -= m_buff.capacity();
+            Push(item);
         }
-        return r;
     }
 };
+
+// CTAD
+template<typename... Args>
+CircularBuffer(Args&&...) -> CircularBuffer<std::common_type_t<Args...>, sizeof...(Args)>;
+
 }    // namespace Nilai
 //!@}
 #endif

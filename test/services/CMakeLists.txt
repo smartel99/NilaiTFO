@@ -4,6 +4,7 @@ set(NILAI_TEST_SOURCES
         )
 
 set(NILAI_TEST_NAME nilai_services_test)
+message(STATUS "Building ${NILAI_TEST_NAME}")
 
 if (DEFINED NILAI_SINGLE_TEST_EXE)
     add_custom_target(${NILAI_TEST_NAME}

@@ -92,7 +92,7 @@
  * @{
  * @brief Make Nilai use the backend for the STM32F4xx.
  */
-//#define NILAI_USES_STM32F4xx
+// #define NILAI_USES_STM32F4xx
 //!@}
 
 /**
@@ -100,7 +100,7 @@
  * @{
  * @brief Make Nilai use the backend for the STM32L4xx.
  */
-//#define NILAI_USES_STM32L4xx
+// #define NILAI_USES_STM32L4xx
 //!@}
 //!@}
 
@@ -191,7 +191,7 @@
  * @{
  * @brief If defined, the Umo module will use the CAN peripheral.
  */
-//#define NILAI_UMO_USE_CAN
+// #define NILAI_UMO_USE_CAN
 //!@}
 
 /**
@@ -213,7 +213,7 @@
  * @{
  * @brief If defined, enables the event subsystem.
  */
-//#    define NILAI_USE_EVENTS
+// #    define NILAI_USE_EVENTS
 //! @}
 
 #    if defined(NILAI_USE_EVENTS)
@@ -230,7 +230,7 @@
  * @{
  * @brief If defined, ADC events will be enabled and used.
  */
-//#    define NILAI_USE_ADC_EVENTS
+// #    define NILAI_USE_ADC_EVENTS
 //!@}
 
 /**
@@ -238,7 +238,7 @@
  * @{
  * @brief If defined, CAN events will be enabled and used.
  */
-//#    define NILAI_USE_CAN_EVENTS
+// #    define NILAI_USE_CAN_EVENTS
 //!@}
 
 /**
@@ -246,7 +246,7 @@
  * @{
  * @brief If defined, I2C events will be enabled and used.
  */
-//#    define NILAI_USE_I2C_EVENTS
+// #    define NILAI_USE_I2C_EVENTS
 //!@}
 
 /**
@@ -254,7 +254,7 @@
  * @{
  * @brief If defined, I2S events will be enabled and used.
  */
-//#    define NILAI_USE_I2S_EVENTS
+// #    define NILAI_USE_I2S_EVENTS
 //!@}
 
 /**
@@ -262,7 +262,7 @@
  * @{
  * @brief If defined, RTC events will be enabled and used.
  */
-//#    define NILAI_USE_RTC_EVENTS
+// #    define NILAI_USE_RTC_EVENTS
 //!@}
 
 /**
@@ -270,7 +270,7 @@
  * @{
  * @brief If defined, SAI events will be enabled and used.
  */
-//#    define NILAI_USE_SAI_EVENTS
+// #    define NILAI_USE_SAI_EVENTS
 //!@}
 
 /**
@@ -278,7 +278,7 @@
  * @{
  * @brief If defined, SPI events will be enabled and used.
  */
-//#    define NILAI_USE_SPI_EVENTS
+// #    define NILAI_USE_SPI_EVENTS
 //!@}
 
 /**
@@ -286,7 +286,7 @@
  * @{
  * @brief If defined, TIMER events will be enabled and used.
  */
-//#    define NILAI_USE_TIMER_EVENTS
+// #    define NILAI_USE_TIMER_EVENTS
 //!@}
 
 /**
@@ -294,7 +294,7 @@
  * @{
  * @brief If defined, UART events will be enabled and used.
  */
-//#    define NILAI_USE_UART_EVENTS
+// #    define NILAI_USE_UART_EVENTS
 //!@}
 #    endif
 //!@}
@@ -317,7 +317,7 @@
  * @{
  * @brief If defined, enables the ADC module.
  */
-//#define NILAI_USE_ADC     //! Enables the Analog-to-Digital Converter module.
+// #define NILAI_USE_ADC     //! Enables the Analog-to-Digital Converter module.
 //!@}
 
 /**
@@ -325,7 +325,7 @@
  * @{
  * @brief If defined, enables the CAN module.
  */
-//#define NILAI_USE_CAN     //! Enables the Controller Area Network module.
+// #define NILAI_USE_CAN     //! Enables the Controller Area Network module.
 //!@}
 
 /**
@@ -333,7 +333,7 @@
  * @{
  * @brief If defined, enables the I2C module.
  */
-//#define NILAI_USE_I2C     //! Enables the Inter-Integrated Circuit module.
+// #define NILAI_USE_I2C     //! Enables the Inter-Integrated Circuit module.
 //!@}
 
 /**
@@ -341,7 +341,7 @@
  * @{
  * @brief If defined, enables the I2S module.
  */
-//#define NILAI_USE_I2S     //! Enables the Inter-IC Sound module.
+// #define NILAI_USE_I2S     //! Enables the Inter-IC Sound module.
 //!@}
 
 /**
@@ -349,7 +349,7 @@
  * @{
  * @brief If defined, enables the PWM module.
  */
-//#define NILAI_USE_PWM     //! Enables the Pulse-Width Modulation module.
+// #define NILAI_USE_PWM     //! Enables the Pulse-Width Modulation module.
 //!@}
 
 /**
@@ -357,7 +357,7 @@
  * @{
  * @brief If defined, enables the RTC module.
  */
-//#define NILAI_USE_RTC     //! Enables the Real-Time Clock module.
+// #define NILAI_USE_RTC     //! Enables the Real-Time Clock module.
 //!@}
 
 /**
@@ -365,7 +365,7 @@
  * @{
  * @brief If defined, enables the SAI module.
  */
-//#define NILAI_USE_SAI     //! Enables the Serial Audio Interface module.
+// #define NILAI_USE_SAI     //! Enables the Serial Audio Interface module.
 //!@}
 
 /**
@@ -373,7 +373,7 @@
  * @{
  * @brief If defined, enables the SPI module.
  */
-//#define NILAI_USE_SPI     //! Enables the Serial Peripheral Interface module.
+// #define NILAI_USE_SPI     //! Enables the Serial Peripheral Interface module.
 //!@}
 
 /**
@@ -381,7 +381,7 @@
  * @{
  * @brief If defined, enables the UART module.
  */
-//#define NILAI_USE_UART    //! Enables the Universal Asynchronous Receiver-Transmitter module.
+// #define NILAI_USE_UART    //! Enables the Universal Asynchronous Receiver-Transmitter module.
 //!@}
 //!@}
 
@@ -399,7 +399,7 @@
  * href=https://www.ti.com/lit/ds/symlink/ads131a04.pdf?ts=1659994576841&ref_url=https%253A%252F%252Fwww.ti.com%252Fproduct%252FADS131A04>ADS131</a>
  * (ADC) module.
  */
-//#define NILAI_USE_ADS
+// #define NILAI_USE_ADS
 //!@}
 
 /**
@@ -409,7 +409,7 @@
  * href=https://ww1.microchip.com/downloads/en/DeviceDoc/doc9634.pdf>AT24QT2120</a> (Capacitive
  * touch sensor) module.
  */
-//#define NILAI_USE_AT24QT2120
+// #define NILAI_USE_AT24QT2120
 //!@}
 
 /**
@@ -417,7 +417,7 @@
  * @{
  * @brief If defined, enables the heartbeat module, which toggles a pin at a steady rate.
  */
-//#define NILAI_USE_HEARTBEAT
+// #define NILAI_USE_HEARTBEAT
 //!@}
 
 /**
@@ -427,7 +427,7 @@
  * href=https://www.analog.com/media/en/technical-documentation/data-sheets/2498fg.pdf>LTC2498</a>
  * (ADC) module.
  */
-//#define NILAI_USE_LTC2498
+// #define NILAI_USE_LTC2498
 //!@}
 
 /**
@@ -437,7 +437,7 @@
  * href=https://datasheets.maximintegrated.com/en/ds/MAX14759-MAX14763.pdf>MAX14763</a> (2:1
  * analog switch) module.
  */
-//#define NILAI_USE_MAX14763
+// #define NILAI_USE_MAX14763
 //!@}
 
 /**
@@ -447,7 +447,7 @@
  * href=https://datasheets.maximintegrated.com/en/ds/MAX14778.pdf>MAX14778</a> (4:1 analog
  * multiplexer) module.
  */
-//#define NILAI_USE_MAX14778
+// #define NILAI_USE_MAX14778
 //!@}
 
 /**
@@ -457,7 +457,7 @@
  * href=https://datasheets.maximintegrated.com/en/ds/MAX323-MAX325.pdf>MAX323</a> (Dual SPST
  * analog switch) module.
  */
-//#define NILAI_USE_MAX323
+// #define NILAI_USE_MAX323
 //!@}
 
 /**
@@ -467,7 +467,7 @@
  * href=https://www.nxp.com/docs/en/data-sheet/PCA9505_9506.pdf>PCA9505</a> (40-bit I2C I/O
  * extender) module.
  */
-//#define NILAI_USE_PCA9505
+// #define NILAI_USE_PCA9505
 //!@}
 
 /**
@@ -475,7 +475,7 @@
  * @{
  * @brief If defined, enables the relay module.
  */
-//#define NILAI_USE_RELAY
+// #define NILAI_USE_RELAY
 //!@}
 
 /**
@@ -485,7 +485,7 @@
  * href=http://ww1.microchip.com/downloads/en/DeviceDoc/50002390E.pdf>RN2903</a> (LoRa
  * Transceiver) module.
  */
-//#define NILAI_USE_RN2903
+// #define NILAI_USE_RN2903
 //!@}
 
 /**
@@ -495,7 +495,7 @@
  * href=https://toshiba.semicon-storage.com/eu/semiconductor/product/isolators-solid-state-relays/photorelay-mosfet-output/detail.TLP3545.html>TLP3545</a>
  * (Photorelay) module.
  */
-//#define NILAI_USE_TLP3545
+// #define NILAI_USE_TLP3545
 //!@}
 
 /**
@@ -505,7 +505,7 @@
  * href=https://www.ti.com/lit/ds/symlink/tas5707.pdf?ts=1660064616030&ref_url=https%253A%252F%252Fwww.google.com%252F>TAS5707</a>
  * (20-W stereo digital audio power amplifier) module.
  */
-//#define NILAI_USE_TAS5707
+// #define NILAI_USE_TAS5707
 //!@}
 
 /**
@@ -515,7 +515,7 @@
  * href=https://www.ti.com/document-viewer/TAS5760MD/datasheet>TAS5760</a> (General purpose I2S
  * Class-D audio amplifier) module in hardware mode.
  */
-//#define NILAI_USE_HW_TAS5760
+// #define NILAI_USE_HW_TAS5760
 //!@}
 
 /**
@@ -525,7 +525,7 @@
  * href=https://www.ti.com/document-viewer/TAS5760MD/datasheet>TAS5760</a> (General purpose I2S
  * Class-D audio amplifier) module in software mode.
  */
-//#define NILAI_USE_SW_TAS5760
+// #define NILAI_USE_SW_TAS5760
 //!@}
 //!@}
 
@@ -540,7 +540,7 @@
  * @{
  * @brief If defined, enables the Universe Management module.
  */
-//#define NILAI_USE_UMO
+// #define NILAI_USE_UMO
 //!@}
 
 /**
@@ -548,7 +548,7 @@
  * @{
  * @brief If defined, enables the System module.
  */
-//#define NILAI_USE_SYSTEM
+// #define NILAI_USE_SYSTEM
 //!@}
 
 /**
@@ -556,7 +556,7 @@
  * @{
  * @brief If defined, enables the Logging module.
  */
-//#define NILAI_USE_LOGGER
+// #define NILAI_USE_LOGGER
 //!@}
 
 /**
@@ -564,7 +564,7 @@
  * @{
  * @brief If defined, enables the file logging module.
  */
-//#define NILAI_USE_FILE_LOGGER
+// #define NILAI_USE_FILE_LOGGER
 //!@}
 
 /**
@@ -574,7 +574,7 @@
  *
  * @attention FATFS must be included in the project to use the filesystem module
  */
-//#define NILAI_USE_FILESYSTEM
+// #define NILAI_USE_FILESYSTEM
 //!@}
 
 /**
@@ -582,7 +582,7 @@
  * @{
  * @brief If defined, enables the Ini file parsing module.
  */
-//#define NILAI_USE_INI_PARSER
+// #define NILAI_USE_INI_PARSER
 //!@}
 //!@}
 //!@}
@@ -672,7 +672,7 @@
  *
  * @note This adds significant bloat to the binary file (mktime taking 820 bytes just by itself).
  */
-//#define NILAI_RTC_USE_STL
+// #define NILAI_RTC_USE_STL
 //!@}
 //!@}
 #    endif
@@ -689,7 +689,7 @@
  * @{
  * @brief If defined, enables the interpretation of error codes.
  */
-//#define NILAI_FS_STATUS_STRING
+// #define NILAI_FS_STATUS_STRING
 //!@}
 //!@}
 #    endif
@@ -708,6 +708,28 @@
  */
 #        define NILAI_ADC_STATUS_STRING
 //!@}
+//!@}
+#    endif
+
+#    if defined(NILAI_USE_UART)
+/**
+ * @addtogroup NILAI_UART_RX_CIRC_BUFF_SIZE
+ * @{
+ * @brief Defines the maximum size for the UART module's circular buffer.
+ *
+ * Defaults to 64.
+ */
+#        define NILAI_UART_RX_CIRC_BUFF_SIZE 64
+//!@}
+
+/**
+ * @addtogroup NILAI_UART_RX_FRAME_BUFF_SIZE
+ * @{
+ * @brief Defines the maximum size for the UART module's frame buffer.
+ *
+ * Defaults to 4.
+ */
+#        define NILAI_UART_RX_FRAME_BUFF_SIZE 4
 //!@}
 #    endif
 //!@}

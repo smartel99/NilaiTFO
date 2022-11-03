@@ -47,27 +47,94 @@ endif ()
 
 add_compile_options(-DNILAI_TEST)
 
-add_subdirectory(bit_manipulations)
-add_subdirectory(pin)
-# add_subdirectory(processes)
-# add_subdirectory(interfaces)
-add_subdirectory(drivers)
-add_subdirectory(services)
-add_subdirectory(circular_buffer)
+option(NILAI_TEST_ALL "Enable all tests" OFF)
+if (NILAI_TEST_ALL)
+    set(NILAI_TEST_BIT_MANIPULATION ON CACHE BOOL "Enable testing for bit manipulation" FORCE)
+    set(NILAI_TEST_PIN ON CACHE BOOL "Enable testing for pins" FORCE)
+    set(NILAI_TEST_CIRCULAR_BUFFER ON CACHE BOOL "Enable testing for circular buffer" FORCE)
+    set(NILAI_TEST_SWAP_BUFFER ON CACHE BOOL "Enable testing for swap buffer" FORCE)
 
+    set(NILAI_TEST_DRIVERS ON CACHE BOOL "Enable testing for drivers" FORCE)
+    set(NILAI_TEST_ALL_DRIVERS ON CACHE BOOL "Enable testing for all drivers" FORCE)
+
+    set(NILAI_TEST_INTERFACES ON CACHE BOOL "Enable testing for interfaces" FORCE)
+    set(NILAI_TEST_ALL_INTERFACES ON CACHE BOOL "Enable testing for all interfaces" FORCE)
+
+    set(NILAI_TEST_SERVICES ON CACHE BOOL "Enable testing for services" FORCE)
+    set(NILAI_TEST_ALL_SERVICES ON CACHE BOOL "Enable testing for all services" FORCE)
+
+    set(NILAI_TEST_PROCESSES ON CACHE BOOL "Enable testing for processes" FORCE)
+    set(NILAI_TEST_ALL_PROCESSES ON CACHE BOOL "Enable testing for all processes" FORCE)
+endif ()
+
+set(NILAI_TEST_SOURCES)
+
+option(NILAI_TEST_BIT_MANIPULATION "Enable testing for bit manipulation" OFF)
+if (NILAI_TEST_BIT_MANIPULATION)
+    add_subdirectory(bit_manipulations)
+    if (NILAI_SINGLE_TEST_EXE STREQUAL "true")
+        set(NILAI_TEST_SOURCES ${NILAI_TEST_SOURCES} $<TARGET_PROPERTY:nilai_bit_manipulation_test,SOURCES>)
+    endif ()
+endif ()
+
+option(NILAI_TEST_PIN "Enable testing for pins" OFF)
+if (NILAI_TEST_PIN)
+    add_subdirectory(pin)
+    if (NILAI_SINGLE_TEST_EXE STREQUAL "true")
+        set(NILAI_TEST_SOURCES ${NILAI_TEST_SOURCES} $<TARGET_PROPERTY:nilai_pin_test,SOURCES>)
+    endif ()
+endif ()
+
+option(NILAI_TEST_CIRCULAR_BUFFER "Enable testing for circular buffer" OFF)
+if (NILAI_TEST_CIRCULAR_BUFFER)
+    add_subdirectory(circular_buffer)
+    if (NILAI_SINGLE_TEST_EXE STREQUAL "true")
+        set(NILAI_TEST_SOURCES ${NILAI_TEST_SOURCES} $<TARGET_PROPERTY:nilai_circular_buffer_test,SOURCES>)
+    endif ()
+endif ()
+
+option(NILAI_TEST_SWAP_BUFFER "Enable testing for swap buffer" OFF)
+if (NILAI_TEST_SWAP_BUFFER)
+    add_subdirectory(swap_buffer)
+    if (NILAI_SINGLE_TEST_EXE STREQUAL "true")
+        set(NILAI_TEST_SOURCES ${NILAI_TEST_SOURCES} $<TARGET_PROPERTY:nilai_swap_buffer_test,SOURCES>)
+    endif ()
+endif ()
+
+option(NILAI_TEST_DRIVERS "Enable testing for drivers" OFF)
+if (NILAI_TEST_DRIVERS)
+    add_subdirectory(drivers)
+    if (NILAI_SINGLE_TEST_EXE STREQUAL "true")
+        set(NILAI_TEST_SOURCES ${NILAI_TEST_SOURCES} $<TARGET_PROPERTY:nilai_drivers_test,SOURCES>)
+    endif ()
+endif ()
+
+option(NILAI_TEST_INTERFACES "Enable testing for interfaces" OFF)
+if (NILAI_TEST_INTERFACES)
+    add_subdirectory(interfaces)
+    if (NILAI_SINGLE_TEST_EXE STREQUAL "true")
+        set(NILAI_TEST_SOURCES ${NILAI_TEST_SOURCES} $<TARGET_PROPERTY:nilai_interfaces_test,SOURCES>)
+    endif ()
+endif ()
+
+option(NILAI_TEST_SERVICES "Enable testing for services" OFF)
+if (NILAI_TEST_SERVICES)
+    add_subdirectory(services)
+    if (NILAI_SINGLE_TEST_EXE STREQUAL "true")
+        set(NILAI_TEST_SOURCES ${NILAI_TEST_SOURCES} $<TARGET_PROPERTY:nilai_services_test,SOURCES>)
+    endif ()
+endif ()
+
+option(NILAI_TEST_PROCESSES "Enable testing for processes" OFF)
+if (NILAI_TEST_PROCESSES)
+    add_subdirectory(processes)
+    if (NILAI_SINGLE_TEST_EXE STREQUAL "true")
+        set(NILAI_TEST_SOURCES ${NILAI_TEST_SOURCES} $<TARGET_PROPERTY:nilai_processes_test,SOURCES>)
+    endif ()
+endif ()
 
 if (NILAI_SINGLE_TEST_EXE STREQUAL "true")
     set(NILAI_OUTPUT_FILENAME NilaiTFO_Test)
-
-    set(NILAI_TEST_SOURCES
-            $<TARGET_PROPERTY:nilai_drivers_test,SOURCES>
-            #            $<TARGET_PROPERTY:nilai_interfaces_test,SOURCES>
-            #            $<TARGET_PROPERTY:nilai_processes_test,SOURCES>
-            $<TARGET_PROPERTY:nilai_bit_manipulation_test,SOURCES>
-            $<TARGET_PROPERTY:nilai_pin_test,SOURCES>
-            $<TARGET_PROPERTY:nilai_services_test,SOURCES>
-            $<TARGET_PROPERTY:nilai_circular_buffer_test,SOURCES>
-            )
 
     if (NILAI_MAKE_TEST_AS_LIB STREQUAL "true")
         message(STATUS "Making NilaiTFO_Test as a library")

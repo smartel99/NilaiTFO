@@ -23,6 +23,7 @@
 #    include "detection_status.h"
 #    include "key_status.h"
 
+#    include "../../../defines/macros.h"
 #    include "../../../defines/misc.h"
 
 #    include <vector>

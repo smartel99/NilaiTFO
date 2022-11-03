@@ -75,7 +75,7 @@ namespace Nilai::Interfaces
  * as long as they comply with these function signatures:
  * <ul>
  *  <li>@code bool T::RegisterCommandInterface(const std::function<void(T&, const
- *      std::vector<uint8_t>&>& func) @endcode
+ *      std::vector<uint8_t>&)>& func) @endcode
  *      This method should keep @c func and invoke it whenever a command is received.
  *      It should return true if successful, false otherwise.
  *  </li>
@@ -83,7 +83,7 @@ namespace Nilai::Interfaces
  *      This method should transmit @c b in a way that is received by its destination.
  *      It should return true if successful, false otherwise.
  *  </li>
- *  <li>@code bool T::WriteDate(const std::vector<uint8_t>& data) @endcode
+ *  <li>@code bool T::WriteData(const std::vector<uint8_t>& data) @endcode
  *      This method should transmit @c data in a way that is received by its destination.
  *      It should return true if successful, false otherwise.
  *  </li>
@@ -99,7 +99,7 @@ namespace Nilai::Interfaces
  *      it does not do anything.
  *      It should return true if successful, false otherwise.
  *  </li>
- *  <li>@code std::vector<uint8_t> T::WaitForResponse(size_t expected) @endcode
+ *  <li>@code std::vector<uint8_t> T::WaitForResponse(size_t expected, size_t timeout) @endcode
  *      This method should wait for the destination to send a response to the command that has
  *      just been sent, then return that response.
  *  </li>
@@ -121,7 +121,7 @@ concept CommandInterfaceDevice = CommandInterfaceDeviceIsValid<T>();
  * Command structure:
  * <ul>
  *  <li>Start of Frame (handled uniquely by the interface)</li>
- *  <li>Destination Address (4 bytes, optional)</li>
+ *  <li>Destination Address (4 bytes)</li>
  *  <li>Packet ID (4 bytes)</li>
  *  <li>Command ID (1 byte)</li>
  *  <li>Command Payload (optional)</li>
@@ -133,9 +133,10 @@ template<CommandInterfaceDevice... Interfaces>
 class CommandInterface
 {
 public:
+    CommandInterface() = default;
     explicit CommandInterface(Interfaces&... interfaces)
     {
-        (interfaces.RegisterDispatcher(
+        (interfaces.RegisterCommandInterface(
            [this](decltype(interfaces) interface, const std::vector<uint8_t>& data)
            { ReceiveFrom(interface, data); }),
          ...);
@@ -169,11 +170,6 @@ public:
     {
         interface.SendSoF();
 
-        if constexpr (CommandHasAddress<Cmd>())
-        {
-            interface.WriteData(Serialize(cmd.address));
-        }
-
         interface.WriteData(Serialize(m_atCommandId));
         m_atCommandId++;
 
@@ -189,7 +185,7 @@ public:
         if constexpr (CommandNeedsResponse<Cmd>())
         {
             using response_type = typename Cmd::response_type;
-            return Deserialize<response_type>(interface.WaitForResponse());
+            return Deserialize<response_type>(interface.WaitForResponse(0, 0));
         }
     }
 
@@ -197,16 +193,24 @@ public:
     void ReceiveFrom(T& interface, const std::vector<uint8_t>& data)
         requires((std::same_as<std::remove_cvref_t<T>, Interfaces>) || ...)
     {
-        CommandEvent cmd = CommandEvent(
-          [this, interface](const std::vector<uint8_t>& d) { RespondTo(interface, d); }, data);
+        CommandEvent cmd =
+          CommandEvent([this, &interface](const CommandEvent& cmd, const std::vector<uint8_t>& d)
+                       { RespondTo(interface, cmd, d); },
+                       data);
 
         Nilai::Application::Get().DispatchEvent(&cmd);
     }
 
     template<typename T>
-    void RespondTo(T& interface, const std::vector<uint8_t>& data)
+    void RespondTo(T& interface, const CommandEvent& cmd, const std::vector<uint8_t>& data)
     {
+        interface.SendSoF();
+
+        interface.WriteData(Serialize(cmd.PacketId));
+        interface.WriteByte(cmd.Id);
         interface.WriteData(data);
+
+        interface.SendEoF();
     }
 
 private:

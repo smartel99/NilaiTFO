@@ -32,7 +32,7 @@
 #    define HAL_ADC_ERROR_INVALID_CALLBACK (0x10U) /*!< Invalid Callback error */
 #endif                                             /* USE_HAL_ADC_REGISTER_CALLBACKS */
 
-using ADCIoBuffer = IoBuffer<uint32_t>;
+using ADCIoBuffer = IoBuffer<uint32_t, 20>;
 
 struct ADC_TypeDef
 {

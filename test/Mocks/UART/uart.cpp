@@ -5,15 +5,14 @@
 size_t                                          s_uart_buffers_id_count;
 std::map<size_t, std::unique_ptr<UartIoBuffer>> s_uart_buffers;
 
-void Nilai_UART_Init(UART_HandleTypeDef* handle, size_t txl, size_t rxl)
+void Nilai_UART_Init(UART_HandleTypeDef* handle)
 {
-    using T = typename decltype(std::declval<UartIoBuffer>().rx)::value_type;
-    s_uart_buffers[s_uart_buffers_id_count] =
-      std::make_unique<UartIoBuffer>(static_cast<T>(txl), static_cast<T>(rxl));
+    s_uart_buffers[s_uart_buffers_id_count] = std::make_unique<UartIoBuffer>();
 
     handle->id     = s_uart_buffers_id_count++;
     handle->hdmarx = new DMA_HandleTypeDef;
-    Nilai::Test::Internal::DmaSetCapacity(handle->hdmarx, rxl);
+    Nilai::Test::Internal::DmaSetCapacity(handle->hdmarx,
+                                          s_uart_buffers[s_uart_buffers_id_count]->rx.Size());
 }
 
 HAL_StatusTypeDef HAL_UART_DeInit(UART_HandleTypeDef* handle)
@@ -34,9 +33,14 @@ HAL_StatusTypeDef HAL_UART_Receive_DMA(UART_HandleTypeDef* handle, uint8_t* buff
     return HAL_OK;
 }
 
+HAL_StatusTypeDef HAL_UARTEx_ReceiveToIdle_DMA(UART_HandleTypeDef* huart, uint8_t* dest, size_t len)
+{
+    return HAL_UART_Receive_DMA(huart, dest, len);
+}
+
 HAL_StatusTypeDef HAL_UART_Transmit_IT(UART_HandleTypeDef* handle, uint8_t* buff, size_t len)
 {
-    s_uart_buffers[handle->id]->tx.Push(buff, len);
+    s_uart_buffers[handle->id]->tx.PushMany(buff, len);
     return HAL_OK;
 }
 
@@ -47,8 +51,8 @@ HAL_StatusTypeDef HAL_UART_DMAStop(UART_HandleTypeDef*)
 
 void Nilai_UART_Inject_DMA(UART_HandleTypeDef* handle, const uint8_t* buff, size_t len)
 {
-    size_t pushed = s_uart_buffers[handle->id]->rx.Push(buff, len);
-    s_uart_buffers[handle->id]->rx.Pop(pushed);
+    s_uart_buffers[handle->id]->rx.PushMany(buff, len);
+    s_uart_buffers[handle->id]->rx.PopMany(len);
     Nilai::Test::Internal::DmaDecCounter(handle->hdmarx, len);
     memcpy(handle->data, buff, std::min(len, handle->len));
 }

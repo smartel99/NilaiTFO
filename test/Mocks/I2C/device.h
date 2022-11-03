@@ -21,12 +21,13 @@
 #include "../generic_stm32.h"
 
 #include <cstdint>
+#include <cstring>
 #include <map>
 
 namespace Nilai::Test::Internal
 {
 
-using I2CIoBuffer = IoBuffer<uint8_t>;
+using I2CIoBuffer = IoBuffer<uint8_t, 512>;
 
 struct I2CRegisterDef
 {
@@ -47,8 +48,8 @@ struct I2CDevice
         requires(((std::same_as<Rs, I2CRegisterDef> ||
                    std::constructible_from<I2CRegisterDef, Rs>)&&...))
     {
-        ((Registers[registers.Addr] = I2CIoBuffer(registers.TxLen, registers.RxLen)), ...);
-        Registers[s_masterRegisterId] = I2CIoBuffer(txLen, rxLen);
+        ((Registers[registers.Addr] = I2CIoBuffer()), ...);
+        Registers[s_masterRegisterId] = I2CIoBuffer();
     }
 
     void TxToDev(const uint8_t* data, uint16_t size)
@@ -57,7 +58,7 @@ struct I2CDevice
     }
     void TxToRegister(uint16_t regAddr, const uint8_t* data, uint16_t size)
     {
-        Registers[regAddr].tx.Push(data, size);
+        Registers[regAddr].tx.PushMany(data, size);
     }
 
     size_t RxFromDev(uint8_t* data, uint16_t len)
@@ -66,7 +67,10 @@ struct I2CDevice
     }
     size_t RxFromRegister(uint16_t regAddr, uint8_t* data, uint16_t len)
     {
-        return Registers[regAddr].rx.Read(data, len);
+        auto vals = Registers[regAddr].rx.PopMany(len);
+
+        std::memcpy(data, vals.data(), vals.size());
+        return vals.size();
     }
 
     I2CIoBuffer::value_type& NilaiGetDevTxBuffer()

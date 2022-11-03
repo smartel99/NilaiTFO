@@ -13,7 +13,7 @@
 #include <vector>
 
 using HAL_UART_StateTypeDef = uint32_t;
-using UartIoBuffer          = IoBuffer<uint8_t>;
+using UartIoBuffer          = IoBuffer<uint8_t, 512>;
 
 
 #define HAL_UART_STATE_READY                                                                       \
@@ -27,16 +27,18 @@ struct UART_HandleTypeDef
     DMA_HandleTypeDef*    hdmarx;
 
     uint8_t* data;
-    size_t len;
+    size_t   len;
 };
 
 extern std::map<size_t, std::unique_ptr<UartIoBuffer>> s_uart_buffers;
 
 HAL_StatusTypeDef HAL_UART_DeInit(UART_HandleTypeDef*);
 HAL_StatusTypeDef HAL_UART_Receive_DMA(UART_HandleTypeDef*, uint8_t*, size_t);
+HAL_StatusTypeDef HAL_UARTEx_ReceiveToIdle_DMA(UART_HandleTypeDef* huart, uint8_t* dest, size_t
+                                                                                           len);
 HAL_StatusTypeDef HAL_UART_Transmit_IT(UART_HandleTypeDef*, uint8_t*, size_t);
 
-void              Nilai_UART_Init(UART_HandleTypeDef*, size_t = 512, size_t = 512);
+void              Nilai_UART_Init(UART_HandleTypeDef*);
 HAL_StatusTypeDef HAL_UART_DMAStop(UART_HandleTypeDef*);
 void              Nilai_UART_Inject_DMA(UART_HandleTypeDef*, const uint8_t*, size_t);
 void              Nilai_UART_Inject_DMA(UART_HandleTypeDef*, const std::string&);

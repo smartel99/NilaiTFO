@@ -57,11 +57,6 @@ concept ValidCommandId =
  *      command's ID.
  *  </li>
  *  <li>
- *      It may have a member called `address` of type `uint32_t`. This is the address of the
- *      destination. If not specified, or if it is not of the right type, no address information
- *      will be sent for the command.
- *  </li>
- *  <li>
  *      It must have a typename called `payload_type`. This is the type of the `payload`. It may be
  *      `void`, primitive, `std::vector<uint8_t>`, `std::string` or any other object that is
  *      constructable from an `std::array` of `uint8_t`.
@@ -87,24 +82,25 @@ concept ValidCommandId =
  */
 template<typename T>
 concept Command = ValidCommandPayload<T> && ValidCommandResponse<T> && ValidCommandId<T> &&
-  std::is_default_constructible_v<T>;
+                  std::is_default_constructible_v<T>;
 
-template<typename T>
-consteval bool CommandHasAddress()
-    requires requires(T t) {
-                 {
-                     t.address
-                     } -> std::same_as<uint32_t>;
-             }
+template<uint8_t         Id,
+         CommandPayload  Payload     = void,
+         CommandResponse Response    = void,
+         int             PayloadSize = -1>
+struct GenericCommand
 {
-    return true;
-}
+    using payload_type = Payload;
+    // If PayloadSize is not provided, automatically deduce the size of the payload. Otherwise,
+    // use the provided payload size.
+    static constexpr size_t payload_size =
+      PayloadSize == -1 ? std::same_as<payload_type, void> ? 0 : sizeof(payload_type) : PayloadSize;
+    using response_type = Response;
 
-template<typename T>
-consteval bool CommandHasAddress()
-{
-    return false;
-}
+    static constexpr uint8_t id = Id;
+};
+
+
 }    // namespace Nilai::Interfaces
 #endif
 

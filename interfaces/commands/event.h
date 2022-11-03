@@ -25,6 +25,7 @@
 #    include "command.h"
 
 #    include <functional>
+#    include <optional>
 #    include <utility>
 
 /**
@@ -46,35 +47,41 @@ namespace Nilai::Interfaces
 {
 struct CommandEvent : public Nilai::Events::Event
 {
-    std::function<void(const std::vector<uint8_t>&)> Respond;
-    std::vector<uint8_t>                             Data;
+    std::function<void(const CommandEvent& cmd, const std::vector<uint8_t>&)> Respond;
+    std::vector<uint8_t>                                                      Data;
 
-    explicit CommandEvent(std::function<void(const std::vector<uint8_t>&)> f,
-                          std::vector<uint8_t>                             data)
+    uint32_t PacketId = 0;
+    uint8_t  Id       = 0;
+
+    explicit CommandEvent(
+      std::function<void(const CommandEvent& cmd, const std::vector<uint8_t>&)> f,
+      std::vector<uint8_t>                                                      data)
     : Event(Events::EventTypes::CommandEvent, Events::EventCategories::Command),
-      Respond(std::move(f)),
-      Data(std::move(data))
+      Respond(std::move(f))
     {
-    }
-
-    template<Command Cmd>
-    [[nodiscard]] bool Is() const
-    {
-        if (!HasEnoughDataForCmd<Cmd>())
+        if (data.size() >= s_headerSize)
         {
-            return false;
+            PacketId = (static_cast<uint32_t>(data[0]) << 24) |
+                       (static_cast<uint32_t>(data[1]) << 16) |
+                       (static_cast<uint32_t>(data[2]) << 8) | (static_cast<uint32_t>(data[3]));
+
+            Id   = data[4];
+            Data = std::vector<uint8_t> {data.begin() + s_headerSize, data.end()};
         }
-
-        constexpr size_t idIdx = CommandHasAddress<Cmd>() ? sizeof(Cmd::address) : 0;
-        return Data[idIdx] == Cmd::id;
     }
 
     template<Command Cmd>
-    [[nodiscard]] Cmd As() const
+    [[nodiscard]] bool Is() noexcept
     {
-        if (!HasEnoughDataForCmd<Cmd>())
+        return Id == Cmd::id && HasEnoughDataForCmd<Cmd>();
+    }
+
+    template<Command Cmd>
+    [[nodiscard]] std::optional<Cmd> As() noexcept
+    {
+        if (!Is<Cmd>())
         {
-            return Cmd {};
+            return std::nullopt;
         }
 
         return Cmd {Data};
@@ -84,19 +91,24 @@ private:
     template<Command Cmd>
     [[nodiscard]] bool HasEnoughDataForCmd() const noexcept
     {
-        constexpr size_t expectedSize =
-          ((CommandHasAddress<Cmd>() ? sizeof(Cmd::address) : 0) + sizeof(Cmd::id)) +
-          Cmd::payload_size;
-        if (Data.size() == expectedSize)
+        size_t expectedSize = sizeof(PacketId) + sizeof(Cmd::id);
+        if constexpr (CommandHasPayload<Cmd>())
+        {
+            expectedSize += Cmd::payload_size;
+        }
+
+        if (Data.size() >= expectedSize)
         {
             return true;
         }
         else
         {
-            NILAI_ASSERT(false, "Exp: %d, got %d", expectedSize, Data.size());
+            LOG_ERROR("Exp: %d, got %d", expectedSize, Data.size());
             return false;
         }
     }
+
+    static constexpr size_t s_headerSize = sizeof(PacketId) + sizeof(Id);
 };
 }    // namespace Nilai::Interfaces
 //!@}

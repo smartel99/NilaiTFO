@@ -35,6 +35,7 @@
 #            include "../defines/macros.h"
 #            include "../defines/misc.h"
 #            include "../defines/module.h"
+#            include "../defines/swap_buffer.h"
 #            include "../services/time.h"
 
 #            include "UART/frame.h"
@@ -52,12 +53,6 @@
 namespace Nilai::Drivers
 {
 
-enum class SectionState
-{
-    NotComplete,
-    Complete,
-};
-
 class UartModule : public Nilai::Module
 {
 public:
@@ -68,18 +63,21 @@ public:
     using signed_data_type = char;
 
     using raw_buffer_type = std::vector<data_type>;
-    using buffer_type     = CircularBuffer<typename raw_buffer_type::value_type>;
-    using size_type       = buffer_type::size_type;
+
+    using buffer_type = std::vector<data_type>;
+
+    using size_type = typename raw_buffer_type::size_type;
 
     using timeout_t = Nilai::time_t;
 
-    using callback_t = std::function<void()>;
+    using callback_t = std::function<void(Uart::Frame)>;
 
 public:
-    UartModule(const std::string& label,
-               handle_pointer     uart,
-               size_type          txl = 512,
-               size_type          rxl = 512);
+    UartModule() noexcept = default;
+    UartModule(std::string    label,
+               handle_pointer uart,
+               size_type      txl = 64,
+               size_type      rxl = 64) noexcept;
     ~UartModule() override;
 
     bool DoPost() override;
@@ -92,7 +90,7 @@ public:
      * @param msg bytes to send
      * @param len number of bytes to send
      */
-    void Transmit(const signed_data_type* msg, size_type len);
+    bool Transmit(const signed_data_type* msg, size_type len);
 
     /**
      * Blocking send
@@ -103,78 +101,64 @@ public:
      * @return false on timeout
      */
     bool                  Transmit(const signed_data_type*, size_type len, timeout_t timeout);
-    void                  Transmit(const data_type* buff, size_type len);
+    bool                  Transmit(const data_type* buff, size_type len);
     bool                  Transmit(const data_type* buff, size_t len, timeout_t timeout);
-    void                  Transmit(const std::string& msg);
-    void                  Transmit(const raw_buffer_type& msg);
-    [[maybe_unused]] void VTransmit(const signed_data_type* fmt, ...);
+    bool                  Transmit(const std::string& msg);
+    bool                  Transmit(const raw_buffer_type& msg);
+    [[maybe_unused]] bool VTransmit(const signed_data_type* fmt, ...);
 
-    [[nodiscard]] size_type AvailableBytes() const noexcept { return m_rxCirc.Size(); }
     [[nodiscard]] size_type AvailableFrames() const noexcept { return m_rxFrames.Size(); }
 
-    size_type   Receive(data_type* buf, size_type len);
-    size_type   Receive(data_type* buf, size_type len, timeout_t timeout);
-    Uart::Frame Receive();
+    // Blocks until a frame is received.
+    Uart::Frame Receive(timeout_t timeout = s_rxTimeout);
+
+    void ForceSwap();
 
     void SetExpectedRxLen(size_type len);
-    void ClearExpectedRxLen();
 
     void SetFrameReceiveCpltCallback(const callback_t& cb);
     void ClearFrameReceiveCpltCallback();
 
-    void SetStartOfFrameSequence(const std::string& sof);
-    void SetStartOfFrameSequence(const raw_buffer_type& sof);
-    void SetStartOfFrameSequence(const data_type* sof, size_type len);
-    void ClearStartOfFrameSequence();
-
-    void SetEndOfFrameSequence(const std::string& eof);
-    void SetEndOfFrameSequence(const raw_buffer_type& eof);
-    void SetEndOfFrameSequence(const data_type* eof, size_type len);
-    void ClearEndOfFrameSequence();
-
-    void FlushRecv();
-
 private:
     bool WaitUntilTransmissionComplete(timeout_t timeout = s_txTimeout);
-    bool ResizeDmaBuffer();
-    void SetTriage();
-    void SearchFrame(const raw_buffer_type&  data,
-                     const raw_buffer_type&  pattern,
-                     std::vector<size_type>& result,
-                     size_type               max_depth = 0,
-                     size_type               offset    = 0);
+
+    void RxCpltCallback(uint16_t size);
+    bool ResizeDma(size_t newSize);
+    bool StartDma();
+    void MoveCompleteFrameToFrameBuff();
 
 protected:
-    std::string m_label;
-
+    handle_type* m_handle = nullptr;    //!< Pointer to the hardware peripheral.
+    
 private:
-    handle_type* m_handle = nullptr;
+    std::string m_label;    //!< Label of the module, used for logging purposes.
 
-    Uart::Status m_status = Uart::Status::Ok;
 
-    std::string m_sof;        // start of frame
-    std::string m_eof;        // end of frame
-    size_type   m_efl = 0;    // expected frame length
+    raw_buffer_type m_txBuff;    //!< Transmission buffer
 
-    size_type m_txl;    // transmission buffer size
-    size_type m_rxl;    // reception buffer size
+    /**
+     * Number of bytes that have been received by DMA.
+     * When this value is not 0, it means that a DMA event has occurred and that the buffer should
+     * be swapped.
+     */
+    uint16_t    m_bytesInRxBuff = 0;
+    buffer_type m_dmaBuff;
+    buffer_type m_rxBuff;    //!< Buffer where the raw, unprocessed data is received.
 
-    size_type                   m_sBuffId = 0;    // Static buffer id
-    raw_buffer_type             m_txBuff;         // transmission buffer
-    raw_buffer_type             m_rxBuff;         // reception buffer
-    buffer_type                 m_rxCirc;         // circular read access for reception buffer
-    CircularBuffer<Uart::Frame> m_rxFrames;       // reception frame buffer
+    //! Buffer where received frames are stored.
+    CircularBuffer<Uart::Frame, NILAI_UART_RX_FRAME_BUFF_SIZE> m_rxFrames;
 
     callback_t m_cb;
-
-    callback_t m_run;
-
-    // Triage
-    callback_t m_triage;
 
     static constexpr timeout_t s_txTimeout = 100;    // Systicks.
     static constexpr timeout_t s_rxTimeout = 50;     // Systicks.
 
+    static CircularBuffer<UartModule*, 6> s_uarts;
+
+public:
+    static void RxCpltCallback(UartModule::handle_type* handle, uint16_t size);
+
+private:
 #            ifdef GTEST
 private:
     FRIEND_TEST(NilaiUart, TriageSof);

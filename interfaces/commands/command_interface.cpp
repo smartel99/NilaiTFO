@@ -36,7 +36,8 @@ public:
     bool SendSoF() { return true; }
     bool SendEoF() { return true; }
 
-    std::vector<uint8_t> WaitForResponse([[maybe_unused]] size_t len) { return {}; }
+    std::vector<uint8_t> WaitForResponse([[maybe_unused]] size_t len, [[maybe_unused]] size_t t) {
+        return {}; }
 };
 static_assert(CommandInterfaceDevice<ValidInterface>);
 static_assert(CheckIfCommandInterfaceDeviceIsValid<ValidInterface>());

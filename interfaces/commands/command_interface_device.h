@@ -94,7 +94,7 @@ consteval bool CommandInterfaceDeviceHasWaitForResponse()
 {
     return requires(T t) {
                {
-                   t.WaitForResponse(static_cast<size_t>(0))
+                   t.WaitForResponse(static_cast<size_t>(0), static_cast<size_t>(0))
                    } -> std::same_as<std::vector<uint8_t>>;
            };
 }
@@ -125,7 +125,7 @@ consteval bool CommandInterfaceDeviceIsValid()
 
     static_assert(CommandInterfaceDeviceHasWaitForResponse<T>(),
                   "Interface does not have a function with the signature 'std::vector<uint8_t> "
-                  "T::WaitForResponse(size_t)'");
+                  "T::WaitForResponse(size_t, size_t)'");
 
     return true;
 }
@@ -135,7 +135,8 @@ consteval bool CheckIfCommandInterfaceDeviceIsValid()
 {
     return CommandInterfaceDeviceHasRegisterCommandInterface<T>() &&
            CommandInterfaceDeviceHasWriteByte<T>() && CommandInterfaceDeviceHasWriteData<T>() &&
-           CommandInterfaceDeviceHasSendSoF<T>() && CommandInterfaceDeviceHasSendEoF<T>();
+           CommandInterfaceDeviceHasSendSoF<T>() && CommandInterfaceDeviceHasSendEoF<T>() &&
+           CommandInterfaceDeviceHasWaitForResponse<T>();
 }
 
 namespace Internal
