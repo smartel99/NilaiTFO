@@ -101,21 +101,15 @@ public:
      */
     [[nodiscard]] bool HasValue(std::string_view section, std::string_view name) const;
 
-    virtual IniStruct::iterator                     begin() { return m_values.begin(); }
-    [[nodiscard]] virtual IniStruct::const_iterator cbegin() const { return m_values.cbegin(); }
-    virtual IniStruct::reverse_iterator             rbegin() { return m_values.rbegin(); }
-    [[nodiscard]] virtual IniStruct::const_reverse_iterator crbegin() const
-    {
-        return m_values.crbegin();
-    }
+    IniStruct::iterator                             begin() { return m_values.begin(); }
+    [[nodiscard]] IniStruct::const_iterator         begin() const { return m_values.cbegin(); }
+    IniStruct::reverse_iterator                     rbegin() { return m_values.rbegin(); }
+    [[nodiscard]] IniStruct::const_reverse_iterator rbegin() const { return m_values.crbegin(); }
 
-    virtual IniStruct::iterator                             end() { return m_values.end(); }
-    [[nodiscard]] virtual IniStruct::const_iterator         cend() const { return m_values.cend(); }
-    virtual IniStruct::reverse_iterator                     rend() { return m_values.rend(); }
-    [[nodiscard]] virtual IniStruct::const_reverse_iterator crend() const
-    {
-        return m_values.crend();
-    }
+    IniStruct::iterator                             end() { return m_values.end(); }
+    [[nodiscard]] IniStruct::const_iterator         end() const { return m_values.cend(); }
+    IniStruct::reverse_iterator                     rend() { return m_values.rend(); }
+    [[nodiscard]] IniStruct::const_reverse_iterator rend() const { return m_values.crend(); }
 
     const std::string& operator[](const std::string& k) const { return m_values.at(k); }
 

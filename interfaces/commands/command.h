@@ -94,7 +94,7 @@ struct GenericCommand
     // If PayloadSize is not provided, automatically deduce the size of the payload. Otherwise,
     // use the provided payload size.
     static constexpr size_t payload_size =
-      PayloadSize == -1 ? std::same_as<payload_type, void> ? 0 : sizeof(payload_type) : PayloadSize;
+      PayloadSize == -1 ? CommandPayloadMemberSize<Payload>::value : PayloadSize;
     using response_type = Response;
 
     static constexpr uint8_t id = Id;

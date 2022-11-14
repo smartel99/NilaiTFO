@@ -24,6 +24,7 @@
 #    include <type_traits>
 #    include <vector>
 
+#    include "../../services/deserializer.h"
 #    include "../../services/serializer.h"
 #    include "primitives.h"
 
@@ -44,34 +45,63 @@
 
 namespace Nilai::Interfaces
 {
+template<class Class, typename = void>
+struct CommandPayloadMemberType
+{
+    using type = void;
+};
+
+template<class Class>
+struct CommandPayloadMemberType<Class, std::void_t<decltype(std::declval<Class>().payload)>>
+{
+    using type = decltype(Class::payload);
+};
+
+template<class Class, bool = false>
+struct CommandPayloadMemberSize
+{
+    static constexpr size_t value = 0;
+};
+
+
+template<class Class>
+struct CommandPayloadMemberSize<
+  Class,
+  std::same_as<typename CommandPayloadMemberType<Class>::type, typename Class::payload_type>>
+{
+    static constexpr size_t value = sizeof(Class::payload_type);
+};
+
+
 template<typename T>
 consteval bool CommandHasPayload()
-    requires requires(T t) {
-                 typename T::payload_type;
-                 t.payload;
-
-                 {
-                     T::payload_size
-                     } -> std::same_as<size_t>;
-             } && std::same_as<decltype(T::payload), typename T::payload_type>
 {
-    return true;
+    using payload_type = typename CommandPayloadMemberType<T>::type;
+    return requires(T t) {
+               typename T::payload_type;
+               t.payload;
+               t.payload_size;
+           } && std::same_as<payload_type, typename T::payload_type> &&
+           !std::same_as<payload_type, void> &&
+           std::same_as<decltype(T::payload_size), const size_t>;
 }
 
 template<typename T>
-consteval bool CommandHasPayload()
-{
-    return false;
-}
+concept SerializableCommandPayload =
+  std::same_as<T, void> || std::same_as<T, std::vector<uint8_t>> ||
+  std::convertible_to<T, std::vector<uint8_t>> || requires(T t) { Nilai::Serialize(t); };
+
+template<typename T>
+concept DeserializableCommandPayload =
+  std::same_as<T, void> || std::constructible_from<T, std::vector<uint8_t>> ||
+  requires { Nilai::Deserialize<T>({}); };
 
 /**
  * A command payload can be void (no payload to be sent), or any type that can be converted to a
  * vector of uint8_t.
  */
 template<typename T>
-concept CommandPayload =
-  std::same_as<T, void> || std::same_as<T, std::vector<uint8_t>> ||
-  std::convertible_to<T, std::vector<uint8_t>> || requires(T t) { Nilai::Serialize(t); };
+concept CommandPayload = SerializableCommandPayload<T> && DeserializableCommandPayload<T>;
 
 template<typename T>
 concept CommandConstructibleFromArray =

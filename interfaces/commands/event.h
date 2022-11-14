@@ -91,7 +91,7 @@ private:
     template<Command Cmd>
     [[nodiscard]] bool HasEnoughDataForCmd() const noexcept
     {
-        size_t expectedSize = sizeof(PacketId) + sizeof(Cmd::id);
+        size_t expectedSize = 0;
         if constexpr (CommandHasPayload<Cmd>())
         {
             expectedSize += Cmd::payload_size;

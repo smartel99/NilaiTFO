@@ -18,13 +18,17 @@
 #define NILAI_FILESYSTEM_ERRORCODES_H
 
 #if defined(NILAI_USE_FILESYSTEM)
-#    include "ff.h"
+
+#    if !defined(NILAI_TEST)
+#        include "ff.h"
+#    endif
+
 
 namespace Nilai::Filesystem
 {
-
 enum class Result
 {
+#    if !defined(NILAI_TEST)
     Ok               = FR_OK,
     DiskError        = FR_DISK_ERR,
     IntErr           = FR_INT_ERR,
@@ -45,6 +49,28 @@ enum class Result
     NotEnoughCore    = FR_NOT_ENOUGH_CORE,
     TooManyOpenFiles = FR_TOO_MANY_OPEN_FILES,
     InvalidParameter = FR_INVALID_PARAMETER,
+#    else
+    Ok               = 0,
+    DiskError        = -1,
+    IntErr           = -1,
+    NotReady         = -1,
+    NoFile           = -1,
+    NoPath           = -1,
+    InvalidName      = -1,
+    Denied           = -1,
+    Exist            = -1,
+    InvalidObject    = -1,
+    WriteProtected   = -1,
+    InvalidDrive     = -1,
+    NotEnabled       = -1,
+    NoFilesystem     = -1,
+    MkfsAborted      = -1,
+    Timeout          = -1,
+    Locked           = -1,
+    NotEnoughCore    = -1,
+    TooManyOpenFiles = -1,
+    InvalidParameter = -1,
+#    endif
 };
 }    // namespace Nilai::Filesystem
 #endif

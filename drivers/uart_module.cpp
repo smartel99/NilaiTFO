@@ -32,6 +32,9 @@
         LOG_WARNING("[%s]: " msg, m_label.c_str() __VA_OPT__(, ) __VA_ARGS__)
 #    define UART_ERROR(msg, ...) LOG_ERROR("[%s]: " msg, m_label.c_str() __VA_OPT__(, ) __VA_ARGS__)
 
+#    define NILAI_UART_USE_IT   0
+#    define NILAI_UART_USE_DMA  1
+#    define NILAI_UART_USE_IMPL NILAI_UART_USE_DMA
 
 
 namespace Nilai::Drivers
@@ -39,7 +42,7 @@ namespace Nilai::Drivers
 CircularBuffer<UartModule*, 6> UartModule::s_uarts;
 
 UartModule::UartModule(std::string label, handle_type* uart, size_type txl, size_type rxl) noexcept
-: m_label(std::move(label)), m_handle(uart)
+: m_handle(uart), m_label(std::move(label))
 {
     NILAI_ASSERT(uart != nullptr, "Handle is NULL!");
     s_uarts.Push(this);
@@ -182,8 +185,11 @@ Uart::Frame UartModule::Receive(timeout_t timeout)
 
 void UartModule::ForceSwap()
 {
-    //    HAL_UART_DMAStop(m_handle);
+#    if NILAI_UART_USE_IMPL == NILAI_UART_USE_DMA
+    HAL_UART_DMAStop(m_handle);
+#    else
     HAL_UART_AbortReceive_IT(m_handle);
+#    endif
     uint16_t rcvd = m_dmaBuff.size() - __HAL_DMA_GET_COUNTER(m_handle->hdmarx);
     std::memcpy(m_rxBuff.data(), m_dmaBuff.data(), m_dmaBuff.size());
     //    m_rxBuff = m_dmaBuff;
@@ -235,17 +241,21 @@ void UartModule::MoveCompleteFrameToFrameBuff()
 
 bool UartModule::StartDma()
 {
-    //    HAL_StatusTypeDef status =
-    //      HAL_UARTEx_ReceiveToIdle_DMA(m_handle, m_dmaBuff.data(), m_dmaBuff.size());
-    //    HAL_StatusTypeDef status = HAL_UART_Receive_DMA(m_handle, m_dmaBuff.data(),
-    //    m_dmaBuff.size());
+#    if NILAI_UART_USE_IMPL == NILAI_UART_USE_DMA
+    HAL_StatusTypeDef status = HAL_UART_Receive_DMA(m_handle, m_dmaBuff.data(), m_dmaBuff.size());
+#    else
     HAL_StatusTypeDef status = HAL_UART_Receive_IT(m_handle, m_dmaBuff.data(), m_dmaBuff.size());
+#    endif
     return status == HAL_OK;
 }
 
 bool UartModule::ResizeDma(size_t newSize)
 {
-    HAL_StatusTypeDef s = HAL_UART_AbortReceive_IT(m_handle);    // HAL_UART_DMAStop(m_handle);
+#    if NILAI_UART_USE_IMPL == NILAI_UART_USE_DMA
+    HAL_StatusTypeDef s = HAL_UART_DMAStop(m_handle);
+#    else
+    HAL_StatusTypeDef s      = HAL_UART_AbortReceive_IT(m_handle);
+#    endif
     if (s != HAL_OK)
     {
         UART_ERROR("Unable to stop the DMA stream! %i", static_cast<int>(s));

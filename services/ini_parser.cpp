@@ -24,7 +24,6 @@
 #    include "filesystem.h"
 #    include "logger.h"
 
-
 namespace Nilai::Services
 {
 IniParser::IniParser(std::string_view fp) : m_fp(fp)
@@ -86,16 +85,16 @@ void IniParser::Save()
     };
 
     std::map<std::string, std::vector<Kvp>> data;
-    for (const auto& [secNName, v] : m_values)
+    for (auto&& [secNName, v] : m_values)
     {
         data[GetSectionFromKey(secNName)].emplace_back(GetNameFromKey(secNName), v);
     }
 
     // Dump the sections and key-value pairs.
-    for (const auto& [section, kvp] : data)
+    for (auto&& [section, kvp] : data)
     {
         f.WriteFmtString("[%s]\n", section.c_str());
-        for (const auto& [k, v] : kvp)
+        for (auto&& [k, v] : kvp)
         {
             f.WriteFmtString("%s=%s\n", k.c_str(), v.c_str());
         }

@@ -14,7 +14,7 @@
 #if defined(NILAI_USE_FILESYSTEM)
 #    include "../defines/filesystem/error_codes.h"
 #    include "../defines/pin.h"
-#    include "ff.h"
+#    include "filesystem/types.h"
 
 #    include "file.h"
 
@@ -26,22 +26,8 @@ namespace Nilai
 // TODO Make the file system an object-oriented class that actually represents a file system.
 namespace Filesystem
 {
-using partSize_t = DWORD;
-using dword_t    = unsigned long;
-using fs_t       = FATFS;
-using dir_t      = DIR;
-using fileInfo_t = FILINFO;
-
-enum class CodePages
-{
-    // TODO http://elm-chan.org/fsw/ff/doc/setcp.html
-};
 
 
-struct MakeVolumeParams
-{
-    // TODO
-};
 
 
 bool   Init(const Nilai::Pin& detect = {});

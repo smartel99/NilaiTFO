@@ -18,6 +18,7 @@
 #define NILAI_SMARTPOINTERS_H
 
 #include <memory>
+#include <optional>
 
 namespace Nilai
 {
@@ -47,6 +48,9 @@ constexpr Ptr<T> CreatePtr(Args&&... args)
 {
     return Ptr<T>(std::forward<Args>(args)...);
 }
+
+template<typename T>
+using OptRef = std::optional<std::reference_wrapper<T>>;
 }    // namespace Nilai
 
 #endif    // NILAI_SMARTPOINTERS_H

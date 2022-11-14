@@ -117,8 +117,7 @@ set(SOURCES ${SOURCES} "${ROOT_DIR}/vendor/inih/ini.c")
 
 if (NILAI_TEST)
     include_directories(${ROOT_DIR}/test/Mocks)
-    include_directories(${ROOT_DIR}/test/Mocks/fatfs)
-    
+
     file(GLOB_RECURSE MOCK_SOURCES "${ROOT_DIR}/test/Mocks/*.*")
 
     if ("${NILAI_MCU}" STREQUAL "L452")

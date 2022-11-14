@@ -22,20 +22,22 @@ using UartIoBuffer          = IoBuffer<uint8_t, 512>;
 
 struct UART_HandleTypeDef
 {
-    size_t                id;
-    HAL_UART_StateTypeDef gState;
-    DMA_HandleTypeDef*    hdmarx;
+    size_t                id         = 0;
+    HAL_UART_StateTypeDef gState     = {};
+    DMA_HandleTypeDef*    hdmarx     = nullptr;
+    uint16_t              RxXferSize = 0;
 
-    uint8_t* data;
-    size_t   len;
+    uint8_t* data = nullptr;
+    size_t   len  = 0;
 };
 
 extern std::map<size_t, std::unique_ptr<UartIoBuffer>> s_uart_buffers;
 
 HAL_StatusTypeDef HAL_UART_DeInit(UART_HandleTypeDef*);
 HAL_StatusTypeDef HAL_UART_Receive_DMA(UART_HandleTypeDef*, uint8_t*, size_t);
-HAL_StatusTypeDef HAL_UARTEx_ReceiveToIdle_DMA(UART_HandleTypeDef* huart, uint8_t* dest, size_t
-                                                                                           len);
+HAL_StatusTypeDef HAL_UARTEx_ReceiveToIdle_DMA(UART_HandleTypeDef* huart,
+                                               uint8_t*            dest,
+                                               size_t              len);
 HAL_StatusTypeDef HAL_UART_Transmit_IT(UART_HandleTypeDef*, uint8_t*, size_t);
 
 void              Nilai_UART_Init(UART_HandleTypeDef*);

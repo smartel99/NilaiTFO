@@ -33,8 +33,6 @@ include_directories(${CMAKE_BINARY_DIR}/_deps/googletest-src/googletest/include)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Mocks/fatfs)
-
 if ("${NILAI_MCU}" STREQUAL "L452")
     include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Mocks/STM32L452)
     add_definitions(-DNILAI_USES_STM32L4xx)
