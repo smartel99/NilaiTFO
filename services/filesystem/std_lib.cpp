@@ -44,7 +44,7 @@ static inline const char* FileModesFlag(FileModes modes)
     }
 }
 
-Result Fopen(file_t** file, const char* path, FileModes mode)
+Result Fopen(file_t* file, const char* path, FileModes mode)
 {
     *file = std::fopen(path, FileModesFlag(mode));
     if (*file == nullptr)
@@ -57,7 +57,7 @@ Result Fopen(file_t** file, const char* path, FileModes mode)
     }
 }
 
-Result Fclose(file_t** file)
+Result Fclose(file_t* file)
 {
     return static_cast<Result>(std::fclose(*file));
 }
@@ -65,38 +65,38 @@ Result Fclose(file_t** file)
 
 fsize_t Fread(file_t* file, void* buff, size_t len)
 {
-    return std::fread(buff, sizeof(char), len, file);
+    return std::fread(buff, sizeof(char), len, *file);
 }
 
 fsize_t Fwrite(file_t* file, const void* buff, size_t len)
 {
-    return std::fwrite(buff, sizeof(char), len, file);
+    return std::fwrite(buff, sizeof(char), len, *file);
 }
 
 Result Fseek(file_t* file, fsize_t offset)
 {
-    return static_cast<Result>(std::fseek(file, offset, SEEK_SET));
+    return static_cast<Result>(std::fseek(*file, offset, SEEK_SET));
 }
 
 Result Frewind(file_t* file)
 {
-    std::rewind(file);
+    std::rewind(*file);
     return Result::Ok;
 }
 
 Result Fflush(file_t* file)
 {
-    return std::fflush(file) == 0 ? Result::Ok : Result::IntErr;
+    return std::fflush(*file) == 0 ? Result::Ok : Result::IntErr;
 }
 
 Result Fgets(file_t* file, std::string& outStr, size_t maxLen)
 {
     outStr = std::string(maxLen, '\0');
 
-    char* res = fgets(outStr.data(), static_cast<int>(outStr.size()), file);
+    char* res = fgets(outStr.data(), static_cast<int>(outStr.size()), *file);
     if (res == nullptr)
     {
-        return static_cast<Result>(ferror(file));
+        return static_cast<Result>(ferror(*file));
     }
 
     outStr = res;
@@ -106,40 +106,40 @@ Result Fgets(file_t* file, std::string& outStr, size_t maxLen)
 
 Result Fputc(file_t* file, int ch)
 {
-    return std::fputc(ch, file) == 0 ? Result::Ok : Result::IntErr;
+    return std::fputc(ch, *file) == 0 ? Result::Ok : Result::IntErr;
 }
 
 Result Fputs(file_t* file, const char* str)
 {
-    return std::fputs(str, file) == 0 ? Result::Ok : Result::IntErr;
+    return std::fputs(str, *file) == 0 ? Result::Ok : Result::IntErr;
 }
 
 fsize_t Ftell(file_t* file)
 {
-    return std::ftell(file);
+    return std::ftell(*file);
 }
 
 bool Feof(file_t* file)
 {
-    return (std::feof(file) != 0);
+    return (std::feof(*file) != 0);
 }
 
 fsize_t Fsize(file_t* file)
 {
-    long curr = std::ftell(file);
-    std::fseek(file, 0, SEEK_END);
-    fsize_t size = std::ftell(file);
-    std::fseek(file, curr, SEEK_SET);
+    long curr = std::ftell(*file);
+    std::fseek(*file, 0, SEEK_END);
+    fsize_t size = std::ftell(*file);
+    std::fseek(*file, curr, SEEK_SET);
     return size;
 }
 
 bool Ferror(file_t* file)
 {
-    return ferror(file) != 0;
+    return ferror(*file) != 0;
 }
 
 
-bool Init(const Nilai::Pin& pin)
+bool Init([[maybe_unused]] const Nilai::Pin& pin)
 {
     return true;
 }
@@ -148,7 +148,7 @@ void Deinit()
 {
 }
 
-Result Mount(const std::string& drive, bool forceMount)
+Result Mount([[maybe_unused]] const std::string& drive, [[maybe_unused]] bool forceMount)
 {
     return Result::Ok;
 }
@@ -175,7 +175,9 @@ Result MakePartition([[maybe_unused]] const std::string& drive,
     return Result::NotEnabled;
 }
 
-Result GetFreeClusters(const std::string& drive, dword_t* outClst, fs_t** fatfs)
+Result GetFreeClusters([[maybe_unused]] const std::string& drive,
+                       [[maybe_unused]] dword_t*           outClst,
+                       [[maybe_unused]] fs_t**             fatfs)
 {
     NILAI_ASSERT(false, "Function not enabled!");
     return Result::NotEnabled;

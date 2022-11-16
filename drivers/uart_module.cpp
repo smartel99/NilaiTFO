@@ -84,7 +84,7 @@ void UartModule::Run()
     if (m_bytesInRxBuff != 0)
     {
         // DMA has received something!
-        UART_DEBUG("Reception complete!");
+//        UART_DEBUG("Reception complete!");
         MoveCompleteFrameToFrameBuff();
         if (m_cb)
         {

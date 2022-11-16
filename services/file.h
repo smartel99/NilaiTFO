@@ -56,10 +56,10 @@ class File
 {
 public:
     File() = default;
-    File(std::string path, FileModes mode = FileModes::DEFAULT);
+    File(std::string_view path, FileModes mode = FileModes::DEFAULT);
     ~File();
 
-    Result Open(std::string path = "", FileModes mode = FileModes::DEFAULT);
+    Result Open(std::string_view path = "", FileModes mode = FileModes::DEFAULT);
     Result Close();
     Result Read(void* outData, size_t lenDesired, size_t* lenRead = nullptr);
     Result Write(const void* data, size_t dataLen, size_t* dataWritten = nullptr);
@@ -82,9 +82,9 @@ public:
             return Result::NoFile;
         }
 #            endif
-        if (f_printf(m_file, fmt, args...) <= 0)
+        if (f_printf(&m_file, fmt, args...) <= 0)
         {
-            m_status = static_cast<Result>(f_error(m_file));
+            m_status = static_cast<Result>(f_error(&m_file));
         }
         else
         {
@@ -113,11 +113,11 @@ public:
                        operator bool() const { return IsOpen(); }
 
 private:
-    std::string m_path;
-    FileModes   m_mode   = FileModes::Read | FileModes::OpenExisting;
-    file_t*     m_file   = nullptr;
-    bool        m_isOpen = false;
-    Result      m_status = {};
+    std::string_view m_path;
+    FileModes        m_mode   = FileModes::Read | FileModes::OpenExisting;
+    file_t           m_file   = {};
+    bool             m_isOpen = false;
+    Result           m_status = {};
 };
 }    // namespace Nilai::Filesystem
 

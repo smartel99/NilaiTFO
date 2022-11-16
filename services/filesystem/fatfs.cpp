@@ -48,24 +48,16 @@ static FsData s_data;
 
 namespace Nilai::Filesystem
 {
-Result Fopen(file_t** file, const char* path, FileModes mode)
+Result Fopen(file_t* file, const char* path, FileModes mode)
 {
-    if(*file == nullptr)
-    {
-        *file = new file_t;
-    }
-    return static_cast<Result>(f_open(*file, path, static_cast<BYTE>(mode)));
+    Result r = static_cast<Result>(f_open(file, path, static_cast<BYTE>(mode)));
+    f_sync(file);
+    return r;
 }
 
-Result Fclose(file_t** file)
+Result Fclose(file_t* file)
 {
-    Result r= static_cast<Result>(f_close(*file));
-
-    if(*file != nullptr)
-    {
-        delete *file;
-        *file = nullptr;
-    }
+    Result r= static_cast<Result>(f_close(file));
     return r;
 }
 
@@ -84,6 +76,7 @@ fsize_t Fwrite(file_t* file, const void* buff, size_t len)
     UINT bw = 0;
     if (f_write(file, buff, len, &bw) == FR_OK)
     {
+        f_sync(file);
         return bw;
     }
     return -1;
@@ -93,7 +86,9 @@ Result Fseek(file_t* file, fsize_t offset)
 {
 
 #        if _FS_MINIMIZE <= 2
-    return static_cast<Result>(f_lseek(file, offset));
+    Result r = static_cast<Result>(f_lseek(file, offset));
+    f_sync(file);
+    return r;
 #        else
     NILAI_ASSERT(false, "This function is not enabled");
     return Result::Ok;
@@ -199,9 +194,11 @@ bool Ferror(file_t* file)
 bool Init(const Nilai::Pin& pin)
 {
     s_data.sdPin = pin;
-    s_data.fs    = new FATFS;
-    NILAI_ASSERT(s_data.fs != nullptr, "Unable to allocate memory for file system!");
-
+    if(s_data.fs == nullptr)
+    {
+        s_data.fs = new FATFS;
+        NILAI_ASSERT(s_data.fs != nullptr, "Unable to allocate memory for file system!");
+    }
     s_data.isInit = FATFS_LinkDriver(&USER_Driver, s_data.sdPath) == 0;
 
     return s_data.isInit;

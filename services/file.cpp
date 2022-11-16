@@ -28,9 +28,9 @@
 
 namespace Nilai::Filesystem
 {
-File::File(std::string path, FileModes mode) : m_path(std::move(path)), m_mode(mode), m_file {}
+File::File(std::string_view path, FileModes mode) : m_mode(mode)
 {
-    Open(m_path, mode);
+    Open(path, mode);
 }
 
 File::~File()
@@ -41,20 +41,20 @@ File::~File()
     //    }
 }
 
-Result File::Open(std::string path, FileModes mode)
+Result File::Open(std::string_view path, FileModes mode)
 {
     // If path is empty, just reopen the file.
     if (!path.empty())
     {
-        m_path = std::move(path);
+        m_path = path;
     }
 
     m_mode   = mode;
-    m_status = Fopen(&m_file, m_path.c_str(), m_mode);
+    m_status = Fopen(&m_file, m_path.data(), m_mode);
 
     if (m_status != Result::Ok)
     {
-        FS_ERROR("Unable to open file '%s': %s", m_path.c_str(), ResultToStr(m_status));
+        FS_ERROR("Unable to open file '%s': %s", m_path.data(), ResultToStr(m_status));
         m_isOpen = false;
     }
     else
@@ -73,7 +73,7 @@ Result File::Close()
 
     if (m_status != Result::Ok)
     {
-        FS_ERROR("Unable to close file '%s': %s", m_path.c_str(), ResultToStr(m_status));
+        FS_ERROR("Unable to close file '%s': %s", m_path.data(), ResultToStr(m_status));
     }
     else
     {
@@ -87,7 +87,7 @@ Result File::Read(void* outData, size_t lenDesired, size_t* lenRead)
 {
     ASSERT_FILE_IS_OK();
     NILAI_ASSERT(outData != nullptr, "Pointer is null!");
-    fsize_t r = Fread(m_file, outData, lenDesired);
+    fsize_t r = Fread(&m_file, outData, lenDesired);
 
     if (lenRead != nullptr)
     {
@@ -101,7 +101,7 @@ Result File::Write(const void* data, size_t dataLen, size_t* dataWritten)
     ASSERT_FILE_IS_OK();
     NILAI_ASSERT(data != nullptr, "Pointer is null!");
 
-    fsize_t r = Fwrite(m_file, data, dataLen);
+    fsize_t r = Fwrite(&m_file, data, dataLen);
 
     if (dataWritten != nullptr)
     {
@@ -114,61 +114,61 @@ Result File::Seek(fsize_t ofs)
 {
     ASSERT_FILE_IS_OK();
 
-    return Fseek(m_file, ofs);
+    return Fseek(&m_file, ofs);
 }
 
 Result File::Rewind()
 {
     ASSERT_FILE_IS_OK();
 
-    return Frewind(m_file);
+    return Frewind(&m_file);
 }
 
 Result File::Sync()
 {
     ASSERT_FILE_IS_OK();
-    return Fflush(m_file);
+    return Fflush(&m_file);
 }
 
 Result File::GetString([[maybe_unused]] std::string& outStr, [[maybe_unused]] size_t maxLen)
 {
     ASSERT_FILE_IS_OK();
-    return Fgets(m_file, outStr, maxLen);
+    return Fgets(&m_file, outStr, maxLen);
 }
 
 Result File::WriteChar([[maybe_unused]] uint8_t c)
 {
     ASSERT_FILE_IS_OK();
-    return Fputc(m_file, c);
+    return Fputc(&m_file, c);
 }
 
 Result File::WriteString([[maybe_unused]] const std::string& str)
 {
     ASSERT_FILE_IS_OK();
-    return Fputs(m_file, str.c_str());
+    return Fputs(&m_file, str.c_str());
 }
 
 fsize_t File::Tell()
 {
     ASSERT_FILE_IS_OK();
-    return Ftell(m_file);
+    return Ftell(&m_file);
 }
 
 bool File::AtEoF()
 {
     ASSERT_FILE_IS_OK();
-    return Feof(m_file);
+    return Feof(&m_file);
 }
 
 fsize_t File::GetSize()
 {
     ASSERT_FILE_IS_OK();
-    return Fsize(m_file);
+    return Fsize(&m_file);
 }
 
 bool File::HasError()
 {
-    return Ferror(m_file);
+    return Ferror(&m_file);
 }
 
 }    // namespace Nilai::Filesystem

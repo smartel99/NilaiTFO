@@ -70,7 +70,7 @@ enum class FileModes : uint8_t
     WRITE_APPEND  = Read | Write | OpenAppend,
 };
 #    else
-using file_t  = FILE;
+using file_t  = FILE*;
 using fsize_t = std::size_t;
 
 using partSize_t = std::size_t;
@@ -136,8 +136,8 @@ constexpr inline FileModes operator|=(FileModes& a, const FileModes& b)
     return a = a | b;
 }
 
-Result  Fopen(file_t** file, const char* path, FileModes mode);
-Result  Fclose(file_t** file);
+Result  Fopen(file_t* file, const char* path, FileModes mode);
+Result  Fclose(file_t* file);
 fsize_t Fread(file_t* file, void* buff, size_t len);
 fsize_t Fwrite(file_t* file, const void* buff, size_t len);
 Result  Fseek(file_t* file, fsize_t offset);
