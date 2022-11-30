@@ -14,6 +14,8 @@
 #    include "../services/logger.h"
 #    include "../services/time.h"
 
+#    include "../defines/system.h"
+
 #    include <cstdarg>    // For va_list.
 #    include <cstdio>
 #    include <cstring>
@@ -52,6 +54,23 @@ UartModule::UartModule(std::string label, handle_type* uart, size_type txl, size
     m_dmaBuff.resize(rxl);
     m_rxBuff.resize(rxl);
 
+    if (uart->hdmatx != nullptr)
+    {
+        UART_INFO("Using TX thru DMA");
+        m_txFunc = TransmitDMA;
+    }
+    else
+    {
+        UART_INFO("Using TX thru IT");
+        m_txFunc = TransmitIT;
+    }
+
+    if (uart->hdmarx == nullptr)
+    {
+        UART_ERROR("RX DMA not enabled!");
+        AssertFailed(reinterpret_cast<const uint8_t*>(__FILE__), __LINE__, 1);
+    }
+
     StartDma();
     UART_INFO("Uart initialized");
 }
@@ -84,7 +103,7 @@ void UartModule::Run()
     if (m_bytesInRxBuff != 0)
     {
         // DMA has received something!
-//        UART_DEBUG("Reception complete!");
+        //        UART_DEBUG("Reception complete!");
         MoveCompleteFrameToFrameBuff();
         if (m_cb)
         {
@@ -119,8 +138,7 @@ bool UartModule::Transmit(const data_type* buff, size_type len)
     memcpy(m_txBuff.data(), buff, len);
 
     // Send the message.
-    if (HAL_UART_Transmit_IT(m_handle, m_txBuff.data(), static_cast<uint16_t>(m_txBuff.size())) !=
-        HAL_OK)
+    if (!m_txFunc(m_handle, m_txBuff.data(), static_cast<uint16_t>(m_txBuff.size())))
     {
         UART_ERROR("Unable to transmit message");
         return false;
@@ -159,7 +177,7 @@ bool UartModule::Transmit(const raw_buffer_type& msg)
     va_end(args);
 
     // Send the message.
-    if (HAL_UART_Transmit_IT(m_handle, m_txBuff.data(), static_cast<uint16_t>(len)) != HAL_OK)
+    if (!m_txFunc(m_handle, m_txBuff.data(), static_cast<uint16_t>(len)))
     {
         UART_ERROR("Unable to transmit message");
         return false;
@@ -293,6 +311,16 @@ void UartModule::RxCpltCallback(uint16_t size)
     StartDma();
 }
 
+bool UartModule::TransmitIT(UartModule::handle_type* uart, const uint8_t* data, size_t len)
+{
+    return HAL_UART_Transmit_IT(uart, const_cast<uint8_t*>(data), len) == HAL_OK;
+}
+
+bool UartModule::TransmitDMA(UartModule::handle_type* uart, const uint8_t* data, size_t len)
+{
+    return HAL_UART_Transmit_DMA(uart, const_cast<uint8_t*>(data), len) == HAL_OK;
+}
+
 extern "C" void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef* huart, uint16_t size)
 {
     UartModule::RxCpltCallback(huart, size);
@@ -303,9 +331,37 @@ extern "C" void HAL_UART_RxCpltCallback(UART_HandleTypeDef* huart)
     UartModule::RxCpltCallback(huart, huart->RxXferSize);
 }
 
+extern "C" void HAL_UART_TxCpltCallback(UART_HandleTypeDef* huart)
+{
+    HAL_UART_AbortTransmit(huart);
+}
+
 extern "C" void HAL_UART_ErrorCallback(UART_HandleTypeDef* huart)
 {
-    // placeholder for now, just in case.
+    union Status
+    {
+        struct
+        {
+            uint32_t ParityError : 1;
+            uint32_t FrameError : 1;
+            uint32_t NoiseError : 1;
+            uint32_t OverrunError : 1;
+            uint32_t IdleFrameDetected : 1;
+            uint32_t ReadDataBufferNotEmpty : 1;
+            uint32_t TxComplete : 1;
+            uint32_t TxBufferEmpty : 1;
+            uint32_t LinBreakDetected : 1;
+            uint32_t CtsChangeFlag : 1;
+            uint32_t : 22;
+        } Bits;
+        uint32_t Register = 0;
+    };
+    static_assert(sizeof(Status) == sizeof(uint32_t), "Invalid size for status");
+
+    [[maybe_unused]] volatile Status status = {.Register =
+                                                 huart->Instance->NILAI_UART_IRQ_STATUS_REG};
+
+    System::Breakpoint();
 }
 
 

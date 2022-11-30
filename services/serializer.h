@@ -125,6 +125,10 @@ std::vector<uint8_t> Serialize(const T& t) noexcept
             serializeBytes(item);
         }
     }
+    else if constexpr (std::convertible_to<T, std::vector<uint8_t>>)
+    {
+        return static_cast<std::vector<uint8_t>>(t);
+    }
     else
     {
         serialized.reserve(sizeof(T));

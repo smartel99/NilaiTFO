@@ -72,6 +72,8 @@ public:
 
     using callback_t = std::function<void(Uart::Frame)>;
 
+    using tx_func_t = bool (*)(handle_type*, const uint8_t*, size_t);
+
 public:
     UartModule() noexcept = default;
     UartModule(std::string    label,
@@ -127,13 +129,16 @@ private:
     bool StartDma();
     void MoveCompleteFrameToFrameBuff();
 
+    static bool TransmitIT(handle_type* uart, const uint8_t* data, size_t len);
+    static bool TransmitDMA(handle_type* uart, const uint8_t* data, size_t len);
+
 protected:
     handle_type* m_handle = nullptr;    //!< Pointer to the hardware peripheral.
-    
+
 private:
     std::string m_label;    //!< Label of the module, used for logging purposes.
 
-
+    tx_func_t       m_txFunc = nullptr;
     raw_buffer_type m_txBuff;    //!< Transmission buffer
 
     /**

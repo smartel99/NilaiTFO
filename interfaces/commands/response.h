@@ -44,6 +44,22 @@
 
 namespace Nilai::Interfaces
 {
+template<class Class, typename = void>
+struct CommandResponseMemberSize
+{
+    static constexpr size_t value = 0;
+};
+
+
+template<class Class>
+struct CommandResponseMemberSize<Class, std::void_t<decltype(sizeof(Class))>>
+{
+    static constexpr size_t value = sizeof(Class);
+};
+
+static_assert(CommandResponseMemberSize<void>::value == 0);
+static_assert(CommandResponseMemberSize<int>::value == sizeof(int));
+
 /**
  * Checks if the command requires a response to be received. This is done at compile time through
  * the two definitions of the functions, each having different specialization.

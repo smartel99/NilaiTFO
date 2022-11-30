@@ -28,6 +28,14 @@ namespace Nilai::System
 {
 void Reset();
 bool IsDebuggerConnected();
+
+inline void Breakpoint()
+{
+    if (IsDebuggerConnected())
+    {
+        NILAI_BREAKPOINT;
+    }
+}
 }    // namespace Nilai::System
 
 #endif    // NILAI_DEFINES_SYSTEM_H

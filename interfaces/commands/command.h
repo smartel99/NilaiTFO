@@ -85,9 +85,10 @@ concept Command = ValidCommandPayload<T> && ValidCommandResponse<T> && ValidComm
                   std::is_default_constructible_v<T>;
 
 template<uint8_t         Id,
-         CommandPayload  Payload     = void,
-         CommandResponse Response    = void,
-         int             PayloadSize = -1>
+         CommandPayload  Payload      = void,
+         CommandResponse Response     = void,
+         int             PayloadSize  = -1,
+         int             ResponseSize = -1>
 struct GenericCommand
 {
     using payload_type = Payload;
@@ -95,7 +96,10 @@ struct GenericCommand
     // use the provided payload size.
     static constexpr size_t payload_size =
       PayloadSize == -1 ? CommandPayloadMemberSize<Payload>::value : PayloadSize;
+
     using response_type = Response;
+    static constexpr size_t response_size =
+      ResponseSize == -1 ? CommandResponseMemberSize<Response>::value : ResponseSize;
 
     static constexpr uint8_t id = Id;
 };
