@@ -1,7 +1,4 @@
 /**
- * @addtogroup filesystem.h
- * @{
- *******************************************************************************
  * @file	filesystem.h
  * @author	Samuel Martel
  * @brief
@@ -15,39 +12,25 @@
 /***********************************************/
 /* Includes */
 #if defined(NILAI_USE_FILESYSTEM)
-
-#    include "../defines/Filesystem/ErrorCodes.h"
+#    include "../defines/filesystem/error_codes.h"
 #    include "../defines/pin.h"
-#    include "ff.h"
+#    include "filesystem/types.h"
+
 #    include "file.h"
 
 #    include <string>
 
 
-namespace cep
+namespace Nilai
 {
 // TODO Make the file system an object-oriented class that actually represents a file system.
 namespace Filesystem
 {
-using partSize_t = DWORD;
-using dword_t    = unsigned long;
-using fs_t       = FATFS;
-using dir_t      = DIR;
-using fileInfo_t = FILINFO;
-
-enum class CodePages
-{
-    // TODO http://elm-chan.org/fsw/ff/doc/setcp.html
-};
 
 
-struct MakeVolumeParams
-{
-    // TODO
-};
 
 
-bool   Init(const cep::Pin& detect = {});
+bool   Init(const Nilai::Pin& detect = {});
 void   Deinit();
 Result Mount(const std::string& drive = "", bool forceMount = false);
 Result Unmount();
@@ -78,14 +61,9 @@ Result Unlink(const std::string& path);
 
 Result Utime(const std::string& path, const fileInfo_t* fno);
 
-std::string ResultToStr(Result res);
-};    // namespace Filesystem
-}    // namespace cep
-
-
-/**
- * @}
- */
+const char* ResultToStr(Result res);
+}    // namespace Filesystem
+}    // namespace Nilai
 #endif
 /* END OF FILE */
 #endif /* FILESYSTEM_H_ */

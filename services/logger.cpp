@@ -1,7 +1,4 @@
 /**
- * @addtogroup logger.cpp
- * @{
- *******************************************************************************
  * @file	logger.cpp
  * @author	Samuel Martel
  * @brief
@@ -9,41 +6,40 @@
  *******************************************************************************
  */
 
-#if defined(NILAI_USE_LOGGER)
-#    include "logger.hpp"
-#    include "../defines/macros.hpp"
+#if defined(NILAI_USE_LOGGER) && !defined(NILAI_TEST)
+#    include "logger.h"
+#    include "../defines/macros.h"
 #    if defined(NILAI_USE_UART)
-#        include "../drivers/uartModule.hpp"
+#        include "../drivers/uart_module.h"
 #    endif
 
 #    include <cstdarg>
 #    include <cstdio>
+#    include <utility>
 
+namespace Nilai::Services
+{
 Logger* Logger::s_instance = nullptr;
 
 #    if defined(NILAI_USE_UART)
-Logger::Logger(UartModule* uart, const LogFunc& logFunc)
+Logger::Logger(Drivers::UartModule& uart, LogFunc logFunc)
+: m_uart(uart), m_logFunc(std::move(logFunc))
 {
-    CEP_ASSERT(s_instance == nullptr, "Can only have one instance of Logger!");
+    NILAI_ASSERT(s_instance == nullptr, "");
+    NILAI_ASSERT(m_logFunc, "");
     s_instance = this;
-    m_uart     = uart;
-    m_logFunc  = logFunc;
 }
 #    else
-
-Logger::Logger(const LogFunc& logFunc)
+Logger::Logger(const LogFunc& logFunc) : m_logFunc(std::move(logFunc))
 {
     CEP_ASSERT(s_instance == nullptr, "Can only have one instance of Logger!");
+    NILAI_ASSERT(m_logFunc, "");
     s_instance = this;
-    m_logFunc  = logFunc;
 }
 #    endif
 
 Logger::~Logger()
 {
-#    if defined(NILAI_USE_UART)
-    delete m_uart;
-#    endif
     s_instance = nullptr;
 }
 
@@ -59,20 +55,23 @@ void Logger::Log(const char* fmt, ...)
 
 void Logger::VLog(const char* fmt, va_list args)
 {
-    static char buff[1024] = {0};
+    static char buff[1024] = {};
 
-    size_t s = vsnprintf(buff, sizeof_array(buff), fmt, args);
+    size_t s = vsnprintf(buff, std::size(buff), fmt, args);
 
-    CEP_ASSERT(s < sizeof_array(buff), "vsnprintf error!");
+    NILAI_ASSERT(s < std::size(buff), "vsnprintf error!");
 #    if defined(NILAI_USE_UART)
-    if (m_uart != nullptr)
-    {
-        m_uart->Transmit(buff, s);
-    }
+    m_uart.Transmit(buff, s);
 #    endif
-    if (m_logFunc)
+    m_logFunc(buff, s);
+}
+
+void Logger::SetLogFunc(const LogFunc& logFunc)
+{
+    if (logFunc)
     {
-        m_logFunc(buff, s);
+        m_logFunc = logFunc;
     }
 }
+}    // namespace Nilai::Services
 #endif

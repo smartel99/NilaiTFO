@@ -1,6 +1,4 @@
 /**
- * @addtogroup Defines
- * {
  * @file   globaldef.h
  * @author Pascal-Emmanuel Lachance
  * @date   2019/07/07, 20:01
@@ -30,15 +28,11 @@
 
 /*****************************************************************************/
 /* Macros ------------------------------------------------------------------ */
-#    define sizeof_array(x) (size_t)(sizeof(x) / sizeof((x)[0]))
 
 #    define IS_POINTER_NOT_NULL(ptr) (ptr != NULL)
 
 /*****************************************************************************/
 #endif /* GLOBALDEF_H */
-/**
- * @}
- */
 
 /* Have a wonderful day! :) */
 /****** END OF FILE ******/

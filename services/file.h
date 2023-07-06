@@ -1,7 +1,4 @@
 /**
- * @addtogroup file.h
- * @{
- *******************************************************************************
  * @file	file.h
  * @author	Samuel Martel
  * @brief
@@ -9,113 +6,85 @@
  *******************************************************************************
  */
 
-#ifndef FILE_H_
-#define FILE_H_
+#ifndef NILAI_SERVICES_FILESYSTEM_FILE_H_
+#define NILAI_SERVICES_FILESYSTEM_FILE_H_
 
 /***********************************************/
 /* Includes */
 #if defined(NILAI_USE_FILESYSTEM)
+#    include "../defines/filesystem/error_codes.h"
+#    include "../defines/macros.h"
 
-#    include "../defines/Core.h"
-#    include "../defines/Filesystem/ErrorCodes.h"
-
-#    include "ff.h"
+#    include "filesystem/types.h"
 
 #    include <functional>
 #    include <string>
-
-namespace cep
-{
-namespace Filesystem
-{
-using file_t  = FIL;
-using fsize_t = FSIZE_t;
+#    include <string_view>
 
 /**
- * Mode flags that specifies the type of access and open method for a file.
- * Multiple flags can be combined.
+ * @addtogroup Nilai
+ * @{
  */
-enum class FileModes : uint8_t
-{
-    //!< Specifies read access to the file. Data can be read from the file.
-    Read = FA_READ,
-    //!< Specifies write access to the file. Data can be written to the file.
-    //! Combine with Read for read-write access.
-    Write = FA_WRITE,
-    //!< Opens a file. The function fails if the file is not existing. (Default)
-    OpenExisting = FA_OPEN_EXISTING,
-    //!< Creates a new file. The function fails with Result::Exist if the file already exists.
-    CreateNew = FA_CREATE_NEW,
-    //!< Creates a new file. If the file already exists, it will be truncated and overwritten.
-    CreateAlways = FA_CREATE_ALWAYS,
-    //!< Opens the file if it exists. If it doesn't, create it.
-    OpenAlways = FA_OPEN_ALWAYS,
-    //!< Same as FA_OPEN_ALWAYS except the read/write pointer is set at the end of the file.
-    OpenAppend = FA_OPEN_APPEND,
 
-    DEFAULT       = Read | OpenExisting,
-    DEFAULT_WRITE = Read | Write | OpenAlways,
-    WRITE_APPEND  = Read | Write | OpenAppend,
-};
+/**
+ * @addtogroup Services
+ * @{
+ */
 
-constexpr inline FileModes operator|(FileModes a, FileModes b)
-{
-    return static_cast<FileModes>(static_cast<std::underlying_type_t<FileModes>>(a) |
-                                  static_cast<std::underlying_type_t<FileModes>>(b));
-}
-constexpr inline FileModes operator&(FileModes a, FileModes b)
-{
-    return static_cast<FileModes>(static_cast<std::underlying_type_t<FileModes>>(a) &
-                                  static_cast<std::underlying_type_t<FileModes>>(b));
-}
-constexpr inline FileModes operator|=(FileModes& a, const FileModes& b)
-{
-    return a = a | b;
-}
+/**
+ * @addtogroup Filesystem
+ * @{
+ */
 
+namespace Nilai::Filesystem
+{
+/**
+ * @enum AllocModes
+ * @brief Modes of allocation used by FATFS
+ */
 enum class AllocModes
 {
     PrepareToAllocate = 0,
     AllocateNow       = 1,
 };
 
+/**
+ * @class File
+ * @brief Structure representing a file object.
+ */
 class File
 {
 public:
     File() = default;
-    File(const std::string& path, FileModes mode = FileModes::DEFAULT);
+    File(std::string_view path, FileModes mode = FileModes::DEFAULT);
     ~File();
 
-    Result Open(const std::string& path = "", FileModes mode = FileModes::DEFAULT);
+    Result Open(std::string_view path = "", FileModes mode = FileModes::DEFAULT);
     Result Close();
     Result Read(void* outData, size_t lenDesired, size_t* lenRead = nullptr);
     Result Write(const void* data, size_t dataLen, size_t* dataWritten = nullptr);
     Result Seek(fsize_t ofs);
     Result Rewind();
-    Result Truncate();
     Result Sync();
-    Result Forward(const std::function<size_t(const uint8_t*, size_t)>& func,
-                   size_t                                               cntToFwd,
-                   size_t*                                              forwarded);
-    Result Expand(fsize_t newSize, AllocModes mode);
     Result GetString(std::string& outStr, size_t maxLen = 128);
     Result WriteChar(uint8_t c);
     Result WriteString(const std::string& str);
 
     template<typename... Ts>
-    Result WriteFmtString(const char* fmt, Ts... args)
+    Result WriteFmtString([[maybe_unused]] const char* fmt, [[maybe_unused]] Ts... args)
     {
-#    if _FS_READONLY == 0 && _USE_STRFUNC >= 1
-#        if defined(DEBUG)
+#    if !defined(NILAI_TEST)
+#        if _FS_READONLY == 0 && _USE_STRFUNC >= 1
+#            if defined(DEBUG)
         if (!m_isOpen)
         {
             // File must be open and valid!
             return Result::NoFile;
         }
-#        endif
+#            endif
         if (f_printf(&m_file, fmt, args...) <= 0)
         {
-            m_status = (Result)f_error(&m_file);
+            m_status = static_cast<Result>(f_error(&m_file));
         }
         else
         {
@@ -124,9 +93,13 @@ public:
 
         return m_status;
 
+#        else
+        NILAI_ASSERT(false, "This function is not enabled");
+        return Result::Ok;
+#        endif
 #    else
-        CEP_ASSERT(false, "This function is not enabled");
-        return 0;
+        fprintf(m_file, fmt, args...);
+        return Result::Ok;
 #    endif
     }
 
@@ -140,18 +113,17 @@ public:
                        operator bool() const { return IsOpen(); }
 
 private:
-    std::string m_path;
-    FileModes   m_mode = FileModes::Read | FileModes::OpenExisting;
-    file_t      m_file;
-    bool        m_isOpen = false;
-    Result      m_status = {};
+    std::string_view m_path;
+    FileModes        m_mode   = FileModes::Read | FileModes::OpenExisting;
+    file_t           m_file   = {};
+    bool             m_isOpen = false;
+    Result           m_status = {};
 };
-}    // namespace Filesystem
-}    // namespace cep
+}    // namespace Nilai::Filesystem
 
-/**
- * @}
- */
+//!@}
+//!@}
+//!@}
 #endif
 /* END OF FILE */
-#endif /* FILE_H_ */
+#endif /* NILAI_SERVICES_FILESYSTEM_FILE_H_ */

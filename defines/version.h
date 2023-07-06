@@ -1,7 +1,4 @@
 /**
- * @addtogroup version.h
- * @{
- *******************************************************************************
  * @file	version.h
  * @author	Samuel Martel
  * @brief
@@ -22,7 +19,7 @@
 /***********************************************/
 /* Function declarations */
 
-namespace cep
+namespace Nilai
 {
 static constexpr size_t GetMonthFromDate()
 {
@@ -63,10 +60,7 @@ static constexpr size_t GetVersion()
 
     return ver;
 }
-}    // namespace cep
+}    // namespace Nilai
 
-/**
- * @}
- */
 /* END OF FILE */
 #endif /* VERSION_H_ */

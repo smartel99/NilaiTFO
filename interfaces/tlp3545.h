@@ -1,7 +1,4 @@
 /**
- * @addtogroup tlp3545.h
- * @{
- *******************************************************************************
  * @file	tlp3545.h
  * @author	Samuel Martel
  * @brief
@@ -51,8 +48,5 @@ private:
 /* Function declarations */
 
 #endif
-/**
- * @}
- */
 /* END OF FILE */
 #endif /* TLP3545_H_ */
