@@ -14,6 +14,7 @@
 
 //#include "macros.h"
 
+#include <array>
 #include <bit>
 #include <iomanip>
 #include <sstream>

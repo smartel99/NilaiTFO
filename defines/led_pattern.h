@@ -13,6 +13,7 @@
 
 /*****************************************************************************/
 /* Includes */
+#    include <cstddef>
 #    include <vector>
 
 namespace Nilai

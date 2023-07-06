@@ -79,10 +79,10 @@ consteval bool CommandHasPayload()
 {
     using payload_type = typename CommandPayloadMemberType<T>::type;
     return requires(T t) {
-               typename T::payload_type;
-               t.payload;
-               t.payload_size;
-           } && std::same_as<payload_type, typename T::payload_type> &&
+        typename T::payload_type;
+        t.payload;
+        t.payload_size;
+    } && std::same_as<payload_type, typename T::payload_type> &&
            !std::same_as<payload_type, void> &&
            std::same_as<decltype(T::payload_size), const size_t>;
 }
@@ -105,19 +105,15 @@ template<typename T>
 concept CommandPayload = SerializableCommandPayload<T> && DeserializableCommandPayload<T>;
 
 template<typename T>
-concept CommandConstructibleFromArray =
-  requires { std::constructible_from<T, std::array<uint8_t, T::payload_size>>; };
+concept CommandConstructibleFromArray = std::constructible_from<T, std::vector<uint8_t>>;
 
 template<typename T>
 concept CommandPayloadConstructibleFromArray =
-  requires {
-      std::constructible_from<typename T::payload_type, std::array<uint8_t, T::payload_size>>;
-  };
+  std::constructible_from<typename T::payload_type, std::vector<uint8_t>>;
 
 template<typename T>
-concept ValidCommandPayload = !
-CommandHasPayload<T>() ||
-  (CommandConstructibleFromArray<T> || CommandPayloadConstructibleFromArray<T>);
+concept ValidCommandPayload = !CommandHasPayload<T>() || (CommandConstructibleFromArray<T> ||
+                                                          CommandPayloadConstructibleFromArray<T>);
 
 }    // namespace Nilai::Interfaces
 
