@@ -215,7 +215,9 @@ bool SwTas5760<Device>::ResumeStream()
 template<typename Device>
 bool SwTas5760<Device>::StopStream()
 {
-    Deinit();
+    //    Deinit();
+    ToggleMute(true);
+    ToggleSleep(true);
     return Device::StopStream();
 }
 

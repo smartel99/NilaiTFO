@@ -357,7 +357,7 @@ enum class Registers : uint8_t
      *      <td colspan="1" style="border-left:1px solid;text-align:center">Clock Error</td>
      *      <td colspan="1" style="border-left:1px solid;text-align:center">Over Current Error</td>
      *      <td colspan="1" style="border-left:1px solid;text-align:center">DC Error</td>
-     *      <td colspan="1" style="border-left:1px solid;text-align:center">Over Temperature
+     *      <td colspan="1" style="border-left:1px solid;text-align:center">Over GssTemperature
      * Error</td>
      *  </tr>
      *  <tr>

@@ -41,6 +41,7 @@ RtcModule::RtcModule(RTC_HandleTypeDef* handle) : m_handle(handle)
  */
 bool RtcModule::DoPost()
 {
+#if defined(NILAI_RTC_DO_POST)
     Rtc::Time firstTime = GetTime();
     Delay(2000);
     Rtc::Time secondTime = GetTime();
@@ -57,6 +58,8 @@ bool RtcModule::DoPost()
         RTC_ERROR("POST ERROR! (first: %i, second: %i)", ftSec, stSec);
         return false;
     }
+#endif
+    return true;
 }
 
 void RtcModule::Run()

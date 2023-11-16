@@ -57,17 +57,16 @@ struct CommandPayloadMemberType<Class, std::void_t<decltype(std::declval<Class>(
     using type = decltype(Class::payload);
 };
 
-template<class Class, typename = void>
+template<typename Class>
 struct CommandPayloadMemberSize
 {
-    static constexpr size_t value = 0;
+    static constexpr size_t value = sizeof(Class);
 };
 
-
-template<class Class>
-struct CommandPayloadMemberSize<Class, std::void_t<decltype(sizeof(Class))>>
+template<>
+struct CommandPayloadMemberSize<void>
 {
-    static constexpr size_t value = sizeof(Class);
+    static constexpr size_t value = 0;
 };
 
 static_assert(CommandPayloadMemberSize<void>::value == 0);

@@ -594,6 +594,26 @@
  */
 
 /**
+ * @addtogroup rtc_options RTC Options
+ * @{
+ * @brief Options for the Real-Time Clock module.
+ *
+ * @note These options are only effective if @ref NILAI_USE_RTC is defined.
+ */
+#if defined(NILAI_USE_RTC)
+
+/**
+ * @addtogroup rtc_post_options RTC POST Options.
+ * @{
+ * @brief Toggles the Power-On Self Test of the Real-Time Clock module.
+ * The RTC POST takes ~2 seconds to do.
+ */
+#define NILAI_RTC_DO_POST
+//!@}
+#endif
+//!@}
+
+/**
  * @addtogroup tas5760_options TAS5760 Settings
  * @{
  * @brief Options for the TAS5760 module.

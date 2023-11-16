@@ -44,17 +44,16 @@
 
 namespace Nilai::Interfaces
 {
-template<class Class, typename = void>
+template<typename Class>
 struct CommandResponseMemberSize
 {
-    static constexpr size_t value = 0;
+    static constexpr size_t value = sizeof(Class);
 };
 
-
-template<class Class>
-struct CommandResponseMemberSize<Class, std::void_t<decltype(sizeof(Class))>>
+template<>
+struct CommandResponseMemberSize<void>
 {
-    static constexpr size_t value = sizeof(Class);
+    static constexpr size_t value = 0;
 };
 
 static_assert(CommandResponseMemberSize<void>::value == 0);
