@@ -65,10 +65,12 @@ class SwTas5760 : public Tas5760Module<Device>
 public:
     template<typename... Args>
     SwTas5760(const TAS5760::SwConfig& cfg, Handle handle, const std::string& label, Args&&... args)
-    : Tas5760Module<Device>(handle, label, std::forward<Args>(args)...), m_cfg(cfg)
+        : Tas5760Module<Device>(handle, label, std::forward<Args>(args)...),
+          m_cfg(cfg)
     {
         Build(cfg);
     }
+
     SwTas5760(const SwTas5760&)            = delete;
     SwTas5760(SwTas5760&&)                 = delete;
     SwTas5760& operator=(const SwTas5760&) = delete;
@@ -120,17 +122,22 @@ private:
     void HandleHeadphoneChange();
 
     bool                      SetRegister(TAS5760::Registers r, uint8_t v);
+    uint8_t                   GetRegister(TAS5760::Registers r);
     static const std::string& StatusToStr(uint8_t s);
 
 private:
     TAS5760::SwConfig m_cfg;
 
-    std::function<void()> m_faultFunction    = []() {};
-    std::function<void()> m_hpChangeFunction = []() {};
+    std::function<void()> m_faultFunction = []()
+    {
+    };
+    std::function<void()> m_hpChangeFunction = []()
+    {
+    };
 
 #        if defined(NILAI_USE_EVENTS)
-    Events::EventTypes    m_faultEvent       = Events::EventTypes::Exti_Generic;
-    Events::EventTypes    m_hpChangeEvent    = Events::EventTypes::Exti_Generic;
+    Events::EventTypes m_faultEvent    = Events::EventTypes::Exti_Generic;
+    Events::EventTypes m_hpChangeEvent = Events::EventTypes::Exti_Generic;
 #        endif
 
     bool m_isShutdown = false;
@@ -164,7 +171,7 @@ private:
     //! Number of milliseconds the fault pin needs to be active to go check the error.
     static constexpr uint32_t s_minErrorTime = 2;
 };
-}    // namespace Nilai::Interfaces
+} // namespace Nilai::Interfaces
 
 //!@}
 //!@}
