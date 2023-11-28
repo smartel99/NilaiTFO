@@ -26,12 +26,9 @@
 #        define LOG_HELPER(color, msg, ...)                                                        \
             do                                                                                     \
             {                                                                                      \
-                Logger::Get() != nullptr                                                           \
-                  ? Logger::Get()->Log(color "[%02i:%02i:%02i.%03i]" msg,                          \
-                                       GET_CUR_H(),                                                \
-                                       GET_CUR_MIN() % 60,                                         \
-                                       GET_CUR_SEC() % 60,                                         \
-                                       GET_CUR_MS() % 1000 __VA_OPT__(, ) __VA_ARGS__)             \
+                Nilai::Services::Logger::Get() != nullptr                                          \
+                  ? Nilai::Services::Logger::Get()->Log(color "[%08i] " msg,         \
+                                       GET_CUR_MS() __VA_OPT__(, ) __VA_ARGS__)             \
                   : (void)0;                                                                       \
             } while (0)
 #        define INT_NILAI_LOG_IMPL_OK
@@ -104,7 +101,10 @@ class Logger
 public:
 #    if defined(NILAI_USE_UART)
     explicit Logger(
-      Drivers::UartModule& uart, LogFunc logFunc = [](const char*, size_t) {});
+        Drivers::UartModule& uart,
+        LogFunc              logFunc = [](const char*, size_t)
+        {
+        });
 #    else
     Logger(const LogFunc& logFunc);
 #    endif
@@ -126,9 +126,11 @@ private:
 #    if defined(NILAI_USE_UART)
     Drivers::UartModule& m_uart;
 #    endif
-    LogFunc m_logFunc = [](const char*, size_t) {};
+    LogFunc m_logFunc = [](const char*, size_t)
+    {
+    };
 };
-}    // namespace Nilai::Services
+} // namespace Nilai::Services
 #else
 #    define LOG_HELPER(fmt, ...)
 #    define LOG_DEBUG(msg, ...)

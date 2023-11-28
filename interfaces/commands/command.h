@@ -20,12 +20,13 @@
 
 #if defined(NILAI_USE_COMMAND_INTERFACE)
 
-#    include <concepts>
-#    include <cstdint>
-#    include <type_traits>
+#include <concepts>
+#include <cstdint>
+#include <type_traits>
 
-#    include "payload.h"
-#    include "response.h"
+#include "payload.h"
+#include "response.h"
+#include "id.h"
 
 /**
  * @addtogroup Nilai
@@ -44,17 +45,13 @@
 
 namespace Nilai::Interfaces
 {
-template<typename T>
-concept ValidCommandId =
-  requires { T::id; } && std::same_as<std::remove_cvref_t<decltype(T::id)>, uint8_t>;
-
 /**
  * For a command to be valid, it must be composed in a certain way.
  *
  * <ul>
  *  <li>
- *      It must have a static constexpr member called `id` of the type `uint8_t`. This is the
- *      command's ID.
+ *      It must have a static constexpr member called `id` of the type `uint8_t`, or an enumeration with an underlying type of `uint8_t`.
+ *      This is the command's ID.
  *  </li>
  *  <li>
  *      It must have a typename called `payload_type`. This is the type of the `payload`. It may be
@@ -84,28 +81,31 @@ template<typename T>
 concept Command = ValidCommandPayload<T> && ValidCommandResponse<T> && ValidCommandId<T> &&
                   std::is_default_constructible_v<T>;
 
-template<uint8_t         Id,
-         CommandPayload  Payload      = void,
-         CommandResponse Response     = void,
-         int             PayloadSize  = -1,
-         int             ResponseSize = -1>
+template<CommandId auto Id,
+         CommandPayload Payload = void,
+         CommandResponse Response = void,
+         int PayloadSize = -1,
+         int ResponseSize = -1>
 struct GenericCommand
 {
     using payload_type = Payload;
     // If PayloadSize is not provided, automatically deduce the size of the payload. Otherwise,
     // use the provided payload size.
     static constexpr size_t payload_size =
-      PayloadSize == -1 ? CommandPayloadMemberSize<Payload>::value : PayloadSize;
+        PayloadSize == -1 ? CommandPayloadMemberSize<Payload>::value : PayloadSize;
 
     using response_type = Response;
     static constexpr size_t response_size =
-      ResponseSize == -1 ? CommandResponseMemberSize<Response>::value : ResponseSize;
+        ResponseSize == -1 ? CommandResponseMemberSize<Response>::value : ResponseSize;
 
-    static constexpr uint8_t id = Id;
+    static constexpr uint8_t id = static_cast<uint8_t>(Id);
 };
 
+} // namespace Nilai::Interfaces
 
-}    // namespace Nilai::Interfaces
+//!@}
+//!@}
+//!@}
 #endif
 
 #endif    // GUARD_NILAI_INTERFACES_COMMANDS_COMMAND_H
