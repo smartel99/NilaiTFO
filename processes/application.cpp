@@ -135,15 +135,13 @@ void Application::OnRun()
         }
 
         // Remove the modules to be removed from the list.
-        m_modules.erase(std::remove_if(m_modules.begin(),
-                                       m_modules.end(),
-                                       [&, this](const auto& m)
-                                       {
-                                           return std::find(m_deletionQueue.begin(),
-                                                            m_deletionQueue.end(),
-                                                            m.Id) != m_deletionQueue.end();
-                                       }),
-                        m_modules.end());
+        std::erase_if(m_modules,
+                      [&, this](const auto& m)
+                      {
+                          return std::find(m_deletionQueue.begin(),
+                                           m_deletionQueue.end(),
+                                           m.Id) != m_deletionQueue.end();
+                      });
         m_deletionQueue.clear();
     }
 
