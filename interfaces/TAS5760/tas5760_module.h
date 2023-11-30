@@ -80,7 +80,7 @@ template<CommunicationDevice Device>
 class Tas5760Module : public Device
 {
 protected:
-    using Handle = typename std::invoke_result_t<decltype(&Device::GetHandle), Device>;
+    using Handle = std::invoke_result_t<decltype(&Device::GetHandle), Device>;
 
 public:
     template<typename... Args>
