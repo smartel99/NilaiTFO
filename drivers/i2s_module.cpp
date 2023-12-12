@@ -19,8 +19,9 @@
 #if defined(NILAI_USE_I2S) && !defined(NILAI_TEST)
 #    include "../defines/macros.h"
 
-#    define I2S_INFO(msg, ...)  LOG_INFO("[%s]: " msg, m_label.c_str(), ##__VA_ARGS__)
-#    define I2S_ERROR(msg, ...) LOG_ERROR("[%s]: " msg, m_label.c_str(), ##__VA_ARGS__)
+#    define I2S_INFO(msg, ...)    LOG_INFO("[%s]: " msg, m_label.c_str(), ##__VA_ARGS__)
+#    define I2S_WARNING(msg, ...) LOG_WARNING("[%s]: " msg, m_label.c_str(), ##__VA_ARGS__)
+#    define I2S_ERROR(msg, ...)   LOG_ERROR("[%s]: " msg, m_label.c_str(), ##__VA_ARGS__)
 
 namespace Nilai::Drivers
 {
@@ -222,18 +223,23 @@ I2S::AudioFreqs I2sModule::GetAudioFreq() const
     return static_cast<I2S::AudioFreqs>(m_handle->Init.AudioFreq);
 }
 
-void I2sModule::SetAudioFreq(I2S::AudioFreqs f)
+void I2sModule::SetAudioFreq([[maybe_unused]] I2S::AudioFreqs f)
 {
-    if (m_isStreaming)
-    {
-        // Currently streaming, stop it first.
-        StopStream();
-    }
+    // TODO this causes the SPI/I2S peripheral to freeze. Maybe setting the registers directly would
+    // fix it.
 
-    HAL_I2S_DeInit(m_handle);    // De-init the I2S peripheral.
+    I2S_WARNING("Setting sampling rate is not supported!");
 
-    m_handle->Init.AudioFreq = (uint32_t)f;
-    NILAI_ASSERT(HAL_I2S_Init(m_handle) == HAL_OK, "Unable to re-init I2S!");
+    //    if (m_isStreaming)
+    //    {
+    //        // Currently streaming, stop it first.
+    //        StopStream();
+    //    }
+    //
+    //    HAL_I2S_DeInit(m_handle);    // De-init the I2S peripheral.
+    //
+    //    m_handle->Init.AudioFreq = static_cast<uint32_t>(f);
+    //    NILAI_ASSERT(HAL_I2S_Init(m_handle) == HAL_OK, "Unable to re-init I2S!");
 }
 
 #    if !defined(NILAI_I2S_REGISTER_CALLBACKS)

@@ -61,7 +61,7 @@
                 }                                                                                  \
             } while (false)
 #    else
-#        define NILAI_ASSERT(x, msg, ...)
+#        define NILAI_ASSERT(x, msg, ...) x
 #    endif
 
 /*************************************************************************************************/

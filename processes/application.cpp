@@ -13,6 +13,7 @@
 
 #include "../services/profiler/profiler.h"
 
+#include <algorithm>
 #include <exception>
 
 static void AtExitForwarder();
@@ -105,16 +106,14 @@ void Application::DispatchEvent(Events::Event* data)
 
 [[noreturn]] void Application::Run()
 {
-    std::for_each(
-      m_modules.begin(), m_modules.end(), [](const ModuleInfo& module) { module.Mod->OnAttach(); });
+    std::ranges::for_each(m_modules, [](const ModuleInfo& module) { module.Mod->OnAttach(); });
 
     while (true)
     {
         OnRun();
     }
 
-    std::for_each(
-      m_modules.begin(), m_modules.end(), [](const ModuleInfo& module) { module.Mod->OnDetach(); });
+    std::ranges::for_each(m_modules, [](const ModuleInfo& module) { module.Mod->OnDetach(); });
 }
 
 void Application::OnRun()
@@ -138,9 +137,8 @@ void Application::OnRun()
         std::erase_if(m_modules,
                       [&, this](const auto& m)
                       {
-                          return std::find(m_deletionQueue.begin(),
-                                           m_deletionQueue.end(),
-                                           m.Id) != m_deletionQueue.end();
+                          return std::find(m_deletionQueue.begin(), m_deletionQueue.end(), m.Id) !=
+                                 m_deletionQueue.end();
                       });
         m_deletionQueue.clear();
     }

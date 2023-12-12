@@ -39,7 +39,7 @@ namespace Nilai::Drivers
 class I2sModule : public AudioDevice
 {
 public:
-    I2sModule(I2S_HandleTypeDef* handle, std::string label);
+     I2sModule(I2S_HandleTypeDef* handle, std::string label);
     ~I2sModule() override = default;
 
     bool                             DoPost() override;

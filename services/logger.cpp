@@ -60,10 +60,14 @@ void Logger::VLog(const char* fmt, va_list args)
     size_t s = vsnprintf(buff, std::size(buff), fmt, args);
 
     NILAI_ASSERT(s < std::size(buff), "vsnprintf error!");
+    Write({buff, s});
+}
+void Logger::Write(std::string_view str)
+{
 #    if defined(NILAI_USE_UART)
-    m_uart.Transmit(buff, s);
+    m_uart.Transmit(str.data(), str.size());
 #    endif
-    m_logFunc(buff, s);
+    m_logFunc(str.data(), str.size());
 }
 
 void Logger::SetLogFunc(const LogFunc& logFunc)

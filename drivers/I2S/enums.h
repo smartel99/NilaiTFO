@@ -22,6 +22,8 @@
 #    else
 #        include "Core/Inc/i2s.h"
 
+#        include <cstdint>
+
 namespace Nilai::I2S
 {
 enum class AudioFreqs
@@ -36,7 +38,20 @@ enum class AudioFreqs
     f11k025 = I2S_AUDIOFREQ_11K,
     f8k     = I2S_AUDIOFREQ_8K,
 };
+
+constexpr AudioFreqs ToAudioFreq(std::uint32_t freq)
+{
+    if (freq <= static_cast<uint32_t>(AudioFreqs::f8k))
+    {
+        return AudioFreqs::f8k;
+    }
+    if (freq >= static_cast<uint32_t>(AudioFreqs::f192k))
+    {
+        return AudioFreqs::f192k;
+    }
+    return static_cast<AudioFreqs>(freq);
 }
+}    // namespace Nilai::I2S
 
 #    endif
 

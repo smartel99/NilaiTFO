@@ -52,28 +52,28 @@
 
 #    if defined(NILAI_LOG_ENABLE_DEBUG) && defined(INT_NILAI_LOG_IMPL_OK)
 #        define LOG_DEBUG(msg, ...)                                                                \
-            LOG_HELPER("\033[37;40mD ", msg "\n\r" __VA_OPT__(, ) __VA_ARGS__)
+            LOG_HELPER("\033[37mD ", msg "\n\r" __VA_OPT__(, ) __VA_ARGS__)
 #    else
 #        define LOG_DEBUG(msg, ...)
 #    endif
 
 #    if defined(NILAI_LOG_ENABLE_INFO) && defined(INT_NILAI_LOG_IMPL_OK)
 #        define LOG_INFO(msg, ...)                                                                 \
-            LOG_HELPER("\033[32;40mI ", msg "\n\r" __VA_OPT__(, ) __VA_ARGS__)
+            LOG_HELPER("\033[32mI ", msg "\n\r" __VA_OPT__(, ) __VA_ARGS__)
 #    else
 #        define LOG_INFO(msg, ...)
 #    endif
 
 #    if defined(NILAI_LOG_ENABLE_WARNING) && defined(INT_NILAI_LOG_IMPL_OK)
 #        define LOG_WARNING(msg, ...)                                                              \
-            LOG_HELPER("\033[93;40mW ", msg "\n\r" __VA_OPT__(, ) __VA_ARGS__)
+            LOG_HELPER("\033[93mW ", msg "\n\r" __VA_OPT__(, ) __VA_ARGS__)
 #    else
 #        define LOG_WARNING(msg, ...)
 #    endif
 
 #    if defined(NILAI_LOG_ENABLE_ERROR) && defined(INT_NILAI_LOG_IMPL_OK)
 #        define LOG_ERROR(msg, ...)                                                                \
-            LOG_HELPER("\033[91;40mE ", msg "\n\r" __VA_OPT__(, ) __VA_ARGS__)
+            LOG_HELPER("\033[91mE ", msg "\n\r" __VA_OPT__(, ) __VA_ARGS__)
 #    else
 #        define LOG_ERROR(msg, ...)
 #    endif
@@ -112,6 +112,8 @@ public:
 
     void Log(const char* fmt, ...);
     void VLog(const char* fmt, va_list args);
+
+    void Write(std::string_view str);
 
     void SetLogFunc(const LogFunc& logFunc);
 #    if defined(NILAI_USE_UART)
