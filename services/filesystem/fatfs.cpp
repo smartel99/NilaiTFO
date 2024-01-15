@@ -44,7 +44,10 @@ struct FsData
     bool       isMounted = false;
 };
 
-static FsData s_data;
+namespace
+{
+FsData s_data;
+}
 
 namespace Nilai::Filesystem
 {
@@ -57,7 +60,7 @@ Result Fopen(file_t* file, const char* path, FileModes mode)
 
 Result Fclose(file_t* file)
 {
-    Result r= static_cast<Result>(f_close(file));
+    Result r = static_cast<Result>(f_close(file));
     return r;
 }
 
@@ -194,7 +197,7 @@ bool Ferror(file_t* file)
 bool Init(const Nilai::Pin& pin)
 {
     s_data.sdPin = pin;
-    if(s_data.fs == nullptr)
+    if (s_data.fs == nullptr)
     {
         s_data.fs = new FATFS;
         NILAI_ASSERT(s_data.fs != nullptr, "Unable to allocate memory for file system!");
@@ -265,6 +268,17 @@ Result Unmount()
 bool IsMounted()
 {
     return s_data.isMounted;
+}
+
+uint64_t GetFreeSize(const std::string& drive)
+{
+    uint32_t free_clusters = 0;
+    fs_t* fs = nullptr;
+    NILAI_ASSERT(GetFreeClusters(drive, &free_clusters, &fs) == Result::Ok, "Unable to get free clusters");
+
+    //! TODO when _MIN_SS and _MAX_SS are not equal, sector size if in fs->ssize.
+    constexpr uint32_t SECTOR_SIZE = 512;
+    return static_cast<uint64_t>(free_clusters) * fs->csize * SECTOR_SIZE;
 }
 
 Result MakeVolume([[maybe_unused]] const std::string&      drive,
@@ -438,6 +452,7 @@ Result Utime([[maybe_unused]] const std::string& path, [[maybe_unused]] const fi
     return Result::NotEnabled;
 #        endif
 }
+
 }    // namespace Nilai::Filesystem
 #    endif
 #endif

@@ -26,15 +26,13 @@ namespace Nilai
 // TODO Make the file system an object-oriented class that actually represents a file system.
 namespace Filesystem
 {
-
-
-
-
 bool   Init(const Nilai::Pin& detect = {});
 void   Deinit();
 Result Mount(const std::string& drive = "", bool forceMount = false);
 Result Unmount();
 bool   IsMounted();
+
+uint64_t GetFreeSize(const std::string& drive= "");
 
 Result MakeVolume(const std::string& drive, const MakeVolumeParams& params);
 Result MakePartition(const std::string& drive, const partSize_t ps[]);
