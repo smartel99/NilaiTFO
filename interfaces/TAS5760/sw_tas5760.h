@@ -125,6 +125,9 @@ private:
     uint8_t                   GetRegister(TAS5760::Registers r);
     static const std::string& StatusToStr(uint8_t s);
 
+    bool ValidateRegisters();
+    bool SetRegisters();
+
 private:
     TAS5760::SwConfig m_cfg;
 
@@ -153,6 +156,8 @@ private:
     //! Volume for the right channel, 0xCF -> +0dB.
     uint8_t m_rVol = s_defaultVolume;
 
+    uint32_t m_nextVerificationTime = 0;
+
 private:
     static constexpr uint8_t s_bothChMuted   = 0x03;
     static constexpr uint8_t s_defaultVolume = 0xCF;
@@ -170,6 +175,9 @@ private:
 
     //! Number of milliseconds the fault pin needs to be active to go check the error.
     static constexpr uint32_t s_minErrorTime = 2;
+
+    //! Validate the registers every 100ms.
+    static constexpr uint32_t s_verificationPeriod = 100;
 };
 } // namespace Nilai::Interfaces
 
