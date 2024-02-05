@@ -171,9 +171,9 @@ void SwTas5760<Device>::SetChannelVolume(TAS5760::Channels ch, uint8_t vol)
         TAS5760::Registers reg;
         uint8_t&           val;
     };
-    static std::array channels = {ChInfo {TAS5760::Registers::LeftChVolCtrl, m_lVol},
-                                  ChInfo {TAS5760::Registers::RightChVolCtrl, m_rVol}};
-    auto              chId     = static_cast<size_t>(ch);
+    std::array channels = {ChInfo {TAS5760::Registers::LeftChVolCtrl, m_lVol},
+                           ChInfo {TAS5760::Registers::RightChVolCtrl, m_rVol}};
+    auto       chId     = static_cast<size_t>(ch);
     NILAI_ASSERT(chId < channels.size(), "Invalid Channel");
 
     ChInfo& channel = channels[chId];
