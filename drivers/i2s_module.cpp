@@ -117,6 +117,8 @@ bool I2sModule::Stream(const void* samples, size_t cnt)
 bool I2sModule::Restream(const void* samples, size_t cnt)
 {
     m_isStreaming = true;
+    __HAL_I2S_ENABLE(m_handle);
+    __HAL_I2S_ENABLE_IT(m_handle, I2S_IT_ERR);
     return HAL_I2S_Transmit_DMA(m_handle, (uint16_t*)samples, cnt) == HAL_OK;
 }
 
@@ -167,6 +169,8 @@ bool I2sModule::StopStream()
         I2S_ERROR("Unable to stop stream!");
         return false;
     }
+    __HAL_I2S_DISABLE_IT(m_handle, I2S_IT_ERR);
+    __HAL_I2S_DISABLE(m_handle);
 
     // Restart the clock if it was running.
     if (m_isClockActive)
@@ -240,6 +244,13 @@ void I2sModule::SetAudioFreq([[maybe_unused]] I2S::AudioFreqs f)
     //
     //    m_handle->Init.AudioFreq = static_cast<uint32_t>(f);
     //    NILAI_ASSERT(HAL_I2S_Init(m_handle) == HAL_OK, "Unable to re-init I2S!");
+}
+
+void I2sModule::ReInit()
+{
+    HAL_I2S_DeInit(m_handle);
+    HAL_I2S_Init(m_handle);
+    SetStreamingCallbacks();
 }
 
 #    if !defined(NILAI_I2S_REGISTER_CALLBACKS)

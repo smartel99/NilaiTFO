@@ -65,8 +65,7 @@ class SwTas5760 : public Tas5760Module<Device>
 public:
     template<typename... Args>
     SwTas5760(const TAS5760::SwConfig& cfg, Handle handle, const std::string& label, Args&&... args)
-        : Tas5760Module<Device>(handle, label, std::forward<Args>(args)...),
-          m_cfg(cfg)
+    : Tas5760Module<Device>(handle, label, std::forward<Args>(args)...), m_cfg(cfg)
     {
         Build(cfg);
     }
@@ -114,6 +113,12 @@ public:
     bool ResumeStream() override;
     bool StopStream() override;
 
+    void OnError(const std::function<void()>& cb)
+    {
+        NILAI_ASSERT(cb, "cb is not callable!");
+        m_onErrorCb = cb;
+    }
+
 private:
     bool Init();
     bool Deinit();
@@ -131,12 +136,9 @@ private:
 private:
     TAS5760::SwConfig m_cfg;
 
-    std::function<void()> m_faultFunction = []()
-    {
-    };
-    std::function<void()> m_hpChangeFunction = []()
-    {
-    };
+    std::function<void()> m_faultFunction    = []() {};
+    std::function<void()> m_onErrorCb        = [] {};
+    std::function<void()> m_hpChangeFunction = []() {};
 
 #        if defined(NILAI_USE_EVENTS)
     Events::EventTypes m_faultEvent    = Events::EventTypes::Exti_Generic;
@@ -179,7 +181,7 @@ private:
     //! Validate the registers every 100ms.
     static constexpr uint32_t s_verificationPeriod = 100;
 };
-} // namespace Nilai::Interfaces
+}    // namespace Nilai::Interfaces
 
 //!@}
 //!@}

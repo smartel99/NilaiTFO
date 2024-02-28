@@ -300,8 +300,12 @@ void SwTas5760<Device>::HandleFault()
 {
     if (m_hasFault && (GetTime() >= (m_faultTime + s_minErrorTime)))
     {
+        if (!Device::IsStreaming())
+        {
+            return;
+        }
         // Fault pin needs to be still LOW. If it isn't low anymore, the error is gone.
-        if (!m_cfg.Fault.Get())
+        //        if (!m_cfg.Fault.Get())
         {
             uint8_t s = m_cfg.I2c
                           .ReceiveFrameFromRegister(
@@ -315,6 +319,11 @@ void SwTas5760<Device>::HandleFault()
                 // Error is latching, cleared by toggling the shutdown pin.
                 m_cfg.SpkShutdown.Set(false);
                 TAS_ERROR("A fault was detected: %s", StatusToStr(s).c_str());
+            }
+            else if ((s & s_clkeMask) != 0)
+            {
+                TAS_ERROR("A clock error was detected");
+                m_onErrorCb();
             }
         }
         m_hasFault = false;

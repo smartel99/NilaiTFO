@@ -88,6 +88,8 @@ public:
      */
     I2S_HandleTypeDef* GetHandle() { return m_handle; }
 
+    void ReInit();
+
     static void HalTxHalfCplt(I2S_HandleTypeDef* i2s);
     static void HalTxCplt(I2S_HandleTypeDef* i2s);
     static void HalRestartClock(I2S_HandleTypeDef* i2s);
