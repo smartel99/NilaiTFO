@@ -60,29 +60,6 @@
 #else
 #    error Unsuported Compiler!
 #endif
-
-/*
- * This is a very rough fix to a bug cause by ClangIntellisense not recognizing the `-std=c++17`
- * compiler flag passed to it by VisualGDB.
- * This causes the `__cplusplus` macro to be defined to another standard, not allowing the Clang
- * Intellisense to recognize features of the C++17 standard, such as `std::string_view`.
- * This fix is **not** to be kept if the toolchain changes from gcc to llvm, as it could have
- * catastrophic effects.
- * Currently, since we are not compiling with clang, only using tools from llvm, this does not have
- * effects on the code itself.
- * - Pascal 2020/07/02
- *
- * Edit 2021/04/20: Bug also affects whatever intellisense Eclipse uses, so check for __GNUC__
- * added.
- *  - SM
- */
-#if defined(__clang__) || defined(__GNUC__)
-#    ifdef __cplusplus
-#        undef __cplusplus
-#    endif
-#    define __cplusplus 201703UL
-#endif
-
 /*************************************************************************************************/
 /**
  * @}
